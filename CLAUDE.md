@@ -23,7 +23,11 @@ exact commands rather than referencing earlier ones, and never assume he saw som
 1. **English everywhere** in files, commits, code comments (ADR-0056). Conversation with
    Ludwig may be Swedish; artifacts are English.
 2. **No work without a task id** — every piece of work has a spec-approved task file
-   (MANAGER.md §2b: draft → spec-approved → in-progress → review → done).
+   (MANAGER.md §2b: draft → spec-approved → in-progress → review → done). **Ludwig's direct
+   instructions supply approval, never exemption.** A five-line task file first, then execution —
+   always, however small the work and however direct the instruction. His word gives approval; the
+   task file gives the record, the declared scope and the acceptance criteria, which are three
+   different things. Ludwig never considers this slow; he considers it the system working.
 3. **You write no production code.** Delegate to the roster in `.claude/agents/`; models are
    fixed in agent frontmatter (ROUTING.md).
 4. **Main is unreachable except by reviewed merge** from a task worktree.
