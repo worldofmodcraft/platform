@@ -1,0 +1,42 @@
+{
+  "mission": "SITE-V1",
+  "status": "proposed",
+  "authority": "ADR-0117",
+  "last_reviewed": "2026-09-02",
+  "nodes": [
+    { "id": "N1", "name": "mod-source",     "home": "author-git-repo",           "external": true },
+    { "id": "N2", "name": "registry-data",  "home": "worldofmodcraft/registry",  "external": false },
+    { "id": "N3", "name": "registry-ci",    "home": "worldofmodcraft/registry",  "external": false },
+    { "id": "N4", "name": "validation-core","home": "worldofmodcraft/registry",  "external": false },
+    { "id": "N5", "name": "build-pipeline", "home": "worldofmodcraft/registry",  "external": false },
+    { "id": "N6", "name": "artifact-store", "home": "github-releases-org",       "external": false },
+    { "id": "N7", "name": "site-build",     "home": "worldofmodcraft/site",      "external": false },
+    { "id": "N8", "name": "site-host",      "home": "github-pages+dns",          "external": false }
+  ],
+  "edges": [
+    { "id": "E1",  "from": "N1", "to": "N5", "contract": "contracts/manifest.schema.json",          "status": "to-write" },
+    { "id": "E2",  "from": "author", "to": "N2", "contract": "contracts/entry.schema.json",         "status": "to-write" },
+    { "id": "E3",  "from": "author", "to": "N2", "contract": "contracts/page.schema.json",          "status": "to-write" },
+    { "id": "E4",  "from": "N2", "to": "N3", "contract": "contracts/append-only.rules.md",          "status": "to-write" },
+    { "id": "E5",  "from": "N3", "to": "N4", "contract": "contracts/validation-report.schema.json", "status": "to-write" },
+    { "id": "E6",  "from": "N5", "to": "N4", "contract": "contracts/validation-report.schema.json", "status": "to-write" },
+    { "id": "E7",  "from": "N5", "to": "N6", "contract": "contracts/artifact-naming.md",            "status": "to-write" },
+    { "id": "E8",  "from": "N5", "to": "N2", "contract": "contracts/entry.schema.json",             "status": "to-write" },
+    { "id": "E9",  "from": "N5", "to": "signing-key", "contract": "contracts/signature-format.md",  "status": "undecided" },
+    { "id": "E10", "from": "N2", "to": "N7", "contract": "contracts/entry.schema.json",             "status": "to-write" },
+    { "id": "E11", "from": "N6", "to": "N7", "contract": "contracts/archive-layout.md",             "status": "to-write" },
+    { "id": "E12", "from": "N2", "to": "N7", "contract": "contracts/rebuild-trigger.md",            "status": "to-write" },
+    { "id": "E13", "from": "N7", "to": "N8", "contract": "contracts/site-output.md",                "status": "to-write" },
+    { "id": "E14", "from": "N8", "to": "public", "contract": "contracts/url-scheme.md",             "status": "to-write" }
+  ],
+  "forbidden_edges": [
+    { "from": "N7", "to": "N1", "reason": "ADR-0059 §1 — pages read the archive, never the live repo" },
+    { "from": "N7", "to": "dynamic-backend", "reason": "mission §2 — the site is 100% static in phase 1" },
+    { "from": "N3", "to": "signing-key", "reason": "PR gates run without secrets; see mission log Q3" }
+  ],
+  "subgraphs": {
+    "registry_side": ["N4", "N3", "N5", "N6"],
+    "site_side": ["N7", "N8"],
+    "note": "Disjoint once the contracts exist; they rejoin only through N2 and N6 via schema files."
+  }
+}
