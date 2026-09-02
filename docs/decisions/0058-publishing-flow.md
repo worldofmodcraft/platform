@@ -4,6 +4,7 @@
 - **Date:** 2026-09-02
 - **Area:** Registry / Site
 - **Related:** ADR-0039, ADR-0040, ADR-0041, ADR-0059
+- **Amends:** ADR-0030, ADR-0039 (namespace ownership: numeric account id supersedes the username string)
 
 ## Decision
 1. **Flow:** creator's mod lives in a public **git** repo (any host; GitHub is the pragmatic phase-1 default). `modcraft publish` runs `validate` locally, tags a release, and opens a PR against `worldofmodcraft/registry` with the mod's JSON entry (id, version, commit hash, source URL). The pipeline fetches that exact commit, validates, builds, signs, archives artefacts + source tarball to platform storage, writes hashes into the entry and merges. Rejections return the full log in the PR.

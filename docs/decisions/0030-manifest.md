@@ -4,6 +4,8 @@
 - **Date:** 2026-09-01
 - **Area:** Mod format
 - **Related:** ADR-0011, ADR-0021, ADR-0028, ADR-0032, ADR-0034
+- **Amended by:** ADR-0058 (ownership binds to the numeric GitHub account id, not the username string)
+- **Amended by:** ADR-0119 (reserved namespaces are owned by the platform organisation)
 
 ## Decision
 Folder:
