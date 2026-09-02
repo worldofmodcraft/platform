@@ -1,6 +1,6 @@
 # Task 016: Make token-guard checkpoints self-service
 
-- **Mission:** SITE-V1 (cross-cutting, serves CLAUDE.md rule 0) — **Status:** spec-approved (Ludwig, 2026-09-03)
+- **Mission:** SITE-V1 (cross-cutting, serves CLAUDE.md rule 0) — **Status:** done (2026-09-03)
 - **Agent / model:** manager (direct — local machine configuration, no repo code)
 - **Budget:** small · **Branch:** task/016-usage-snapshot
 
@@ -55,3 +55,18 @@ reported as current.
 ---
 # Task 016 log
 - 2026-09-03 spec written before execution.
+- 2026-09-03 **Step 1 succeeded — no wrapper was needed.** claude-hud already ships the writer:
+  `display.externalUsageWritePath` ("when stdin `rate_limits` exists, ClaudeHUD writes a private
+  snapshot for other local tools"). Set to `/home/ludwig/.claude/usage-snapshot.json`. The HUD
+  writes `updated_at`, `five_hour {used_percentage, resets_at}` and `seven_day {...}`.
+  Ludwig's step 2 (a stdin-tee wrapper) and the step 4 fallback ladder were therefore not built —
+  the cheapest option in his own ordering turned out to be available.
+- 2026-09-03 checkpoint reader written at `~/.claude/token-guard-check.sh`: picks the *more
+  constrained* window, applies the 10-minute staleness rule, and prints STOP at >=90%, WARN at
+  >=85%. All five acceptance criteria demonstrated:
+    1. snapshot present and refreshed by normal HUD operation
+    2. real reading, no input from Ludwig: `BINDING: 5-hour 51% (resets 02:00Z) | other: weekly 25%`
+    3. HUD output compared before and after the config change — identical
+    4. staleness: 2-hour-old file -> `UNKNOWN ... treat as >90%`; missing file -> same
+    5. fallback ladder unused; recorded here rather than left implied
+- Status -> done.

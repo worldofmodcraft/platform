@@ -493,3 +493,14 @@ to the letter of checkpoint 3 but interrupts him constantly.
 | Time | Reading | Source | Action |
 |---|---|---|---|
 | 2026-09-03, before task 002 review dispatch | **48 %** (5-hour window, resets in 3h 49m) | Ludwig's HUD, stated in session | Below 50 % → work resumes normally |
+
+### Task 016 done — token-guard checkpoints are now self-service
+claude-hud already had the writer (`display.externalUsageWritePath`); enabling it was the whole
+job, so neither the stdin-tee wrapper nor the estimator fallback was built. The HUD now persists
+`~/.claude/usage-snapshot.json` on every render, and `~/.claude/token-guard-check.sh` reads it,
+picks the more constrained window, enforces the 10-minute staleness rule, and returns STOP at
+>=90 % / WARN at >=85 %. The manager no longer needs Ludwig present to take a reading.
+
+| Time | Reading | Source | Action |
+|---|---|---|---|
+| 2026-09-03, task 016 acceptance | **5-hour 51 %** (resets 02:00Z), weekly 25 % | snapshot, self-service | Below 90 % → continue |
