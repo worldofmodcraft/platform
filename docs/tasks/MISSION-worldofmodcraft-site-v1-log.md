@@ -226,3 +226,27 @@ not something to do on a hunch.
 This is worth settling deliberately rather than just unblocking the push, because the answer
 decides three things at once: who owns the reserved namespaces (ADR-0119 §2), whose numeric id is
 written into every registry entry as `owner`, and which account publishes the canary mod.
+
+### Task 003 — round 2 reviewed: PASS, recommended for merge
+The same reviewer re-reviewed the fixes and did not merely re-run the author's commands: it
+**reverted `build_index.py` to the pre-fix commit and ran the four new regression tests against
+the old code**. Three failed, for the right reasons (assertions on scanned count, result state and
+exit code — not "did it run"); the fourth correctly still passed, being a non-regression guard.
+That is the check that separates real tests from tests shaped to pass.
+
+It also answered the design question I put to it rather than ducking it: making a malformed
+filename **fatal** is the right trade here, because the decision log is a small, hand-curated,
+numbered directory — not a scratch pad — so a noisy false positive on a stray file is cheap to
+fix, while a real ADR silently missing from the index is undetectable and therefore strictly
+worse. Consistent with ADR-0113 (the generator refuses rather than lies).
+
+Verdict: all 10 checklist items pass. Two non-blocking observations carried forward:
+- ADR-0099 (CI gates) was not in the task's Context although the task adds a CI workflow. No
+  reinterpretation occurred — the workflow is consistent with it — and the mechanical
+  cross-check could not have caught the omission, because ADR-0099 has no `Touches:` line yet.
+  **This is a concrete argument for task 004** (tagging), and a manager selection miss worth
+  recording as such.
+- The CI workflow remains built-but-unproven until the repo has a remote (honest TODO row).
+
+**Not merged.** Task 003 adds a file under `docs/decisions/` and a CI workflow — MANAGER.md §7
+reserves both for Ludwig's explicit approval regardless of checklist state.
