@@ -1954,7 +1954,7 @@
       "number": 119,
       "filename": "0119-reserved-namespaces.md",
       "title": "Reserved namespaces — a small platform-owned set, exempt from username binding",
-      "status": "Proposed (option approved in principle by Ludwig, session 1 of SITE-V1; text pending his read)",
+      "status": "Accepted",
       "date": "2026-09-02",
       "area": "Registry / Mod format",
       "touches": [
