@@ -275,3 +275,32 @@ Options when Ludwig wants to act on it: (A) push it to `worldofmodcraft/platform
 ADR-0098 already names — public, matching ADR-0060's "public but unannounced"; (B) a private repo
 for now; (C) leave it, accepting the risk deliberately. Not urgent tonight; not something to leave
 unsaid either.
+
+### M2 complete — DNS live and correct (2026-09-02)
+Verified by DoH query, not by waiting: all four GitHub Pages A records present with nothing extra,
+`www` CNAME → `worldofmodcraft.github.io`, nameservers `anastasia`/`dexter.ns.cloudflare.com`.
+No propagation delay occurred because Cloudflare is both registrar and nameserver — there was no
+delegation change, only records inside an already-delegated zone.
+
+Incidental proof that the grey-cloud instruction was followed: the answers are GitHub's real IPs,
+not Cloudflare anycast addresses. Proxied records would have returned `104.x`/`172.67.x`.
+
+AAAA records were not added (they are optional); IPv6-only visitors cannot reach the site until
+they are. Recorded, not urgent.
+
+### Task 002 complete, in review
+Asset scanner delivered on `task/002-asset-scanner`: 8 files, all within declared scope, 2062
+insertions, zero deletions. Independently checked by the manager before review: 21 tests OK
+(1 skipped), a DBC signature under the name `screenshot.png` rejected with the format named and
+ADR-0004 cited, and a real PNG named `data.dbc` accepted — extension trusted in neither direction.
+
+The author could not fetch wowdev.wiki (HTTP 403) and, rather than inventing signatures from
+memory, verified all five Blizzard formats against independent implementations — AzerothCore's own
+`DBCFileLoader.cpp`, StormLib, and wow.export — with in-line citations. That is the correct
+response to the "no invented facts" rule.
+
+Sent to the reviewer with instructions to attack it adversarially rather than re-run the author's
+fixtures: signatures at non-zero offsets, nested GLB containers, base64 `data:` URIs, and above
+all the text/JSON/Lua/Markdown bucket, which is identified by content heuristic (UTF-8, no control
+bytes) because none of those formats has a magic number — the one place a crafted binary might
+slip through. The single skipped test is also to be explained rather than accepted.
