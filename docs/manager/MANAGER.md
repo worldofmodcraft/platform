@@ -91,6 +91,16 @@ Default (pending Ludwig's answer, OPEN-QUESTIONS §Q4): the manager may merge a 
 - Every task file declares an **effort budget** (small ≤ 1 agent-session, medium ≤ 3, large ≤ 6). Exceeding budget = stop, report, ask. Budget overruns are information ("this was mis-scoped"), never something to push through quietly.
 - A session that produces two consecutive stop-and-ask events halts entirely until Ludwig responds — accumulating blocked questions and continuing elsewhere is how scope drifts.
 - Absolute stop conditions (halt session, do not attempt to fix): signing key or secrets exposed in any output; an agent modified files outside its worktree; main differs from expected; registry history rewritten.
+- **The token guard (inviolable; CLAUDE.md rule 0).** Ludwig's Claude Max subscription is shared
+  with his daily work, so headroom for him is a hard constraint, not a courtesy. **Halt all work at
+  90 %** of the binding usage window (5-hour or weekly, whichever is more constrained): launch
+  nothing new, let running agents write their logs and end at their current sub-step so state is on
+  disk and resumable, write the session status, stop. **Resume only below 50 %** — never in the
+  50–90 % band. Check at session start, before every delegation, after every report-back, and
+  before any large operation, logging the reading each time. **Usage that cannot be determined
+  counts as above 90 %:** stop and ask Ludwig. This rule outranks mission progress, open tasks and
+  momentum; only Ludwig may lift it, explicitly and in writing, for a specific moment, and any
+  figure he states is authoritative immediately.
 
 ## 8b. Question discipline
 
