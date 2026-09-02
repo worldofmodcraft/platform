@@ -250,3 +250,28 @@ Verdict: all 10 checklist items pass. Two non-blocking observations carried forw
 
 **Not merged.** Task 003 adds a file under `docs/decisions/` and a CI workflow — MANAGER.md §7
 reserves both for Ludwig's explicit approval regardless of checklist state.
+
+### Push access resolved — 2026-09-02
+Ludwig authorised `womcraft` in WSL. Verified from the API rather than assumed: `gh` is now
+`womcraft` (id 324089373) with `admin: true, push: true` on both org repos and org role
+`admin`/`active`. **Q7 is answered by action: `womcraft` is the platform identity.**
+
+`worldofmodcraft/registry` now has its `main` branch: the bootstrap README, pushed successfully.
+
+**Commit attribution fixed going forward.** The first push landed `UNATTRIBUTED` — the git author
+email (`gitwowroguelike@snabbpost.com`) is not linked to the `womcraft` account, so GitHub could
+not connect the commit to any user. For a project whose defining trait is openness (ADR-0006) and
+whose registry treats git history as the audit trail (ADR-0041), that matters. The registry clone
+now commits as `womcraft <324089373+womcraft@users.noreply.github.com>` — repo-local config, so
+`~/wom` and the global default are untouched, and the noreply form avoids publishing a real
+address. The one existing bootstrap commit stays unattributed: amending a pushed commit requires
+`--force`, which MANAGER.md §3.7 forbids outright. Not worth breaking a rule over one commit.
+
+### Risk worth naming: the decision log exists in exactly one place
+`~/wom` — 119 ADRs, the doctrine, the mission, the dependency graph and every task file — has
+**no git remote**. It lives only on Ludwig's laptop. Everything the project *is* (as opposed to
+what it has built) is one disk failure from gone, and ADR-0045 makes backups a platform value.
+Options when Ludwig wants to act on it: (A) push it to `worldofmodcraft/platform` as the monorepo
+ADR-0098 already names — public, matching ADR-0060's "public but unannounced"; (B) a private repo
+for now; (C) leave it, accepting the risk deliberately. Not urgent tonight; not something to leave
+unsaid either.
