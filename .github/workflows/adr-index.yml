@@ -1,0 +1,42 @@
+name: ADR index
+
+# Verifies docs/decisions/INDEX.json is generated from the ADR headers and
+# still agrees with them (ADR-0116 layer 4; task 003,
+# docs/tasks/003-adr-index-generator.md).
+#
+# KNOWN LIMITATION (recorded in docs/tools/adr-index.md and the task 003
+# log): this repository has no git remote yet, so this workflow has never
+# been observed running on GitHub Actions. The commands below were run
+# locally against this repository and pass -- see the task log for exact
+# output. Do not treat a green run of this file as proof until it has
+# actually executed in Actions once the repo is pushed.
+
+on:
+  push:
+    paths:
+      - "docs/decisions/**"
+      - "tools/adr/**"
+      - "tests/adr/**"
+      - ".github/workflows/adr-index.yml"
+  pull_request:
+    paths:
+      - "docs/decisions/**"
+      - "tools/adr/**"
+      - "tests/adr/**"
+      - ".github/workflows/adr-index.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run ADR tooling tests
+        run: python3 -m unittest discover -s tests/adr -v
+
+      - name: Verify INDEX.json matches the ADR files (gate)
+        run: python3 tools/adr/build_index.py --check

@@ -1,0 +1,1979 @@
+{
+  "count": 119,
+  "adrs": [
+    {
+      "number": 1,
+      "filename": "0001-platform-is-the-goal.md",
+      "title": "The platform is the goal; the roguelike is the first mod",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Vision",
+      "touches": [],
+      "related": [
+        2,
+        44,
+        50
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 2,
+      "filename": "0002-target-audience.md",
+      "title": "Target audience is self-hosted, single-player and small groups",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Vision",
+      "touches": [],
+      "related": [
+        10,
+        25,
+        37
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 3,
+      "filename": "0003-naming.md",
+      "title": "Naming",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Vision",
+      "touches": [],
+      "related": [],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 4,
+      "filename": "0004-own-assets-only.md",
+      "title": "Own assets only; never Blizzard data",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Legal / Content",
+      "touches": [],
+      "related": [
+        5,
+        33,
+        41,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 5,
+      "filename": "0005-game-data-is-the-users-responsibility.md",
+      "title": "Game data is obtained by the user; the platform only validates it",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Legal / Launcher",
+      "touches": [],
+      "related": [
+        4
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 6,
+      "filename": "0006-openness-and-handover.md",
+      "title": "Openness is the defining trait; designed for handover",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Governance",
+      "touches": [],
+      "related": [
+        40,
+        47,
+        56
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 7,
+      "filename": "0007-fork-wowee-and-azerothcore-monorepo.md",
+      "title": "Fork WoWee (client) and AzerothCore (server); monorepo",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Architecture",
+      "touches": [],
+      "related": [
+        14,
+        27,
+        49
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 8,
+      "filename": "0008-mod-anatomy-and-record-compiler.md",
+      "title": "A mod is records + Lua + native plugins; the kernel compiles records",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Architecture / Mod format",
+      "touches": [],
+      "related": [
+        9,
+        11,
+        15,
+        16,
+        17
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 9,
+      "filename": "0009-field-level-merge.md",
+      "title": "Field-level merge instead of rule-of-one",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Architecture / Mod format",
+      "touches": [],
+      "related": [
+        8,
+        11
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 10,
+      "filename": "0010-no-sandbox-total-observability.md",
+      "title": "No sandbox; total observability instead",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Security / Observability",
+      "touches": [],
+      "related": [
+        2,
+        12,
+        28,
+        34
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 11,
+      "filename": "0011-load-order-and-dependencies.md",
+      "title": "Load order is computed from dependencies; install order does not exist",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format / Launcher",
+      "touches": [],
+      "related": [
+        9,
+        20,
+        31
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 12,
+      "filename": "0012-native-plugins-two-tiers.md",
+      "title": "Native plugins via a C ABI in two tiers (stable / unsafe)",
+      "status": "Accepted",
+      "date": "2026-08-31",
+      "area": "Architecture / Plugins",
+      "touches": [],
+      "related": [
+        8,
+        10,
+        14,
+        41,
+        49
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 13,
+      "filename": "0013-id-allocation-registry-ranges.md",
+      "title": "Namespaced IDs with registry-assigned numeric ranges",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Registry",
+      "touches": [],
+      "related": [
+        8,
+        30,
+        42
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 14,
+      "filename": "0014-kernel-language-and-shape.md",
+      "title": "Kernel is a shared C++ in-process library; offline tooling is separate",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture",
+      "touches": [],
+      "related": [
+        7,
+        12,
+        20,
+        43
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 15,
+      "filename": "0015-lua-dialect.md",
+      "title": "Lua 5.4 everywhere; legacy FrameXML addons isolated in a 5.1 sandbox",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Scripting",
+      "touches": [],
+      "related": [
+        8,
+        24,
+        26
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 16,
+      "filename": "0016-overlay-client-data-from-the-start.md",
+      "title": "Client/server game data uses an overlay format from the start",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Data",
+      "touches": [],
+      "related": [
+        8,
+        26,
+        27
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 17,
+      "filename": "0017-world-db-base-plus-delta.md",
+      "title": "World database = pristine base + compiler-owned delta",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Data",
+      "touches": [],
+      "related": [
+        8,
+        44,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 18,
+      "filename": "0018-components-on-top-with-facade.md",
+      "title": "Components on top of WoW objects, behind a facade; full ECS designed for, not built",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Entities",
+      "touches": [],
+      "related": [
+        23,
+        31
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 19,
+      "filename": "0019-client-agnostic-kernel.md",
+      "title": "The kernel API is client-agnostic",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture",
+      "touches": [],
+      "related": [
+        7,
+        57
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 20,
+      "filename": "0020-api-rings-and-idl.md",
+      "title": "Kernel API in three rings; one IDL as single source of truth",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / API",
+      "touches": [],
+      "related": [
+        12,
+        14,
+        15,
+        53
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 21,
+      "filename": "0021-extending-other-mods.md",
+      "title": "Mods extend/replace other mods only through the kernel",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format",
+      "touches": [],
+      "related": [
+        11,
+        22,
+        30
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 22,
+      "filename": "0022-cpp-scripts-vs-mod-lua.md",
+      "title": "AzerothCore C++ scripts and mod Lua are layered; scripts are ported to Lua on demand",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Architecture / Content",
+      "touches": [],
+      "related": [
+        21
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 23,
+      "filename": "0023-lua-state-on-reload.md",
+      "title": "Lua state on reload — \"in the KV store or gone\"",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Scripting / Persistence",
+      "touches": [],
+      "related": [
+        15,
+        51
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 24,
+      "filename": "0024-instancing-api.md",
+      "title": "Kernel-owned instancing of any map",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Ring 2 / World",
+      "touches": [],
+      "related": [
+        18,
+        25,
+        44,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 25,
+      "filename": "0025-world-clock-toggle.md",
+      "title": "Per-world clock mode — wall time or world time — plus pause",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Ring 1 / World",
+      "touches": [],
+      "related": [
+        2,
+        44,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 26,
+      "filename": "0026-eluna-break-framexml-kept.md",
+      "title": "Clean break from Eluna; FrameXML addon compatibility kept; overlay-aware legacy API",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Compatibility",
+      "touches": [],
+      "related": [
+        15,
+        16,
+        32
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 27,
+      "filename": "0027-blizzard-client-debug-only.md",
+      "title": "Blizzard client supported for debugging only",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Compatibility",
+      "touches": [],
+      "related": [
+        7,
+        16,
+        57
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 28,
+      "filename": "0028-permissions-transparency.md",
+      "title": "Manifest permissions — declared, displayed, not negotiated; server-profile asymmetry",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format / Trust",
+      "touches": [],
+      "related": [
+        10,
+        31,
+        44
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 29,
+      "filename": "0029-mod-config-schema-driven.md",
+      "title": "Everything is configurable; configuration is schema-driven, generated in launcher and in-game",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Configuration",
+      "touches": [],
+      "related": [
+        28,
+        31,
+        34,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 30,
+      "filename": "0030-manifest.md",
+      "title": "Manifest and mod folder structure",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format",
+      "touches": [],
+      "related": [
+        11,
+        21,
+        28,
+        32,
+        34
+      ],
+      "amends": [],
+      "amended_by": [
+        58,
+        119
+      ]
+    },
+    {
+      "number": 31,
+      "filename": "0031-roles-and-permissions-on-server.md",
+      "title": "Server roles and namespaced permissions",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Ring 1 / Authorization",
+      "touches": [],
+      "related": [
+        29,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 32,
+      "filename": "0032-capability-tags.md",
+      "title": "Capability tags for inter-mod discovery",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format / API",
+      "touches": [],
+      "related": [
+        11,
+        20
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 33,
+      "filename": "0033-asset-overlay.md",
+      "title": "Asset overlay — mods may replace vanilla assets by path with their own files",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Assets / Content",
+      "touches": [],
+      "related": [
+        4,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 34,
+      "filename": "0034-observability-contract.md",
+      "title": "Observability contract — what is logged automatically, what mods must provide",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Observability",
+      "touches": [],
+      "related": [
+        10,
+        35,
+        36
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 35,
+      "filename": "0035-tracing-defaults-and-tools.md",
+      "title": "Full tracing on by default, per-category toggles with measured cost; debugging tools",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Observability",
+      "touches": [],
+      "related": [
+        29,
+        34
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 36,
+      "filename": "0036-telemetry.md",
+      "title": "Opt-in diagnostics sharing to worldofmodcraft.com",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Telemetry / Privacy",
+      "touches": [],
+      "related": [
+        34,
+        37,
+        38
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 37,
+      "filename": "0037-mod-health-and-flagging.md",
+      "title": "Mod health panels, conflict detection and flagging",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Site / Telemetry",
+      "touches": [],
+      "related": [
+        11,
+        36,
+        42
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 38,
+      "filename": "0038-flag-deletion-is-covered.md",
+      "title": "(reserved) — merged into ADR-0036 and ADR-0037",
+      "status": "Superseded (content folded into ADR-0036 / ADR-0037)",
+      "date": "2026-09-01",
+      "area": "",
+      "touches": [],
+      "related": [],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 39,
+      "filename": "0039-registry-as-git-repo.md",
+      "title": "The registry is a git repository; namespace = GitHub username",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Registry",
+      "touches": [],
+      "related": [
+        6,
+        40,
+        42,
+        43
+      ],
+      "amends": [],
+      "amended_by": [
+        58,
+        119
+      ]
+    },
+    {
+      "number": 40,
+      "filename": "0040-verified-builds.md",
+      "title": "Verified builds from source; all source open; signed; unsigned refused by default",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Registry / Build pipeline",
+      "touches": [],
+      "related": [
+        4,
+        12,
+        28,
+        41
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 41,
+      "filename": "0041-integrity-chain-and-archiving.md",
+      "title": "Integrity chain; platform-side archiving of artefacts and source; nothing can be unpublished",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Registry / Security",
+      "touches": [],
+      "related": [
+        6,
+        39,
+        40
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 42,
+      "filename": "0042-updates-and-versioning.md",
+      "title": "Mod updates, versioning, rollback and server profiles",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Launcher / Registry",
+      "touches": [],
+      "related": [
+        11,
+        28,
+        37,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 43,
+      "filename": "0043-launcher.md",
+      "title": "The launcher — a Tauri shell over the CLI; process supervisor; phased scope",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Launcher",
+      "touches": [],
+      "related": [
+        14,
+        29,
+        42,
+        44,
+        45,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 44,
+      "filename": "0044-modpacks.md",
+      "title": "Modpack is a first-class type; total-conversion single mods remain allowed",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Mod format",
+      "touches": [],
+      "related": [
+        1,
+        30
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 45,
+      "filename": "0045-backups.md",
+      "title": "Rolling, user-configurable, verified backups per world",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Launcher / Data safety",
+      "touches": [],
+      "related": [
+        10,
+        17,
+        29,
+        42
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 46,
+      "filename": "0046-content-rules-and-connectivity.md",
+      "title": "Content rules (minimal) and multiplayer connectivity (invite codes, Tailscale built in)",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Site / Launcher",
+      "touches": [],
+      "related": [
+        4,
+        31,
+        33
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 47,
+      "filename": "0047-world-migration-and-kernel-majors.md",
+      "title": "World data across kernel majors; parallel support of majors",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Versioning / Data",
+      "touches": [],
+      "related": [
+        13,
+        25,
+        42,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 48,
+      "filename": "0048-platform-updates-and-placeholders.md",
+      "title": "Platform packages; uninstalled-mod placeholders",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Launcher / Data",
+      "touches": [],
+      "related": [
+        13,
+        40,
+        42
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 49,
+      "filename": "0049-licensing.md",
+      "title": "Licensing — AGPL platform, MIT SDK with linking clause, any OSI licence for mods",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Legal",
+      "touches": [],
+      "related": [
+        6,
+        7,
+        12,
+        40
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 50,
+      "filename": "0050-build-order-walking-skeleton.md",
+      "title": "Build order — walking skeleton plus one vertical slice",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Process",
+      "touches": [],
+      "related": [
+        1,
+        12,
+        16,
+        54
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 51,
+      "filename": "0051-modder-first-evening-and-dev-mode.md",
+      "title": "The mod author's first evening; kernel dev mode",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Developer experience",
+      "touches": [],
+      "related": [
+        17,
+        23,
+        30,
+        53
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 52,
+      "filename": "0052-testing-and-soak.md",
+      "title": "Testing — `modcraft test` with a strictly bounded simulated player; playerbots for soak",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Developer experience / Quality",
+      "touches": [],
+      "related": [
+        28,
+        40,
+        51
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 53,
+      "filename": "0053-ai-ready-tooling.md",
+      "title": "AI-ready mod development",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Developer experience",
+      "touches": [],
+      "related": [
+        20,
+        30,
+        51
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 54,
+      "filename": "0054-documentation-first-and-manager-model.md",
+      "title": "Documentation first; codebase survey before code; manager/subagent model",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Process",
+      "touches": [],
+      "related": [
+        6,
+        50,
+        56
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 55,
+      "filename": "0055-wowee-defects-tracked.md",
+      "title": "WoWee polish is done as needed and tracked; upstream relationship maintained",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Process / Client",
+      "touches": [],
+      "related": [
+        7,
+        49,
+        54
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 56,
+      "filename": "0056-english-throughout.md",
+      "title": "English throughout",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Governance / Documentation",
+      "touches": [],
+      "related": [
+        6,
+        30
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 57,
+      "filename": "0057-warcraftxl-related-project.md",
+      "title": "WarcraftXL is a related project on a different path; not needed",
+      "status": "Accepted",
+      "date": "2026-09-01",
+      "area": "Ecosystem",
+      "touches": [],
+      "related": [
+        7,
+        19,
+        27
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 58,
+      "filename": "0058-publishing-flow.md",
+      "title": "Publishing flow — mechanics, ownership by numeric account id, provider neutrality",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Registry / Site",
+      "touches": [],
+      "related": [
+        39,
+        40,
+        41,
+        59
+      ],
+      "amends": [
+        30,
+        39
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 59,
+      "filename": "0059-mod-pages-and-page-content.md",
+      "title": "Mod pages are generated; page content is separate from versions and immediately editable",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Site",
+      "touches": [],
+      "related": [
+        30,
+        41,
+        58
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 60,
+      "filename": "0060-public-but-unannounced.md",
+      "title": "Public but unannounced until Ludwig declares a stable release",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Governance",
+      "touches": [],
+      "related": [
+        6,
+        78,
+        94
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 61,
+      "filename": "0061-ai-generated-assets.md",
+      "title": "AI-generated assets are permitted under the originality rule",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Content / Legal",
+      "touches": [],
+      "related": [
+        4,
+        30,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 62,
+      "filename": "0062-335a-only-kernel-is-the-server-core.md",
+      "title": "The platform targets 3.3.5a only; the kernel fork is the only supported server core",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Scope",
+      "touches": [],
+      "related": [
+        7,
+        16,
+        19
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 63,
+      "filename": "0063-forks-via-git-subtree.md",
+      "title": "Forks are imported into the monorepo via git subtree with full history",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Repo",
+      "touches": [],
+      "related": [
+        7,
+        64
+      ],
+      "amends": [],
+      "amended_by": [
+        118
+      ]
+    },
+    {
+      "number": 64,
+      "filename": "0064-upstream-merge-cadence.md",
+      "title": "Upstream merges are milestone-gated, never mid-phase",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process",
+      "touches": [],
+      "related": [
+        55,
+        63
+      ],
+      "amends": [],
+      "amended_by": [
+        118
+      ]
+    },
+    {
+      "number": 65,
+      "filename": "0065-idl-lua-table-format.md",
+      "title": "The IDL is our own minimal Lua-table format",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / API",
+      "touches": [],
+      "related": [
+        8,
+        20,
+        32,
+        66
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 66,
+      "filename": "0066-rpc-wire-format.md",
+      "title": "RPC wire format is IDL-generated compact binary with numbered fields; JSON debug mirror",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Network",
+      "touches": [],
+      "related": [
+        20,
+        65
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 67,
+      "filename": "0067-reproducible-dev-environments.md",
+      "title": "Reproducible dev environments — devcontainers for Linux targets, scripted Windows client build",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Build",
+      "touches": [],
+      "related": [
+        40,
+        50,
+        71
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 68,
+      "filename": "0068-task-ledger-as-files.md",
+      "title": "The task ledger is files in the repo; GitHub Issues are a future inbox only",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process",
+      "touches": [],
+      "related": [
+        54,
+        70
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 69,
+      "filename": "0069-trunk-based-releases.md",
+      "title": "Trunk-based development; platform packages are signed tags on main",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Release",
+      "touches": [],
+      "related": [
+        47,
+        48
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 70,
+      "filename": "0070-issue-inbox-automation.md",
+      "title": "Automated issue triage into the task inbox",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Automation",
+      "touches": [],
+      "related": [
+        35,
+        54,
+        68
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 71,
+      "filename": "0071-windows-native-server-for-players.md",
+      "title": "Players run a native Windows server + portable database; Docker remains for dev/VPS",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Launcher / Distribution",
+      "touches": [],
+      "related": [
+        43,
+        67
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 72,
+      "filename": "0072-login-keep-protocol-hide-concepts.md",
+      "title": "Login — keep the auth protocol, hide the concepts",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / UX",
+      "touches": [],
+      "related": [
+        42,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 73,
+      "filename": "0073-mod-delivery-registry-first.md",
+      "title": "Mod delivery to clients — registry first, HTTP sidechannel for the rest",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Distribution",
+      "touches": [],
+      "related": [
+        41,
+        42,
+        46
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 74,
+      "filename": "0074-save-cadence.md",
+      "title": "Save cadence — aggressive and configurable in world mode",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Data safety",
+      "touches": [],
+      "related": [
+        25,
+        29,
+        93
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 75,
+      "filename": "0075-all-locales-accepted.md",
+      "title": "All client locales are accepted",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Data / Launcher",
+      "touches": [],
+      "related": [
+        5,
+        56
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 76,
+      "filename": "0076-worlds-one-active-schema-per-world.md",
+      "title": "Worlds — one active at a time; per-world schemas from day one; the process is the world",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Launcher",
+      "touches": [],
+      "related": [
+        24,
+        25,
+        43,
+        45
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 77,
+      "filename": "0077-disaster-mirror.md",
+      "title": "Scheduled disaster mirror of platform storage",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Registry / Governance",
+      "touches": [],
+      "related": [
+        6,
+        41,
+        58
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 78,
+      "filename": "0078-public-server-directory.md",
+      "title": "Public server directory (phase 3)",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Site / Backend",
+      "touches": [],
+      "related": [
+        2,
+        42,
+        46,
+        60,
+        79
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 79,
+      "filename": "0079-contract-first-backend.md",
+      "title": "Contract-first backend",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Backend",
+      "touches": [],
+      "related": [
+        36,
+        59,
+        78
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 80,
+      "filename": "0080-lazy-evaluation-principle.md",
+      "title": "Compute on observation — the lazy-evaluation principle",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Performance",
+      "touches": [],
+      "related": [
+        25,
+        34
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 81,
+      "filename": "0081-reference-machine.md",
+      "title": "The reference machine is Ludwig's PC",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Performance / Process",
+      "touches": [],
+      "related": [
+        34,
+        71,
+        74
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 82,
+      "filename": "0082-chat-commands-primitive.md",
+      "title": "Chat commands are a ring-1 primitive with namespacing",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 1 / UX",
+      "touches": [],
+      "related": [
+        30,
+        31,
+        34
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 83,
+      "filename": "0083-world-overlay-rendering.md",
+      "title": "World-anchored overlay rendering (ring 3)",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 3 / Client",
+      "touches": [],
+      "related": [
+        16,
+        20,
+        29
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 84,
+      "filename": "0084-mod-audio-api.md",
+      "title": "Mod audio API",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 2 / Client",
+      "touches": [],
+      "related": [
+        4,
+        20
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 85,
+      "filename": "0085-wompack-format.md",
+      "title": "`.wompack` — the defined mod package format",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Distribution / Format",
+      "touches": [],
+      "related": [
+        30,
+        41,
+        43
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 86,
+      "filename": "0086-auto-pause-when-empty.md",
+      "title": "Auto-pause when empty (world setting)",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "World / Settings",
+      "touches": [],
+      "related": [
+        25,
+        29
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 87,
+      "filename": "0087-client-settings-two-tier.md",
+      "title": "Client settings — personal is global, mod-delivered is per profile",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Client / Profiles",
+      "touches": [],
+      "related": [
+        29,
+        42
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 88,
+      "filename": "0088-characters-per-world.md",
+      "title": "Characters are bound to their world",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Data / Product",
+      "touches": [],
+      "related": [
+        43,
+        48,
+        76
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 89,
+      "filename": "0089-gm-play-and-integrity.md",
+      "title": "GM play — self-discipline, always logged; `world.integrity` as a neutral read API",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 2 / Product",
+      "touches": [],
+      "related": [
+        31,
+        34,
+        96
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 90,
+      "filename": "0090-runtime-failure-and-throttling.md",
+      "title": "Runtime mod failure — never auto-disable; deduplicate, flag, and give admins a throttle",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Observability / Ops",
+      "touches": [],
+      "related": [
+        10,
+        28,
+        34,
+        37
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 91,
+      "filename": "0091-kernel-rng.md",
+      "title": "`kernel.rng` — seeded randomness as a ring-1 service",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 1",
+      "touches": [],
+      "related": [
+        34,
+        35
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 92,
+      "filename": "0092-safe-reposition.md",
+      "title": "Safe reposition for characters in locations that no longer exist",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Data safety",
+      "touches": [],
+      "related": [
+        24,
+        48
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 93,
+      "filename": "0093-native-crash-minidumps.md",
+      "title": "Native crash handling — minidumps and a persistent event ring buffer",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Observability",
+      "touches": [],
+      "related": [
+        34,
+        36,
+        48
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 94,
+      "filename": "0094-code-signing-deferred.md",
+      "title": "Windows code signing deferred; the pipeline carries an empty signing slot now",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Distribution",
+      "touches": [],
+      "related": [
+        41,
+        43,
+        60
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 95,
+      "filename": "0095-name-risk.md",
+      "title": "The name is kept; renaming is kept cheap",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Legal / Governance",
+      "touches": [],
+      "related": [
+        3,
+        60
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 96,
+      "filename": "0096-achievements.md",
+      "title": "Achievements — a kernel service on the Steam model, wearing Blizzard's UI",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 2 / Content",
+      "touches": [],
+      "related": [
+        16,
+        18,
+        26,
+        32,
+        89
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 97,
+      "filename": "0097-roguelike-kit-reaudit.md",
+      "title": "The roguelike design kit is re-audited against the platform before step 1",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Roguelike",
+      "touches": [],
+      "related": [
+        1,
+        51
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 98,
+      "filename": "0098-repo-layout-and-org-responsibilities.md",
+      "title": "Monorepo top-level layout; repository responsibilities in the organisation",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Repo / Architecture",
+      "touches": [],
+      "related": [
+        49,
+        63,
+        79
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 99,
+      "filename": "0099-ci-gates.md",
+      "title": "CI gates — path-filtered per merge; nightly full build with stop-the-line",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / CI",
+      "touches": [],
+      "related": [
+        67,
+        69
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 100,
+      "filename": "0100-cli-distribution.md",
+      "title": "`modcraft` CLI distribution — static binaries, bundled with the launcher",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Distribution / DevEx",
+      "touches": [],
+      "related": [
+        14,
+        48,
+        51
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 101,
+      "filename": "0101-db-engine-in-platform-package.md",
+      "title": "The bundled database engine is part of the platform package",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Distribution / Data",
+      "touches": [],
+      "related": [
+        45,
+        47,
+        48,
+        71
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 102,
+      "filename": "0102-control-channel-soap-then-contract.md",
+      "title": "Launcher↔server control — SOAP now, control contract later",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Launcher / Architecture",
+      "touches": [],
+      "related": [
+        43,
+        79,
+        112
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 103,
+      "filename": "0103-restart-is-the-unit.md",
+      "title": "Production mod changes apply at restart; prefer boring, restartable solutions",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ops / Principles",
+      "touches": [],
+      "related": [
+        51,
+        74,
+        112
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 104,
+      "filename": "0104-no-paid-mods.md",
+      "title": "No paid mods; funding links welcome",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Site / Policy",
+      "touches": [],
+      "related": [
+        40,
+        46,
+        49
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 105,
+      "filename": "0105-config-precedence.md",
+      "title": "Configuration precedence",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Configuration",
+      "touches": [],
+      "related": [
+        29,
+        44
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 106,
+      "filename": "0106-log-rotation.md",
+      "title": "Local log rotation",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Observability",
+      "touches": [],
+      "related": [
+        35
+      ],
+      "amends": [],
+      "amended_by": [
+        115
+      ]
+    },
+    {
+      "number": 107,
+      "filename": "0107-observability-access-by-role.md",
+      "title": "Observability access on multiplayer servers is layered by role",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Observability / Privacy",
+      "touches": [],
+      "related": [
+        31,
+        34,
+        112
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 108,
+      "filename": "0108-day-boundary.md",
+      "title": "`day_boundary` and kernel day services",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 1 / World",
+      "touches": [],
+      "related": [
+        25,
+        91
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 109,
+      "filename": "0109-kernel-http.md",
+      "title": "`kernel.http` — sanctioned outbound HTTP for mods",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ring 2 / Network",
+      "touches": [],
+      "related": [
+        28,
+        34,
+        73
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 110,
+      "filename": "0110-clientmods-and-policy.md",
+      "title": "Client-only mods as a category; server clientmod policy",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Mod format / Client",
+      "touches": [],
+      "related": [
+        26,
+        87,
+        90
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 111,
+      "filename": "0111-per-mod-restore.md",
+      "title": "Per-mod backup restore (advanced tool)",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Data safety",
+      "touches": [],
+      "related": [
+        45,
+        112
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 112,
+      "filename": "0112-web-console.md",
+      "title": "The server web console",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Ops / Product",
+      "touches": [],
+      "related": [
+        29,
+        31,
+        34,
+        35,
+        73,
+        79,
+        82,
+        89,
+        90,
+        93,
+        102,
+        103,
+        107,
+        111
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 113,
+      "filename": "0113-documentation-as-a-product.md",
+      "title": "Documentation as a product",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "DevEx / Documentation",
+      "touches": [],
+      "related": [
+        20,
+        51,
+        53,
+        65,
+        97
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 114,
+      "filename": "0114-api-gap-review.md",
+      "title": "API gap review (2026-09-02) — surfaces that must exist",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "API / Ring 2–3",
+      "touches": [],
+      "related": [
+        20,
+        24,
+        50,
+        80,
+        83,
+        96,
+        103,
+        112,
+        113
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 115,
+      "filename": "0115-roguelike-lessons.md",
+      "title": "Lessons inherited from the roguelike project — amendments to existing decisions",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Observability / Kernel / Process",
+      "touches": [],
+      "related": [],
+      "amends": [
+        20,
+        23,
+        34,
+        35,
+        40,
+        51,
+        52,
+        65,
+        106
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 116,
+      "filename": "0116-adr-compliance.md",
+      "title": "ADR compliance — gates first, indexed selection, bidirectional review",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Governance",
+      "touches": [],
+      "related": [
+        54,
+        68,
+        113,
+        115
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 117,
+      "filename": "0117-dependency-graph-and-contracts.md",
+      "title": "Dependency graph before code; every edge names its contract",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Architecture / Process",
+      "touches": [
+        "docs/architecture",
+        "process/specs",
+        "contracts",
+        "ci"
+      ],
+      "related": [
+        50,
+        65,
+        79,
+        85,
+        99,
+        116
+      ],
+      "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 118,
+      "filename": "0118-upstream-strategy.md",
+      "title": "Upstream survival strategy — thin patch surface, drift radar, contribute back",
+      "status": "Accepted",
+      "date": "2026-09-02",
+      "area": "Process / Forks",
+      "touches": [
+        "client",
+        "server",
+        "process/merges",
+        "ci"
+      ],
+      "related": [
+        62,
+        98,
+        99
+      ],
+      "amends": [
+        63,
+        64
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 119,
+      "filename": "0119-reserved-namespaces.md",
+      "title": "Reserved namespaces — a small platform-owned set, exempt from username binding",
+      "status": "Proposed (option approved in principle by Ludwig, session 1 of SITE-V1; text pending his read)",
+      "date": "2026-09-02",
+      "area": "Registry / Mod format",
+      "touches": [
+        "registry",
+        "registry/ci",
+        "mod-format",
+        "site"
+      ],
+      "related": [
+        3,
+        30,
+        39,
+        58
+      ],
+      "amends": [
+        30,
+        39
+      ],
+      "amended_by": []
+    }
+  ]
+}
