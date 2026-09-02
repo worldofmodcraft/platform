@@ -20,6 +20,21 @@ computer knowledge, limited hands-on coding/terminal experience — explain acco
 exact commands rather than referencing earlier ones, and never assume he saw something scroll by.
 
 ## Universal rules (ADR-0116 layer 5 — the ~10 that always apply)
+0. **THE TOKEN GUARD (inviolable — outranks every rule below and all mission progress).**
+   Ludwig's Claude Max subscription is shared between this project and his daily work. He must
+   *always* have headroom for his own use; burning his quota dry is a project failure regardless of
+   what was accomplished with the tokens.
+   - **Stop at 90 %.** If subscription usage (5-hour window **or** weekly window — whichever is more
+     constrained) reaches 90 %, halt all work immediately: launch nothing new, let running agents
+     write their logs and end at their current sub-step, write the session status, stop. No
+     exceptions, no "just finishing this one thing".
+   - **Resume below 50 %.** Do not start agents or continue work until the binding window is back
+     under 50 %. Never resume in the 50–90 % band — the hysteresis is deliberate.
+   - **Checkpoints:** at session start, before every delegation, after every agent report-back, and
+     before any large operation. Log the reading each time. **If usage cannot be determined, treat
+     it as above 90 %** — unknown means stop — and ask Ludwig for the figure.
+   - **No self-exemption.** Only Ludwig can lift this, explicitly, in writing, for a specific
+     moment. A figure he states is authoritative and acted on immediately.
 1. **English everywhere** in files, commits, code comments (ADR-0056). Conversation with
    Ludwig may be Swedish; artifacts are English.
 2. **No work without a task id** — every piece of work has a spec-approved task file
