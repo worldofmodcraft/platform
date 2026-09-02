@@ -462,3 +462,34 @@ holds a complete copy.
 
 *(Ludwig's answer, 2026-09-03: protect both. Registry full; platform pragmatic with zero required
 approvals. Escape hatch is lifting protection loudly, never a quiet exemption.)*
+
+### THE TOKEN GUARD IS ACTIVE — 2026-09-03 (task 015, PR #4)
+CLAUDE.md **rule 0** and MANAGER.md §8 now carry it: halt all work at 90 % of the binding usage
+window, resume only below 50 %, never in the 50–90 % band, checkpoint and log at session start /
+before every delegation / after every report-back / before large operations, and treat undetermined
+usage as above 90 %. Only Ludwig may lift it, explicitly and in writing; a figure he states is
+authoritative immediately. **The rule is in force from this line onward.**
+
+#### Operating constraint found while applying it
+I first reported usage as "not determinable" and halted. **That was wrong, and the error was mine:**
+I probed the statusline with a synthetic session whose `transcript_path` was empty, so the usage
+element had nothing to compute and omitted itself — I then concluded from my own broken test that
+the data did not exist. Ludwig's HUD reports it plainly: `Usage █████░░░░░ 48% (resets in 3h 49m)`.
+
+The real constraint is narrower but genuine: the HUD receives usage from **Claude Code's stdin
+payload to the statusline**, not from any file on disk (`external-usage.js` reads a snapshot path
+that does not exist in this install, and nothing under `~/.claude` holds a usage figure). So the
+manager cannot take its own reading — **every checkpoint depends on Ludwig stating the figure.**
+Investigation was stopped there rather than pursued further, since hunting for it spends exactly
+the budget the rule exists to protect.
+
+**Proposed practical form (for Ludwig):** rather than the manager asking at every checkpoint, he
+watches the HUD continuously anyway — so the cheapest reliable signal is him calling out a figure
+when it crosses ~85 %, plus stating it at natural report-backs. Every figure he gives is logged
+here. Alternative: he answers a one-line usage question at each delegation, which is more faithful
+to the letter of checkpoint 3 but interrupts him constantly.
+
+#### Checkpoint log
+| Time | Reading | Source | Action |
+|---|---|---|---|
+| 2026-09-03, before task 002 review dispatch | **48 %** (5-hour window, resets in 3h 49m) | Ludwig's HUD, stated in session | Below 50 % → work resumes normally |

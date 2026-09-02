@@ -1,6 +1,6 @@
 # Task 015: The token guard — subscription headroom as an absolute stop condition
 
-- **Mission:** SITE-V1 (cross-cutting) — **Status:** review
+- **Mission:** SITE-V1 (cross-cutting) — **Status:** done (merged as PR #4, 2026-09-03)
 - **Agent / model:** manager (direct — doctrine text, specified by Ludwig 2026-09-03)
 - **Budget:** small · **Branch:** task/015-token-guard
 
