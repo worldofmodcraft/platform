@@ -1,6 +1,6 @@
 # Task 014: Codify the three rules the session-1 audit produced
 
-- **Mission:** SITE-V1 — **Status:** review (written before execution, per rule 1 below)
+- **Mission:** SITE-V1 — **Status:** done (merged as PR #2, 2026-09-03)
 - **Agent / model:** manager (direct — doctrine text, approved by Ludwig 2026-09-03)
 - **Budget:** small
 - **Branch:** task/014-doctrine-from-audit
