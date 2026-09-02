@@ -351,9 +351,10 @@ MANAGER.md §3.7 forbids outright. Verified that the rewrite changed authorship 
 every branch's tree hash is byte-identical to its pre-rewrite value, commit count unchanged at 16,
 `refs/original` backups cleared, ADR-0119 still present and Accepted.
 
-**Outstanding:** GitHub shows the commits unattributed until `womcraft@snabbpost.com` is added and
-verified on the `womcraft` account (https://github.com/settings/emails). Until then the history is
-correct but the avatars are blank.
+**Attribution confirmed working.** I expected the commits to land unattributed until the address
+was verified on the account, and said so — that was wrong. The API reports the tip of `main` as
+`author_email: womcraft@snabbpost.com, github_user: womcraft`, so the address is already
+associated and every commit links to the platform account. No action needed.
 
 `main` on the server holds 118 ADRs, not 119 — correct, because nothing is merged yet. ADR-0119
 and everything else built this session live on the four branches, awaiting Ludwig's §7 approval.
