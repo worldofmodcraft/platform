@@ -151,7 +151,7 @@ version and SHA-256 can be bound into the signature itself rather than merely si
 | Task | State | Agent | Blocked by |
 |---|---|---|---|
 | 001 index completeness | review (awaiting merge approval) | manager | Ludwig §7 |
-| 002 asset scanner | draft | implementer/sonnet | **M1** |
+| 002 asset scanner | **in progress** | implementer/sonnet | — |
 | 003 INDEX.json generator | **in progress** | implementer/sonnet | — |
 | 004 `Touches:` tagging of 116 ADRs | draft | scaffolder/haiku | 003 |
 | 005 ADR-0119 + amend metadata | review (awaiting merge approval) | manager | Ludwig §7 |
@@ -161,6 +161,7 @@ version and SHA-256 can be bound into the signature itself rather than merely si
 | 009 site build + design | not written | implementer/sonnet | 006 |
 | 010 test mod + first-publish runbook | not written | implementer + doc-writer | M4, 007–009 |
 | 011 hardware-key 2FA upgrade | booked | Ludwig | before first real publish |
+| 012 key-management record | done (this session) | manager | — |
 
 ### Next steps
 1. **You: M1** (org + two empty public repos + Actions read/write). Still the gate for tasks 002
@@ -173,3 +174,55 @@ version and SHA-256 can be bound into the signature itself rather than merely si
    decision Accepted on your behalf.
 5. **You: merge approval** for the two review-state branches (§7 — both touch docs/decisions/).
 6. **Me:** task 003 is running; task 004 follows it; task 002 is spec-ready the moment M1 lands.
+
+## Session 1 addendum — M1 landed, key received, org access blocked
+
+- **M1 verified done** by API, not by asking: org `worldofmodcraft` (id **324218296**) created
+  2026-09-02; `registry` and `site` both exist, public, size 0, default branch `main`.
+- **Platform signing key received and verified.** key_id **6E5B30596A7A8CC4**, Ed25519. The public
+  key decodes to exactly 42 bytes and the key id recovered from the key material matches the id in
+  the comment line, so the file is neither truncated nor hand-edited. Recorded with the rotation
+  procedure in `docs/architecture/key-management.md`. Only the public half was ever transmitted.
+- **Tasks 002 and 003 both running** (implementer/sonnet); concurrency cap is 3.
+
+### Blocker — push access to the organisation
+The registry repo was cloned and given an initial commit locally, but the push was refused:
+`remote: Permission to worldofmodcraft/registry.git denied to mbmludric`. The API agrees:
+`{admin:false, push:false, pull:true}`. The token is healthy (scopes `gist, read:org, repo,
+workflow`) — the account simply lacks write access.
+
+Ludwig confirmed the cause: the org owner and sole member is a **different account**, `wombat`,
+while `gh` in WSL is authenticated as `mbmludric` (id 37807560). This also raises a question the
+mission never settled: which account is the project's canonical identity — the one that owns the
+org, signs releases and publishes the canary mod. ADR-0058 binds namespaces to a numeric id
+permanently, so this is decided once and never cheaply changed. See Q7.
+### Task 003 review outcome — sent back, two blocking findings
+Reviewed by the `reviewer` agent (never the author, MANAGER.md §3.5). Verdict: not a clean pass.
+
+1. **Hollow skip (blocking).** `build_index.py` filtered candidate files by filename *before*
+   parsing, so any `.md` in `docs/decisions/` with a non-conforming name was invisible to every
+   invariant — not scanned, not counted, not reported, and unable to trigger a "README missing a
+   row" violation. `--check` would print CHECK OK while a real ADR sat entirely unindexed. Exactly
+   the failure this tool exists to prevent, and it survived 28 passing tests because no test
+   exercised a malformed filename. Fails criterion 8 and ADR-0115 §1.
+2. **Doc describes a CI step that does not exist (blocking, minor).** `docs/tools/adr-index.md`
+   claims the workflow runs `--write` plus `git diff --exit-code`; the workflow runs neither.
+
+Everything else verified independently and held: file scope, no ADR touched, 28/28 tests, byte
+determinism against the committed index, all three break-and-restore demonstrations, both halves
+of the Touches-coverage criterion, and the honest TODO row for the unprovable workflow.
+
+Returned to the same agent (strike 1 of two on criterion 8 — a correction, not an escalation).
+**This is the review layer paying for itself: I had already checked scope and re-run the gate
+myself, and I would have merged it.**
+
+### Q7 — which account is the platform's canonical identity? (blocking the first push)
+Ludwig says the org owner and sole member is `wombat`, but the public GitHub account with the
+login `wombat` is **Daniel Sachse (id 571379, created 2011)** — not Ludwig's. So the owning
+account has some other login, and I cannot read it: org members are private and the available
+token lacks `admin:org`. Guessing an identity that ADR-0058 binds permanently to a namespace is
+not something to do on a hunch.
+
+This is worth settling deliberately rather than just unblocking the push, because the answer
+decides three things at once: who owns the reserved namespaces (ADR-0119 §2), whose numeric id is
+written into every registry entry as `owner`, and which account publishes the canary mod.
