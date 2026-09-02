@@ -25,7 +25,13 @@ Task lifecycle: `draft → spec-approved → in-progress → review → done | s
 verified every item in `SPEC-CHECKLIST.md` — for small tasks solo in the same sitting; for
 large, core-surgeon or security-touching tasks via an independent spec review by the reviewer
 agent *before* delegation. External SDD frameworks (OpenSpec etc.) are not adopted: the task
-ledger is the single truth (ADR-0068); we take the gate, not the tooling. Before a mission's
+ledger is the single truth (ADR-0068); we take the gate, not the tooling.
+**An instruction from Ludwig is not a substitute for the gate.** When he asks for something
+directly, the correct response is a short task file and then the work — never the work and then a
+note. Approval and specification are different functions: he supplies the first, the file supplies
+the second. The one time this was skipped (session 1 of SITE-V1, task 012) the ceremony was
+thinnest exactly where reversibility was lowest — a public repository and a history rewrite went
+through with less process than a two-line documentation fix. Before a mission's
 first implementation task, the manager draws its dependency graph (nodes = components, every
 boundary edge names its contract — ADR-0117); specs identify their nodes/edges, ordering is
 derived topologically, and parallelism from disjoint subgraphs.
@@ -40,6 +46,12 @@ derived topologically, and parallelism from disjoint subgraphs.
 6. **No invented facts about the environment.** Claims about Claude Code features, library APIs, or upstream behaviour of AzerothCore/WoWee must come from docs, code reading, or a survey document — never from memory alone. If unverified, verify or mark as assumption in the task log.
 7. **Forbidden shortcuts** (rejection on sight in review): TODO/stub left where an error belongs; extension-based checks where magic bytes are specified; acceptance criteria marked done without demonstration; code changed without its documentation; catching-and-ignoring errors; `--force` anything; disabling a linter/test to pass.
 8. **Everything in English** (ADR-0056), including commits, task files and logs.
+9. **Remotes, publication and history are never casual.** Anything that creates or changes a
+   remote, publishes anything, or rewrites history is *at minimum* a small spec-approved task,
+   however trivial it looks. **Rewriting history on a pushed branch is forbidden** — it requires
+   `--force`, already banned by §3.7. On an unpushed branch it is allowed and must be logged with
+   what changed and what was verified unchanged. The window in which a rewrite is free closes at
+   the first push, and that ordering must be a decision, never luck.
 
 ## 3b. Organisation: one manager, flat roster
 
@@ -102,7 +114,14 @@ Ludwig decides only what only Ludwig can decide.**
    `## For Ludwig`, each item with two sentences of context, options A/B/C with consequences, the
    manager's lean marked with a star, and what currently rests on assumptions pending the answer.
    Bundled at natural pauses (milestone/session end); urgent items flagged immediately.
-5. Unanswered questions never accumulate silently: at five open Ludwig-items, new tasks depending
+5. **Nothing is cited unless it exists.** No report, status or answer names a file, path or
+   artefact that is not on disk at that moment — check before citing, and cite unmerged work as
+   `branch:path` with the command to view it, since under §3.2 most work is invisible on main.
+   Retroactive records are permitted where work has already happened, but are **always marked
+   "retroactive"** so they can never be mistaken for a spec that gated anything. A ledger row
+   claiming work it never gated is worse than a missing row: it makes the ledger unusable for the
+   one thing it exists to do.
+6. Unanswered questions never accumulate silently: at five open Ludwig-items, new tasks depending
    on them pause. Every answer is fed back into the task log — and into a new ADR when the answer
    is principled — so no question is ever asked twice.
 

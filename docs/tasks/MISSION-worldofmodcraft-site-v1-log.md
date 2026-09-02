@@ -402,3 +402,63 @@ protection today: `main` on both accepts a direct push, which is precisely how t
 hours of work reached the server. This is a genuine gap against an accepted ADR, in mission scope
 via D1, and it needs Ludwig's decision on whether protection also applies to `platform` (where the
 manager currently commits directly) before it is specified.
+
+## Session 2 — 2026-09-03
+
+### Task 013 done: §3.2 is now physical
+`registry` and `platform` main both require pull requests, block force-push and deletion, and
+include administrators. Zero required approvals on both — a solo maintainer cannot approve their
+own PR, and an approval requirement nobody can satisfy would make the escape hatch routine and
+thereby destroy it. Raise to 1 when a second maintainer exists.
+
+Proven, not assumed: a direct push to protected main was attempted and refused —
+`GH006: Protected branch update failed ... Changes must be made through a pull request` — even as
+org admin, with no stray commit left behind. Merged as PR #1, through the gate it created.
+
+Ludwig's standing rule on this: **if protection ever genuinely blocks us, the escape hatch is
+temporarily lifting it — a loud, deliberate act — never exempting ourselves quietly.**
+
+**Consequence carried into task 008:** the post-merge pipeline can no longer push its hash and
+signature write-back straight to main. Resolution: the pipeline runs on a branch of the *same*
+repository (so secrets are available, unlike a fork PR), pushes `pipeline/<ns>.<name>-<version>`,
+opens a PR, and that PR merges once its own checks pass. Two PRs per publish; nothing bypasses.
+
+### Task 014 done: three rules born from this session's audit
+Ludwig specified all three after the audit; provenance is recorded in `docs/tasks/014-...md`.
+
+1. **Approval is not exemption** (CLAUDE.md rule 2, MANAGER.md §2b) — his word gives approval; the
+   task file gives the record, the declared scope and the acceptance criteria. Three different
+   things, and only the first can be spoken.
+2. **Nothing is cited unless it exists** (MANAGER.md §8b.5, REVIEW-CHECKLIST item 7) — check
+   before citing; cite unmerged work as `branch:path` with the command to view it; retroactive
+   records are permitted but always marked so, since a ledger row claiming work it never gated is
+   worse than a missing row.
+3. **Remotes, publication and history are never casual** (MANAGER.md §3 guardrail 9) — at minimum
+   a small spec-approved task. Rewriting pushed history is forbidden; unpushed is allowed and
+   logged.
+
+**Root cause, recorded so it is not softened later:** *ceremony was lowest exactly where
+reversibility was lowest.* Creating a public repository and rewriting sixteen commits of history
+went through with less process than task 001, a documentation index fix that changed two lines and
+received a full task file, acceptance criteria and a review. The rewrite was free only because
+nothing had been pushed yet; had the order been reversed, §3.7's ban on `--force` would have made
+it irreversible. That ordering was luck, and luck is not a control.
+
+### Verbatim repost — the "Correction" section of the session-1 audit report
+Reposted at Ludwig's request because the original arrived truncated; kept here so the mission log
+holds a complete copy.
+
+> **Correction:** anything that creates a repository, rewrites history, changes a remote, or
+> publishes gets a task file first — however small, however direct the instruction. Two minutes,
+> then the work.
+>
+> **One thing the audit exposed that needs a decision:** neither repo has branch protection.
+> ADR-0041 explicitly requires "branch protection, no force-push, PRs only" on the registry, and
+> `main` on both `registry` and `platform` currently accepts a direct push — which is exactly how
+> this session's work reached the server unchallenged. Proposed as task 013 but not started,
+> because it needs a decision: does protection also apply to `platform`, where the manager commits
+> directly? Protecting it would mean every doctrine and ledger update goes through a PR — more
+> faithful to §3.2, but heavier for documents edited constantly.
+
+*(Ludwig's answer, 2026-09-03: protect both. Registry full; platform pragmatic with zero required
+approvals. Escape hatch is lifting protection loudly, never a quiet exemption.)*
