@@ -304,3 +304,37 @@ fixtures: signatures at non-zero offsets, nested GLB containers, base64 `data:` 
 all the text/JSON/Lua/Markdown bucket, which is identified by content heuristic (UTF-8, no control
 bytes) because none of those formats has a magic number — the one place a crafted binary might
 slip through. The single skipped test is also to be explained rather than accepted.
+
+### Task 002 — FAILED review. Three false accepts. Root cause: this manager's spec.
+The adversarial review brief paid for itself. Constructing its own fixtures rather than re-running
+the author's, the reviewer got real Blizzard payloads **accepted, exit 0**, three ways — all three
+reproduced by the manager before acting:
+1. **Past the probe window.** Only 4096 bytes are read to classify; 4126 bytes of Lua comments
+   followed by a `WDBC` payload is accepted as TEXT.
+2. **Whitelisted header, arbitrary tail.** An 8-byte PNG signature plus a full DBC payload is
+   accepted as PNG. A file that is *only* the PNG signature, or only `OggS`, is also accepted.
+3. **Non-recursive GLB walk.** An embedded payload that is a fake glTF header plus a DBC payload is
+   classified by header sniff and accepted — defeating the one guarantee the spec called
+   non-negotiable.
+
+Plus an inverted constant: WoW chunked formats store tags byte-reversed, so a real WMO begins
+`REVM`, not `MVER`. The code compares the forward string and can never match one. It fails closed,
+so nothing gets through, but the format is never *named*. Twenty-one green tests missed it because
+`build_wmo()` reproduced the same wrong convention — a fixture derived from the implementation
+proves only self-consistency.
+
+**The root cause is the spec, not the agent.** Round 1 said "identify every file's real type by
+magic bytes". A magic-byte-at-offset-0 sniffer satisfies every word of that. The spec never stated
+the *guarantee*, so the guarantee was never built. Under ROUTING's "most failures are spec
+failures", this is strike 1 against an inadequate spec, not agent failure: the fix is a better
+spec at the same tier, not escalation.
+
+Spec amended with criteria 8–14: the whole file must be a well-formed instance of a whitelisted
+format, ending where the file ends — deliberately *not* "scan for forbidden bytes", which
+false-positives on compressed data and is defeated by an offset. Recursion into embedded
+containers, full inspection of the text bucket, corrected WMO byte order, fixtures built from
+independently cited sequences, and honest Known Limitations are now explicit criteria. Returned to
+the same agent.
+
+Kept as-is (verified sound): GLB structural bounds checking, the honest counters, the real stdlib
+schema validator, and the legitimately skipped test.
