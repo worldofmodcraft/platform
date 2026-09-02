@@ -338,3 +338,22 @@ the same agent.
 
 Kept as-is (verified sound): GLB structural bounds checking, the honest counters, the real stdlib
 schema validator, and the legitimately skipped test.
+
+### Backup risk closed — the platform repo exists (2026-09-02)
+`worldofmodcraft/platform` created public (ADR-0060: public but unannounced; ADR-0098 already
+reserved the name). All five branches pushed, so the decision log, doctrine, mission, dependency
+graph, key record and task ledger no longer exist on exactly one laptop.
+
+Before the first public push, commit authorship across all 16 commits was rewritten from
+`Ludwig <gitwowroguelike@snabbpost.com>` to `womcraft <womcraft@snabbpost.com>` at Ludwig's
+instruction. That moment was the only free one: afterwards a rewrite needs `--force`, which
+MANAGER.md §3.7 forbids outright. Verified that the rewrite changed authorship and nothing else —
+every branch's tree hash is byte-identical to its pre-rewrite value, commit count unchanged at 16,
+`refs/original` backups cleared, ADR-0119 still present and Accepted.
+
+**Outstanding:** GitHub shows the commits unattributed until `womcraft@snabbpost.com` is added and
+verified on the `womcraft` account (https://github.com/settings/emails). Until then the history is
+correct but the avatars are blank.
+
+`main` on the server holds 118 ADRs, not 119 — correct, because nothing is merged yet. ADR-0119
+and everything else built this session live on the four branches, awaiting Ludwig's §7 approval.
