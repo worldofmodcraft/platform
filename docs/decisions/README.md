@@ -92,6 +92,7 @@ ADR silently — propose a superseding ADR instead.
 - [0058](0058-publishing-flow.md) Publishing flow; namespace ownership by numeric account id
 - [0059](0059-mod-pages-and-page-content.md) Mod pages generated; page content editable without a new version
 - [0119](0119-reserved-namespaces.md) Reserved namespaces (`mc`, `test`) owned by the organisation
+- [0120](0120-content-whitelist-not-container-framing.md) Asset guarantee: content whitelisting, not container framing
 
 ### Process & developer experience
 - [0050](0050-build-order-walking-skeleton.md) Build order: walking skeleton + vertical slice

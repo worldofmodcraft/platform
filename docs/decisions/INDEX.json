@@ -1,5 +1,5 @@
 {
-  "count": 119,
+  "count": 120,
   "adrs": [
     {
       "number": 1,
@@ -60,7 +60,9 @@
         46
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        120
+      ]
     },
     {
       "number": 5,
@@ -1972,6 +1974,30 @@
       "amends": [
         30,
         39
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 120,
+      "filename": "0120-content-whitelist-not-container-framing.md",
+      "title": "The asset guarantee is content whitelisting, not container framing",
+      "status": "Accepted",
+      "date": "2026-09-03",
+      "area": "Content / Registry / Build pipeline",
+      "touches": [
+        "registry",
+        "registry/ci",
+        "validation",
+        "mod-format"
+      ],
+      "related": [
+        4,
+        40,
+        46,
+        61
+      ],
+      "amends": [
+        4
       ],
       "amended_by": []
     }

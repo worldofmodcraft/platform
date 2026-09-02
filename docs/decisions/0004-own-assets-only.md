@@ -4,6 +4,7 @@
 - **Date:** 2026-08-31
 - **Area:** Legal / Content
 - **Related:** ADR-0005, ADR-0033, ADR-0041, ADR-0046
+- **Amended by:** ADR-0120 (the guarantee is content whitelisting, not only magic-byte typing)
 
 ## Context
 Private servers exist in a legal grey zone. Blizzard has shut down prominent servers. The platform's only defensible position is to never distribute a single byte of Blizzard-owned data and to make that enforceable.
