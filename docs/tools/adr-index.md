@@ -114,12 +114,16 @@ surfaces it immediately, at the point the corpus was actually broken.
 ## Known limitation: CI is unproven
 
 This repository has no git remote yet, so `.github/workflows/adr-index.yml` cannot be shown
-running on GitHub Actions. The workflow runs the same two commands documented above
-(`--write` then `git diff --exit-code` on `INDEX.json`, and `--check`); both were run locally
-against this repository as part of task 003 and pass (see the task log for the exact commands
-and output). The workflow itself is built but unproven until the repository is pushed to a
-remote — this is recorded as an explicit TODO in the task log, not claimed as working CI
-(ADR-0115 §10).
+running on GitHub Actions. The workflow has exactly two steps: the test suite
+(`python3 -m unittest discover -s tests/adr -v`) and `python3 tools/adr/build_index.py
+--check`. There is no separate `--write` step and no `git diff --exit-code` step in the
+workflow — `--check` already performs that staleness comparison internally (it regenerates
+the index in memory and diffs it against the committed `INDEX.json`; see "Commands" above), so
+a second command doing the same comparison from outside would be redundant. Both of the
+workflow's actual commands were run locally against this repository as part of task 003 and
+pass (see the task log for the exact commands and output). The workflow itself is built but
+unproven until the repository is pushed to a remote — this is recorded as an explicit TODO in
+the task log, not claimed as working CI (ADR-0115 §10).
 
 ## Tests
 

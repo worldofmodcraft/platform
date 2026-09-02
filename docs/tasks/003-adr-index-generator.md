@@ -282,3 +282,153 @@ All 8 acceptance criteria demonstrated above with real commands and output. Deli
 complete: generator, `docs/decisions/INDEX.json` (generated, committed), tests (28, passing),
 `docs/tools/adr-index.md`, `.github/workflows/adr-index.yml` (unproven per TODO above), this
 log. No ADR body or header touched. Ready for review.
+
+---
+## Review round 2 — fixes (2026-09-02)
+
+Independent review returned two blocking findings on the commit above (`bdb3db5`). Both fixed
+on this branch, in place, without touching any declared-out-of-scope file.
+
+### Finding 1 (blocking) — hollow skip in file discovery
+
+**Reviewer's report:** `analyze()` filtered `docs/decisions/*.md` by `FILENAME_RE` *before*
+calling `parse_adr_file()` (`tools/adr/build_index.py:399-401` in the reviewed commit). A
+`.md` file that looked like an ADR but had a non-conforming name (capital letter, 3-digit
+number, trailing space, ...) was excluded from `paths` before anything ever inspected it — so
+it never appeared in `scanned_count`, `skipped_files`, or `fatal_issues`, and
+`check_index_completeness()` (fed the same pre-filtered list) could not flag it as a dangling
+row or a missing README entry either. It was invisible to every invariant simultaneously.
+Reproduced by the reviewer: two ADR-shaped files, one mis-named, gave "Scanned 1... Skipped
+(fatal): 0" and exit 0 — `--check` printing CHECK OK while a real ADR sat entirely unindexed.
+This is the exact failure class the tool exists to prevent, and violated criterion 8 ("never
+skipped silently, every skipped file counted with its reason") and ADR-0115 §1.
+
+**Root cause:** `FILENAME_RE` was doing two unrelated jobs at once — (a) excluding the two
+real non-ADR files (`README.md`, `TEMPLATE.md`), and (b) validating that a filename has the
+right shape. Using the same regex for both meant a typo in an ADR's filename was
+indistinguishable, at the discovery stage, from "this isn't an ADR at all" — it silently fell
+into case (a).
+
+**Fix:**
+- Added `NON_ADR_FILENAMES = {"README.md", "TEMPLATE.md"}`, an explicit, closed, two-item set
+  — not a regex, not derived from `FILENAME_RE` (`tools/adr/build_index.py`, near
+  `FILENAME_RE`'s definition).
+- `analyze()`'s discovery now excludes only `NON_ADR_FILENAMES`: `p for p in
+  decisions_dir.glob("*.md") if p.name not in NON_ADR_FILENAMES`. Every other `*.md` file is
+  discovered and handed to `parse_adr_file()`.
+- `parse_adr_file()` already had a `FILENAME_RE` check as its very first step, reporting a
+  `FatalIssue` for a non-conforming name — that path simply used to be unreachable for real
+  files because discovery filtered them out first. It is reachable now. Strengthened the
+  message ("filename does not match the required 'NNNN-slug.md' pattern (4-digit number,
+  lowercase slug) -- this file cannot be indexed") and the surrounding comment explaining why
+  this is the *only* place a bad filename is caught.
+- `check_index_completeness()` used to do `int(FILENAME_RE.match(fn).group(1))` for every
+  filename handed to it, which would now raise `AttributeError` on a non-conforming name
+  (`match()` returns `None`). Fixed to skip filenames `FILENAME_RE` cannot match when building
+  `file_numbers` (using a walrus-guarded comprehension) — such a name has no derivable ADR
+  number to check for a README row, and is already reported, fatally, by `parse_adr_file()`.
+  Confirmed this does not silently downgrade anything: the malformed file is still fatal via
+  the `parse_adr_file()` path; this function just no longer crashes trying to double-count it.
+
+**Fatal, not a reported skip — per the coordinator's explicit instruction.** A mis-named ADR
+is invisible to the index the whole spec gate depends on, so `--write` and `--check` both
+refuse (exit non-zero) rather than merely logging it. This was already the existing behaviour
+of the `FatalIssue` path once reachable — no new "is this fatal?" branch was needed, only
+making the existing fatal path actually run. I agree with the instruction: unlike missing
+`Touches:` (criterion 5, deliberately non-fatal because 116/119 ADRs are untagged *by design*
+pending task 004), a filename `NNNN-slug.md` violation on an otherwise well-formed ADR has no
+legitimate "not yet done" reading — it is always a mistake, and every existing ADR in the
+corpus already conforms (verified again below), so making it fatal cannot regress the clean
+tree.
+
+**Re-demonstrated, criterion 8, with the malformed-filename case added:**
+```
+$ python3 tools/adr/build_index.py --write --decisions-dir /tmp/decisions_test2 --out /tmp/decisions_test2/INDEX.json
+Scanned 121 ADR file(s) in /tmp/decisions_test2.
+Parsed OK: 116.
+Skipped (fatal): 5.
+...
+Fatal header problems (5):
+  - 0002-target-audience.md:1: missing Status field in header
+  - 0004-own-assets-only.md:4: unparseable date '31st of August 2026' (expected YYYY-MM-DD)
+  - 0006-Bad-Capital-Name.md: filename does not match the required 'NNNN-slug.md' pattern (4-digit number, lowercase slug) -- this file cannot be indexed
+  - 0007-duplicate-test.md: duplicate ADR number 0007, also used by: 0007-fork-wowee-and-azerothcore-monorepo.md
+  - 0007-fork-wowee-and-azerothcore-monorepo.md: duplicate ADR number 0007, also used by: 0007-duplicate-test.md
+
+Refusing to write INDEX.json: the corpus has unresolved violations above.
+```
+Exit code 1; `grep -c Traceback` on the full output → 0. All four fatal categories (missing
+Status, unparseable date, malformed filename, duplicate number) now reported together, by
+name, with the malformed-filename case sitting alongside the three that were already covered.
+The temporary fixture lived under `/tmp/decisions_test2`, never inside the worktree; deleted
+after the run.
+
+Also reproduced the reviewer's literal repro (two files, one mis-named, nothing else broken)
+directly against `/tmp` fixtures with both `--check` and `--write`:
+```
+$ python3 tools/adr/build_index.py --check --decisions-dir /tmp/repro_finding1 --out /tmp/repro_finding1/INDEX.json
+Scanned 2 ADR file(s) in /tmp/repro_finding1.
+Parsed OK: 1.
+Skipped (fatal): 1.
+  - 0002-Bad-Name.md: filename does not match the required 'NNNN-slug.md' pattern (4-digit number, lowercase slug) -- this file cannot be indexed
+...
+exit=1
+```
+`CHECK OK` was not printed; exit code 1 in both `--write` and `--check`.
+
+**Regression tests added** to `tests/adr/test_build_index.py` (none of criterion 8's original
+28 tests exercised a malformed filename, which is how this survived review round 1):
+- `AnalyzeTests::test_malformed_filename_is_discovered_counted_and_fatal` — asserts the file
+  is counted in `scanned_count`, named in `skipped_files` and `fatal_issues`, `result.ok` is
+  `False`, and the well-formed ADRs are unaffected.
+- `AnalyzeTests::test_malformed_filename_does_not_crash_completeness_check` — asserts
+  `analyze()` does not raise.
+- `AnalyzeTests::test_readme_and_template_are_still_excluded_explicitly` — asserts
+  `NON_ADR_FILENAMES` still keeps `README.md`/`TEMPLATE.md` out of discovery and does not
+  turn them into "malformed ADRs".
+- `CliIntegrationTests::test_check_fails_on_a_malformed_filename_not_check_ok` — the
+  reviewer's exact reproduction, at the CLI level: exit code 1, `Scanned 3`, `Skipped (fatal):
+  1`, the bad filename named in the output, `CHECK OK` never printed, `CHECK FAILED` printed.
+
+`python3 -m unittest discover -s tests/adr -v` → **32 tests, all pass** (28 original + 4 new),
+run 2026-09-02 after the fix.
+
+### Finding 2 (minor, factual) — stale sentence in docs/tools/adr-index.md
+
+**Reviewer's report:** `docs/tools/adr-index.md`'s "Known limitation" section claimed the
+workflow "runs the same two commands documented above (`--write` then `git diff --exit-code`
+on `INDEX.json`, and `--check`)". The actual `.github/workflows/adr-index.yml` has only two
+steps: the `unittest` run and `python3 tools/adr/build_index.py --check`. There is no
+`--write` step and no `git diff --exit-code` step. The task log already described the
+workflow correctly; only this doc sentence was wrong.
+
+**Fix:** per the coordinator's instruction, made the doc match the artifact — did **not** add
+steps to the workflow. Rewrote the "Known limitation: CI is unproven" section in
+`docs/tools/adr-index.md` to name the workflow's actual two steps (`unittest discover` and
+`--check`) and explicitly note there is no separate `--write`/`git diff --exit-code` step,
+because `--check` already performs that staleness comparison internally (regenerates the
+index in memory, diffs against the committed file — as the "Commands" section above already
+explains). Grepped the rest of the doc for `git diff --exit-code` and `--write.*then` to
+confirm this was the only stale sentence; it was.
+
+### Re-verification after both fixes
+- `python3 -m unittest discover -s tests/adr -v` → 32/32 pass.
+- `python3 tools/adr/build_index.py --check` (real repo, unmodified) → exit 0, `CHECK OK`,
+  still 119 entries, still 116/119 missing Touches (unchanged by this fix, as expected — no
+  real ADR filename is malformed).
+- `python3 tools/adr/build_index.py --write` run twice on the real repo → `diff` on the two
+  `INDEX.json` outputs → identical; `git diff --stat -- docs/decisions/INDEX.json` against the
+  committed copy → empty (the fix did not change the generated index for the real, clean
+  corpus, only its behaviour on a corpus that has a problem).
+- `git status --short` / `git diff --stat -- docs/decisions` → only `tools/adr/build_index.py`,
+  `tests/adr/test_build_index.py` and `docs/tools/adr-index.md` modified; no ADR body or
+  header touched; `docs/decisions/INDEX.json` unmodified (byte-identical regeneration).
+- Both workflow commands (`python3 -m unittest discover -s tests/adr -v`;
+  `python3 tools/adr/build_index.py --check`) re-run locally after the fix → both pass, as
+  above. Still unproven in actual GitHub Actions (no remote) — TODO row above stands unchanged.
+
+## Status (updated)
+Both review round 2 findings fixed and re-demonstrated on branch `task/003-adr-index-generator`
+in `/home/ludwig/wt/task-003`. All 8 acceptance criteria still hold, with criterion 8 now also
+covering the malformed-filename case end to end. 32/32 tests pass. No ADR body or header
+touched at any point across either review round. Ready for review again.

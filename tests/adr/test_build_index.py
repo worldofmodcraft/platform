@@ -307,6 +307,65 @@ class AnalyzeTests(unittest.TestCase):
         self.assertIn("ADR-0001 (0001-first.md)", result.touches_missing)
         self.assertNotIn("ADR-0002 (0002-second.md)", result.touches_missing)
 
+    def test_malformed_filename_is_discovered_counted_and_fatal(self):
+        # Regression test for task 003 review round 2, finding 1: a *.md
+        # file that looks like an ADR but has a non-conforming filename
+        # (here, a capital letter in the slug) used to be filtered out of
+        # file discovery before parse_adr_file() ever saw it -- invisible
+        # to scanned_count, skipped_files, fatal_issues and the
+        # completeness check, all at once. It must now be scanned, counted,
+        # named, and treated as fatal (per the reviewer's explicit
+        # instruction: a mis-named ADR is invisible to the index the whole
+        # spec gate depends on, so this is not merely a reported skip).
+        self._write_basic_corpus()
+        write(
+            self.dir / "0003-Bad-Name.md",
+            "# ADR-0003: Mis-named file\n\n- **Status:** Accepted\n- **Date:** 2026-09-03\n\n"
+            "## Decision\nZ.\n",
+        )
+        result = bi.analyze(self.dir)
+
+        # Discovered: counted in scanned_count, not silently dropped.
+        self.assertEqual(result.scanned_count, 3)
+        # Counted and named in skipped_files, with a reason.
+        skipped_names = {name for name, _reason in result.skipped_files}
+        self.assertIn("0003-Bad-Name.md", skipped_names)
+        skipped_reason = dict(result.skipped_files)["0003-Bad-Name.md"]
+        self.assertIn("filename", skipped_reason.lower())
+        # Named in fatal_issues too.
+        fatal_names = {issue.filename for issue in result.fatal_issues}
+        self.assertIn("0003-Bad-Name.md", fatal_names)
+        # Fatal: blocks --write/--check, not a mere report.
+        self.assertFalse(result.ok)
+        # The well-formed ADRs are unaffected.
+        self.assertEqual({a.filename for a in result.adrs}, {"0001-first.md", "0002-second.md"})
+
+    def test_malformed_filename_does_not_crash_completeness_check(self):
+        # check_index_completeness() now receives every discovered filename,
+        # including non-conforming ones, and must not raise trying to derive
+        # an ADR number from a name FILENAME_RE cannot match.
+        self._write_basic_corpus()
+        write(
+            self.dir / "0003-Bad-Name.md",
+            "# ADR-0003: Mis-named file\n\n- **Status:** Accepted\n- **Date:** 2026-09-03\n\n"
+            "## Decision\nZ.\n",
+        )
+        try:
+            result = bi.analyze(self.dir)
+        except Exception as exc:  # pragma: no cover - the point is this never fires
+            self.fail(f"analyze() raised {exc!r} on a malformed filename instead of reporting it")
+        self.assertFalse(result.ok)
+
+    def test_readme_and_template_are_still_excluded_explicitly(self):
+        # NON_ADR_FILENAMES must still keep the two real non-ADR files out
+        # of discovery -- the fix must not turn them into "malformed ADRs".
+        self._write_basic_corpus()
+        write(self.dir / "TEMPLATE.md", "# ADR-NNNN: <template>\n\n- **Status:** Proposed\n")
+        result = bi.analyze(self.dir)
+        self.assertEqual(result.scanned_count, 2)
+        self.assertEqual(result.fatal_issues, [])
+        self.assertTrue(result.ok)
+
 
 class DeterminismAndSerializationTests(unittest.TestCase):
     def test_two_writes_are_byte_identical(self):
@@ -401,6 +460,26 @@ class CliIntegrationTests(unittest.TestCase):
         rc, out = self._run("--lookup", "nonexistent-topic")
         self.assertEqual(rc, 0)
         self.assertIn("0 match(es)", out)
+
+    def test_check_fails_on_a_malformed_filename_not_check_ok(self):
+        # This is the reviewer's exact reproduction for finding 1: "a
+        # directory with two ADR-shaped files, one mis-named, reports
+        # 'Scanned 1... Skipped (fatal): 0' and exits 0." It must now scan
+        # both, skip and name the bad one, and fail the gate -- CHECK OK
+        # must never be printed while a file is invisible to the index.
+        self._run("--write")  # INDEX.json for the two well-formed ADRs first
+        write(
+            self.dir / "0099-Mis-Named.md",
+            "# ADR-0099: Mis-named\n\n- **Status:** Accepted\n- **Date:** 2026-09-02\n\n"
+            "## Decision\nZ.\n",
+        )
+        rc, out = self._run("--check")
+        self.assertEqual(rc, 1)
+        self.assertIn("Scanned 3 ADR file(s)", out)
+        self.assertIn("Skipped (fatal): 1", out)
+        self.assertIn("0099-Mis-Named.md", out)
+        self.assertNotIn("CHECK OK", out)
+        self.assertIn("CHECK FAILED", out)
 
 
 class RealRepoTests(unittest.TestCase):

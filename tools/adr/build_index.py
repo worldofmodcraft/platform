@@ -131,6 +131,19 @@ class AnalysisResult:
 # ---------------------------------------------------------------------------
 
 FILENAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
+
+# The only two *.md files under docs/decisions/ that are not ADRs. This is a
+# closed, explicit exclusion list -- deliberately NOT "any *.md file whose
+# name FILENAME_RE fails to match". Filtering file discovery by FILENAME_RE
+# used to be exactly how these two were excluded, which meant a typo'd ADR
+# filename (a capital letter, a 3-digit number, a trailing space) was
+# silently dropped before anything ever looked at it: invisible to
+# scanned_count, skipped_files, fatal_issues and the completeness check, all
+# at once (task 003 review round 2, finding 1). Every other *.md file is
+# discovered and handed to parse_adr_file(), whose own FILENAME_RE check
+# reports a non-conforming name as a fatal, named issue instead.
+NON_ADR_FILENAMES = {"README.md", "TEMPLATE.md"}
+
 TITLE_RE = re.compile(r"^#\s*ADR-(\d{4}):\s*(.+?)\s*$")
 SECTION_RE = re.compile(r"^##\s")
 BULLET_RE = re.compile(r"^-\s+(.*)$")
@@ -179,9 +192,21 @@ def parse_adr_file(path: Path) -> Tuple[Optional[Adr], List[FatalIssue]]:
 
     fm = FILENAME_RE.match(filename)
     if not fm:
-        # Should not happen -- caller only passes files matching the glob
-        # this regex is derived from -- but never trust that silently.
-        issues.append(FatalIssue(filename, None, "filename does not match NNNN-slug.md"))
+        # This is the ONLY place a non-conforming ADR filename is caught --
+        # analyze() hands every *.md file under docs/decisions/ except the
+        # two names in NON_ADR_FILENAMES to this function, specifically so a
+        # typo'd filename cannot be dropped before anything ever looks at
+        # it. Fatal by design (per task 003 review round 2, finding 1): a
+        # mis-named ADR is invisible to the index the whole spec gate
+        # depends on, so it must block --write/--check, not merely be noted.
+        issues.append(
+            FatalIssue(
+                filename,
+                None,
+                "filename does not match the required 'NNNN-slug.md' pattern "
+                "(4-digit number, lowercase slug) -- this file cannot be indexed",
+            )
+        )
         return None, issues
     filename_number = int(fm.group(1))
 
@@ -327,11 +352,21 @@ def parse_readme_index(readme_path: Path) -> List[Tuple[int, str, int]]:
 
 
 def check_index_completeness(readme_path: Path, adr_filenames: List[str]) -> List[str]:
-    """Mechanises task 001: every ADR file listed exactly once, no dangling rows."""
+    """Mechanises task 001: every ADR file listed exactly once, no dangling rows.
+
+    adr_filenames may include names that do not match FILENAME_RE (analyze()
+    now passes every discovered *.md file, not just the well-formed ones --
+    see NON_ADR_FILENAMES). Such a name cannot be resolved to an ADR number
+    at all, so it is skipped here; it is still reported, fatally, by
+    parse_adr_file()'s own filename check -- this function must not crash on
+    it, and must not silently treat it as complete either.
+    """
     issues: List[str] = []
     rows = parse_readme_index(readme_path)
 
-    file_numbers = {int(FILENAME_RE.match(fn).group(1)) for fn in adr_filenames}
+    file_numbers = {
+        int(m.group(1)) for fn in adr_filenames if (m := FILENAME_RE.match(fn))
+    }
     row_numbers = [n for n, _target, _line in rows]
 
     # Every file appears exactly once.
@@ -396,8 +431,14 @@ def check_amend_protocol(adrs: List[Adr]) -> List[str]:
 def analyze(decisions_dir: Path) -> AnalysisResult:
     readme_path = decisions_dir / "README.md"
 
+    # Discover every *.md file except the two known non-ADRs -- NOT every
+    # *.md file whose name happens to match FILENAME_RE. A file that looks
+    # like it belongs here but has a malformed name (capital letter, 3-digit
+    # number, trailing space, ...) must still be scanned and reported, not
+    # silently excluded before parse_adr_file() ever sees it (see
+    # NON_ADR_FILENAMES above; task 003 review round 2, finding 1).
     paths = sorted(
-        p for p in decisions_dir.glob("*.md") if FILENAME_RE.match(p.name)
+        p for p in decisions_dir.glob("*.md") if p.name not in NON_ADR_FILENAMES
     )
 
     fatal_issues: List[FatalIssue] = []
