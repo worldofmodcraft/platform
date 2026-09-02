@@ -27,10 +27,9 @@ Budget ~15 minutes.
 
 *You should see:* `https://github.com/worldofmodcraft` loads as an organisation page.
 
-### M1.2 Two-factor authentication
-ADR-0041 and mission §6.1 say **hardware-key** 2FA on the org account. `START-HERE.md` §1.2 says an
-authenticator app is fine. That is a real contradiction between two of your own documents, so I am
-not choosing for you — see question **Q1** in the mission log. Do this much now either way:
+### M1.2 Two-factor authentication  — decided: Q1=A
+Authenticator app now; a **hardware key is required before the first non-test publish** (booked as
+a task, not forgotten). Until then the only thing the key protects is a canary mod.
 1. **https://github.com/settings/security** → enable 2FA on your personal account if it is not on.
 2. Org → **Settings → Authentication security** → tick **Require two-factor authentication for
    everyone in the worldofmodcraft organization** → Save.
@@ -104,21 +103,61 @@ returns the four addresses. Tell me when the records are in and I will verify th
 
 ---
 
-## ⏸ M3 — Signing keypair → Actions secret
-**Blocked on decision Q3 (which signature format).** ADR-0041 requires a platform key with a
-`key_id` and a written rotation procedure, but never names the algorithm or the tool, and the
-choice binds us for years: the kernel and launcher will embed the public key and must verify
-these signatures forever. I will give you the exact generation command — a single copy-paste that
-never writes the private key to the repo — as soon as you pick. Do not generate a key before then.
+## ☐ M3 — Signing keypair → Actions secret  — decided: Q3=A (minisign, Ed25519)
+Every command below is one I ran end-to-end against minisign 0.12 before writing it here: I
+generated a throwaway key, signed a file, verified it, tampered with the file, confirmed
+verification fails with exit code 1, then destroyed the throwaway key.
+
+**Run these in your WSL terminal, in a directory that is NOT a git repository** — for example
+`cd ~` first. The private key must never sit inside a repo.
+
+```bash
+# 1. Get minisign (no sudo, no install — a single static binary)
+cd ~ && curl -fsSL -o minisign.tar.gz \
+  https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz
+tar -xzf minisign.tar.gz && cp minisign-linux/x86_64/minisign ~/.local/bin/ && rm -rf minisign-linux minisign.tar.gz
+minisign -v          # should print: minisign 0.12
+
+# 2. Generate the platform keypair, unencrypted so CI can use it unattended
+mkdir -p ~/wom-keys && cd ~/wom-keys
+minisign -G -W -p worldofmodcraft.pub -s worldofmodcraft.key
+
+# 3. Show the PUBLIC key (safe to share — this goes in docs and later into the kernel)
+cat worldofmodcraft.pub
+```
+
+The public key's comment line ends in 16 hex characters — that is the **`key_id`** ADR-0041
+requires for rotation. Paste the whole `worldofmodcraft.pub` output to me and I will record it in
+the docs and the pipeline; it is public by design.
+
+**Then add the private key to Actions secrets** — this is the one value that must never be pasted
+into our chat, a file in a repo, or a CI log:
+```bash
+cat ~/wom-keys/worldofmodcraft.key    # copy this entire output to your clipboard
+```
+1. Go to `https://github.com/worldofmodcraft/registry/settings/secrets/actions`
+2. **New repository secret** → Name: `MINISIGN_SECRET_KEY` → Secret: paste → **Add secret**.
+3. Back up `~/wom-keys/worldofmodcraft.key` somewhere offline (password manager or a USB stick).
+   If you lose it, every future release needs a new key and a kernel update to trust it.
+
+*You should see:* `MINISIGN_SECRET_KEY` listed under "Repository secrets", showing only the name —
+GitHub never displays the value again, which is correct.
+
+**Note:** the secret key file's first line says "minisign encrypted secret key" even with `-W`.
+That comment is static text in the format; the key genuinely has no password. Treat the file as
+the crown jewels regardless.
 
 ---
 
-## ⏸ M4 — The `test:hello-world` repository
-**Blocked on decision Q2 (namespace).** The mission calls the test mod `test:hello-world`, but
-ADR-0030 and ADR-0039 say a namespace **is** the owner's GitHub username. `test` is nobody's
-username, so as written the mission asks the registry CI to accept something its own ownership
-rule must reject. I will prepare the complete repository contents — manifest, README, licence,
-original placeholder screenshots — for you to push once the namespace is settled.
+## ☐ M4 — The `test:hello-world` repository  — decided: Q2=A (`test` is a reserved namespace)
+ADR-0119 (drafted this session, awaiting your read) reserves `mc` and `test` as
+organisation-owned namespaces, so `test:hello-world` is now legal without weakening the ownership
+check. The URL stays `worldofmodcraft.com/mods/test/hello-world`.
+
+I will prepare the complete repository contents — `mod.lua` manifest, `README.md`, MIT `LICENSE`,
+and original placeholder screenshots (AI-generated is fine per ADR-0061, as long as nothing
+imitates Blizzard style) — as task 009. You then create one **public** repo under your personal
+account and push what I hand you. Nothing to do yet; this step waits on tasks 003–007.
 
 ---
 

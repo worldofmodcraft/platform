@@ -122,9 +122,54 @@ never been answered; MANAGER.md is running on its defaults. Q2 (merge authority)
 (agent permission mode) shape how I run this mission specifically. Not urgent this session — the
 defaults are sane — but they should not stay open past the first merge.
 
+### Decisions recorded — Ludwig, 2026-09-02 (session 1)
+Answered **1A 2A 3A 4A 5A 6A**. All six leans accepted. Where each answer now lives, so none is
+ever asked twice:
+
+| Q | Answer | Recorded in |
+|---|---|---|
+| Q1 | Authenticator app now; hardware key required before the first non-test publish | runbook M1.2; the hardware-key upgrade is booked as task 011 |
+| Q2 | `test` becomes a reserved, organisation-owned namespace | **ADR-0119** (Proposed) + task 005; runbook M4 unblocked |
+| Q3 | minisign (Ed25519) | depgraph E9 (was the only undecided contract); runbook M3 unblocked with verified commands |
+| Q4 | Two-phase: PR validates without secrets, post-merge workflow signs | depgraph **E15** (new edge); binds task 006 |
+| Q5 | Build INDEX.json first | **task 003, spec-approved and delegated** (implementer/sonnet, worktree ../wt/task-003) |
+| Q6 | Add the metadata lines | task 005: `Amended by:` on ADR-0030/0039, `Amends:` on ADR-0058 |
+
+**The dependency graph now has no undecided contracts.** Q3 settled E9; Q4 added E15 (the
+post-merge pipeline trigger) — an edge that did not exist in the first draft because the mission
+spec assumed signing happened on the PR. That is the graph doing its job: the missing edge showed
+up as a contract nobody could name.
+
+**Verified before writing the runbook, not assumed:** minisign 0.12's flags come from running the
+real binary (`-G -W` generates an unattended key; the README documents neither that flag nor CI
+secret handling). I generated a throwaway keypair, signed, verified, tampered, confirmed exit
+code 1, and destroyed the key. The `key_id` ADR-0041 needs is the 16 hex characters in the public
+key's comment line, and minisign's *trusted comment* is covered by the signature — so mod id,
+version and SHA-256 can be bound into the signature itself rather than merely sitting beside it.
+
+### Task ledger
+| Task | State | Agent | Blocked by |
+|---|---|---|---|
+| 001 index completeness | review (awaiting merge approval) | manager | Ludwig §7 |
+| 002 asset scanner | draft | implementer/sonnet | **M1** |
+| 003 INDEX.json generator | **in progress** | implementer/sonnet | — |
+| 004 `Touches:` tagging of 116 ADRs | draft | scaffolder/haiku | 003 |
+| 005 ADR-0119 + amend metadata | review (awaiting merge approval) | manager | Ludwig §7 |
+| 006 contracts (entry/page/manifest schemas) | not written | implementer/sonnet | M1 |
+| 007 registry CI gates | not written | implementer/sonnet | 006 |
+| 008 pipeline + archive + signing | not written | implementer/sonnet | 006, M3 |
+| 009 site build + design | not written | implementer/sonnet | 006 |
+| 010 test mod + first-publish runbook | not written | implementer + doc-writer | M4, 007–009 |
+| 011 hardware-key 2FA upgrade | booked | Ludwig | before first real publish |
+
 ### Next steps
-1. You: **M1** (org + repos + Actions permissions) — this is the gate for all implementation.
-2. You: **M2** (Cloudflare DNS) — can be done in parallel with M1.
-3. You: answer Q1–Q5.
-4. Me, the moment M1 lands: spec-approve and delegate Task 002 (asset scanner), and Task 00X
-   (INDEX.json) if Q5=A. Both are independent of the domain, the key and the test mod.
+1. **You: M1** (org + two empty public repos + Actions read/write). Still the gate for tasks 002
+   and 006–010 — they have nowhere to live until the repos exist.
+2. **You: M2** (Cloudflare DNS, four A records + www CNAME, all grey-cloud). Tell me when saved
+   and I will verify resolution from here.
+3. **You: M3** (generate the minisign key, add `MINISIGN_SECRET_KEY` to the registry repo's Actions
+   secrets, paste me the *public* key). Can be done any time; nothing waits on it until task 008.
+4. **You: read ADR-0119** and say whether the text stands. It is `Proposed`; I do not mark a
+   decision Accepted on your behalf.
+5. **You: merge approval** for the two review-state branches (§7 — both touch docs/decisions/).
+6. **Me:** task 003 is running; task 004 follows it; task 002 is spec-ready the moment M1 lands.

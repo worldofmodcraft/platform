@@ -1,7 +1,7 @@
 # SITE-V1 dependency graph
 
 - **Mission:** SITE-V1 (`docs/tasks/MISSION-worldofmodcraft-site-v1.md`)
-- **Status:** proposed — awaiting Ludwig's answers to the open questions in the mission log
+- **Status:** accepted (session 1, 2026-09-02); all contracts decided — E9 and E15 settled by Ludwig's answers Q3=A, Q4=A
 - **Authority:** ADR-0117 (graph before code; every boundary edge names its contract)
 - **Last reviewed:** 2026-09-02
 
@@ -38,12 +38,13 @@ is real and gets a contract.
 | E6 | N5 → N4 | same validator contract as E5 | `contracts/validation-report.schema.json` |
 | E7 | N5 → N6 | release tag + asset naming scheme for archived source and signature | `contracts/artifact-naming.md` |
 | E8 | N5 → N2 | write-back fields: `source_archive`, `source_sha256`, `signature`, `key_id`, `published_at`, `status` | `contracts/entry.schema.json` |
-| E9 | N5 → signing key | detached-signature format, algorithm, `key_id` semantics | `contracts/signature-format.md` — **UNDECIDED, see mission log Q3** |
+| E9 | N5 → signing key | minisign (Ed25519) detached signature; `key_id` from the public-key comment; mod id + version + SHA-256 carried in the signed *trusted comment* | `contracts/signature-format.md` — decided (Q3=A) |
 | E10 | N2 → N7 | read side of the entry and page schemas | `contracts/entry.schema.json`, `contracts/page.schema.json` |
 | E11 | N6 → N7 | archive interior: `README.md` at tarball root, screenshots at manifest-declared paths | `contracts/archive-layout.md` |
 | E12 | N2 → N7 | rebuild trigger: `repository_dispatch` event type + payload | `contracts/rebuild-trigger.md` |
 | E13 | N7 → N8 | build output: `dist/` tree + `CNAME` | `contracts/site-output.md` |
 | E14 | N8 → public | HTTPS on apex; URL scheme `/mods/<ns>/<name>` | `contracts/url-scheme.md` |
+| E15 | N2 (merge to main) → N5 | **post-merge** trigger: the pipeline runs on `push`, never on the fork PR, because secrets are unreachable from fork-triggered workflows (Q4=A) | `contracts/pipeline-trigger.md` |
 
 ## What the graph tells us
 
