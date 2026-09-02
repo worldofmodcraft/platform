@@ -1,6 +1,6 @@
 # ADR-0119: Reserved namespaces — a small platform-owned set, exempt from username binding
 
-- **Status:** Proposed (option approved in principle by Ludwig, session 1 of SITE-V1; text pending his read)
+- **Status:** Accepted
 - **Date:** 2026-09-02 · **Area:** Registry / Mod format
 - **Touches:** registry, registry/ci, mod-format, site
 - **Related:** ADR-0003, ADR-0030, ADR-0039, ADR-0058

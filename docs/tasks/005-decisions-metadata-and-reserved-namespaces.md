@@ -1,6 +1,6 @@
 # Task 005: Reserved-namespace ADR and the missing amend back-references
 
-- **Mission:** SITE-V1 — **Status:** review (awaiting Ludwig's approval; MANAGER.md §7 — touches docs/decisions/)
+- **Mission:** SITE-V1 — **Status:** review (ADR-0119 accepted by Ludwig 2026-09-02; awaiting merge approval per MANAGER.md §7)
 - **Agent / model:** manager (direct — decision-log metadata and one new ADR, both explicitly approved by Ludwig)
 - **Budget:** small
 - **Branch / worktree:** task/005-decisions-metadata-and-reserved-namespaces (based on task/001)
@@ -49,3 +49,6 @@ amended.
 - 2026-09-02 opened after Ludwig answered Q2=A and Q6=A in session 1.
 - 2026-09-02 wrote ADR-0119; added `Amended by:` to 0030 and 0039 (0058 and 0119 each), and the
   `Amends:` line 0058 lacked; indexed 0119. Criteria 1–5 demonstrated. Status → review.
+- 2026-09-02 Ludwig read the text and accepted it as written. Status: Proposed -> Accepted.
+  Note the coupling this creates: INDEX.json (task 003) records each ADR's status, so task 003
+  must regenerate its index after this change or its own --check gate fails on merge.
