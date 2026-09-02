@@ -82,3 +82,11 @@ Scanner + signature table + contract schema + tests/fixtures + `docs/validation/
 ---
 # Task 002 log  (append-only, by the executing agent)
 - (not started — awaiting spec approval)
+
+---
+**Note (manager, 2026-09-02):** this file is the ledger entry. The **live** task file and its
+running log are in the `worldofmodcraft/registry` repository at `docs/tasks/002-asset-scanner.md`
+on branch `task/002-asset-scanner`, because that is where the work happens. The mission spans two
+repositories, which MANAGER.md §6 (written for a monorepo) does not address; the convention
+adopted is: the ledger entry lives here, the live log travels with the work, and the completed
+file is copied back into `docs/tasks/done/` at merge. Booked for Ludwig as a doctrine gap.
