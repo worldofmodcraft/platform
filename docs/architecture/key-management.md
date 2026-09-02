@@ -8,13 +8,22 @@
 
 Ownership is bound to **numeric account ids**, never to username strings — usernames can be
 released and re-registered by someone else, which is exactly the namespace-capture attack
-ADR-0058 §2 exists to prevent. Both ids below were read from the GitHub API on 2026-09-02, not
+ADR-0058 §2 exists to prevent. Every id below was read from the GitHub API on 2026-09-02, not
 transcribed from memory.
 
 | Party | Login (at registration) | Numeric id | Role |
 |---|---|---|---|
-| Ludwig | `mbmludric` | **37807560** | Project owner; publisher of the canary mod |
-| Organisation | `worldofmodcraft` | **324218296** | Owner of the reserved namespaces `mc` and `test` (ADR-0119 §2) |
+| Platform account | `womcraft` | **324089373** | Owner and sole member of the organisation. Created 2026-09-02 14:20 UTC, ~6 h before the org itself — a dedicated project identity, not a repurposed personal one. |
+| Organisation | `worldofmodcraft` | **324218296** | Owns the reserved namespaces `mc` and `test` (ADR-0119 §2). Created 2026-09-02 20:38 UTC. |
+| Ludwig (older personal account) | `mbmludric` | 37807560 | The account `gh` is authenticated as inside WSL. **No write access to the organisation** — this is why the first push was refused. |
+
+All three ids were read from the GitHub API on 2026-09-02. An earlier draft of this document
+named `mbmludric` as the project owner; that was wrong and is corrected here. Note also that the
+public account literally named `wombat` belongs to an unrelated person (Daniel Sachse, id 571379)
+— worth recording so nobody later mistakes it for ours.
+
+**Canonical identity: pending (mission log Q7).** Which account signs, owns and publishes is not
+yet decided, and ADR-0058 binds ownership to a numeric id permanently.
 
 Repositories, both public and created empty on 2026-09-02:
 `worldofmodcraft/registry` (default branch `main`) and `worldofmodcraft/site`.
