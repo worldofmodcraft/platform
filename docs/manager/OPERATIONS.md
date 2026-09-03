@@ -11,7 +11,7 @@
 |---|---|---|
 | `worldofmodcraft/platform` | ADRs, doctrine, dependency graph, task ledger, mission logs, `tools/adr/` | `~/wom` |
 | `worldofmodcraft/registry` | contracts, `tools/validation/`, CI and pipeline (later), the mod data | `~/registry` |
-| `worldofmodcraft/site` | Astro site (task 009) | not cloned yet — **empty repo** |
+| `worldofmodcraft/site` | Astro site (task 009) | `~/site` — seeded and protected (task 022) |
 
 Task worktrees live at `~/wt/<name>`. Task files travel with the work (in the repo where the work
 happens); the ledger entry and mission log stay in `platform`.
@@ -26,7 +26,7 @@ happens); the ledger entry and mission log stay in `platform`.
   offline backup — it must never appear in a repo, a log, or a chat.
 
 ## Branch protection changes the workflow
-`main` on **both** repos requires a pull request, blocks force-push and deletion, and includes
+`main` on **all three** repos requires a pull request, blocks force-push and deletion, and includes
 administrators. Zero required approvals, so the manager merges its own PR under §7 authority.
 A direct push is refused with `GH006: Protected branch update failed`.
 
@@ -66,8 +66,9 @@ exemption** (Ludwig, 2026-09-03).
 
 ## Ludwig's manual steps: blocked versus merely pending
 Not the same thing, and conflating them wastes his time.
-- **Blocked (cannot be done yet, do not ask):** enabling GitHub Pages — `worldofmodcraft/site` is
-  empty and GitHub will not serve a repo with no content. Returns to him the moment task 009 pushes.
+- **Blocked (cannot be done yet, do not ask):** enabling GitHub Pages — `worldofmodcraft/site` now
+  holds only a licence, a README and an ignore file (task 022), which is not a site. Returns to him
+  the moment task 009 pushes a real build.
 - **Pending (he can do any time):** `M3` — add the minisign private key as `MINISIGN_SECRET_KEY` on
   the registry repo. Needed by task 008, not before.
 - **Pending, later:** `M4` — create `test/hello-world` and push what task 010 prepares.
