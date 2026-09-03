@@ -3,6 +3,8 @@
 - **Purpose:** facts a session learns by getting them wrong. Context is lost at compaction or
   handover; this file is not. If you catch yourself deducing one of these from scratch, it belongs here.
 - **Last reviewed:** 2026-09-03
+- **This is a living document.** Every session that learns a new gotcha appends it here before
+  handing over. Adding to it is part of the handover procedure (MANAGER.md §5), not optional.
 
 ## Repositories and what lives where
 | Repo | Holds | Local clone |
@@ -53,6 +55,24 @@ exemption** (Ludwig, 2026-09-03).
   or `--check` fails on merge.
 - **`~/.claude/token-guard-check.sh`** — prints the binding usage window; UNKNOWN if the snapshot is
   missing or older than 10 minutes, which the guard counts as above 90 %.
+
+## Consequences of branch protection that bite later
+- **The publishing pipeline cannot push its write-back to `main`.** Task 008 must run on a branch of
+  the *same* repository — where repository secrets are available, unlike a fork PR — push
+  `pipeline/<ns>.<name>-<version>`, open a PR, and let it merge when its own checks pass. Two PRs
+  per publish. This is a direct consequence of task 013 and is easy to rediscover the hard way.
+- **Accepting an ADR is a two-file change.** `INDEX.json` records each ADR's status, so flipping a
+  status without regenerating the index makes `--check` fail on merge.
+
+## Ludwig's manual steps: blocked versus merely pending
+Not the same thing, and conflating them wastes his time.
+- **Blocked (cannot be done yet, do not ask):** enabling GitHub Pages — `worldofmodcraft/site` is
+  empty and GitHub will not serve a repo with no content. Returns to him the moment task 009 pushes.
+- **Pending (he can do any time):** `M3` — add the minisign private key as `MINISIGN_SECRET_KEY` on
+  the registry repo. Needed by task 008, not before.
+- **Pending, later:** `M4` — create `test/hello-world` and push what task 010 prepares.
+- **Done and verified:** the org, both repos, Actions permissions, DNS (four A records + `www`
+  CNAME, all unproxied), the signing keypair.
 
 ## Environment
 - Node is at `/home/ludwig/.local/node/bin/node` (userland install; on PATH via `~/.bashrc`, but use

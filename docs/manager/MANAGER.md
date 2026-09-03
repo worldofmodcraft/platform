@@ -72,8 +72,13 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
 
 - **Tasks are sized to fit.** A task that cannot plausibly complete within one agent's context window is mis-scoped: split it before delegation, never during a panic.
 - **State lives on disk, context is cache.** Every task maintains its log (`docs/tasks/NNN-log.md`) continuously: done / remaining / decisions with reasons / open issues. Any agent must be able to resume the task from the log alone. This mirrors platform ADR-0023 ("in the KV store or gone"): volatile memory is never trusted.
-- **The 60 % rule.** An agent past ~60 % context (visible in the HUD) finishes its current sub-step, updates the log, and ends its run. Continuation is a fresh agent reading the log — which is a handover by *file*, never a handover by *summary from a tired context*.
-- The manager applies the same rule to itself: before its own context passes ~60 %, it writes the session status (§9) so a fresh session can take over losslessly.
+- **The 60 % rule (agents).** An agent past ~60 % context finishes its current sub-step, updates the log, and ends its run. Continuation is a fresh agent reading the log — a handover by *file*, never a handover by *summary from a tired context*.
+- **The planned-handover rule (the manager).** The 60 % figure predates the 1M-token window; for the manager it is replaced by **30 % soft / 40 % hard**, because at 1M tokens 60 % is an enormous conversation and recall degrades long before the arithmetic threshold.
+  1. **Soft, 30 %:** at the next natural boundary after context passes 30 % — a task step finished, or an agent report-back — perform a deliberate handover. **Start no new tasks in this session.**
+  2. **Hard, 40 %:** wrap up mid-step if necessary and hand over regardless.
+  3. **Self-service reading**, same technique as the token guard: the HUD's context cache at `~/.claude/plugins/claude-hud/context-cache/*.json` carries `used_percentage` and `context_window_size`. Read it at session start and at every report-back, and log it beside the token-guard checkpoints so drift toward the threshold is visible early. Missing or stale (>10 min) → **unknown → ask Ludwig**, exactly as with usage.
+  4. **The handover procedure:** (a) update every open task log to a resumable state; (b) write the session-status entry in the mission log — done / in progress / blocked on Ludwig / next steps — and append any fresh gotchas to `OPERATIONS.md`; (c) verify with `ls` and `git status` that everything cited exists and is committed; (d) tell Ludwig it is handover time and give him the exact kickoff line to paste into the fresh session.
+  5. **Never rely on auto-compaction.** If it triggers anyway, treat the session as **untrusted for operational detail** and verify against disk before acting on anything remembered. A summariser keeps narrative and drops exactly the operational detail that has already caused false verifications here.
 
 ## 6. Worktree isolation (anti-derailment rule #2)
 
