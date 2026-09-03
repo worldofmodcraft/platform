@@ -597,3 +597,56 @@ DNS resolves to GitHub's four documented Pages addresses; `www` CNAMEs correctly
 HTTP 404 over plain HTTP and a certificate-name error over HTTPS — the exact signature of "DNS
 points at GitHub, no GitHub site claims this hostname". Both clear when 009 ships content and Pages
 is enabled against the custom domain.
+
+---
+
+## SESSION STATUS / HANDOVER — 2026-09-03, context 47 % of 1M (past the 40 % hard threshold)
+
+Handover performed under the rule created in task 021, on its first application. Nothing here
+depends on conversational memory: everything below is on disk and committed.
+
+### Completed this session (all merged to `main`, both repos)
+Tasks **001, 002, 003, 005, 012, 013, 014, 015, 016, 017, 020, 021** — see `docs/tasks/done/`.
+Highlights a fresh session should know rather than rediscover:
+- **The asset scanner is live** (`registry`, PR #1) and enforces ADR-0120: magic-byte typing plus
+  content whitelisting. Three rounds, three adversarial reviews, one escalation.
+- **The decision log is mechanically self-checking**: 120 ADRs, `INDEX.json` + `--check` gate.
+- **Both `main` branches are protected**; all work goes through PRs (see OPERATIONS.md for the loop).
+- **Two safety rules are law and self-service**: the token guard (CLAUDE.md rule 0) and the planned
+  handover (MANAGER.md §5). `~/.claude/checkpoint.sh` reports both.
+
+### In progress — needs a decision from the next session
+- **Task 006 (contracts)** is complete on branch `task/006-contracts` in `worldofmodcraft/registry`
+  (worktree `~/wt/registry-task-006`), verified by the manager (23 tests; nine adversarial schema
+  probes all correct), and **was dispatched to an adversarial reviewer whose result had not
+  returned when this session hit the handover threshold.**
+  **That review belongs to this session and does not survive it.** The next session must
+  re-dispatch a reviewer for `task/006-contracts` before merging — the brief is in this log's
+  preceding entries, and the highest-value target is `contracts/append-only.rules.md`, because
+  task 007 implements a diff checker directly from its prose.
+  Manager triage already recorded: the mission spec's D1 omits `key_id` from the version-object
+  field list; ADR-0041, criterion 1 and depgraph edge E8 all include it. **`key_id` stays**; D1 is
+  stale, like its "58 ADRs". Editing the mission spec needs Ludwig (§7).
+
+### Blocked on Ludwig
+- **M3** (pending, any time): add the minisign private key as `MINISIGN_SECRET_KEY` on
+  `worldofmodcraft/registry`. Needed by task 008.
+- **M4** (later): create `test/hello-world`, push what task 010 prepares.
+- **Pages enablement** (genuinely blocked, do not ask yet): `site` is empty; GitHub will not serve
+  a repo with no content. Returns to him the moment task 009 pushes.
+- **Task 011**: hardware-key 2FA before the first non-test publish.
+- Mission spec D1 is stale in two places (ADR count, `key_id`) — his call whether to amend it.
+
+### Next steps, in order
+1. Re-dispatch the reviewer for `task/006-contracts`; merge on a pass.
+2. Then **007 (registry CI gates)** and **009 (site build + design)** run **in parallel** — the site
+   reads schemas, not the pipeline (edges E10/E11). **009 is the task that makes
+   worldofmodcraft.com serve its first page.**
+3. **008 (pipeline + signing)** after 006, needing M3, and must write back via a same-repo PR
+   because branch protection blocks direct pushes (OPERATIONS.md).
+4. **010** (test mod + runbook) last, then the §7 walkthrough.
+
+### Checkpoint log (final readings)
+| Time | Usage | Context | Action |
+|---|---|---|---|
+| 2026-09-03 handover | weekly 28 %, 5-hour 22 % | **47 %** | Past 40 % hard threshold → handover |
