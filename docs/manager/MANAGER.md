@@ -89,13 +89,28 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
 
 ## 7. Merge authority
 
-Default (pending Ludwig's answer, OPEN-QUESTIONS §Q4): the manager may merge a task branch **only when all of the following hold** — review checklist fully green, all acceptance criteria demonstrated, tests pass in the worktree, docs updated, task log complete. Anything touching `docs/decisions/`, mission specs, signing/keys, CI security checks, or deletion of data always requires Ludwig's explicit approval before merge, regardless of checklist state.
+Default (pending Ludwig's answer, OPEN-QUESTIONS §Q4): the manager may merge a task branch **only when all of the following hold** — review checklist fully green, all acceptance criteria demonstrated, tests pass in the worktree, docs updated, task log complete. Anything touching `docs/decisions/`, mission specs, signing/keys, CI security checks, deletion of data, or **a takedown** always requires Ludwig's explicit approval before merge, regardless of checklist state.
+
+**Takedowns are never merged on the manager's own authority** (Ludwig, 2026-09-03). A takedown is
+the one registry mutation that *removes* value — a published version's `status` becoming `removed`
+with a reason, the single in-place change `contracts/append-only.rules.md` permits, mandated by
+ADR-0041 for legal grounds only. Its authorisation is the merge gate; but the merge gate is the
+**`womcraft` account**, which the manager session also acts as, so "a human decided this" is not
+something the gate can currently prove. Therefore, **regardless of technical ability**: a takedown
+PR requires Ludwig's explicit written approval, given in session, referenced in the PR, *before*
+merge. The manager merging one on its own is an absolute stop condition under §8, not a judgement
+call.
+
+This restores the human gate as doctrine where it cannot yet be physics. It is replaced, not
+supplemented, when the checker can require a signed takedown record in the PR — the phase-3 upgrade
+named in `contracts/append-only.rules.md` — at which point the guarantee stops depending on who
+holds an account.
 
 ## 8. Budgets and stop conditions
 
 - Every task file declares an **effort budget** (small ≤ 1 agent-session, medium ≤ 3, large ≤ 6). Exceeding budget = stop, report, ask. Budget overruns are information ("this was mis-scoped"), never something to push through quietly.
 - A session that produces two consecutive stop-and-ask events halts entirely until Ludwig responds — accumulating blocked questions and continuing elsewhere is how scope drifts.
-- Absolute stop conditions (halt session, do not attempt to fix): signing key or secrets exposed in any output; an agent modified files outside its worktree; main differs from expected; registry history rewritten.
+- Absolute stop conditions (halt session, do not attempt to fix): signing key or secrets exposed in any output; an agent modified files outside its worktree; main differs from expected; registry history rewritten; **a takedown PR merged without Ludwig's written approval** (§7).
 - **The token guard (inviolable; CLAUDE.md rule 0).** Ludwig's Claude Max subscription is shared
   with his daily work, so headroom for him is a hard constraint, not a courtesy. **Halt all work at
   90 %** of the binding usage window (5-hour or weekly, whichever is more constrained): launch
