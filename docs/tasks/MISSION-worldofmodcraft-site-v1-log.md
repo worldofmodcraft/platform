@@ -620,8 +620,15 @@ Highlights a fresh session should know rather than rediscover:
   (worktree `~/wt/registry-task-006`), verified by the manager (23 tests; nine adversarial schema
   probes all correct), and **was dispatched to an adversarial reviewer whose result had not
   returned when this session hit the handover threshold.**
-  **That review belongs to this session and does not survive it.** The next session must
-  re-dispatch a reviewer for `task/006-contracts` before merging — the brief is in this log's
+  **UPDATE: the review landed before handover and returned BLOCKING — two findings, both in
+  `contracts/append-only.rules.md`, both recorded in that branch's task log and pushed.**
+  (F1) the document forbids the published→removed takedown ADR-0041 mandates, so a task 007 checker
+  built from it could not implement the platform's only legal-takedown mechanism; (F2) its
+  uniqueness rule compares new versions only against history, so two `2.0.0` objects added in one PR
+  pass. Everything else passed and was independently verified, including that all 19 invalid
+  examples are load-bearing and the SPDX enum matches upstream byte-for-byte.
+  **The next session fixes those two points, re-verifies, and re-reviews before merging** — no
+  re-dispatch of the original review is needed — the brief is in this log's
   preceding entries, and the highest-value target is `contracts/append-only.rules.md`, because
   task 007 implements a diff checker directly from its prose.
   Manager triage already recorded: the mission spec's D1 omits `key_id` from the version-object
