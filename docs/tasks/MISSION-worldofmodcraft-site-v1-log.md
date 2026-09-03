@@ -504,3 +504,45 @@ picks the more constrained window, enforces the 10-minute staleness rule, and re
 | Time | Reading | Source | Action |
 |---|---|---|---|
 | 2026-09-03, task 016 acceptance | **5-hour 51 %** (resets 02:00Z), weekly 25 % | snapshot, self-service | Below 90 % → continue |
+
+### Task 002 done — merged as registry PR #1 (2026-09-03)
+Three rounds, three independent adversarial reviews. Rounds 1 and 2 found real bypasses and **both
+traced to defects in the manager's specification, not the implementation**: "identify by magic
+bytes" and then "a well-formed instance of a whitelisted format" were each satisfied by files
+carrying a byte-for-byte Blizzard file. The guarantee was fixed by decision (ADR-0120) rather than
+by a third attempt at wording, and round 3 — the one permitted escalation under §3.4 — passed.
+
+What ships: PNG content whitelisting (chunk-type safe list with a written reason per entry, each
+permitted chunk's spec-fixed length enforced, and the IDAT stream required to inflate to exactly
+the byte count IHDR implies); Ogg codec-header validation; recursive GLB validation with bounded
+depth; whole-file incremental UTF-8 decoding for the text bucket; actionable rejection messages
+carrying a remedy. A 200 MB zlib bomb is rejected in under a millisecond with bounded memory.
+Seven accumulated attacks rejected; 107/140 real third-party PNGs and 70/75 real Ogg files accepted.
+
+**The implementer improved the spec unprompted**, which is what the escalation tier is for: a
+chunk-type whitelist alone does not close PNG, because IDAT is the one permitted chunk whose length
+the specification does not bound — so the payload simply moves inside it. It built that attack
+itself and closed it.
+
+**A manager verification error, recorded because it recurred as a pattern.** The round-2 check I
+reported as "all four bypasses closed" was invalid: the scanner takes a *directory*, and I passed
+single file paths, which return exit 2 meaning "not a directory". I read four usage errors as four
+rejections. The reviewer's contrary finding was correct. I caught it only because a *legitimate*
+file also came back "rejected" — had every fixture been malicious, the broken check would have
+agreed with me every time. That is the third instance this session of **a test that can only
+confirm what its author already believes** (after task 003's hollow gate and task 002's
+self-referential WMO fixture), and the first that was mine.
+
+### Booked: Ogg residual gap is a moderation problem, not only a hardening one (Ludwig, 2026-09-03)
+Once Ogg codec headers validate, audio payload bytes are never read, so a byte-for-byte file can
+ride inside them. Closing it needs decoding (ADR-0120 option B). Accepted deliberately for phase 1:
+the canary is the only publisher, so the surface is unreachable until third-party publishing opens.
+
+Ludwig's framing, which widens this beyond a technical fix: **audio can ship infringing or illegal
+content that no format validator can ever detect, so it needs community moderation and flagging**
+(ADR-0037, ADR-0046) — not merely a stricter parser. Two separate follow-ups, both prerequisites
+for opening publishing to third parties:
+- **Task 018** — Ogg decode-verification (closes byte-for-byte smuggling).
+- **Task 019** — audio in the moderation/flagging path (covers what decoding never will).
+Neither is in SITE-V1's scope; both are hard gates before the registry accepts outside submissions,
+and are recorded here so that gate is not discovered late.
