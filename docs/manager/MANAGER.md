@@ -89,7 +89,7 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
 
 ## 7. Merge authority
 
-Default (pending Ludwig's answer, OPEN-QUESTIONS §Q4): the manager may merge a task branch **only when all of the following hold** — review checklist fully green, all acceptance criteria demonstrated, tests pass in the worktree, docs updated, task log complete. Anything touching `docs/decisions/`, mission specs, signing/keys, CI security checks, deletion of data, or **a takedown** always requires Ludwig's explicit approval before merge, regardless of checklist state.
+**Decided** (Ludwig, OPEN-QUESTIONS Q2 = A): the manager may merge a task branch **only when all of the following hold** — review checklist fully green, all acceptance criteria demonstrated, tests pass in the worktree, docs updated, task log complete. Anything touching `docs/decisions/`, mission specs, signing/keys, CI security checks, deletion of data, or **a takedown** always requires Ludwig's explicit approval before merge, regardless of checklist state.
 
 **Takedowns are never merged on the manager's own authority** (Ludwig, 2026-09-03). A takedown is
 the one registry mutation that *removes* value — a published version's `status` becoming `removed`
