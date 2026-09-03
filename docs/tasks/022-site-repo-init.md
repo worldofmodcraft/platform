@@ -59,3 +59,82 @@ Beyond MANAGER.md 3.7:
 - Enabling GitHub Pages: it stays blocked until content exists (OPERATIONS.md), and enabling it
   against an empty site is how a half-served domain gets cached.
 - Force-pushing anything, or any second commit on `main` outside a pull request.
+
+---
+# Task 022 log
+
+- 2026-09-03 spec approved (manager, solo — SPEC-CHECKLIST verified in the same sitting; small,
+  infrastructure, no production code and no new graph edges).
+
+## Acceptance criteria — demonstrated
+
+**1. `main` exists with exactly the three seeded files.**
+```
+$ cd ~/site && git log --oneline -1 && git ls-tree --name-only HEAD
+99d3941 Initialise the site repository
+.gitignore
+LICENSE
+README.md
+$ git log -1 --format='%an <%ae>'
+womcraft <womcraft@snabbpost.com>
+```
+
+**2. `README.md` states what the repository is.** It says the repository holds the site
+*generator*, that every page is generated from the registry plus the platform's archived tarballs
+(never the author's live repository, ADR-0059), that nothing is hand-edited to change what a page
+says, and — under an explicit "Status" heading — that the site does not yet serve anything. No
+claim is made about a live site, because there is not one.
+
+**3. `LICENSE` is AGPL-3.0, per ADR-0049.** That ADR names "site generator" explicitly in its
+AGPL-3.0 list, alongside the forks, `libmodcraft`, the launcher, the build pipeline and the
+registry tooling; the MIT-with-linking-clause carve-out covers the SDK only, which this repository
+is not. The text is GitHub's canonical copy, fetched rather than typed:
+```
+$ gh api licenses/agpl-3.0 --jq '.spdx_id, (.body|length)'
+AGPL-3.0
+34523
+$ head -2 ~/site/LICENSE
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
+```
+
+**4. `.gitignore` covers the Astro build outputs and nothing speculative.** Three entries:
+`node_modules/`, `dist/`, `.astro/`.
+
+**5. Protection on `main` matches `registry`.** Read back from the API after setting it, rather
+than asserted:
+```
+$ gh api repos/worldofmodcraft/site/branches/main/protection --jq '{prs:.required_pull_request_reviews.required_approving_review_count, admins:.enforce_admins.enabled, force:.allow_force_pushes.enabled, del:.allow_deletions.enabled}'
+{"admins":true,"del":false,"force":false,"prs":0}
+```
+Same shape as `registry`: pull requests required, zero required approvals (a solo maintainer
+cannot approve their own PR — task 013's reasoning, unchanged), administrators included,
+force-push and deletion blocked.
+
+**6. A direct push to `main` is refused, with no stray commit left behind.**
+```
+$ cd ~/site && git rev-parse --abbrev-ref HEAD
+main
+$ git commit -m "Probe: direct push to protected main must be refused"   # local only
+$ git push origin main
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: - Changes must be made through a pull request.
+ ! [remote rejected] main -> main (protected branch hook declined)
+$ git reset --hard origin/main && git status --short && git rev-parse HEAD origin/main
+99d39411d2cd6466c90afde8f7c97e9fec5d25e5
+99d39411d2cd6466c90afde8f7c97e9fec5d25e5
+```
+Working tree clean, local `main` identical to `origin/main`, probe commit gone.
+
+**7. Local clone and `OPERATIONS.md`.** The clone is at `~/site`; the repositories table now says
+so, the branch-protection section says "all three repos" instead of "both", and the Pages bullet
+now states the accurate reason it is still blocked — the repository has a licence and a README,
+which is not a site.
+
+## Note recorded for a later task, not fixed here
+Neither `worldofmodcraft/platform` nor `worldofmodcraft/registry` has a `LICENSE` file, though
+ADR-0049 puts the registry tooling under AGPL-3.0 and the platform repository is where the
+decision log itself lives. Out of this task's declared file scope and left alone deliberately;
+booked for Ludwig in the mission log rather than fixed in passing.
+
+**Status: criteria 1-7 demonstrated. Ready for merge.**
