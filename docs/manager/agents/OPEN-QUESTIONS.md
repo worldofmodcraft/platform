@@ -7,7 +7,8 @@ A) ★ Per mission milestone: runs until a §8 stop condition, budget end, or mi
 B) Per task: report after every completed task.
 C) Time-boxed: report at least every N hours of wall time.
 
-**Q2 Merge authority.** Who merges to main?
+**Q2 Merge authority.** Who merges to main? — **ANSWERED: A** (Ludwig, 2026-09-03). Encoded in
+MANAGER.md §7, which also now carries the takedown exception added in task 028.
 A) ★ Manager merges when checklist is fully green; Ludwig always approves ADRs, specs, security/CI, keys, data deletion.
 B) Ludwig approves every merge (safest, slowest — you become the bottleneck).
 C) Manager merges docs-only freely; all code merges need Ludwig.
