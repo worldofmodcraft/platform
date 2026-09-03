@@ -9,6 +9,11 @@
 
 ---
 
+> **Amended 2026-09-03 (task 027, approved by Ludwig per MANAGER.md §7):** §4 D1's version-object
+> field list gained `key_id` (ADR-0041, depgraph edge E8 and `contracts/entry.schema.json` all
+> carry it; D1 was the only place that did not), and §3's ADR count was corrected from 58 to 120.
+> No other change.
+
 ## 1. Objective
 
 Stand up the complete Phase-1 publishing infrastructure for World of Modcraft and prove it end-to-end with one test mod, so that:
@@ -33,13 +38,13 @@ Do not build any of the following in this mission, even partially, even as stubs
 
 ## 3. Context you must load first
 
-1. Read the entire decision log (`docs/decisions/`, 58 ADRs + index). The ADRs listed under "Governing decisions" above are binding for this mission; if anything in this spec contradicts an ADR, **stop and ask** — do not resolve it silently.
+1. Read the entire decision log (`docs/decisions/`, 120 ADRs + index). The ADRs listed under "Governing decisions" above are binding for this mission; if anything in this spec contradicts an ADR, **stop and ask** — do not resolve it silently.
 2. Key facts: platform name **World of Modcraft**; site **worldofmodcraft.com**; core namespace `mc:`; everything in **English**; mods may contain **only whitelisted original assets** (glTF/GLB, PNG, OGG); Blizzard formats (M2/WMO/ADT/BLP/DBC/MPQ) are rejected **by magic bytes, not extension**, including inside GLB containers; registry entries are **append-only**; namespace ownership is the **numeric GitHub account id**.
 
 ## 4. Deliverables
 
 ### D1 — Repository: `worldofmodcraft/registry`
-- `index.json` (or per-mod files under `mods/<ns>.<name>/`): entry schema exactly per ADR-0058 §2 (`owner = { provider, id, name_at_registration }`, versions[] with `{ version, commit, source_url, source_archive, source_sha256, signature, published_at, status }`).
+- `index.json` (or per-mod files under `mods/<ns>.<name>/`): entry schema exactly per ADR-0058 §2 (`owner = { provider, id, name_at_registration }`, versions[] with `{ version, commit, source_url, source_archive, source_sha256, signature, key_id, published_at, status }`).
 - `mods/<ns>.<name>/page.json` per ADR-0059 §2 (description, screenshots[], tags[], links[], deprecated).
 - **CI checks (GitHub Actions), each with a clear failure message:**
   - JSON schema validation of every changed file.
