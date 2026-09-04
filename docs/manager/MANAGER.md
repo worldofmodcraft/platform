@@ -36,6 +36,42 @@ first implementation task, the manager draws its dependency graph (nodes = compo
 boundary edge names its contract — ADR-0117); specs identify their nodes/edges, ordering is
 derived topologically, and parallelism from disjoint subgraphs.
 
+## 2c. Verification is a runnable artefact, not a transcript
+
+**Any task whose acceptance criteria are command-based ships `docs/tasks/NNN-verify.sh`**, committed
+and executable. The agent runs it and pastes *its* output into the task log; the reviewer and the
+manager re-run the same script and diff. Nothing in a log that claims a command's output is trusted
+unless the script that produced it is on disk and re-runnable.
+
+**Why this exists, in one sentence:** on task 006, three separate log entries recorded commands
+whose output the command cannot produce — a `grep` with an alternation that basic `grep` reads
+literally, returning nothing; a quoted hit for a string spanning a line break; a hit count that did
+not match its own paste. The claims happened to be true. They were asserted, not demonstrated, and
+no amount of care caught them, because catching them required someone to re-run every line by hand.
+Making the commands an artefact makes fabrication **detectable by construction rather than by
+vigilance** (Ludwig, 2026-09-03).
+
+Four rules follow, each bought with a review round:
+
+1. **A search that finds nothing is a broken search, never a clean result.** A check whose pattern
+   matches zero lines must fail. Task 006's first sweep "passed" by returning nothing at all.
+2. **The artefact must be able to fail, and that must be demonstrated.** Mutation-test it: break
+   the thing each check claims to check, and show the check turn red. On task 006 a 28-check script
+   stayed fully green while the deletion verdict was flipped from "always a violation" to "never",
+   while rule 4's uniqueness clause was deleted, and while the test suite itself was broken — three
+   checks that could not fail, one of them guarding a previous review's own finding. **A check that
+   cannot fail is worse than no check, because it manufactures confidence.**
+3. **A label that names several things must fail when any one of them is missing.** Those three
+   false greens were regex alternations behind labels that read as conjunctions. Split them.
+4. **The script must be portable and deterministic**, and proven so somewhere other than the
+   machine that wrote it — a fresh clone, not the authoring worktree. Task 006's script passed only
+   where it was written, because committed bytecode happened to match that filesystem's mtimes.
+
+**Scope:** this applies to command-based criteria. A task whose criteria are visual (a screenshot),
+external (a live CI run), or human (Ludwig's approval) records those as it always has — but it says
+plainly which criteria are script-verified and which are not, so no reader mistakes the second kind
+for the first.
+
 ## 3. Hard guardrails (structural, not aspirational)
 
 1. **ADRs are law.** No agent, including the manager, may edit files under `docs/decisions/` except to add a new ADR explicitly approved by Ludwig. Conflicts between a task and an ADR halt the task.

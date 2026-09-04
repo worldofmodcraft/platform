@@ -15,7 +15,10 @@ applies to specs too).
 7. **Dependencies/sequencing** against other open tasks are stated (file overlaps = sequence);
    the task's node(s)/edge(s) are identified in the dependency graph and no new undeclared
    edges are introduced — a new dependency updates the graph first (ADR-0117).
-8. **Core-surgeon only:** the covering survey document exists and is cited; if none, a survey
+8. **Verification artefact declared** (MANAGER.md §2c): if any acceptance criterion is
+   command-based, the spec names `docs/tasks/NNN-verify.sh` in the file scope and says the log
+   pastes that script's output. If none are, the spec says so explicitly.
+9. **Core-surgeon only:** the covering survey document exists and is cited; if none, a survey
    task is created first.
 
 Rationale: ROUTING.md already records that most failures are spec failures. Catching them
