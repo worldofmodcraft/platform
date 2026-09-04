@@ -9,6 +9,7 @@ A single "no" blocks the merge. The reviewer is never the author.
 5. **Docs moved with code:** every behaviour change is reflected in the relevant design doc / README / runbook in the same branch.
 6. **Forbidden-shortcut scan:** none of MANAGER.md §3.7 present (grep for TODO/FIXME/skip markers; read error paths).
 7. **Task log complete and truthful:** done/remaining/decisions/issues current; a stranger could resume from it. Every path, file and artefact the log cites exists on disk (verify, do not assume); any record written after the fact is marked **retroactive**.
-8. **No secrets** in diff, logs or command output.
-9. **English throughout.**
-10. **Cleanup ready:** branch merges cleanly onto current main; worktree removable.
+8. **Verification artefact (MANAGER.md §2c):** for command-based criteria, `docs/tasks/NNN-verify.sh` exists, is executable, and **you re-ran it yourself** — its real output matches the log. Then **mutation-test it**: break what each check claims to check and confirm the check reddens. A check that stays green while its subject is broken is a finding, however true its claim happens to be. Confirm it passes in a *fresh clone*, not only the authoring worktree.
+9. **No secrets** in diff, logs or command output.
+10. **English throughout.**
+11. **Cleanup ready:** branch merges cleanly onto current main; worktree removable.
