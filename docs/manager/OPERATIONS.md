@@ -69,8 +69,33 @@ demonstrated (settings load at session start), so treat the first refusal-free m
   the gate (non-zero on drift), `--lookup <topic>` returns matching ADRs. **Accepting an ADR or
   editing any header changes its INDEX entry**, so regenerate and commit the index in the same PR
   or `--check` fails on merge.
-- **`~/.claude/token-guard-check.sh`** — prints the binding usage window; UNKNOWN if the snapshot is
-  missing or older than 10 minutes, which the guard counts as above 90 %.
+- **`~/.claude/token-guard-check.sh`** — **DO NOT TRUST. Being retired (task 031).** It reads a file
+  every running session writes, so it under-reports. See the next section.
+
+## The two files that look authoritative and are not (2026-09-04)
+Both are the same defect: a shared file with no notion of *whose* numbers it holds.
+
+- **`~/.claude/usage-snapshot.json` is written by EVERY running session's statusline.** An idle
+  session rewrites its own frozen figures with an always-current `updated_at`. Observed:
+  `token-guard-check.sh` returning **84 %** five times and **58 %** on the sixth, seconds apart,
+  both claiming an age of one second. **The stale reading is systematically the lower one** — the
+  guard fails in the only direction that matters. The staleness rule cannot catch it because the
+  timestamp is always fresh. **Retired as a quota source** (Ludwig, 2026-09-04).
+  **Resampling is not a fix:** twelve *identical* samples once read `weekly 0 %` against a HUD
+  reading 40 %. Sampling detects divergence between writers, never one writer that is simply wrong.
+  Until task 031 lands: resample across 10 s, treat any variation as UNKNOWN, **and** treat any
+  figure contradicting Ludwig's stated one as UNKNOWN. His figures are authoritative (§8b.5).
+
+- **`~/.claude/plugins/claude-hud/context-cache/*.json` has the same problem for CONTEXT.** One
+  hash-named file per session, `session_name: null`, and eleven of them on this machine. **The one
+  belonging to the live session is the one whose `saved_at` is seconds old** — sort by age, do not
+  guess, and never take "the newest `used_percentage`" as yours without checking the age, because
+  stale siblings sit at plausible values (two read 48 % here, one of them 54 minutes old).
+  Task 023 replaces this with reading the figure from the session's own tmux pane, where it is
+  correct by construction.
+
+**The general lesson, worth more than either instance:** a file written by many and read by one
+cannot be made trustworthy by reading it more carefully. Fix the writer or change the source.
 
 ## Consequences of branch protection that bite later
 - **The publishing pipeline cannot push its write-back to `main`.** Task 008 must run on a branch of
