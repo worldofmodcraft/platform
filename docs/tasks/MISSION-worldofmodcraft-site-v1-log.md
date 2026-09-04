@@ -752,3 +752,49 @@ rather than anything about this contract. Nothing seen yet on 009, 023 or 025.
 | 2026-09-03 ~17:30Z | weekly 40 % | **Ludwig's HUD, authoritative** | resume, doctrine-safe work only |
 | 2026-09-04 20:03Z | 5h 15 %, wk 43 % | snapshot, 12 identical samples | continue |
 | 2026-09-04 20:2xZ | wk 0 %, later 1 % | snapshot — contradicts authoritative 40 % | treat as UNKNOWN; use Ludwig's figure |
+
+### Addendum — all three in-flight agents returned before the session closed
+
+The status above says three agents were running. They are not; each finished and committed. **All
+three branches are complete and awaiting review — none is merged.**
+
+| Branch | Repo | State |
+|---|---|---|
+| `task/023-supervisor` @ `06b260b` | platform | 113/113 harness checks; **needs re-review** |
+| `task/025-boundary-contracts` @ `08e0076` | registry | six contracts + README index; **needs review** |
+| `task/009-site-build` @ `f93be23` | site | the site builds; **needs review** |
+
+**Task 023.** The config contradiction is solved and the cause was the *renderer*, not Ludwig's
+config: `usage.js:91` has an undocumented branch that renders weekly unconditionally, threshold
+ignored, when `five_hour` is null — which reproduces his `Usage Weekly` line exactly. **It also
+falsified part of Ludwig's ruling, correctly:** a persistent probe session's percentages *freeze* at
+its last API response, so it would have reported "safe to resume" during the very halt it exists to
+end. The probe is therefore transient (start → read once → `/exit`), measured at **zero usage
+points**. The HUD config diff is **prepared and not applied**; preflight refuses to start without
+the key. **Booked for Ludwig:** `claude --settings` can scope the change to supervisor-created
+sessions only, leaving his global statusline untouched — verified working, deliberately not built
+because he chose the global key.
+
+**Task 025.** Six contracts, each with a recorded attack attempt. Three worth knowing: a signature
+reusable across identities unless the trusted comment cross-checks id and version; a near-miss
+`repository_dispatch` event type that **GitHub accepts and never routes, with no error anywhere**;
+and namespaces colliding with Windows reserved device names. It listed three things it could **not**
+verify against our own infrastructure (Pages/Jekyll behaviour, minisign's byte layout, Windows
+device-name matching) rather than asserting them.
+
+**Task 009.** Astro site building from fixtures only, Lighthouse **99** (real headless Chrome staged
+without root, recipe documented), Pagefind search, original dark design, deploy workflow.
+**The contract-first ordering paid off inside a single session:** E11 and E13 landed mid-run, and
+the agent rebuilt its archive reader to determine the tar root by inspection and enforce the
+path-escape rule over *every* entry, then added the `.nojekyll` file without which GitHub Pages
+silently serves the site with no CSS or JS. Manager-verified: four hostile-archive cases rejected
+including a negative control, no build-time fetch of any live repository, `dist/` untracked.
+
+**Open question booked by 009:** whether a missing `manifest.json` inside an archive should degrade
+only that mod's licence/type display (implemented) or be build-fatal. E11 does not cover that field.
+
+### Next session starts here
+1. Review and merge **025**, then **009** (it consumes 025's contracts), then **023**.
+2. **Task 032** needs Ludwig's decision before task 007's ownership half can start.
+3. Then **007**, whose spec is drafted in the session scratchpad and must be re-created on disk —
+   it carries task 006's malicious first-publish fixture as an acceptance criterion.
