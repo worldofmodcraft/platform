@@ -66,6 +66,20 @@ Four rules follow, each bought with a review round:
 4. **The script must be portable and deterministic**, and proven so somewhere other than the
    machine that wrote it — a fresh clone, not the authoring worktree. Task 006's script passed only
    where it was written, because committed bytecode happened to match that filesystem's mtimes.
+5. **A suite is judged by the breaking cases it contains, not the count it passes. Every fix round
+   adds the found break as a fixture *before* the fix** (Ludwig, 2026-09-05). Rule 2 says the
+   artefact must be *able* to fail; this rule says which failures it must contain, and when they
+   are written. A round that closes a finding and reports only a larger green total has destroyed
+   the evidence that the finding was ever real — the number went up, and nothing in the repository
+   remembers what went wrong. The fixture is written first and **shown failing**, then the fix is
+   made, then it is shown passing; a log that shows only the final green is not evidence.
+   Two consequences worth stating, because both have already been paid for here:
+   - **Keep the positive controls beside the breaking cases.** A suite that has only hostile
+     fixtures can reach a perfect score by rejecting everything, which is the same manufactured
+     confidence as a check that cannot fail. Task 023's parser suite is the reference shape: the
+     adversarial prose fixtures sit next to real statusline renderings that must still parse.
+   - **A fixture that would have passed against the broken code proves nothing.** Put the defect
+     back and watch the new fixture redden before believing it guards anything.
 
 **Scope:** this applies to command-based criteria. A task whose criteria are visual (a screenshot),
 external (a live CI run), or human (Ludwig's approval) records those as it always has — but it says
