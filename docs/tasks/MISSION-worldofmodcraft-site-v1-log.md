@@ -934,3 +934,133 @@ the same reasoning does not apply.
 | 2026-09-05 ~08:2xZ | 5h 28 % | 16 % | **Ludwig's HUD, authoritative** | continue; first corroboration of the snapshot since it was falsified |
 | 2026-09-05 ~08:5xZ | 5h 40 % | 23 % | snapshot | continue |
 | 2026-09-05 ~09:0xZ | **5h 55 %** | 24 % | **Ludwig's HUD, authoritative** | continue; **snapshot read 40 % — 15-point gap, unsafe direction.** Snapshot demoted to advisory (task 036) |
+
+## SESSION STATUS — 2026-09-05 (session 5)
+
+### THE SITE IS LIVE
+`worldofmodcraft.com` serves SITE-V1 over HTTPS. This is the mission's headline outcome and it
+happened this session, on Ludwig's GO once task 025 closed.
+
+```
+$ curl -sI https://worldofmodcraft.com
+HTTP/2 200
+server: GitHub.com
+
+$ curl -sI https://www.worldofmodcraft.com
+HTTP/2 301
+location: https://worldofmodcraft.com/
+
+$ curl -sI http://worldofmodcraft.com
+HTTP/1.1 301 Moved Permanently
+Location: https://worldofmodcraft.com/
+```
+
+**Nothing needed Ludwig's hands.** Both things he flagged in advance were non-issues *and were
+checked rather than assumed*: the Cloudflare proxy was already off (the apex resolves to GitHub's
+own four addresses, not Cloudflare's), and no CAA record exists to obstruct Let's Encrypt.
+
+All three of his booked verifications are demonstrated in `docs/tasks/037-pages-enablement.md`:
+Pages enabled with the custom domain; the **www → apex redirect observed before anything was
+claimed about it** (GitHub creates it itself, on both schemes, under one certificate whose SAN list
+carries both names); and one real in-browser Pagefind query against the *served* site
+(`lantern` → 4, `campfire` → 3, `zzzqqxnotpresent` → 0).
+
+**Standing caveat, so nobody mistakes this for more than it is:** the deployed site is built from
+the site repository's **fixtures**, not from real published mods. The deploy workflow's registry
+checkout and archive staging are still commented out pending their contracts. The site is live and
+correct; its *content* is fixture content.
+
+### Merged this session
+| Task | Repo | What it did |
+|---|---|---|
+| **037** Pages enablement (PR #27) | platform | The site serves. Five Pages gotchas added to OPERATIONS.md. |
+| **038** doctrine §2c rule 5 (PR #28) | platform | *A suite is judged by the breaking cases it contains, not the count it passes.* |
+
+### Open, pushed, awaiting review
+| Branch | Repo | State |
+|---|---|---|
+| `task/032-ownership-contract` (**PR #4**) | registry | `contracts/ownership.md`, filling edge E16. Manager-verified; **needs the independent adversarial review Ludwig ruled for contracts.** |
+| `task/034-schema-traversal` (**PR #5**) | registry | The `../` hole closed in both merged schemas. Manager-verified including an independently reproduced mutation test. **Needs a code review** (author ≠ reviewer). |
+| `task/023-supervisor` @ `cfb43ef` | platform | **BLOCKING after review round 3.** Fix brief written and dispatch-ready; not dispatched (usage). |
+
+### Ludwig's rulings this session, recorded
+1. **Pages enablement GO** — acted on; see above.
+2. **§5.4(e) defines the non-tmux case**: no sentinel outside tmux, the handover is complete at the
+   committed session status, and session 4's deliberate non-creation was the correct reading and is
+   the precedent. **Applied on `task/023-supervisor`, not on `main`** — §5.4(e) does not exist on
+   `main`; the sentinel clause is introduced by that branch. Task 038's file carries the receipt
+   with the `git grep` proving the absence, so the ruling cannot be lost between branches.
+3. **"The reviewer is never the author" for prose: yes for contracts, no for doctrine.** Contracts
+   are implementable text that other tasks build defences from — and the review chain has already
+   caught a fatal error in exactly that kind of document. Doctrine governs the manager, so Ludwig
+   is its reviewer. This settles the question left open as session 4's manager error 5.
+4. **Task 023 gets one more tightly-scoped fix round**, not a re-design and not a park.
+
+### The finding that outranks the mission this session
+**Task 023's reader takes the bottom-most *matching* line, not the bottom-most line.** A stale
+HUD-shaped line above an unparseable genuine statusline becomes the reading. The reviewer turned a
+pane showing **94 % five-hour / 91 % weekly** — a full halt — into `VERDICT=RESUME_OK`, using a
+decoy line **copied out of this repository's own `OPERATIONS.md`**.
+
+Three things make it the same class as the prose defect rather than a lesser cousin:
+1. **The genuine line is unparseable by default.** `showTokenBreakdown` defaults to `true` and
+   appends ` (in: …, cache: …)` once context passes 85 %. The real statusline stops matching the
+   grammar **exactly when the token guard matters most.** That key is not pinned.
+2. A second default-reachable route: with no rate limits supplied, the `Usage` element is absent
+   entirely — and the script's own preflight text claims that case reports UNKNOWN, which is false.
+3. **The poison is checked in** — fifteen committed documentation lines parse as confident
+   readings, and the managed session reads those files.
+
+Second blocking finding: **while a block is active the supervisor never polls the managed session
+at all**, so it goes blind during the halt it is enforcing.
+
+The pattern across three rounds is worth naming: each round closed the specific defect and left a
+*different instance of "the reader trusts something it should not"*. Round 3's brief is therefore
+written around a single invariant — the statusline is the bottom line or there is no reading —
+rather than another patch.
+
+### Manager errors this session, recorded because the ledger is worth nothing if it flatters
+1. **My first Pagefind harness never cleared its input.** The three queries concatenated into
+   `lanterncampfirezzzqqxnotpresent` and the negative control "passed" on stale results. This is the
+   fourth instance of the project's signature failure — a test that can only confirm what its
+   author already believes — and the second that was mine. Caught only because the counts were
+   identical across three supposedly different queries.
+2. **I read a 301 as a missing feature.** `curl` without `-L` against `/browse` returned an empty
+   redirect body, and I briefly concluded the served site had no search UI at all. It redirects to
+   `/browse/`.
+3. **A grep with the wrong terms produced a false negative against an agent's work.** I searched
+   032's contract for "unverified" and reported zero caveats; the caveat was there, worded "could
+   not be verified". Checking an agent's honesty with a check of my own that cannot fail correctly
+   is the same defect class as 1.
+4. **`gh api -f` sends strings.** `-f https_enforced=true` returned HTTP 422; the fix is `-F`. Minor,
+   but it is in OPERATIONS.md now so nobody re-runs the experiment.
+
+### Blocked on Ludwig
+- **Task 023's fix round** — ruled and briefed, not dispatched: usage stood at 79 %, eleven points
+  from the halt line, and a fix round would likely have been interrupted mid-run.
+- **Reviews for PRs #4 (032) and #5 (034)** — both need an agent, so both need usage headroom.
+- **M4** create `test/hello-world`; **task 011** hardware-key 2FA before the first non-test publish.
+- Offline backup of `~/wom-keys/worldofmodcraft.key` — his own list, still unconfirmed.
+
+### Next session starts here
+1. **Dispatch task 023's fix round** from the brief at the end of `docs/tasks/023-supervisor.md` —
+   it is complete, scoped, and names its out-of-scope items explicitly.
+2. **Review PR #4 (032 ownership contract)** with an adversarial reviewer, per ruling 3.
+3. **Review PR #5 (034 schema traversal)**, then merge both.
+4. **Task 007** (registry CI gates) — its ownership half unblocks the moment 032 merges. The spec
+   was drafted in session 3's scratchpad and **must be re-created on disk**; it carries task 006's
+   malicious first-publish fixture as an acceptance criterion.
+5. **008** pipeline + signing (M3 is done), then **010** test mod and runbook.
+
+### Checkpoint log
+| Time | Usage | Context | Source | Action |
+|---|---|---|---|---|
+| 2026-09-05 session 5 start | 5h **65 %** (resets in 3h 35m) | 4 % | Ludwig's HUD, authoritative | Below 90 % → continue. Weekly not stated; he ruled 65 % binding. |
+| after the Pages sitting | "comfortably under 80 %" | — | Ludwig, stated | → dispatch 023 review + 034 |
+| after both agents returned | 5h **79 %** (resets in 2h 37m) | **18 %** | Ludwig's HUD, authoritative | 11 points from the halt → **no further delegation**; records finished, session closed |
+
+**Note on the guard's operation this session:** between the second and third readings there was a
+window where Ludwig had chosen to supply a figure but had not yet sent it. That window was treated
+as *undetermined* and therefore as above 90 % — no agent was launched, and only non-delegating work
+(merges, verification, writing) continued until the figure arrived. This is the rule working as
+intended and is recorded as the precedent for how the gap is handled.
