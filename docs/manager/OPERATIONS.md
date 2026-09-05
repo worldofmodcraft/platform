@@ -116,6 +116,25 @@ Not the same thing, and conflating them wastes his time.
 - **Done and verified:** the org, both repos, Actions permissions, DNS (four A records + `www`
   CNAME, all unproxied), the signing keypair.
 
+## GitHub Pages, learned during enablement (task 037, 2026-09-05)
+- **A Pages settings change is not observable at the edge for up to ten minutes.** Responses carry
+  `cache-control: max-age=600`. Reading the API back confirms the **setting**; it never confirms the
+  **behaviour**. After enabling `https_enforced`, plain HTTP kept returning 200 for about eight
+  minutes. Poll the real URL before reporting anything as done.
+- **`gh api -f` sends every value as a string.** `-f https_enforced=true` is rejected with
+  `Invalid property /https_enforced: "true" is not of type boolean` (HTTP 422). Use **`-F`** for
+  booleans and numbers.
+- **Set the custom domain before judging the output.** With no CNAME configured, Pages serves at the
+  project-page subpath `https://<org>.github.io/<repo>/`, and a site built for a domain root (Astro
+  `site:` with no `base:`) has broken asset paths there. Setting the apex domain fixes it.
+- **Setting the CNAME flips `https_enforced` back to `false`** on its own, because the existing
+  certificate does not cover the new name. Re-enable it once the certificate has issued.
+- **GitHub creates the `www` → apex redirect itself** for an apex custom domain, on both schemes,
+  and the issued Let's Encrypt certificate carries both names in its SAN list — verified 2026-09-05,
+  not assumed. The plain-HTTP `www` path is a **two-hop** chain (www→apex over HTTP, then
+  HTTP→HTTPS), so one hop travels in clear text before the upgrade.
+
+
 ## Environment
 - Node is at `/home/ludwig/.local/node/bin/node` (userland install; on PATH via `~/.bashrc`, but use
   the absolute path in scripts that may run in a non-login shell).
