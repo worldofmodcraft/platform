@@ -18,6 +18,8 @@ applies to specs too).
 8. **Verification artefact declared** (MANAGER.md §2c): if any acceptance criterion is
    command-based, the spec names `docs/tasks/NNN-verify.sh` in the file scope and says the log
    pastes that script's output. If none are, the spec says so explicitly.
+   **If this task is a fix round, the spec names the break it closes and requires it as a fixture,
+   written and shown failing before the fix** (MANAGER.md §2c rule 5).
 9. **Core-surgeon only:** the covering survey document exists and is cited; if none, a survey
    task is created first.
 
