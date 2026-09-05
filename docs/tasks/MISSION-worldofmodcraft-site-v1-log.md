@@ -798,3 +798,139 @@ only that mod's licence/type display (implemented) or be build-fatal. E11 does n
 2. **Task 032** needs Ludwig's decision before task 007's ownership half can start.
 3. Then **007**, whose spec is drafted in the session scratchpad and must be re-created on disk —
    it carries task 006's malicious first-publish fixture as an acceptance criterion.
+
+---
+
+## THE REVIEW CHAIN PAID FOR ITSELF IN ONE FINDING — 2026-09-05
+
+Recorded at Ludwig's explicit instruction, prominently, because it is the clearest evidence the
+project has produced that the review chain is worth what it costs.
+
+**`contracts/signature-format.md` said the 16-hex `key_id` was the public key blob's 8 key-id bytes
+"in the same byte order they appear there". It is the reverse.**
+
+```
+our production public key blob : RWTEjHpqWTBbbijJKtpGHKoHPXdVAbOkQ+9498maEIr0Cjg5smB6Xd7z
+decoded bytes 2-9, encounter order : C48C7A6A59305B6E
+decoded bytes 2-9, reversed        : 6E5B30596A7A8CC4
+key_id in docs/architecture/key-management.md : 6E5B30596A7A8CC4
+```
+
+The same document's **rule 6** rejects a signature when `entry.json`'s `key_id` does not match the
+key id embedded in the signature blob "byte for byte". So **a verifier built from that text would
+have rejected every correctly signed artefact this platform ever produces** — not an edge case, not
+a subset: all of them, universally, from the first release onward.
+
+**The timing is the point.** This was found on the morning of **2026-09-05**, hours after M3 loaded
+`MINISIGN_SECRET_KEY` into the registry and unblocked **task 008**, which is the task that would
+have implemented exactly this verifier from exactly this text. The window between "the contract is
+wrong" and "the wrong contract is code" was hours wide, and the review chain closed it.
+
+**What actually found it.** Not a caveat, not careful reading, and not the manager: the round-2
+reviewer **installed minisign and ran it**, twice, with two independently generated keypairs. Round
+1 of the same review had read the same section and passed it. The manager then confirmed the
+relationship against the project's own production key. Round 2 also found, in the same pass, that
+`archive-layout.md` recommended `git archive` for producing archives that same document rejects as
+malformed — plain `git archive` emits no root directory at all. Both errors were falsifiable in
+under a minute with tools already installed on this machine.
+
+**What it cost:** three review rounds and two fix rounds on one documentation task.
+**What it bought:** task 008 does not ship a signature verifier that rejects every valid signature.
+
+The method lesson became doctrine the same day — MANAGER.md guardrail **6c** (task 036): *6b covers
+what you cannot check; it never substitutes for the sub-minute check you can.* A caveat where a
+command was available is not caution; it is a missing check wearing caution's clothes.
+
+## SESSION STATUS — 2026-09-05 (session 4)
+
+### Merged this session
+| Task | Repo | What it did |
+|---|---|---|
+| **033** worktree cleanup (PR #23) | platform | The two merged registry worktrees and branches removed. |
+| **035** guardrail 6b (PR #24) | platform | A contract's environmental claims carry their caveat inline. |
+| **032** graph edge E16 (PR #25) | platform | Ownership becomes a named edge with a contract; Ludwig ruled option A. |
+| **025** six boundary contracts (registry PR #3) | registry | E7/E9/E11/E12/E13/E14. Three review rounds, two fix rounds. |
+| **009** the site (site PR #1) | site | **`worldofmodcraft/site` has content for the first time.** |
+| **036** doctrine 6c + token-guard interim rule | platform | This branch. |
+
+### The other finding that outranks the mission: an exploit in the site build
+Task 009's review **proved**, rather than described, an arbitrary local file read that publishes to
+the public internet: `page.json`'s `screenshots[]` was validated only against a pattern forbidding a
+leading `/`, a URL scheme and backslashes — **not `../`** — and the value was joined onto a real
+filesystem path. The manager reproduced it independently on the original commit: `/etc/passwd`
+copied into `public/_generated/`, surviving into `dist/`, sha256 byte-identical to the real file.
+Per ADR-0059 §3 `page.json` publishes on a lighter gate than `entry.json`, so an accepted
+page-content PR was the whole attack.
+
+**The verifier was blind to it.** That same build printed `no local filesystem paths found in
+served HTML` and `dist/ satisfies every check` while the file sat in the tree — its leak scan looked
+for path *strings in HTML* and had no concept of a foreign *file*. Fixed with a magic-bytes check
+over the generated screenshot tree, mutation-tested by planting `/etc/passwd` directly and watching
+it redden.
+
+**Booked as task 034 and NOT yet done:** the same permissive pattern is in **merged** contracts —
+`page.schema.json` **and** `manifest.schema.json` on registry `main` both accept
+`../../../../etc/passwd` as a screenshot path. The site now defends itself; the contract does not.
+Scope is in the session scratchpad and must be re-created on disk. Do **not** widen it to the
+URL-shaped fields (`links[].url`, `source`, `source_url`, `source_archive`) — those are URLs, and
+the same reasoning does not apply.
+
+### In flight at session end
+- **Task 023 (supervisor)** — fix round running. Its review returned **BLOCKING** on the finding
+  that matters most: the split-layout reader **manufactures a confident wrong reading out of
+  ordinary prose**. Four lines of English about "the Context budget" and "API Usage" returned
+  `rc=0 ctx=40 five=12`. The pre-existing single-line parser has the same weakness and Ludwig pulled
+  it into scope. His ruling on the fix: **structural, not incremental** — a valid reading requires
+  the statusline's own visual signature (bar glyphs, exact HUD anchors), never the proximity of the
+  words "Context"/"Usage" to a percentage. **Prose must be unparseable by construction**; everything
+  else fails to UNKNOWN, and UNKNOWN halts. Two permanent regression fixtures required: the
+  reviewer's four-line reproduction, and Ludwig's own habitual `context 24 %, usage 55 %` format.
+
+### Blocked on Ludwig
+- **Pages enablement** — **structurally unblocked for the first time**: `site` has content. Gated on
+  task 025 closing (**done**) plus his explicit go. When it happens, that sitting also owes: the
+  **www → apex redirect** (he ruled: redirect), a **live verification of GitHub's actual www/apex
+  behaviour** rather than an assumption, and **one real in-browser Pagefind query** against the
+  normalised index — task 009's single residual gap, verified structurally but never in a browser.
+- **His standing request:** confirm to him when `www.worldofmodcraft.com` is up and running with
+  SITE-V1 — with real `curl -sI` output, never "it should be live now".
+- **M4** `test/hello-world`; **task 011** hardware-key 2FA before the first non-test publish.
+- **M3 is DONE** (2026-09-05 08:13Z, verified by `gh secret list`). Offline backup of
+  `~/wom-keys/worldofmodcraft.key` is on his own list, unconfirmed.
+
+### Manager errors this session, recorded because the ledger is worth nothing if it flatters
+1. **Two Context-selection misses on task 025** — ADR-0058 §3 and ADR-0040 §1 were relied on by
+   `artifact-naming.md` and never declared. Corrected retroactively and marked as such.
+2. **ADR-0120 missing from task 009's Context**, for the same reason: screenshots are copied
+   verbatim into public output on an unstated assumption that ingestion whitelisted them.
+3. **The 009 fix round was dispatched before Ludwig's instruction to reproduce first arrived** — the
+   messages crossed. Reported to him rather than quietly absorbed; he let it stand.
+4. **My first F1 reproduction attempt used eight `../` and landed at `/home/etc/passwd`** — a "not
+   found" warning that looks exactly like a successful rejection. `path.join` clamps excess `..` at
+   the filesystem root, so a counted payload can silently turn a real attack into a green test. The
+   fix round's regression fixture was told to use the clamping form for exactly this reason.
+5. **Three manager-authored doc tasks (033, 035, 032) were specified, executed and checked by the
+   manager with no independent reviewer.** Flagged to Ludwig rather than left implicit; he has not
+   yet said whether "the reviewer is never the author" should hold without exception for prose.
+
+### Booked, on disk nowhere else — re-create these
+- **Task 034** (registry): the schema traversal fix described above.
+- **Task 032's registry half**: `contracts/ownership.md`. **Spec-approved and fully specified** in
+  `docs/tasks/032-ownership-edge-contract.md`; the graph half is merged. Not dispatched only because
+  three agents were already running. **This is the next session's first dispatch.**
+- **The registry's `docs/tasks/done/` move is harder than it looks and was reverted.** Moving
+  `006-verify.sh` breaks its own self-check (it asserts `docs/tasks/006-verify.sh` is executable at
+  its lines 191-192), and `tools/validation/magic.py` and `tests/validation/test_scan_assets.py`
+  cite `docs/tasks/002-asset-scanner.md` in comments that would go stale. Needs a task, not a
+  `git mv`.
+- **The verification-artefact doctrine companion** Ludwig tied to task 023's fix round closing:
+  *"a suite is judged by the breaking cases it contains, not the count it passes; every fix round
+  adds the found break as a fixture before the fix."* Not written yet, deliberately.
+
+### Checkpoint log
+| Time | Usage | Context | Source | Action |
+|---|---|---|---|---|
+| 2026-09-05 08:02Z start | 5h 14 %, wk 3 % | 6 % | snapshot, 5 stable resamples | continue |
+| 2026-09-05 ~08:2xZ | 5h 28 % | 16 % | **Ludwig's HUD, authoritative** | continue; first corroboration of the snapshot since it was falsified |
+| 2026-09-05 ~08:5xZ | 5h 40 % | 23 % | snapshot | continue |
+| 2026-09-05 ~09:0xZ | **5h 55 %** | 24 % | **Ludwig's HUD, authoritative** | continue; **snapshot read 40 % — 15-point gap, unsafe direction.** Snapshot demoted to advisory (task 036) |
