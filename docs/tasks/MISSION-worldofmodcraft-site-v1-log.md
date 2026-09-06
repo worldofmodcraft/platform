@@ -1313,3 +1313,67 @@ behaviour for a different identity must state the permitted mechanism and forbid
   output, so nothing is lost; it is re-dispatched with a corrected brief.
 - Ludwig's standing rule, stated in session: **no agent touches auth tokens without an explicit
   task-file reason and his approval.** Written into doctrine as **task 042**.
+
+### Checkpoint — Ludwig's `/usage`, authoritative
+| Time | 5-hour | Weekly (all) | Weekly (Fable) | Action |
+|---|---|---|---|---|
+| 2026-09-06 ~14:4x local | **47 %** (resets 16:39) | **5 %** | **3 %** | binding = 5h 47 %; below 90 % → continue |
+
+### Ludwig's rulings, 2026-09-06 (session 6)
+1. **Incident handling approved in full** — the audit, the stop-audit-log response, and the manager
+   owning the brief defect that caused it.
+2. **PR #32 approved**, with one addition made before merge: **retry-after-denial gets its own
+   explicit line.** *"A denied action is information; an agent that re-attempts a blocked
+   credential or permission access is itself a reportable signal, logged, even when the retry also
+   fails."* The retry is the finding **independently of its outcome** — it says the denial was not
+   treated as an answer. Three retries was the tell. Now in `CLAUDE.md` rule 11 and `MANAGER.md`
+   guardrail 10; Ludwig merges as doctrine's reviewer.
+3. **Q1/Q2 scoping:** round 4 stays **harness containment only** (it is running; touching
+   `read_pane_metrics` would collide), and the multiple-match → UNKNOWN correction gets its **own
+   small round 5, immediately after**. Do not fold.
+4. **Both rounds ship their found defect as a committed regression fixture** — confirmed and
+   binding: *the harness writing to `~/.claude` must fail a test*, and *a doubled or ambiguous
+   signature must resolve to UNKNOWN in a test*. This is §2c rule 5 applied to both rounds by
+   explicit instruction, not by inference.
+5. **Task 031 is prioritised next**, the moment task 023's pane primitive lands. Agreed as
+   over-determined: the manager having no trustworthy self-service reader cost **three message
+   round-trips today and one near-miss**, and today's harness-poisoning finding showed the retired
+   file is writable from inside the repository. 031 retires the whole class.
+
+### ROUND 5 BRIEF — dispatch-ready, NOT dispatched (task 023)
+Written now so it cannot be lost between rounds; it moves into `docs/tasks/023-supervisor.md` once
+round 4's agent has finished appending to that file (both would append to the same file end, and
+MANAGER.md §6 sequences file overlap rather than parallelising it).
+
+**Scope: one change.** Ludwig's Q1 ruling is *stricter* than what fix round 3 implemented, and the
+difference is the whole round.
+
+- **Implemented in round 3:** the reading comes from the **bottom-most line that claims** to be a
+  statusline; anything above the bottom-most claim is never consulted.
+- **Ludwig's ruling:** *"a reading is valid ONLY when it matches the HUD statusline's structural
+  signature (bar glyphs / exact format anchors), wherever that line sits; everything else is
+  UNKNOWN; and if the signature appears more than once or is ambiguous, UNKNOWN. **Structure is the
+  anchor, not position.**"*
+
+**The delta: multiplicity must fail closed.** Round 3 resolves two matching signatures by taking the
+lower one. Ludwig's rule resolves them by refusing to read at all. That closes precisely the
+residual risk round 3 documented and could not close — *a session that renders no statusline while a
+HUD-shaped decoy sits inside the capture window becomes the reading*. Under the new rule that pane
+has one signature and no genuine line, or two signatures and no reading; either way a decoy can
+never be silently promoted to a reading.
+
+**Required regression fixture (Ludwig, explicit):** a pane carrying **two** parseable signatures
+must resolve to **UNKNOWN**, and it is written and **shown red against round 4's code** before the
+fix. Keep the positive controls: the real three-line HUD block under Claude Code's own footer must
+still read, and the single-signature panes must still parse. A suite that reaches UNKNOWN by
+refusing everything has the same defect as a check that cannot fail.
+
+**Also in scope, because the rule makes it reachable:** with position no longer deciding anything,
+`CAPTURE_TAIL_LINES` bounds *how much pane is searched for signatures*, which changes its meaning.
+State the new meaning at the code site and say what a larger window now costs (more chances of a
+second signature → more UNKNOWN → more halts, which is the safe direction and should be said out
+loud rather than discovered).
+
+**Out of scope — book, do not fix:** the adoption-path provenance gap, the remaining unpinned
+claude-hud keys, the dead `uint_ge`/`uint_lt` helpers, the narrow-pane wrap, and the absent
+`docs/tasks/023-verify.sh`. All already booked; a round that widens into them stops and reports.
