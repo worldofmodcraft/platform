@@ -88,7 +88,7 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
    verification on this project (OPERATIONS.md) — the codes exist so that cannot recur.
 3. **THE MALICIOUS FIRST-PUBLISH FIXTURE (required, permanent).** Task 006's `attacker:mod` entry —
    `absent → present`, four version objects — is in the suite, built from the same construction as
-   `docs/tasks/006-verify.sh` lines 210-262, and the append-only checker **rejects it**. The test
+   `docs/tasks/006-verify.sh` lines 210-264, and the append-only checker **rejects it**. The test
    asserts **which rule rejects which element**, not merely that it was rejected:
 
    | Element | Content | Must be rejected by |
