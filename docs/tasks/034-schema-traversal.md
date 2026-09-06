@@ -104,5 +104,6 @@ form and assert on the schema's verdict, not on whether a file was found.**
 - `contracts/manifest.schema.json`
 - the existing schema test suite (add fixtures; do not weaken existing ones — MANAGER.md §3.5)
 - `docs/tasks/034-schema-traversal.md` (the task log on that side)
+- `docs/tasks/034-verify.sh` (new, executable — added by the 2026-09-06 correction above)
 
 Anything else = stop and report.
