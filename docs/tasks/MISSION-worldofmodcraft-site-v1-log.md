@@ -1137,3 +1137,72 @@ rather than done.
    first-publish fixture as an acceptance criterion.
 
 All three of items 1-3 were dispatched in parallel after the checkpoint above.
+
+### HALT AT 12:2xZ — and the reason is a finding, not a quota
+
+**The token guard halted delegation.** The advisory snapshot read **5h 94 % / weekly 91 %**, stable
+across six samples over 10 s. Under the interim rule that is UNKNOWN — it contradicts Ludwig's
+authoritative weekly **2 %** stated 45 minutes earlier — and UNKNOWN counts as above 90 %. Either
+reading gives the same verdict, so delegation stopped and Ludwig was asked for the figure. The two
+agents already running were left to finish their sub-step and write their logs, per rule 0.
+
+**Then the cause was established rather than guessed** (guardrail 7):
+
+```
+$ tmux list-sessions
+wom-repro-b1:  1 windows (created Sun Sep  6 12:20:51 2026)
+wom-repro-b1p: 1 windows (created Sun Sep  6 12:20:52 2026)
+wom-repro-b2:  1 windows (created Sun Sep  6 11:59:15 2026)
+
+$ pgrep -af claude | cut -c1-120
+1256790 bash /tmp/.../scratchpad/hudrepro/bin/claude          <-- a shimmed claude binary
+
+snapshot updated_at = 2026-09-06T10:20:14.308Z  =  12:20:14 local (UTC+2)
+```
+
+**The snapshot was overwritten by task 023's own reproduction harness**, seconds before those
+sessions were created. That fix round is under instruction to prove its fix against *a real ≥85 %
+rendering*, so it is deliberately staging a high-usage statusline — and **94 % / 91 % are the
+fixture's values, not Ludwig's quota.**
+
+**Why this is worth more than the incident.** `~/.claude/usage-snapshot.json` was retired as a quota
+source on 2026-09-04 because many writers share it. This is the first time the project has watched a
+**fixture** become one of those writers, and it lands on the exact seam the whole session is about:
+
+- Halting on a synthetic 94 % is the **safe** direction, and it is what happened.
+- The same mechanism can write a **low** number just as easily, and that would **lift a real halt**.
+  A test that stages `Usage 1 %` to prove the parser accepts a healthy line writes `1 %` into the
+  file the guard reads.
+- So the file is not merely unreliable; under this project's own test suite it is **adversarially
+  controllable from inside the repository**. That is the same shape as review round 3's B1 finding
+  on task 023 — *the poison is checked in* — arriving independently, in a different mechanism, on
+  the same day.
+
+**Consequences, recorded now so they are not rediscovered:**
+1. **Task 031 gains a requirement:** the reader must be immune to writers that are not the measured
+   session. Pane-reading (task 023's primitive) satisfies this by construction; a file-based reader
+   never can, and this incident is the proof, not the argument.
+2. **The retirement of the snapshot was correct and is now over-determined.** Nobody resurrects it.
+3. **Usage remains genuinely UNKNOWN**, because the only reader available to the manager is
+   contaminated. Ludwig's figure is the resolution, exactly as rule 0 says.
+
+| Time | Usage | Context | Source | Action |
+|---|---|---|---|---|
+| 2026-09-06 ~12:07 local | 5h 25 %, wk 2 % | — | snapshot, **advisory**, 6 stable samples; weekly corroborates Ludwig | continue |
+| 2026-09-06 ~12:2x local | 5h **94 %**, wk **91 %** | — | snapshot — **poisoned by task 023's test harness, proven above** | **UNKNOWN → halt delegation, ask Ludwig** |
+
+### Merged during the halt (non-delegating work only, session 5's precedent)
+**Registry PR #5 — task 034**, the `../` traversal hole closed in both merged schemas.
+Review passed on substance (the reviewer could not break the pattern with any payload, reproduced
+the mutation test, and ran a fresh clone); both blocking items were process, and the fix round
+closed them. **The manager re-ran `docs/tasks/034-verify.sh` — 36/36 PASS — and then independently
+mutation-tested it**, restoring the pre-fix permissive pattern and watching it redden:
+
+```
+EXIT=1
+FAIL  C1.2 page.schema.json did not reject all traversal paths (exit 1, or the 'ok' line was not found)
+FAIL  C5.12 the real worktree's ScreenshotTraversalTests did not pass after the mutation test (exit 1)
+--- restored, tree clean ---
+```
+
+Merged as `b725b5d`; worktree removed. **Task 034 is done.**
