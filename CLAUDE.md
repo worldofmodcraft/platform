@@ -63,6 +63,19 @@ exact commands rather than referencing earlier ones, and never assume he saw som
     context, wrap up, write the log, end the run (applies to you too — write session status
     before it's needed).
 
+11. **Credentials are never touched without a task-file reason and Ludwig's approval**
+    (Ludwig, 2026-09-06). No agent — and not the manager — reads, prints, copies or uses an
+    authentication token, secret or private key unless a **spec-approved task file states why it is
+    needed** and **Ludwig has approved it in session**. `gh auth token`, `--show-token`, reading
+    `~/.config/gh/hosts.yml` or `~/.claude` credential state, and every equivalent are covered.
+    - **A denial is information; a blocked credential access is never retried.**
+    - When a task needs to reproduce behaviour **for a different identity**, the brief names the
+      permitted mechanism — an unauthenticated request, a fixture, a recorded response — and
+      forbids the rest. Naming the problem without naming the permitted means is a specification
+      defect, and it is what caused the 2026-09-06 incident.
+    - **Response to a violation: stop the agent, audit, log.** Not a session halt. A credential
+      *actually exposed in output* remains an absolute stop condition (MANAGER.md §8).
+
 ## Environment
 Read `docs/dev-environment.md` for how WSL (where you run) and Windows (where the client
 builds/runs) cooperate — network, process invocation, filesystems, and what needs Ludwig's eyes.
