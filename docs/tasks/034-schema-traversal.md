@@ -36,6 +36,35 @@ contracts/manifest.schema.json  properties.screenshots.items.pattern
 `source_url`, `source_archive`. **Those are URLs, and the same reasoning does not apply.** A task
 that wants to touch them stops and reports (MANAGER.md §3.3).
 
+## Context (ADRs and contracts) — **added 2026-09-06, correction after review**
+**This section did not exist when the task was approved.** SPEC-CHECKLIST item 4 requires it and
+the manager's spec gate did not catch its absence; the review of PR #5 found the consequence.
+Recorded as a **manager error**, not folded in silently (REVIEW-CHECKLIST item 4(b): a selection
+miss is reported as a manager error and blocks until the context is corrected and re-verified).
+
+- **ADR-0059** §1 (page content is read from the *archived* source, so a screenshot value is a path
+  into a tarball) and §3 (`page.json` publishes on a deliberately lighter gate — the asymmetry the
+  proven exploit used).
+- **ADR-0030** — **the omission the review found.** It governs the manifest's `screenshots` field,
+  which is exactly what `contracts/manifest.schema.json`'s changed pattern validates. This
+  repository's own precedent cites it for that field repeatedly: `docs/contracts/README.md` lines 20
+  and 24, `docs/tasks/025-boundary-contracts.md`, `docs/tasks/006-contracts.md`, and ADR-0059's own
+  `Related` header. Re-verified against the diff: the change only *tightens* the pattern and leaves
+  the field's existence and meaning untouched, so it conforms — but it had to be checked, not
+  assumed.
+- **ADR-0120** (content whitelisting, not container framing) — listed because it is what the
+  *content* of a screenshot would be checked against. This task checks the **path** only; scanning
+  the file the path resolves to is task **040**, blocked until an archive exists (task 008).
+- **Contracts:** `contracts/page.schema.json`, `contracts/manifest.schema.json`,
+  `contracts/archive-layout.md` (the `../`/absolute-path/symlink escape rule over every archive
+  entry — the same defence, one layer further in).
+
+## Verification artefact (MANAGER.md §2c) — **added 2026-09-06, correction after review**
+Also absent at approval, and also a spec-gate miss. Every acceptance criterion below is
+command-based, so **`docs/tasks/034-verify.sh`** is required, executable, mutation-tested, proven in
+a fresh clone, and the log pastes **its** output. It is in the file scope from this correction
+onward.
+
 ## Acceptance criteria
 Each demonstrated by a command with **real** output in the task log.
 
@@ -75,5 +104,6 @@ form and assert on the schema's verdict, not on whether a file was found.**
 - `contracts/manifest.schema.json`
 - the existing schema test suite (add fixtures; do not weaken existing ones — MANAGER.md §3.5)
 - `docs/tasks/034-schema-traversal.md` (the task log on that side)
+- `docs/tasks/034-verify.sh` (new, executable — added by the 2026-09-06 correction above)
 
 Anything else = stop and report.
