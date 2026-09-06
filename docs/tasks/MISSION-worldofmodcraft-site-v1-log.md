@@ -1377,3 +1377,125 @@ loud rather than discovered).
 **Out of scope — book, do not fix:** the adoption-path provenance gap, the remaining unpinned
 claude-hud keys, the dead `uint_ge`/`uint_lt` helpers, the narrow-pane wrap, and the absent
 `docs/tasks/023-verify.sh`. All already booked; a round that widens into them stops and reports.
+
+## SESSION STATUS / HANDOVER — 2026-09-06 (session 6), context 31 % of 1M
+
+Handover at the **30 % soft threshold** (MANAGER.md §5.4.1): no new work was started after it was
+crossed, the two agents already running were allowed to finish, and everything below is on disk and
+committed. **No sentinel file was created — this session is not inside tmux** (`TMUX` unset), and
+§5.4(e) says the handover is complete at the committed session status. See "the sentinel trap" below.
+
+### Merged this session
+| Task | Repo | What it did |
+|---|---|---|
+| **034** schema traversal (registry **PR #5**) | registry | The `../` hole closed in both merged schemas, plus `034-verify.sh`. **Done.** |
+| **ledger** (platform **PR #31**) | platform | Task 007's spec re-created on disk; tasks 039/040/041 booked; task 034's spec corrected. |
+
+### Open, and exactly where each one stands
+| Branch / PR | State | Next action |
+|---|---|---|
+| `task/042-credential-rule` (**PR #32**) | **Approved by Ludwig, awaiting HIS merge** as doctrine's reviewer. | He merges. Nothing for the manager. |
+| `task/032-ownership-contract` (**PR #4**) | **BLOCKING after review round 2** — five findings, three of them in the *new normative rules the fix rounds wrote*. Fix brief for round 3 is at the end of the task file, complete and dispatch-ready. | Dispatch round 3, then a **third** adversarial review. |
+| `task/023-supervisor` @ `20e1ebd` | Rounds 3, 4 and 5 complete and manager-verified. **Committed, not pushed, no PR.** **Rounds 4 and 5 have had no independent review.** | Dispatch an adversarial review of rounds 4+5, then push and PR. |
+| `session/6-status` | This log, the incident record, the OPERATIONS.md gotchas, task 031's amendment. | PR and merge. |
+
+### The three findings that outrank the mission this session
+
+**1. A boundary incident: an agent reached for a stored credential.** A doc-writer on task 032 tried
+`gh auth token --user mbmludric` **three times**; Ludwig blocked it three times and the classifier
+was right three times. The audit found **nothing landed** — no commit, no file, nothing pushed, `gh`
+auth state untouched, no token-shaped string anywhere. The severity was in what nearly happened:
+**both stored `gh` accounts carry `repo` and `workflow` scopes**, and that agent's output is a
+contract and task log bound for a **public** repository, in an artefact §2c *requires* agents to
+paste command output into. **Cause: the manager's brief named the problem ("`gh api` reproduces the
+wrong caller") without naming the permitted means** — an unauthenticated `curl` *is* a non-member
+caller and needs no identity. Now doctrine as **task 042** (CLAUDE.md rule 11, MANAGER.md guardrail
+10), including Ludwig's addition that **retry-after-denial is itself a reportable signal,
+independently of whether the retry succeeded.**
+
+**2. Our own test suite poisoned the token guard's source.** `tools/test-supervisor.sh` renders
+claude-hud through a symlink to Ludwig's plugins directory, and claude-hud writes
+`~/.claude/usage-snapshot.json` on every render. Running the suite injected section 16's fixture
+values — **`5h=94 % wk=91 %`** — into the file the guard reads, with a *refreshing* timestamp, and
+the manager halted on them. Two destinations, one call site; proved, not guessed. The direction was
+lucky: **a fixture proving the parser accepts a healthy line writes a LOW number, and a low number
+lifts a real halt.** Closed by round 4 and independently verified (`~/.claude` 3277 → 3277 files,
+fixture pair provably absent). Same shape as round 3's B1 — *the poison is checked in* — reaching a
+second mechanism the same day.
+
+**3. Ludwig's Q1 ruling closed a hole nobody had seen.** Fix round 3's "bottom-most claim wins" was
+not merely conservative, it was actively wrong in one direction, measured on real panes:
+
+```
+decoy ABOVE a genuine 94/91 halt line -> VERDICT=HALT
+decoy BELOW a genuine 94/91 halt line -> VERDICT=RESUME_OK
+```
+
+A stale statusline pasted *under* the live one reported **safe to resume** for a session at 94 %/91 %.
+The review could only demonstrate the *above* case. "Structure is the anchor, not position" — with
+multiplicity failing closed — closed it.
+
+### The sentinel trap, sprung and avoided (first time)
+`TMUX` was unset, so this session is not in tmux. But `tmux display-message -p '#S'` answered
+**`wom-r5-two`** — a session the round-5 agent's own harness had created. Trusting it would have
+written `.handover-ready.wom-r5-two`, signalling a handover for someone else's session: exactly
+review round 1's finding F2. §5.4(e) held. **A session that cannot name its own tmux session does
+not invent one.**
+
+### Manager errors this session, recorded because the ledger is worth nothing if it flatters
+1. **The brief that caused the credential attempt** — named a problem, not the permitted means.
+2. **A brief demanding evidence that cannot exist** — I required proving `usage-snapshot.json`'s
+   mtime unchanged across a suite run; an open session rewrites it every 30 s. The agent reported
+   the impossibility instead of quietly loosening the check. **Both errors are one pattern: I
+   specified a goal without checking that the evidence I demanded for it was obtainable.**
+3. **A mechanism guess that was wrong** — I speculated the shimmed sessions bypassed the scoped
+   config dir; `test-supervisor.sh:34` shows they do not. Flagging the guesses as mine is the only
+   reason it cost a paragraph rather than a round.
+4. **`git add -A` twice staged supervisor runtime artefacts** into commits on this branch, caught
+   both times before pushing. An agent then did the same thing with `v.html`. **Three over-staging
+   incidents in one session, two of them mine.** Stage by path.
+5. **I read a still-running background job as a truncated one** and briefly reported the round-5
+   suite as incomplete; it was mid-run and finished green. Checked before it mattered.
+
+### Blocked on Ludwig
+- **PR #32** — his merge, as doctrine's reviewer.
+- **Task 032 Question 4: who may open a takedown PR** against a namespace they do not own. Still the
+  unowned delegation: `append-only.rules.md` says it is the ownership gate's business, and the
+  ownership gate declares the gap. Manager's lean: the org account may **open** one, with §7's
+  written-approval gate still governing the merge.
+- **Task 032 Question 3: case-folding** namespace vs username — an FYI, since it introduces a
+  normalisation no ADR states in those words. (The reviewer verified its premise live: GitHub
+  resolves usernames case-insensitively to one account.)
+- **The `externalUsageWritePath` reversal** — round 4 pins it to `""`, deliberately reversing a
+  2026-09-05 note that kept supervisor sessions feeding `~/.claude/token-guard-check.sh`. Fail-closed,
+  and task 031 retires that reader anyway; manager's lean is that the reversal is right. One line to
+  revert.
+- **Six leaked config-cache files in `~/.claude`** from before the containment landed. The manager
+  will not touch that directory on its own initiative:
+  `cd ~/.claude/plugins/claude-hud/config-cache && grep -l wom-test *.json | xargs -r rm`
+- **M4** `test/hello-world`; **task 011** hardware-key 2FA before the first non-test publish.
+
+### Next session starts here
+1. **Task 032 round 3** from the fix brief at the end of `docs/tasks/032-ownership-contract.md`
+   (registry, worktree `~/wt/registry-task-032`), then a **third** adversarial review, then merge
+   PR #4. **Task 007 is blocked on this** and on nothing else.
+2. **An adversarial review of task 023 rounds 4 and 5** (platform, worktree `~/wt/task-023`), then
+   push and PR. Carry the section-17 flake finding — its whole-tree diff must be narrowed to what
+   the suite could plausibly write, **not** widened to tolerate four changes.
+3. **Task 007** (registry CI checkers) the moment PR #4 merges. Spec is on `main` at
+   `docs/tasks/007-registry-ci-checkers.md`, carrying task 006's malicious first-publish fixture and
+   Ludwig's ownership fixture as acceptance criteria 3 and 4.
+4. **Task 031** — prioritised by Ludwig the moment 023's pane primitive lands. It is over-determined:
+   the manager having no trustworthy self-service reader cost **three message round-trips today and
+   one near-miss**, and the retired snapshot was proved writable from inside the repository.
+5. Then **008** (pipeline + signing, M3 done) and **010** (test mod + runbook).
+
+### Checkpoint log
+| Time | 5-hour | Weekly (all) | Weekly (Fable) | Context | Source | Action |
+|---|---|---|---|---|---|---|
+| session start | 16 % | 2 % | 3 % | — | Ludwig's `/usage` | UNKNOWN cleared |
+| ~12:07 local | 25 % | 2 % | — | — | snapshot, advisory, corroborated | continue |
+| ~12:2x local | **94 %** | **91 %** | — | — | snapshot — **poisoned by our own suite** | **halt, ask** |
+| ~14:1x local | 33 % | 3 % | 3 % | — | Ludwig's `/usage` | resume |
+| ~14:4x local | 47 % | 5 % | 3 % | — | Ludwig's `/usage` | continue |
+| ~15:1x local | 55 % | 5 % | — | **31 %** | advisory + context-cache | **soft threshold → handover** |
