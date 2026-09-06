@@ -68,7 +68,10 @@ exact commands rather than referencing earlier ones, and never assume he saw som
     authentication token, secret or private key unless a **spec-approved task file states why it is
     needed** and **Ludwig has approved it in session**. `gh auth token`, `--show-token`, reading
     `~/.config/gh/hosts.yml` or `~/.claude` credential state, and every equivalent are covered.
-    - **A denial is information; a blocked credential access is never retried.**
+    - **A denied action is information.** An agent that **re-attempts a blocked credential or
+      permission access is itself a reportable signal** — logged, every time, **even when the retry
+      also fails.** The retry is the finding, independently of whether it succeeded: it says the
+      agent did not treat the denial as an answer. Three retries was the tell on 2026-09-06.
     - When a task needs to reproduce behaviour **for a different identity**, the brief names the
       permitted mechanism — an unauthenticated request, a fixture, a recorded response — and
       forbids the rest. Naming the problem without naming the permitted means is a specification
