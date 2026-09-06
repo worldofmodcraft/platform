@@ -1064,3 +1064,76 @@ window where Ludwig had chosen to supply a figure but had not yet sent it. That 
 as *undetermined* and therefore as above 90 % — no agent was launched, and only non-delegating work
 (merges, verification, writing) continued until the figure arrived. This is the rule working as
 intended and is recorded as the precedent for how the gap is handled.
+
+---
+
+## SESSION 6 — 2026-09-06 (opening entry, written at the top of the session)
+
+Written before any delegation, per Ludwig's instruction, so the day's opening checkpoint and the
+two bookkeeping rulings are on disk before anything can consume them.
+
+### Opening token-guard checkpoint — UNKNOWN cleared
+Figures from Ludwig's `/usage`, stated in session and therefore authoritative (MANAGER.md §8b.5).
+The session woke in UNKNOWN state, which under CLAUDE.md rule 0 counts as above 90 %; these
+readings are what lifted it.
+
+| Time | Window | Reading | Source | Action |
+|---|---|---|---|---|
+| 2026-09-06 session start | 5-hour | **16 %** (resets 16:39 Europe/Stockholm) | Ludwig's `/usage`, authoritative | below 90 % |
+| 2026-09-06 session start | weekly, all models | **2 %** | Ludwig's `/usage`, authoritative | below 90 % |
+| 2026-09-06 session start | weekly, Fable | **3 %** | Ludwig's `/usage`, authoritative | below 90 % |
+| 2026-09-06 session start | context (manager) | 21 % | Ludwig's HUD | below the 30 % soft threshold |
+
+**Binding window: the most constrained of the three, which is the Fable weekly at 3 %.** Every
+window is far below the halt line, so work proceeds at normal delegation pace. Ludwig also notes a
+**+50 % weekly-limits promotion active through 2026-09-13**; recorded because it explains generous
+weekly headroom this week, and because it expires — the figures are read as reported percentages,
+so the guard's thresholds are unaffected in form, but a week from now the same absolute work will
+report a larger percentage.
+
+### Bookkeeping 1 (Ludwig) — an idle session wakes in UNKNOWN, and that is the morning ritual
+**The HUD's usage line only renders while a session is actively running.** A session left idle
+overnight therefore wakes with no usage reading at all, and CLAUDE.md rule 0 counts undetermined
+usage as above 90 % — so the first act of every morning is necessarily a halt that has to be
+lifted.
+
+**The ritual, ruled by Ludwig:** he runs `/usage` (or sends his HUD line) and reports the figures;
+the manager treats that as **the day's opening checkpoint** and proceeds. Nothing is dispatched
+before it arrives. This is not a workaround for a defect — it is the intended operation of the rule
+for a session that has been idle, and it is the same shape as session 5's precedent, where the
+window between "Ludwig has chosen to supply a figure" and "the figure has arrived" was treated as
+undetermined and no agent was launched.
+
+**Destination: `docs/manager/OPERATIONS.md`**, where it is written up as its own section this
+session. Recorded here as well because the mission log is what a fresh session reads first.
+
+### Bookkeeping 2 (Ludwig) — `/usage` distinguishes THREE windows; task 031 must specify all of them
+The token guard as written in CLAUDE.md rule 0 and MANAGER.md §8 speaks of "5-hour **or** weekly,
+whichever is more constrained" — **two** windows. `/usage` actually reports **three**:
+
+1. the **5-hour** session window,
+2. the **weekly, all models** window,
+3. the **weekly, model-specific** window (Fable today).
+
+**Ludwig's ruling:** the halt/resume logic must be specified against **all binding windows —
+whichever is most constrained governs**. Same principle as today, but three-way, and written so it
+does not have to be rediscovered when a fourth window appears. Applied immediately in this
+session's opening checkpoint above, which reads all three.
+
+**Destination: task 031** (`docs/tasks/031-manager-checkpoint-reader.md`), the task that replaces
+the manager's usage reader; the requirement is written into its acceptance criteria this session.
+Whether CLAUDE.md rule 0 and MANAGER.md §8 should be reworded from "5-hour or weekly" to the
+general form is a **doctrine change and therefore Ludwig's**; it is booked under `## For Ludwig`
+rather than done.
+
+### Session plan
+1. Task 023 fix round, dispatched from the round-3 brief — tightly scoped per Ludwig's ruling, with
+   the decoy-above-unparseable-line reproduction and the `showTokenBreakdown` ≥85 % format shift
+   required as permanent regression fixtures.
+2. Registry **PR #4** (task 032, ownership contract) — adversarial review, per the ruling that
+   contracts get one.
+3. Registry **PR #5** (task 034, schema traversal) — code review; merge both on green.
+4. Task **007** (registry CI gates): its spec is re-created on disk, carrying task 006's malicious
+   first-publish fixture as an acceptance criterion.
+
+All three of items 1-3 were dispatched in parallel after the checkpoint above.
