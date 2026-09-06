@@ -97,6 +97,25 @@ Both are the same defect: a shared file with no notion of *whose* numbers it hol
 **The general lesson, worth more than either instance:** a file written by many and read by one
 cannot be made trustworthy by reading it more carefully. Fix the writer or change the source.
 
+## The morning ritual: an idle session wakes in UNKNOWN (2026-09-06)
+**claude-hud's usage line only renders while a session is actively running.** Claude Code supplies
+the rate-limit figures in the statusline payload; a session that has sat idle overnight has no
+current payload, so the usage element simply is not there. There is no file to fall back to — the
+one that looked like one is retired two sections above.
+
+Consequently **every morning session starts in UNKNOWN, and CLAUDE.md rule 0 counts undetermined
+usage as above 90 %.** That is not a malfunction to route around; it is the rule operating
+correctly on a session that genuinely does not know its own quota.
+
+**The ritual (Ludwig, 2026-09-06):** he runs `/usage` — or sends his HUD line — and reports the
+figures. The manager logs them as **the day's opening checkpoint** and proceeds. Nothing is
+dispatched before they arrive; only non-delegating work (reading, merges, verification, writing)
+happens in the gap. Session 5 set the precedent for that gap and it held.
+
+**`/usage` reports THREE windows, not two:** 5-hour, weekly all-models, and weekly model-specific.
+Log all three. The binding one is whichever is most constrained (Ludwig, 2026-09-06) — see task
+031, whose acceptance criteria now carry it.
+
 ## Consequences of branch protection that bite later
 - **The publishing pipeline cannot push its write-back to `main`.** Task 008 must run on a branch of
   the *same* repository — where repository secrets are available, unlike a fork PR — push
@@ -134,6 +153,30 @@ Not the same thing, and conflating them wastes his time.
   not assumed. The plain-HTTP `www` path is a **two-hop** chain (www→apex over HTTP, then
   HTTP→HTTPS), so one hop travels in clear text before the upgrade.
 
+
+## Three things this session paid for (2026-09-06)
+
+### `gh pr merge` must be run as a BARE command, never chained
+Chaining it trips the auto-mode classifier. Observed twice: `gh pr checks 31 … ; gh pr merge 31 …`
+was refused with *"Blocked by classifier"*; the identical `gh pr merge 31 …` alone succeeded
+immediately. This confirms the note above that the refusal comes from the classifier rather than
+from a permission rule — **the fix is to stop chaining, not to widen a permission.**
+
+### ANY open Claude Code session writes into `~/.claude` — files appear and disappear, not just values
+Round 4 of task 023 established that an open session rewrites `usage-snapshot.json` every 30 s (a
+claude-hud throttle), plus `projects/*.jsonl` and `context-cache/*`. Round 5's verification found
+the rest of it: the session also **creates and removes** files, e.g. rotating
+`backups/.claude.json.backup.<epoch>`. Any check that diffs that tree for *existence* therefore
+fails whenever a session is open, which — when the manager runs it — is always.
+**Consequence for anything asserting "we wrote nothing there":** assert on what your process could
+plausibly have written (a sandbox marker, a fixture value), never on whole-tree equality.
+
+### Verify-script scope pins rot at merge — `006-verify.sh` is red on `main` today
+`docs/tasks/NNN-verify.sh` scope checks that pin a baseline commit (`git diff --name-only <BASE>..`)
+go permanently red once the branch merges and `main` moves. Confirmed on registry `main`:
+`docs/tasks/006-verify.sh` exits 2 on `C9.4`/`C9.6`. Task 032's pin has already had to move once
+within its own task. **A merge-base-relative scope check survives; a pinned one does not.** Worth a
+doctrine note, not just a per-task fix.
 
 ## Environment
 - Node is at `/home/ludwig/.local/node/bin/node` (userland install; on PATH via `~/.bashrc`, but use
