@@ -97,6 +97,25 @@ Both are the same defect: a shared file with no notion of *whose* numbers it hol
 **The general lesson, worth more than either instance:** a file written by many and read by one
 cannot be made trustworthy by reading it more carefully. Fix the writer or change the source.
 
+## The morning ritual: an idle session wakes in UNKNOWN (2026-09-06)
+**claude-hud's usage line only renders while a session is actively running.** Claude Code supplies
+the rate-limit figures in the statusline payload; a session that has sat idle overnight has no
+current payload, so the usage element simply is not there. There is no file to fall back to — the
+one that looked like one is retired two sections above.
+
+Consequently **every morning session starts in UNKNOWN, and CLAUDE.md rule 0 counts undetermined
+usage as above 90 %.** That is not a malfunction to route around; it is the rule operating
+correctly on a session that genuinely does not know its own quota.
+
+**The ritual (Ludwig, 2026-09-06):** he runs `/usage` — or sends his HUD line — and reports the
+figures. The manager logs them as **the day's opening checkpoint** and proceeds. Nothing is
+dispatched before they arrive; only non-delegating work (reading, merges, verification, writing)
+happens in the gap. Session 5 set the precedent for that gap and it held.
+
+**`/usage` reports THREE windows, not two:** 5-hour, weekly all-models, and weekly model-specific.
+Log all three. The binding one is whichever is most constrained (Ludwig, 2026-09-06) — see task
+031, whose acceptance criteria now carry it.
+
 ## Consequences of branch protection that bite later
 - **The publishing pipeline cannot push its write-back to `main`.** Task 008 must run on a branch of
   the *same* repository — where repository secrets are available, unlike a fork PR — push

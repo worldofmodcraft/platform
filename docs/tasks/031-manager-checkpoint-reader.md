@@ -50,7 +50,15 @@ what happens in that case rather than silently returning something.
 4. Unknown is a stop, per CLAUDE.md rule 0 — demonstrated, not asserted.
 5. `OPERATIONS.md` replaces the `token-guard-check.sh` row with this tool, and states plainly that
    the old reader was wrong in the under-reporting direction, so nobody resurrects it.
-6. Ships `docs/tasks/031-verify.sh` per MANAGER.md §2c, mutation-tested.
+6. **It reads all THREE windows `/usage` reports and halts on the most constrained.** `/usage`
+   distinguishes the **5-hour** window, the **weekly all-models** window and the **weekly
+   model-specific** window (Fable, today). CLAUDE.md rule 0 and MANAGER.md §8 are worded for two
+   ("5-hour or weekly"); the reader is specified for all binding windows, whichever is most
+   constrained governing, and written generally enough that a fourth window does not require a
+   redesign. **A window the reader cannot see is UNKNOWN, and UNKNOWN halts** — it never reports
+   the minimum of the windows it happened to find. Demonstrated with a fixture per window, plus one
+   where a window is missing.
+7. Ships `docs/tasks/031-verify.sh` per MANAGER.md §2c, mutation-tested.
 
 ## Forbidden here
 - Reading `~/.claude/usage-snapshot.json` for a quota figure. It is retired as a quota source
@@ -62,3 +70,25 @@ what happens in that case rather than silently returning something.
 Every manager checkpoint resamples across 10 s and treats any variation as UNKNOWN — **and** treats
 a figure contradicting Ludwig's stated one as UNKNOWN, since the 2026-09-04 observation shows
 sampling alone is insufficient. Ludwig's stated figures are authoritative (MANAGER.md §8b.5).
+
+## Amendment, 2026-09-06 (Ludwig's ruling, session 6)
+Acceptance criterion 6 above is new: **the guard's halt/resume logic must be specified against all
+three windows `/usage` reports**, not the two the doctrine text names. Same principle as has been
+applied all along — whichever window is most constrained governs — but three-way, and stated so
+that it does not have to be rediscovered.
+
+Two consequences worth stating here rather than leaving to the implementer:
+- **Rewording CLAUDE.md rule 0 and MANAGER.md §8** from "5-hour or weekly" to the general form is a
+  **doctrine change, and therefore Ludwig's** (MANAGER.md §3.1 territory by analogy: the manager
+  does not reinterpret a rule it is governed by). Booked for him, not done. Until he rules, this
+  task's criterion 6 is the operative specification and the doctrine text is read as the general
+  rule with two examples.
+- **The reader's failure mode for a window it cannot see is UNKNOWN, never omission.** The retired
+  snapshot's defect was under-reporting; a reader that quietly drops a window it cannot parse
+  reproduces exactly that defect in a new place.
+
+Also relevant to this task's design, added the same day (see `docs/manager/OPERATIONS.md`, "The
+morning ritual"): **the HUD's usage line only renders while a session is actively running**, so an
+idle session has no reading at all. The pane-reading primitive this task reuses inherits that: an
+idle or freshly-woken session's pane carries no usage element, which criterion 3's UNKNOWN path
+must cover as well as the outside-tmux case.
