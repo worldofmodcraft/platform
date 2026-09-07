@@ -1611,3 +1611,59 @@ unsafe, and section 17's guard is re-run in isolation before task 023 goes near 
 - **`task/023-supervisor`** at `1afd793` — committed, not pushed, no PR. Needs: an independent review
   of round 6, and section 17's guard re-run in isolation.
 - Task 007 blocked on PR #4. Then 031, 008, 010.
+
+## Task 032 fix round 4 — three positive precedents (2026-09-07)
+
+Recorded at Ludwig's instruction **as precedents, not as closures**. The ledger records failures in
+detail; these are the three shapes that worked, and the reason each worked is reusable.
+
+Round 4 closed all six of review round 3's findings at `edf225a`: 108 → **147 checks, 0 FAIL, exit 0,
+zero bytes on stderr**, byte-identical in a fresh clone. Ludwig's takedown ruling became operative —
+`R11` declares `Precedence: R11 over R3, R7`, `R3`/`R7` carry the exception in their own paragraphs,
+and the merge gate stays MANAGER.md §7's, referenced rather than absorbed. Verified by the manager on
+the contract text, not taken from the report.
+
+### 1. The derived taxonomy paid off a second time, unprompted
+Round 3's fix for review 2's B1 was to **derive** the failure taxonomy from the MUSTs instead of
+maintaining a prose list beside them — because the drift between the two was the defect, twice.
+Round 4 extended the same idea to rule precedence: the override is written in a mechanical form
+(`Precedence: R8 over R4, R5, R6`), documented in "How to read this document", and checked.
+
+**On its first run, the new check `T13` caught `R8`'s pre-existing unreconciled exception over
+`R4`/`R5`/`R6` — which nobody had asked it to look for, and which three review rounds had walked
+past.** That is the difference between a convention and an enforced convention: the second one finds
+things the author was not looking for. Generalise the mechanism, and it audits the past as well as the
+present.
+
+### 2. The immune system worked: finding 5's own fixture caught a live finding-5-class defect
+Review 3's finding 5 was a guard that **failed open** — `grep -c … || printf '0'` yielding `"0\n0"`,
+the test erroring, the guard skipped, and `[: 0` printed on stderr of every run, pasted twice in a log
+and remarked on by nobody. Ludwig's ruling was that this class gets a committed regression fixture, not
+a point fix.
+
+The fixture is `E1`: *the deterministic half of the suite must write nothing to fd 2.* **On its first
+run it caught an unescaped backtick in a new heading that was silently executing `gh api` on every run
+of the suite.** Command substitution firing on every invocation, invisible for exactly the reason
+finding 5 was invisible — nobody reads stderr.
+
+**The general lesson: when a defect hides in an unread channel, the fixture should assert the channel
+is empty, not that the specific defect is absent.** One assertion, whole class.
+
+### 3. Attempt 9 — the round attacked its own fix before the reviewer could
+Round 4 did not merely implement the precedence rule; it wrote a new adversarial case against it.
+**Attempt 9:** an unauthorised account opens a takedown-*shaped* diff, betting a checker reads
+precedence as a property of **the diff** rather than of **the authorisation**. The conditional wording
+(`R11` is evaluated first, and *if and only if* `R11` authorises the PR as a takedown does `R3` step
+aside) is what closes it.
+
+That is the Attempt-8 instinct applied by the author rather than the reviewer — and it is the right
+instinct about any rule granting an exception, because **an exception is the classic attack surface:
+forbidden work smuggled under a permitted label.** Same shape as the PNG-chunk and asset-smuggling
+findings elsewhere in this project.
+
+### Booked out of the same round: task 045
+`R11`'s "nothing but the takedown mutation itself" is only as precise as
+`contracts/append-only.rules.md`'s definition of that shape — a file written **before** the exception
+existed, and which round 4 correctly left unread as out of scope. Ludwig approved booking it as its own
+small task rather than widening 032 after four rounds. **Registry `docs/tasks/045-takedown-mutation-shape.md`,
+merged as registry PR #6, sequenced before task 007** because 007 consumes both documents.
