@@ -200,3 +200,38 @@ doctrine note, not just a per-task fix.
 4. **Spec wording that sounds sufficient.** "Identify by magic bytes" and "a well-formed instance of
    a whitelisted format" were each satisfied by a file carrying a byte-for-byte Blizzard payload.
    State the guarantee, then try to satisfy it maliciously before delegating.
+
+## Three things session 7 paid for (2026-09-07)
+
+### Parallel agents need separate scratchpads, named in the brief
+Two agents dispatched in the same message defaulted to the same session scratchpad, and one
+clobbered the other's `git clone` **mid-review**. The reviewer lost its claim to an idle machine for
+three of its four measured runs, and said so in its report rather than quietly reporting the numbers.
+**Name an explicit per-agent scratchpad directory in every brief** when more than one agent runs at
+once. Cheap to do, invisible when it goes wrong.
+
+### A measurement taken under contention is not evidence — see task 043
+An adversarial review reported a suite failing **3 of 4 runs**; an isolated re-measurement got
+**0 of 10** on the same commit, from fresh clones, gated against overlap. The difference was other
+agents of the same session running the same suite. Two axes, and the second is easy to miss:
+- **The suite collides with itself** when two runs overlap (leftover `wom-test-probelaunch-*` tmux
+  sessions from foreign runs are the visible symptom).
+- **A check that measures `~/.claude` is perturbed by every running agent** — transcripts, caches and
+  rotating `backups/*` files. For that check "isolation" means *no other agent alive*, not merely no
+  other run of that suite.
+**Consequence:** re-measure in isolation before acting on or propagating a finding that could be an
+artefact of load. The rule is booked as task 043.
+
+### The `reviewer` agent cannot run this project's verify artefacts
+Its Bash allowlist is `git diff`, `git log`, `npm test`, `pytest`, `ctest` — and this project's
+tooling is **Python 3 stdlib via `python3 -m unittest`** plus bash suites (`tools/test-supervisor.sh`,
+`docs/tasks/NNN-verify.sh`). So the roster's own reviewer physically cannot re-run the artefact that
+MANAGER.md §2c *requires* a reviewer to re-run. Adversarial reviews on this project therefore go to a
+full-tools agent at the same tier or higher, briefed with the reviewer role and the author-≠-reviewer
+constraint. Routing rule 2 is satisfied by tier and independence, not by the agent's name.
+
+### And one that is not a gotcha but a standard
+When two agents disagree about a fact, **check the fact yourself** — it is usually one `grep`. Doing
+so this session showed a reviewer had misattributed a real diagnostic (it existed, at a different
+probe case) to a failure that had none, after the manager had already propagated the claim into two
+briefs. §2c's "re-run it, do not trust the transcript" applies to the manager's own reasoning too.
