@@ -1499,3 +1499,115 @@ not invent one.**
 | ~14:1x local | 33 % | 3 % | 3 % | — | Ludwig's `/usage` | resume |
 | ~14:4x local | 47 % | 5 % | 3 % | — | Ludwig's `/usage` | continue |
 | ~15:1x local | 55 % | 5 % | — | **31 %** | advisory + context-cache | **soft threshold → handover** |
+
+## SESSION 7 — in progress (2026-09-07)
+
+### Checkpoint log
+| Time | 5-hour | Weekly (all) | Weekly (Fable) | Source | Action |
+|---|---|---|---|---|---|
+| session start | UNKNOWN | UNKNOWN | UNKNOWN | kickoff line carried `X %` placeholders | **halt, ask** — nothing dispatched |
+| opening | 13 % | 9 % | 5 % | Ludwig's `/usage` | UNKNOWN cleared, the day's opening checkpoint |
+| mid-session | UNKNOWN | UNKNOWN | UNKNOWN | figure arrived as the literal placeholder `[FYLL I /usage]` | halt on new dispatch; running agents allowed to finish per rule 0 |
+| after three landings | 35 % | 11 % | 5 % | Ludwig's `/usage` | clear; three queued items dispatched on his explicit clearance |
+| after four landings | 59 % | 13 % | 5 % | Ludwig's `/usage` | clear, climbing; flag at 85 %, plan handover accordingly |
+
+The morning ritual (OPERATIONS.md) worked exactly as written: the session woke in UNKNOWN, dispatched
+nothing, did only reading and verification in the gap, and cleared on Ludwig's figures. It fired a
+second time mid-session when a placeholder arrived unfilled, and held the same way.
+
+### Ludwig's rulings this session
+1. **Task 032 Q4 — who may open a takedown PR.** The platform's own organisation account may
+   **open** one; MANAGER.md §7's written-approval gate governs the **merge**. Account opens, human
+   authorises. (Round 3 wrote this into the prose; review round 3 found the *logic* still rejects it
+   — see finding 2 below. Ludwig: *"A decision that lives in prose but not in the logic is not a
+   decision."*)
+2. **Task 032 Q3 — case-folding.** Approved to implement, and the case-insensitive normalisation
+   must be **written into `contracts/ownership.md` explicitly**, citing the verified GitHub
+   resolve-to-one-account semantics — because no ADR states it in those words, so the contract must.
+3. **Task 032 R6.** Keep it as a checked rule (option a), **and** mark in the contract that R6 is the
+   document's *derivation* from ADR-0058 §2, not §2's literal text. "Checked AND honestly attributed."
+4. **`externalUsageWritePath = ""`** — approved as a deliberate reversal of the 2026-09-05 note.
+   Fail-closed, and task 031 retires the reader anyway.
+5. **Round 4 of task 032 approved** after review round 3 came back blocking. Note the doctrine
+   working: rounds 1-2 were standard tier, round 3 was the §3.4 escalation, and the escalated round
+   also failed review — which under §3.4 stops the work and asks Ludwig. He was asked; round 4 runs
+   on his decision, not on the manager's momentum.
+
+### Task 032 — still BLOCKING, PR #4 unmerged, task 007 still blocked
+Fix round 3 (`68e986a`) + R6 attribution (`6a517bc`) closed all five round-2 blocking findings, all
+thirteen non-blocking items and both of Ludwig's rulings, at 108 checks / 0 failing. **Review round 3
+(`8584021`) returned BLOCKING with six findings.** Fix round 4 dispatched on Ludwig's approval.
+
+What round 3 got genuinely right, verified by mutation rather than trusted: **the failure taxonomy is
+derived from the MUSTs, not maintained beside them.** All four arms reddened independently (duplicate
+id, rule with no row, row deleted, orphan row); 11 verdict rules, 8 checker rules, 11 rows, counted by
+the reviewer. That was the defect that recurred twice, and it is closed.
+
+**The six findings, and the reason three of them outrank the rest:**
+1. `ownership.md:522-523` pastes `gh api --jq` output in an order gojq cannot produce (it sorts keys)
+   — a fact **the same document states 113 lines earlier while correcting the identical mistake**.
+2. **`R11` never lifts `R3`/`R7`.** Ludwig's takedown ruling is in the prose; `R3` is unconditional,
+   `R11` is a necessary condition only, `I7` requires every rule to pass — so a faithful checker
+   still rejects the platform's own legally-mandated takedown. Round-1 B5's outcome, unchanged.
+   **Highest-priority item of round 4.**
+3. The four whole-document `expect_no_hits` guards do not flatten wrapped lines, so `B1.15` gets zero
+   hits against the pre-fix blob it names and **has never been able to fire**. Round-1 B1's and
+   round-2 B4's defect text are in the document right now with the suite green.
+4. Round-2 finding 17's text reintroduced verbatim; `B1.12a`/`B1.12c` assert bare strings across a
+   174-line section — a §2c rule-3 split that produced two weaker checks instead of two stronger ones.
+5. **`section_heading_count` fails open** — `grep -c … || printf '0'` yields `"0\n0"`, the test errors,
+   the guard is skipped. It prints `[: 0` on stderr of **every run**, pasted twice in the round-3 log
+   unremarked.
+6. `B3.10` defeated by capitalisation: `SHOULD equal` leaves R6 declared MUST, bodied SHOULD, green.
+
+**Findings 1, 3 and 5 are §2c's own founding failures recurring inside the artefact built to prevent
+them** — an un-producible paste, a check that cannot fire, a guard that fails open. Ludwig's ruling:
+this class is the round's primary risk, not three line items, and **each gets a committed regression
+fixture that fails if the defect returns.**
+
+### Task 023 — round 6 landed, R3-B1 overturned by measurement
+Round 6 (`1afd793`) closed both blocking findings from review round 3 (`09662a5`):
+- **R3-B2, a check that could not fail:** `17: preflight REFUSES a config that leaves the write path
+  unpinned` asserted only that the output *contained* `externalUsageWritePath` — a string preflight's
+  **success** banner also carries. Replaced with `assert_false` on the exit status, mutation-tested in
+  the required order (defect back → red → restored byte-identical → green).
+- **Section 17's over-claiming label:** fixed in the required direction. The new
+  `HOME_GUARD_EXISTENCE_CHURN` exempts ordinary per-session runtime directories from *existence*
+  comparison but **deliberately excludes `plugins/claude-hud/{config-cache,context-cache,transcript-cache}`**
+  — the suite's one plausible write surface, where the round-4 regression landed. Narrowed toward what
+  the suite could have written; not widened to tolerate changes. Verified by the manager on the diff.
+
+**R3-B1 (the suite "fails 3 of 4 runs") did not survive isolated measurement: 0 occurrences in 10
+runs**, each from its own fresh clone of `09662a5`, gated against overlap. Nine runs 232/0; the single
+failure was section 17's guard in the only run window containing a `~/.claude/backups` rotation.
+`git diff 20e1ebd..09662a5 -- tools/` is empty, so the measured code is the reviewed code.
+
+### A positive precedent, recorded at Ludwig's instruction
+The two agents disagreed on the evidence, and the manager checked the disputed facts itself rather
+than accepting either report. Result: `(fake claude: got: …)` is real code at line 220 and
+`(diagnostic) the probe session outlived its /exit` is real at line 609 — **so the reviewer fabricated
+nothing** — but the `/exit` check that actually fails sits at line 823 as a bare `assert_false` with
+**no diagnostic attached**, so the reviewer had read a diagnostic belonging to a different probe case
+as evidence for this failure. **The manager had propagated that misattribution into two subsequent
+briefs as established fact**, and said so.
+
+Ludwig's ruling: log this as a **positive precedent** — the measurement standard (§2c: re-run it, do
+not trust the transcript) applied to the manager's own reasoning, including owning the propagation.
+The lesson is not "reviewers are unreliable"; it is that a disputed fact is cheap to check directly
+and expensive to carry forward unchecked.
+
+### Standing rule booked as task 043
+**A test suite is a shared resource: no two agents run against the same suite or worktree
+concurrently — sequence them, or give each a private clone.** §3b/§6 extended from file isolation to
+test-execution isolation. Spec at `docs/tasks/043-suite-is-a-shared-resource.md`, spec-approved by
+Ludwig in session; doctrine, so **he reviews and merges it**, per the task 042 precedent.
+Consequence already in force: round 6's dismissal of its own final failure as "the known flake" is
+unsafe, and section 17's guard is re-run in isolation before task 023 goes near a PR.
+
+### Open
+- **PR #32** (task 042, credential rule) — Ludwig's merge as doctrine's reviewer. **Until it merges,
+  the credential rule is not on `main`**, so every brief this session inlined it by hand.
+- **PR #4** (task 032) — blocking; round 4 running.
+- **`task/023-supervisor`** at `1afd793` — committed, not pushed, no PR. Needs: an independent review
+  of round 6, and section 17's guard re-run in isolation.
+- Task 007 blocked on PR #4. Then 031, 008, 010.
