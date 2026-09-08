@@ -105,6 +105,22 @@ for the first.
    what changed and what was verified unchanged. The window in which a rewrite is free closes at
    the first push, and that ordering must be a decision, never luck.
 
+10. **Credentials require a task-file reason and Ludwig's approval** (Ludwig, 2026-09-06). No
+   agent, and not the manager, reads, prints, copies or uses an authentication token, secret or
+   private key unless a spec-approved task file says why and Ludwig has approved it in session.
+   `gh auth token`, `--show-token` and equivalents are covered. **A denied action is information, and
+   an agent that re-attempts a blocked credential or permission access is itself a reportable
+   signal — logged, even when the retry also fails.** The retry is the finding regardless of its
+   outcome, because it shows the denial was not treated as an answer. A
+   brief that needs behaviour for a *different identity* names the permitted mechanism (an
+   unauthenticated request, a fixture) and forbids the rest — naming the problem without naming the
+   means is a spec defect. **Response to a violation: stop the agent, audit, log** — an *attempt* is
+   contained and recorded, while a credential *exposed in output* stays an absolute stop condition
+   under §8. Provenance: a doc-writer agent attempted `gh auth token --user mbmludric` three times
+   while working on task 032; the audit found nothing landed, and the two stored `gh` accounts on
+   this machine both carry `repo` and `workflow` scopes, so the command would have printed a live
+   write-capable credential into an artefact bound for a public repository.
+
 ## 3b. Organisation: one manager, flat roster
 
 One manager, a flat agent roster. If several missions run in parallel, each mission gets its own

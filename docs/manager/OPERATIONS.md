@@ -25,6 +25,27 @@ happens); the ledger entry and mission log stay in `platform`.
   `docs/architecture/key-management.md`. The private key is only an Actions secret plus Ludwig's
   offline backup — it must never appear in a repo, a log, or a chat.
 
+## `gh` holds TWO accounts on this machine, and one of them is Ludwig's own
+`gh auth status` lists both, and **both tokens carry `gist`, `read:org`, `repo` and `workflow`**:
+
+| Account | Numeric id | What it is | `gh` state |
+|---|---|---|---|
+| `womcraft` | 324089373 | the platform bot identity; all project git and `gh` work runs as this | **active** |
+| `mbmludric` | 37807560 | **Ludwig's older personal GitHub account**; no write access to the org | stored, inactive |
+
+`mbmludric` is a genuine **non-member** of `worldofmodcraft`, which makes it the obvious tool for
+reproducing any "what does a non-member caller see?" question — and that is exactly the trap. On
+2026-09-06 a doc-writer agent tried `gh auth token --user mbmludric` three times for that reason and
+was blocked three times. **Credentials now require a task-file reason and Ludwig's approval**
+(CLAUDE.md rule 11, MANAGER.md guardrail 10).
+
+**The right way to reproduce a non-member caller costs nothing and needs no identity:**
+```
+$ curl -s -o /dev/null -w 'status=%{http_code} redirect=%{redirect_url}\n' \
+    https://api.github.com/orgs/worldofmodcraft/members/womcraft
+status=302 redirect=https://api.github.com/organizations/324218296/public_members/womcraft
+```
+
 ## Branch protection changes the workflow
 `main` on **all three** repos requires a pull request, blocks force-push and deletion, and includes
 administrators. Zero required approvals, so the manager merges its own PR under §7 authority.
