@@ -6,6 +6,7 @@ repository's history.
 
 | File | What it is | Read it when |
 |---|---|---|
+| `00-start-here.md` | What the rulebook is, which layer binds you, and which of the ~120 decision records actually transfer to another project. Written for an assistant being handed the whole thing. | Before anything else, if you were handed the full `decisions/` and `doctrine/` trees. |
 | `01-method.md` | The process: roles, the spec gate, how work is verified, how reviews run, how context and budget are managed. | First. It is the whole system. |
 | `02-lessons.md` | The failure catalogue. Every entry happened; each says what broke, why it was invisible, and the rule that now prevents it. | Second, and again whenever something "passes" and you feel relief. |
 | `03-environment.md` | Concrete tooling hazards: shell, git, GitHub, permissions, usage metering, agent isolation. Separates machine-specific from general. | When setting up, and when something behaves oddly. |

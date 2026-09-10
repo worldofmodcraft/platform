@@ -16,7 +16,14 @@ Modcraft.
 
 ## Scope
 
-`docs/handover/` — four files: an index, the method, the failure catalogue, the environment notes.
+`docs/handover/` — an index, the method, the failure catalogue, the environment notes, the brief-writing
+guide.
+
+**Scope amended 2026-09-10** (Ludwig, in session, same sitting): add `00-start-here.md`, a front door for
+an assistant handed the *complete* rulebook — the constitution, the doctrine tree and all ~120 decision
+records — rather than only the method summary. It states which layer binds the reader, and **which of the
+decision records transfer to another project and which are product-specific and must not be adopted**.
+Recorded as an amendment rather than folded in silently, per MANAGER.md §3.3.
 
 ## Out of scope
 
