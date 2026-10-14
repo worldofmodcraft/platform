@@ -1728,3 +1728,17 @@ Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's who
 - 2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
   (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only. Context was 23 % when he said it.
   Compaction caution (§5.5) still applies: anything remembered is verified against disk before acting.
+- 2026-10-14 late, Ludwig: "Stjärna på allt". These questions are answered with the starred option (manager's bundle, session 8):
+  - **Q-A:** task 032 fix round 6 approved (§3.4, Ludwig's call). Pin full sentences instead of 70-char prefixes, add a tail-append
+    fixture shown red first, remove the "pending Ludwig" markings now that D1/D2 are confirmed, and re-prove in a fresh clone at HEAD.
+  - **Q-B:** the author PR adds a version with only `version`, `commit` and `source_url`, plus `status: pending`. The pipeline's
+    write-back PR fills in the remaining fields and sets `published`. This is the second permitted in-place transition, beside the
+    takedown, and it is written into the contracts by its own reviewed task (057). It resolves the contradiction task 054 found:
+    entry.schema requires 9 fields that the author cannot supply, and append-only forbids the write-back. The manager verified that
+    contradiction on registry origin/main.
+  - **Q-C:** `mod.lua` is read by a restricted static reader, which accepts a literal table only and never executes code.
+  - **Q-D:** the pipeline acts as a GitHub App owned by the organisation. Creating it is a new manual step for Ludwig (M5, runbook).
+  - **Q-E:** archives live in a separate repo, `worldofmodcraft/archive`.
+  - **Q-F:** Ludwig's personal account joins the organisation (manual step), so mission §7.6 stands as written.
+  - **Q-G:** a project-owned URL fronts `source_archive` before the first publish. Feasibility on Pages is unverified and gets a probe.
+  - **Q-H** (does the `MINISIGN_SECRET_KEY` secret exist?) is a fact question, still unanswered.
