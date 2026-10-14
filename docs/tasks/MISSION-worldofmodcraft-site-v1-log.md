@@ -1710,3 +1710,18 @@ Lean marked ★. Q1–Q6 are the draft's items 1–6.
 Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's whole trigger design (Q-C1),
 048 and 049 entirely.
 **Answered 2026-10-14 by Ludwig, in session:** "Allt enligt stjärna, godkänner spec 050". Every item above = ★.
+
+### Ludwig's rulings, 2026-10-14 evening (verbatim answers recorded)
+- Design mission for the game: **C**, "vi fortsätter med SITE V1". No game design until SITE-V1 is done.
+- "Men kör hela natten nu, vill att site v1 ska vara klart när jag vaknar". The manager answered that the
+  mission's binary success criterion needs Ludwig: DNS (M2), the test-mod repo on his personal account (M4),
+  the final demo, and §7 approvals. Everything else runs overnight.
+- "Kör på dina rekommendationer, godkänner alla". All four questions are answered with the starred option:
+  1. **Task 032 D1:** R11 (takedown) applies to **every** namespace, owned or not. The manager's 2026-09-08 reading is confirmed.
+  2. **Task 032 D2:** one authorised takedown PR may carry **any number** of takedown mutations, provided the
+     diff contains nothing else. The manager's 2026-09-08 decision is confirmed.
+  3. **Overnight §7 waiver (2026-10-14/15 only):** the manager may merge PRs that touch CI security checks
+     (registry CI, tasks 007/039) when the independent review is PASS and verification is green.
+     **Still Ludwig-only:** signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine.
+  4. **Overnight §8 waiver:** a blocked chain is parked, with its question written under "For Ludwig", and
+     independent chains continue. The session halts fully at five open Ludwig items.
