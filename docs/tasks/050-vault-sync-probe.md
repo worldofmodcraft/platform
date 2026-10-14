@@ -28,7 +28,7 @@ the design is reconsidered with Ludwig before any code exists.
 - In the repo: this file's log.
 
 ## Procedure and acceptance criteria
-Preconditions: Obsidian is running on the Windows PC with the SELM vault open, and the phone app is
+Preconditions: Obsidian is running on the Windows PC with the vault open, and the phone app is
 installed with LiveSync.
 
 0. **Baseline.** The manager runs `stat -c '%n|%s|%Y' -- "$WOM_VAULT"/*.md` and pastes the output into
