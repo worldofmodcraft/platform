@@ -129,6 +129,68 @@ docs/tasks/053-verify.sh [--mutate]                       # 053 additions, A1-A3
 ```
 Exit status 0 means success; 1 means a refusal (reason on stderr, nothing written); 2 is a usage error.
 
+## Triggers and guard (task 052)
+
+Built by task 052 (`docs/tasks/052-vault-triggers-and-guard.md`); verified by `docs/tasks/052-verify.sh [--mutate]`
+(temp repos, temp remote, temp vault and temp HOME only).
+
+### Triggers
+| Event | What refreshes | How |
+|---|---|---|
+| a commit in a worktree on `task/NNN-*` | `Tasks/NNN.md` | `post-commit` hook, mode `task` (`write --ref HEAD`); any other branch: the hook does nothing |
+| `git pull` that merges on `main` | main's notes | `post-merge` hook, mode `main` (`write --ref main`) |
+| the manager's step after each `gh pr merge`, and at handover | main's notes | `tools/vault/refresh-main.sh` |
+
+`git fetch origin main:main` fires **no** `post-merge` (verified), which is why the manager step exists.
+`refresh-main.sh` runs `git -C <worktree of main> pull --ff-only origin main` when main is checked out in any
+worktree (`git worktree list --porcelain`), otherwise `git fetch origin main:main` (a plain fetch into a checked-out
+main is refused). Then it re-pins the tool and runs `write --ref main`. Any failure exits non-zero.
+
+**Install** (once per repository; hooks live in the git common dir, so every worktree shares them):
+`tools/vault/install-git-hooks.sh [--repo PATH]`. It writes only `hooks/post-commit`, `hooks/post-merge` and
+`wom-vault/` under `$(git rev-parse --git-common-dir)`, refuses an existing hook that is not a WoM hook (first line
+after the shebang starts `# wom-vault-hook v1`), refuses when `core.hooksPath` is set, and is idempotent. With
+`WOM_VAULT_TEST=1` it refuses any git dir not under `realpath(${TMPDIR:-/tmp})`. Installing into the real
+repository is a manual step done with Ludwig (task 052 AC7), never by a test.
+
+**Pinned copy.** The installer writes `git show main:tools/vault/wom_vault.py` (the ref, never a working tree)
+to `wom-vault/wom_vault.py` in the common dir and records `git log -1 --format=%H main -- tools/vault/` as
+`wom-vault/pinned_commit`. The hooks and the manager step run only that copy, so a half-edited working tree or an
+unmerged task branch can never change what writes into the vault. Each hook run prints `wom-vault: pinned_commit=<sha>`;
+when main has a newer commit touching `tools/vault/` it also prints `wom-vault: pinned copy is stale; run refresh-main.sh`
+on stderr (the copy is never replaced silently).
+
+**Failure semantics.** Vault not configured (no `WOM_VAULT`, no config file; in test mode: no `WOM_VAULT`): the hook
+prints `wom-vault: not configured, skipped`, appends a line with the reason to `wom-vault/skips.log` and exits 0.
+Configured but failing: the error is on stderr and the hook exits non-zero. A hook can never block a commit (git
+ignores `post-commit`'s status). The 30 s lock cap of the tool applies, so a commit waits at most 30 s.
+
+### Guard: `vault-guard` (Claude Code PreToolUse)
+`.claude/settings.json` has one PreToolUse entry, matcher `Write|Edit|MultiEdit|NotebookEdit`, command
+`"$CLAUDE_PROJECT_DIR"/.claude/hooks/vault-guard.sh` (a wrapper around `vault_guard.py`). Exit 2 blocks the call;
+settings-file hooks also fire for subagents' tool calls. It checks `tool_input.file_path` and `tool_input.notebook_path`:
+a relative path is joined to the call's `cwd`; `D:\...` and `d:/...` map to `/mnt/d/...`; the result goes through
+`realpath` and is compared case-folded (drvfs is case-insensitive) with the vault. The vault is every value found in
+`WOM_VAULT` and in `~/.config/wom/vault-path`; a path inside either blocks.
+- Vault not configured: allow, and count the skip in `~/.config/wom/guard-skips.log` (a fresh clone is not bricked).
+- Configured but unresolvable (for example D: not mounted): block only paths whose normalised text lies under the
+  configured path string (lexical, case-folded); allow everything else so repo editing never stops.
+- Invalid JSON, or a Write/Edit/MultiEdit/NotebookEdit call without a path: block. A missing `vault_guard.py` blocks
+  too (the wrapper checks), because Claude Code treats a missing hook *script* as a non-blocking error.
+
+**Recovery (disable the guard).** The guard is inert when no vault is configured. To disable it, Ludwig runs, in WSL:
+`rm -f ~/.config/wom/vault-path` and, if set in the shell that starts Claude Code, `unset WOM_VAULT`. (This also
+unconfigures the projection tool until the file is written again.)
+
+**Known gaps (documented, not fixed here).** `\\wsl$`, `//?/` and UNC prefixes, and Windows' trailing-dot/space
+stripping, are not normalised (agents in WSL do not produce them; mixed-slash `d:/` and `D:\` forms are covered).
+Agents' **Bash** writes into the vault are not covered by this guard; that is in task 049's scope. Whether the
+hook process inherits `WOM_VAULT` from the session is unverified (AC7); the design does not depend on it because of
+the config-file read.
+
+Test-only knob: with `WOM_VAULT_TEST=1`, `WOM_GUARD_MNT_ROOT` (a directory under `TMPDIR`) replaces `/mnt` in the
+drive-letter mapping, so the tests never look at a real drive mount. Without test mode it is ignored.
+
 ## Why these claims hold (Obsidian and LiveSync)
 Task 050's log (`docs/tasks/050-vault-sync-probe.md`, "Task 050 log") records the observations the design
 rests on, 2026-10-14: a file written from WSL appears in Windows Obsidian without a restart and on the phone

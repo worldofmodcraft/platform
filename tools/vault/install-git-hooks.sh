@@ -34,7 +34,7 @@ if [ "$pin_only" = 0 ]; then
     [ -f "$HERE/git-hooks/$h" ] || die "missing $HERE/git-hooks/$h"
     dest="$common/hooks/$h"
     if [ -e "$dest" ] || [ -L "$dest" ]; then
-      if [ -L "$dest" ] || ! grep -qxF -- "$MARK" "$dest" 2>/dev/null; then # CHECK:installer-nonwom
+      if [ -L "$dest" ] || ! grep -q -- "^$MARK" "$dest" 2>/dev/null; then # CHECK:installer-nonwom
         die "$dest exists and is not a WoM hook; refusing to touch it"
       fi
     fi

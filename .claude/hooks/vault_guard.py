@@ -106,7 +106,7 @@ def main():
                 vlex = normalise(vraw, "/")
                 if not os.path.isdir(vlex):  # CHECK:fail-closed
                     # Configured but unresolvable (for example D: not mounted): lexical comparison only.
-                    if inside(lex, vlex) or inside(rp, vlex):
+                    if inside(lex, vlex) or inside(rp, vlex):  # CHECK:fail-closed-match
                         print("vault-guard: blocked %s: it is under the configured vault %s (vault not resolvable; "
                               "lexical match)" % (raw, vlex), file=sys.stderr)
                         return 2
