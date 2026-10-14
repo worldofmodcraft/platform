@@ -1,6 +1,6 @@
 # Task 041: Give the site's copies of the registry schemas a sync mechanism that can fail
 
-- **Mission:** SITE-V1 — **Status:** draft (gate-ready spec written 2026-10-14 under task 054; becomes `spec-approved` only when the manager has run SPEC-CHECKLIST.md)
+- **Mission:** SITE-V1 — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
 - **Agent / model:** implementer / sonnet
 - **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/041-site-schema-copies` / `~/wt/site-task-041` — **site** repo (`worldofmodcraft/site`)

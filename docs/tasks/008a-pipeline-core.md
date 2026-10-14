@@ -1,6 +1,6 @@
 # Task 008a: Pipeline core — clone, validate, scan, archive, hash, sign (offline)
 
-- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Split 2026-10-14 on review: 008a is now independent of tasks 057 and 058** (it needs no knowledge of the `pending` state or the `source_archive` URL); the parts that do move to `008c-pipeline-write-back.md`. Q-B and Q-C are decided (Ludwig, 2026-10-14). Touches signing: merge requires Ludwig (MANAGER.md §7).
+- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
 - **Agent / model:** implementer / sonnet (the signing and verifier parts get an independent reviewer at the same tier or higher with full tools — OPERATIONS.md, "The reviewer agent cannot run this project's verify artefacts")
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008a-pipeline-core` / `~/wt/registry-task-008a` — **registry** repo (`worldofmodcraft/registry`)
@@ -278,3 +278,12 @@ Code + tests + docs + verify script + this file's log section current.
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Q-B, Q-C, Q-E, Q-G folded in from Ludwig's answers; two URL functions replace `release_url`; URL shape waits on task 058.
 - 2026-10-14 review fixes: split — `apply_write_back`, `source_archive_url`, the write-back view of `result.json` moved to 008c; clone restricted to https (hostile-URL fixtures, criterion 16); tarball hardening (criterion 17, `archive-layout.md` silence cited); criterion 2 states the commit comes from the entry and drops "uppercase" for `--version`.
+
+## Spec amendment at the gate (manager, 2026-10-14; from spec review round 2, non-blocking items folded in as criteria)
+- **A-1:** pass `--` before the URL to `git clone`. Add a fixture for a URL shaped like `--upload-pack=…` or `-u…`.
+- **A-2:** give the clone a wall-clock timeout and a size cap. Isolate git config (`GIT_CONFIG_GLOBAL=/dev/null`,
+  `GIT_CONFIG_NOSYSTEM=1`). Each gets a fixture or test.
+- **A-3:** add tar fixtures for a symlink entry followed by a write through it (`src/l -> .`, then `src/l/x`), for
+  duplicate entry names, and for setuid/setgid modes. Add a documented note on https URLs aimed at internal addresses
+  (SSRF). The runner context decides whether it is in scope, and the spec records the answer.
+- Merge authority: signing is involved, so **Ludwig approves the merge** (§7). The overnight waiver does not cover signing.

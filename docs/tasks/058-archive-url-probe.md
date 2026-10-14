@@ -1,6 +1,6 @@
 # Task 058: Probe — can a project-owned URL front the release assets that `source_archive` points at?
 
-- **Mission:** SITE-V1, deliverable **D2/D5** (decision Q-G) — **Status:** draft (spec written 2026-10-14 under task 054). Dispatchable once Ludwig has done the one manual step under "Ludwig's manual step" (live part only); the local part can start at once.
+- **Mission:** SITE-V1, deliverable **D2/D5** (decision Q-G) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
 - **Agent / model:** implementer / sonnet for the local matrix and the report; Ludwig (or the manager on his behalf, recorded) for the browser observations.
 - **Budget:** small (≤ 1-2 agent-sessions). It produces a **report, not a decision**.
 - **Branch / worktree:** `task/058-archive-url-probe` / `~/wt/task-058` — **platform** repo.

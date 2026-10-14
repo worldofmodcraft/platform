@@ -1,6 +1,6 @@
 # Task 056: The D5 architecture note — what runs where, the server hosts nothing, and the way off GitHub
 
-- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** draft (spec written 2026-10-14 under task 054). Dispatchable now **for a first version marked "specified, not built"**; its final form waits on 008b, 055 and task 058's report (see Dependencies). The `source_archive` question (was Q1) is decided: Ludwig, 2026-10-14, Q-G.
+- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
 - **Agent / model:** doc-writer / sonnet
 - **Budget:** small (≤ 1 agent-session) for the first version; a second small pass after 008b/055 land
 - **Branch / worktree:** `task/056-architecture-note` / `~/wt/task-056` — **platform** repo (`worldofmodcraft/platform`). The mission lets D5 live "in the site or registry repo as appropriate"; this note goes in the platform repo beside `docs/architecture/depgraph.md` and `key-management.md`, the other D5 documents, so the three are read together. If Ludwig wants it served on the site as well, that is a separate, later task.
