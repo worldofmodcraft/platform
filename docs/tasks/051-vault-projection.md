@@ -1,6 +1,6 @@
 # Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** in-progress (AC1–AC13 done and reviewed; AC14 human, after merge) (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051
@@ -159,6 +159,23 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
 051 → 053 (same script) → 052 (installs the script).
 
 ## Questions (agent-maintained; MANAGER.md §8b)
+- **Q-1 (non-blocking) `source_commit` of main-owned `Tasks/NNN.md`.** The contract says "the owning ref's HEAD",
+  but AC2 says a commit touching only OPERATIONS.md rewrites only Gotchas.md (plus Status/Tasks), and "churn is
+  limited to these two". With HEAD, every main commit would rewrite every `Tasks/NNN.md`. Options: A) last commit
+  that touched the task file (single-source rule) ★; B) main HEAD (literal, breaks AC2). Assumed A for main-owned
+  notes; branch-owned notes (task mode) use the branch HEAD as specified. Rests on: AC2 passing as written.
+- **Q-2 (non-blocking) `check` and `.obsidian/`.** The spec says `check` covers every non-generated file. Obsidian
+  rewrites files under `.obsidian/` (workspace.json etc.) while it runs, so AC14's "check stays green" may fail
+  for reasons unrelated to the tool. Options: A) as specified ★ (implemented); B) skip dot-directories (they do
+  not sync, task 050 AC3); C) a `--ignore PREFIX` flag. Rests on: AC14 on Ludwig's machine.
+- **Q-3 (non-blocking) two unmerged branches with one id** (this repo has `task/046-method-handover` and
+  `task/046-start-here`). The spec's one-writer rule names no tie-break. Implemented: main skips the note, and
+  task mode writes it from whichever of the branches runs last. Alternative: refuse. Rests on: nothing in AC.
+- **Q-4 (non-blocking) `--note NAME` option** was added so that "asked to write any other note" and the
+  forbidden-name refusal (AC3) are expressible at all. Also `--repo PATH` (default: current directory).
+- **Q-5 (information) pinned-commit control.** `3e2b6ef` has no `docs/manager/COMMANDS.md`, and a missing source
+  is an error. The AC4 control therefore clones the repo, resets a throwaway `main` to `3e2b6ef` and adds
+  COMMANDS.md from the branch before rendering. Sources are otherwise the pin's.
 
 ---
 # Task 051 log
@@ -176,3 +193,48 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
   accepted first-run burst (~130 notes). Previous findings 2–6 and 8–11 were closed by the reviewer.
   The manager judges spec v3 ready for Ludwig without a third round: every remaining finding was
   concrete and has a concrete fix in the text.
+- 2026-10-14 implementer: built `tools/vault/wom_vault.py` (+ `tests/test_vault.py`, `audit_run.py`, `mutate.py`),
+  `docs/tools/vault-projection.md`, `docs/manager/COMMANDS.md` (new), one OPERATIONS.md entry,
+  `docs/tasks/051-verify.sh`. Status set to review. Nothing was run against a real vault; every run used
+  `WOM_VAULT_TEST=1`, a `mktemp` vault and a temp `HOME`.
+  - Decisions: main-owned `Tasks/NNN.md` uses the last commit touching the task file (Q-1, AC2 requires it);
+    `--note` and `--repo` options added (Q-4); no `unlink` anywhere, so a crashed run can leave a hidden
+    `.NAME.pid.ns.wom-tmp` (documented); first tests pass was green, so mutation run is the evidence the
+    checks can fail.
+  - strace is not installed (`command -v strace` empty). AC3's "no open before the forbidden-name rejection" is
+    proven with a Python audit hook (`tests/audit_run.py`) that logs every `open`/`os.open`/scandir/listdir of
+    the interpreter running the tool; git child processes never receive the vault path. A control test shows
+    the hook sees the opens of a normal run, so an empty log is not blindness.
+  - AC evidence (all from `docs/tasks/051-verify.sh`, re-runnable): AC1 `test_ac1_*`; AC2 `test_ac2_*`;
+    AC3 `test_ac3_*`; AC4 `test_ac4_*` (6 patterns built at runtime, positive control on pin `3e2b6ef`,
+    plus the committed-secret scan with a control); AC5 `test_ac5_*`; AC6 `test_ac6_*`; AC7 `test_ac7_*`
+    (incl. the real 30 s timeout); AC8 `test_ac8_*`; AC9 `test_ac9_*`; AC10 `--mutate` (12 mutants, all killed,
+    the unmutated copy green each time); AC11 fresh clone run below; AC12 guard (see below); AC13 the doc
+    checks in the script. AC14 is human and OPEN: it happens after merge with Ludwig present.
+  - AC12 demonstration: `TMPDIR=/mnt/x docs/tasks/051-verify.sh` printed
+    `refusing to run: TMPDIR '/mnt/x' is under /mnt/` (rc=3, string check, /mnt never touched);
+    `TMPDIR=$HOME/zz ...` printed `refusing to run: TMPDIR '/home/ludwig/zz' is under HOME` (rc=3).
+    The test module applies the same rule to its own root, and the test mode of the tool itself refuses
+    any vault outside `realpath(TMPDIR)`.
+  - `051-verify.sh --mutate` in the authoring worktree: rc=0, `Ran 32 tests ... OK`, then for each of
+    generated-true, secret-scan, two-phase, containment, vault-symlink, forbidden-names, ownership, lock,
+    skip-identical, test-mode-refusal, nontest-tmp-refusal, never-deletes: `control green` then
+    `ok: mutant '<name>' killed -> FAIL: <tests>` (e.g. `ok: mutant 'lock' killed -> FAIL:
+    test_ac7_lock_serializes FAIL: test_ac7_lock_timeout_after_30s`), ending `== 051-verify: ALL CHECKS PASSED`.
+  - AC11, fresh clone of branch at `660496f` into a temp dir, `docs/tasks/051-verify.sh --mutate`:
+    `Ran 32 tests in 39.847s`, `OK`, 12 mutants killed, `== 051-verify: ALL CHECKS PASSED`, `clone rc=0`.
+    Full output: re-run the command (it is the artefact).
+  - Remaining: AC14 (human, after merge). Booked questions Q-1..Q-5 above. Task 053 will extend the same script.
+- 2026-10-14 manager re-runs at a5cb9b4: `bash docs/tasks/051-verify.sh` ended `== 051-verify: ALL CHECKS PASSED` (39 s).
+  `bash docs/tasks/051-verify.sh --mutate` killed every mutant, re-ran the control green each time, and ended
+  `== 051-verify: ALL CHECKS PASSED` (exit 0).
+- 2026-10-14 independent code review (reviewer, blind order: spec + diff before the log): **PASS**, no blocking findings.
+- Manager triage of the booked questions:
+  - **Q-1 accepted.** The spec contradicted AC2; per-note last-touch follows the contract's single-source rule. Spec intent wins (the manager answers per §8b.3a).
+  - **Q-2 non-issue.** `.obsidian/` sits at the vault root, not inside the project folder that `WOM_VAULT` names. A listing of that folder on 2026-10-14 (task 050) showed no `.obsidian`. The reviewer's concern assumed otherwise.
+  - **Q-3 latent.** Both `task/046-*` branches are ancestors of main (verified with `git merge-base --is-ancestor`), so nothing flip-flops today. The tie-break rule is proposed as a 053 amendment, awaiting Ludwig.
+  - **Q-4 and Q-5 accepted.**
+- Reviewer's non-blocking notes 2 and 5 are proposed as 053 amendments, together with Q-3:
+  - Note 2: a symlink or other non-regular file at a planned target name gets past rule 6.
+  - Note 5: in `051-verify.sh`, a grep error in the committed-secret scan reads as "none found".
+- Status: AC1–AC13 demonstrated. AC14 is human and happens after merge, per the spec.
