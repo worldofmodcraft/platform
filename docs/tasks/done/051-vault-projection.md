@@ -1,6 +1,6 @@
 # Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** in-progress (AC1–AC13 done and reviewed; AC14 human, after merge) (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** done (2026-10-14; AC14 confirmed by Ludwig) (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051
@@ -238,3 +238,16 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
   - Note 2: a symlink or other non-regular file at a planned target name gets past rule 6.
   - Note 5: in `051-verify.sh`, a grep error in the committed-secret scan reads as "none found".
 - Status: AC1–AC13 demonstrated. AC14 is human and happens after merge, per the spec.
+- 2026-10-14 ~23:10 CEST, AC14 live run, manager with Ludwig. Obsidian.exe was running (checked with `tasklist.exe`).
+  The script came from `git show main:tools/vault/wom_vault.py` at ab9232c.
+  - **Procedure error, logged:** the first `check --save-baseline` was given `--repo`, which `check` does
+    not accept (argparse rc=2). So **no fresh baseline existed before the first write**, and the `write` ran anyway.
+  - Mitigation: the three hand-written notes were compared by `stat -c '%n|%s|%Y'` against task 050's
+    baseline. `diff` exit 0, identical.
+  - Then `check --save-baseline` saved 4 non-generated files (the three notes plus Ludwig's undeleted probe),
+    and `check --baseline` found 0 differences.
+  - Lesson: run each AC14 step as its own command and stop on a non-zero rc. Do not chain them with `;`.
+  - `write --ref main`: `planned=42 written=42 unchanged=0 skipped_branch_owned=3 status_unparsed=0 no_log_entry=0`, rc=0.
+  - Second `write`: `written=0 unchanged=42`, rc=0. Idempotent live.
+  - Ludwig: "Anteckningarna har synkat med mobilen." **AC14 PASS.**
+- Task 051 done.
