@@ -1,6 +1,6 @@
 # Task 053: Decision and journal notes in the vault projection
 
-- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** draft (spec v1; independent review pending; Ludwig's approval pending)
+- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/053-vault-adr-journal / ~/wt/task-053

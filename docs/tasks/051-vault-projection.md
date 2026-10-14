@@ -1,6 +1,6 @@
 # Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** draft (spec v2 after the independent spec review, 2026-10-14; second review pending; Ludwig's approval pending)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051

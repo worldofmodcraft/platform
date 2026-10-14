@@ -1,6 +1,6 @@
 # Task 052: Keep the vault current automatically, and keep agents' file tools out of it
 
-- **Mission:** tooling (task 047, part C, step 3) — **Status:** draft (spec v2 after the independent spec review, 2026-10-14; second review pending; Ludwig's approval pending)
+- **Mission:** tooling (task 047, part C, step 3) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/052-vault-triggers / ~/wt/task-052
