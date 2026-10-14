@@ -63,11 +63,17 @@ nfiles="$(git -C "$REPO" ls-files | wc -l)"
 [ "$nfiles" -gt 10 ] || red "git ls-files returned only $nfiles files"
 # One grep per tracked file so that its exit status is read: 0 = hit, 1 = none, >=2 = grep failed (task 053, A3).
 # An erroring grep must turn this check red; it must never count as "none found".
+# The excluded spec file must exist at one of its listed paths, or the exclusion would silently match nothing.
+spec_found=0
+for sp in docs/tasks/051-vault-projection.md docs/tasks/done/051-vault-projection.md; do
+  [ -f "$REPO/$sp" ] && spec_found=$((spec_found+1))
+done
+if [ "$spec_found" -ne 1 ]; then red "the 051 spec file must exist at exactly one of docs/tasks/ and docs/tasks/done/ (found $spec_found); the scan exclusion would match nothing"; fi
 scan_hits=0; scan_errors=0
 while IFS= read -r -d '' f; do
   rc=0; (cd "$REPO" && grep -IEl -- "$SECRET_RX" "$f") || rc=$?
   case "$rc" in 0) scan_hits=$((scan_hits+1));; 1) ;; *) scan_errors=$((scan_errors+1));; esac
-done < <(cd "$REPO" && git ls-files -z -- . ':!docs/tasks/051-vault-projection.md' ':!docs/tasks/051-verify.sh')
+done < <(cd "$REPO" && git ls-files -z -- . ':!docs/tasks/051-vault-projection.md' ':!docs/tasks/done/051-vault-projection.md' ':!docs/tasks/051-verify.sh')
 if [ "$scan_errors" -gt 0 ]; then red "secret scan: grep failed on $scan_errors file(s) (exit >= 2); an erroring scan proves nothing"
 elif [ "$scan_hits" -gt 0 ]; then red "secret-shaped string committed in $scan_hits file(s) (listed above)"
 else say "ok: no secret-shaped string in $nfiles tracked files (the spec file and this script are excluded: they define the patterns)"; fi
