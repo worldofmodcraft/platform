@@ -1,6 +1,6 @@
 # Task 058: Probe — can a project-owned URL front the release assets that `source_archive` points at?
 
-- **Mission:** SITE-V1, deliverable **D2/D5** (decision Q-G) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
+- **Mission:** SITE-V1, deliverable **D2/D5** (decision Q-G) — **Status:** in-progress (local part done; live part needs Ludwig) 
 - **Agent / model:** implementer / sonnet for the local matrix and the report; Ludwig (or the manager on his behalf, recorded) for the browser observations.
 - **Budget:** small (≤ 1-2 agent-sessions). It produces a **report, not a decision**.
 - **Branch / worktree:** `task/058-archive-url-probe` / `~/wt/task-058` — **platform** repo.
@@ -72,3 +72,4 @@ Declared: `docs/tasks/058-verify.sh` for criteria 1-2 and 8. Criteria 3-6 are li
 ---
 # Task 058 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054 (decision Q-G). Two observations made while writing, commands in "What is already known": GitHub's release download answers 302 to `release-assets.githubusercontent.com`; `curl -L` does not follow meta refresh. Nothing else verified.
+- 2026-10-14 implementer (local part). Built `tools/probe/archive-url/` (fixture_server.py, matrix.py, node_client.mjs, pages-tree/), `docs/tasks/058-verify.sh`, `docs/research/archive-url-probe.md` (partial). Criteria 1, 2, 8: demonstrated (output in the commit reply / verify run); mutation test: status-break, SHA-drop, error-swallow each reddened checks C1, C3, C6 respectively. First mutation attempt for "swallow" was NOT caught (no real errors in the clean run) so a refused-connection error control (C6) was added. Criteria 3, 4, 5, 6, 10: NOT RUN - needs Ludwig/manager (steps in the report). Criterion 7: table done for local cells; the "what this means for waiting tasks" mapping NOT DONE (needs live outcome). No push, no credentials, no DNS.
