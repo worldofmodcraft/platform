@@ -265,3 +265,8 @@ FAIL [3] `built` item cites no observation (obs L<n>): N1
 FAIL [3] `built` item cites no observation (obs L<n>): N2
 == 25 pass, 4 fail
 ```
+- 2026-10-15 manager:
+  - Re-review after fix round 1: 2 blocking findings on the rule-9 criterion, the second failure of the same criterion.
+    Under §3.4 the author was stopped and ONE escalation was run: a fresh agent with an exact spec. Result 62ee3bf.
+  - Manager fresh-clone re-run at 62ee3bf: `== 31 pass, 0 fail`. No `built` row claims protection any more.
+  - Status: script criteria green. **Criterion 9 (Ludwig's read-through) is open.** The PR stays unmerged until Ludwig reads it.
