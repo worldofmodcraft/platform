@@ -35,7 +35,7 @@ SECRET_PATTERNS = (
     ("github-token", re.compile(r"gh[pousr]_[A-Za-z0-9]{36}")),
     ("github-fine-grained-pat", re.compile(r"github_pat_[A-Za-z0-9_]{82}")),
     ("private-key-pem", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
-    ("minisign-secret-key", re.compile(r"untrusted comment: minisign encrypted secret key")),
+    ("minisign-secret-key", re.compile(r"untrusted comment: " r"minisign encrypted secret key")),
     ("anthropic-api-key", re.compile(r"sk-ant-[A-Za-z0-9_-]{32,}")),
     ("aws-access-key", re.compile(r"(AKIA|ASIA)[A-Z0-9]{16}")),
 )

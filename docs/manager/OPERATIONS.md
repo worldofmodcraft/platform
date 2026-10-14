@@ -256,3 +256,11 @@ When two agents disagree about a fact, **check the fact yourself** — it is usu
 so this session showed a reviewer had misattributed a real diagnostic (it existed, at a different
 probe case) to a failure that had none, after the manager had already propagated the claim into two
 briefs. §2c's "re-run it, do not trust the transcript" applies to the manager's own reasoning too.
+
+### The vault projection tool never touches the vault except at planned note paths
+`tools/vault/wom_vault.py` (task 051, contract `docs/tools/vault-projection.md`) writes generated notes into
+the Obsidian vault. Facts that were expensive to establish: tests must run with `WOM_VAULT_TEST=1` and a
+temp `WOM_VAULT` (test mode ignores `~/.config/wom/vault-path`); the tool never deletes, so a crash can leave
+a hidden `.NAME.pid.ns.wom-tmp` to remove by hand; `strace` is not installed on this machine, so "never opened
+a file" is proven with a Python audit hook (`tools/vault/tests/audit_run.py`). Self-test:
+`docs/tasks/051-verify.sh [--mutate]`.
