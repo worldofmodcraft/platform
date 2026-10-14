@@ -82,6 +82,13 @@ ac1() {
   check "AC1 refresh-main.sh (main NOT checked out anywhere) exits 0" test "$rc" = 0
   check "AC1 ...used git fetch origin main:main" grep -qF 'main is not checked out anywhere' "$W/refresh2.out"
   check "AC1 ...and updated main's notes" grep -qF 'ops v2 fetched' "$WOM_VAULT/Gotchas.md"
+  # post-merge on a branch other than main must do nothing
+  new_world mrg; install_hooks; git -C "$B" worktree add -q -b feature/y "$W/wty" main
+  a_commit docs/manager/OPERATIONS.md "ops merged elsewhere" "ops v2"; git -C "$B" fetch -q origin
+  git -C "$W/wty" merge -q --no-edit origin/main 2>"$W/mrg.err"
+  check "AC1 a merge on a non-main branch really happened" test "$(git -C "$W/wty" log -1 --format=%s)" = "ops v2"
+  check "AC1 post-merge on a non-main branch writes nothing" test -z "$(vault_files)"
+  check "AC1 ...and is silent" test ! -s "$W/mrg.err"
   # layout 1: main checked out in a worktree; hooks NOT installed, so the write is refresh-main's own
   new_world lay1; "$B/tools/vault/install-git-hooks.sh" --repo "$B" --pin-only >/dev/null 2>&1; add_task_wt
   a_commit docs/manager/OPERATIONS.md "ops v2 layout1" "ops v2"
@@ -227,6 +234,26 @@ PY
   mkdir -p "$G/uhome"
   expect_guard 0 "unconfigured vault allows" "$G/uhome" "$(gj Write file_path "$V/x.md" "$G/repo")"
   check "AC4 ...and the skip is counted in guard-skips.log" test "$(wc -l < "$G/uhome/.config/wom/guard-skips.log")" -ge 1
+  # fail-open hazards (review round 1): only exit 2 blocks, so every other outcome must be mapped to 2
+  mkdir -p "$G/bhome/.config/wom"; printf '%s\n' "$V" > "$G/bhome/.config/wom/vault-path"; chmod 000 "$G/bhome/.config/wom/vault-path"
+  expect_guard 2 "unreadable vault-path file (vault configured but broken)" "$G/bhome" "$(gj Write file_path "$V/x.md" "$G/repo")"
+  expect_guard 2 "unreadable vault-path file: even a repo path is blocked (cannot tell where the vault is)" "$G/bhome" "$(gj Write file_path "$G/repo/f.txt" "$G/repo")"
+  mkdir -p "$G/nhome/.config/wom"; printf '\377\376\200 not utf8\n' > "$G/nhome/.config/wom/vault-path"
+  expect_guard 2 "non-UTF-8 vault-path file" "$G/nhome" "$(gj Write file_path "$V/x.md" "$G/repo")"
+  expect_guard 2 "non-UTF-8 vault-path file: a repo path is blocked too" "$G/nhome" "$(gj Write file_path "$G/repo/f.txt" "$G/repo")"
+  mkdir -p "$G/crash"; cp "$SRC/.claude/hooks/vault-guard.sh" "$G/crash/"
+  sed 's/^    return os.path\.\(realpath\|abspath\)(p).*/    raise RuntimeError("injected crash")/' "$SRC/.claude/hooks/vault_guard.py" > "$G/crash/vault_guard.py"
+  grep -q 'injected crash' "$G/crash/vault_guard.py" || red "AC4 crash injection did not apply"
+  printf '%s' "$(gj Write file_path "$V/x.md" "$G/repo")" | env -i PATH="$PATH" HOME="$H" python3 -I -B "$G/crash/vault_guard.py" >/dev/null 2>&1; rc=$?
+  if [ "$rc" = 2 ]; then say "ok: AC4 an injected crash inside vault_guard.py itself returns 2 (catch-all)"; else red "AC4 injected crash exited $rc, not 2 (the python half must catch everything)"; fi
+  printf '%s' "$(gj Write file_path "$V/x.md" "$G/repo")" | env -i PATH="$PATH" HOME="$H" "$G/crash/vault-guard.sh" >/dev/null 2>&1; rc=$?
+  if [ "$rc" = 2 ]; then say "ok: AC4 an injected crash through the wrapper exits 2"; else red "AC4 injected crash through the wrapper exited $rc, not 2"; fi
+  mkdir -p "$G/odd"; cp "$SRC/.claude/hooks/vault-guard.sh" "$G/odd/"; printf 'import sys\nsys.exit(1)\n' > "$G/odd/vault_guard.py"
+  printf '{}' | "$G/odd/vault-guard.sh" >/dev/null 2>&1; rc=$?
+  if [ "$rc" = 2 ]; then say "ok: AC4 a guard exiting 1 is mapped to 2 by the wrapper"; else red "AC4 a guard exiting 1 reached the caller as $rc, not 2"; fi
+  mkdir -p "$G/nopy"; ln -sf "$(command -v dirname)" "$G/nopy/dirname"
+  printf '%s' "$(gj Write file_path "$V/x.md" "$G/repo")" | env -i PATH="$G/nopy" HOME="$H" "$SRC/$GUARD_REL" >/dev/null 2>&1; rc=$?
+  if [ "$rc" = 2 ]; then say "ok: AC4 python3 missing from PATH blocks (exit 2)"; else red "AC4 python3 missing exited $rc, not 2"; fi
   # the wrapper fails closed for its own missing sibling
   mkdir -p "$G/lonely"; cp "$SRC/$GUARD_REL" "$G/lonely/vault-guard.sh"
   printf '{}' | "$G/lonely/vault-guard.sh" >/dev/null 2>&1; rc=$?
@@ -286,6 +313,11 @@ if [ "${1:-}" = "--mutate" ]; then
   mutate casefold .claude/hooks/vault_guard.py 'return s.casefold()  # CHECK:casefold' 'return s  # mutated' 'AC4'
   mutate realpath .claude/hooks/vault_guard.py 'return os.path.realpath(p)  # CHECK:realpath' 'return os.path.abspath(p)  # mutated' 'AC4'
   mutate fail-closed .claude/hooks/vault_guard.py 'if inside(lex, vlex) or inside(rp, vlex):  # CHECK:fail-closed-match' 'if False:  # mutated' 'AC4'
+  mutate catch-all .claude/hooks/vault_guard.py '    except BaseException as exc:  # CHECK:catch-all' '    except ZeroDivisionError as exc:  # mutated' 'AC4'
+  mutate exec .claude/hooks/vault-guard.sh 'python3 -I "$dir/vault_guard.py" # CHECK:no-exec' 'exec python3 -I "$dir/vault_guard.py" # mutated' 'AC4'
+  mutate status-map .claude/hooks/vault-guard.sh '  *) echo "vault-guard: guard exited with unexpected status $rc; blocking (fail closed)" >&2; exit 2;;' '  *) exit "$rc";;' 'AC4'
+  mutate broken-config .claude/hooks/vault_guard.py 'if broken:  # CHECK:broken-config' 'if False:  # mutated' 'AC4'
+  mutate branch-filter-merge tools/vault/git-hooks/post-merge '[ "$branch" = main ] || exit 0 # CHECK:branch-filter-merge' ': # mutated' 'AC1'
   mutate branch-filter tools/vault/git-hooks/post-commit 'case "$branch" in task/[0-9][0-9][0-9]-*) ;; *) exit 0;; esac # CHECK:branch-filter' ': # mutated' 'AC1'
   mutate installer-refusal tools/vault/install-git-hooks.sh 'case "$common/" in "$tmp"/*) ;; *) die' 'case "$common/" in *) ;; *) die' 'AC3'
   mutate installer-nonwom tools/vault/install-git-hooks.sh 'if [ -L "$dest" ] || ! grep -q -- "^$MARK" "$dest" 2>/dev/null; then # CHECK:installer-nonwom' 'if false; then # mutated' 'AC3'

@@ -175,6 +175,11 @@ a relative path is joined to the call's `cwd`; `D:\...` and `d:/...` map to the 
 - Vault not configured: allow, and count the skip in `~/.config/wom/guard-skips.log` (a fresh clone is not bricked).
 - Configured but unresolvable (for example D: not mounted): block only paths whose normalised text lies under the
   configured path string (lexical, case-folded); allow everything else so repo editing never stops.
+- Config file present but unreadable, not UTF-8, empty or not exactly one line: that is "configured but broken", not
+  "not configured". The vault location is unknown, so **every** file-tool call is blocked with a message and the recovery
+  line below (an unreadable file is a damaged setup, and guessing "allow" would let a write into the vault through).
+- Only exit 2 blocks in Claude Code, so the wrapper does not `exec`: it checks `command -v python3`, runs the python half,
+  and maps any status other than 0 and 2 to 2; the python half has a catch-all that returns 2.
 - Invalid JSON, or a Write/Edit/MultiEdit/NotebookEdit call without a path: block. A missing `vault_guard.py` blocks
   too (the wrapper checks), because Claude Code treats a missing hook *script* as a non-blocking error.
 

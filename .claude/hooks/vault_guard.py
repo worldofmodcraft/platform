@@ -52,19 +52,31 @@ def inside(target, vault):
 
 
 def configured_vaults():
-    out = []
+    """Return (vaults, broken).  `broken` lists config sources that exist but cannot be turned into a vault path
+    (unreadable, not UTF-8, empty, or not exactly one line).  Such a source means "configured but broken", never
+    "not configured": the vault location is unknown, so main() blocks every file-tool call."""
+    out, broken = [], []
     env = os.environ.get("WOM_VAULT")
     if env:
         out.append(("WOM_VAULT", env.strip()))
     cfg = os.path.join(os.path.expanduser("~"), ".config", "wom", "vault-path")
     try:
         with open(cfg, encoding="utf-8") as fh:
-            lines = [l.strip() for l in fh.read().splitlines() if l.strip()]
+            lines = fh.read().splitlines()
     except FileNotFoundError:
-        lines = []
-    if lines:
-        out.append((cfg, lines[0]))
-    return out
+        return out, broken
+    except (OSError, UnicodeDecodeError) as exc:
+        broken.append("%s: %s" % (cfg, exc.__class__.__name__))
+        return out, broken
+    if len(lines) != 1 or not lines[0].strip():
+        broken.append("%s: must hold exactly one non-empty line" % cfg)
+    else:
+        out.append((cfg, lines[0].strip()))
+    return out, broken
+
+
+RECOVERY = ("To disable the guard, Ludwig runs: rm -f ~/.config/wom/vault-path  (and unset WOM_VAULT if set); "
+            "see docs/tools/vault-projection.md, \"Triggers and guard\".")
 
 
 def count_skip(reason):
@@ -94,7 +106,11 @@ def main():
             print("vault-guard: %s call without a file path; blocking" % data.get("tool_name"), file=sys.stderr)
             return 2
         return 0
-    vaults = configured_vaults()
+    vaults, broken = configured_vaults()
+    if broken:  # CHECK:broken-config
+        print("vault-guard: the vault is configured but its config is broken (%s), so the vault location is unknown; "
+              "blocking every file-tool call (fail closed). %s" % ("; ".join(broken), RECOVERY), file=sys.stderr)
+        return 2
     if not vaults:
         count_skip("no vault configured (WOM_VAULT unset, no ~/.config/wom/vault-path); allowed %s" % paths[0][:200])
         return 0
@@ -122,5 +138,13 @@ def main():
     return 0
 
 
+def guarded_main():
+    try:
+        return main()
+    except BaseException as exc:  # CHECK:catch-all  (only exit 2 blocks; any crash must therefore be 2)
+        print("vault-guard: unexpected %s: %s; blocking (fail closed)" % (exc.__class__.__name__, exc), file=sys.stderr)
+        return 2
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded_main())

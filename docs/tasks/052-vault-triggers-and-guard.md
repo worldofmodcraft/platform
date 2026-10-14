@@ -162,3 +162,19 @@ exit=0
 ## Questions
 - Q1 (non-blocking): the guard stats the configured vault path (`os.path.isdir`) on every Write/Edit call. If the vault is on a slow or sleeping drvfs mount this adds a stat per call; accepted as cheap. Say if you want a cache.
 - Q2 (non-blocking): the verify script's test-only `WOM_GUARD_MNT_ROOT` knob exists only to avoid touching /mnt/d in tests; it is honoured only with `WOM_VAULT_TEST=1` and a root under TMPDIR. Alternative would be to drop the D:\ end-to-end fixtures and keep only the pure-function check. Lean: keep.
+
+## Task 052 fix round 1 (review finding: the guard failed open)
+- Cause: only exit 2 blocks; `vault-guard.sh` ended in `exec python3`, `configured_vaults()` caught only `FileNotFoundError`, `main()` had no catch-all.
+- Step 1, fixtures first, run against the OLD code (all red):
+```
+FAIL: AC4 unreadable vault-path file (vault configured but broken) (wanted exit 2, got 1: Traceback ...
+FAIL: AC4 unreadable vault-path file: even a repo path is blocked (cannot tell where the vault is) (wanted exit 2, got 1 ...
+FAIL: AC4 non-UTF-8 vault-path file (wanted exit 2, got 1: Traceback ...
+FAIL: AC4 non-UTF-8 vault-path file: a repo path is blocked too (wanted exit 2, got 1 ...
+FAIL: AC4 injected crash exited 1, not 2 (the python half must catch everything)
+FAIL: AC4 injected crash through the wrapper exited 1, not 2
+FAIL: AC4 python3 missing exited 127, not 2
+```
+- Step 2, fix: wrapper has no `exec`, checks `command -v python3`, maps any status other than 0/2 to 2; `main()` is wrapped by a catch-all (`guarded_main`) returning 2.
+- Decision (config exists but unreadable or garbled): it counts as configured-but-broken, NOT unconfigured. The vault location is unknown, so I block every call of the four file tools, with a message naming the cause and the recovery line. Narrower options ("block only under determinable vaults") cannot protect the unknown vault, and the recovery path (delete the file) stays available through Bash. An empty file or a multi-line file is treated the same, matching 051's "exactly one line" rule.
+- Step 3/4: new mutants catch-all, exec, status-map, broken-config, branch-filter-merge, all killed; a new fixture (guard exiting 1 mapped to 2) and a post-merge-on-non-main test were added. Existing checks untouched.
