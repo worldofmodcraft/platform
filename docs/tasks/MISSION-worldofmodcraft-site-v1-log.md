@@ -1667,3 +1667,45 @@ findings elsewhere in this project.
 existed, and which round 4 correctly left unread as out of scope. Ludwig approved booking it as its own
 small task rather than widening 032 after four rounds. **Registry `docs/tasks/045-takedown-mutation-shape.md`,
 merged as registry PR #6, sequenced before task 007** because 007 consumes both documents.
+
+## SESSION 8 — 2026-10-14 (opening entry)
+
+### Token guard lifted by Ludwig
+Session start: the snapshot read 5h 37 %, weekly 72 % (advisory only under the interim rule).
+Usage was therefore UNKNOWN, so the manager halted and asked. Ludwig answered, verbatim: "Glöm token
+kontrollen, du kan framgent ignorera den regeln och alla subagents också." From that moment the guard is
+lifted for the manager and every subagent. CLAUDE.md rule 0 and MANAGER.md §8 still carry the old text.
+Aligning them is Q-T below (task 048). Context at session start: 5 % of 1M.
+
+### Work this session
+Inbox draft "adopt Arcane practices" became umbrella task 047, split into 050 (sync probe), 051 (generator),
+052 (triggers and guard), 048 (doctrine) and 049 (safety hooks). Task files are on branch
+`task/047-arcane-practices` (view: `git -C ~/wt/task-047 log --stat -1`). Nothing is built until
+Ludwig approves the specs.
+
+## For Ludwig — task 047 (2026-10-14)
+Lean marked ★. Q1–Q6 are the draft's items 1–6.
+- **Q1 hooks:** A all of Arcane's blocks, including the commit-on-red test gate / ★B block `--force`,
+  commits on main, `reset --hard` and `rm -rf`; allow `branch -D` for the main session only (§6 needs it);
+  no test gate (it collides with §2c rule 5) / C no hooks.
+- **Q2 spawn depth 1:** ★A `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` plus `disallowedTools: Agent`
+  (verified: the default is 3) / B frontmatter only / C no change.
+- **Q3 blind verifier:** ★A the reviewer forms findings from spec + diff before it reads the task log /
+  B a separate verifier agent in addition / C no change.
+- **Q4 size caps:** A hard stop at 5 source files / 300 lines / 10-file reading list / ★B the same numbers
+  as a spec-gate warning that needs a written justification / C keep agent-session budgets only.
+- **Q5 maxTurns:** ★A per-agent caps; hitting one counts as a budget stop (§8) / B only for cheap agents /
+  C no.
+- **Q6 handover file:** A a separate per-agent handover file / ★B no new file; a script checks after every
+  subagent that the task log got a new entry / C nothing.
+- **Q-T token-guard text:** A delete the rule / ★B keep the text, marked "suspended by Ludwig 2026-10-14
+  until he revokes it" / C keep it in force.
+- **Q-P public repo:** platform is public (verified: unauthenticated API returns 200). ★A commit the task
+  files, but keep the draft, the Arcane reference and the vault path out of git (the path lives in
+  `~/.config/wom/vault-path`) / B commit everything / C keep it all local.
+- **Q-C1 trigger:** ★A git hooks (post-commit on task branches, post-merge on main) plus a manager step
+  after each merge and at handover / B manager step only / C git hooks only.
+- **Q-C2 Commands.md source:** ★A a new hand-maintained `docs/manager/COMMANDS.md` / B extracted from
+  OPERATIONS.md code blocks / C drop the note.
+Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's whole trigger design (Q-C1),
+048 and 049 entirely.
