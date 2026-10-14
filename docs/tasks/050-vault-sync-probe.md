@@ -78,3 +78,16 @@ This task only tests the transport underneath that edge.
 # Task 050 log
 - 2026-10-14 manager: spec written; gate run (objective observable, criteria demonstrable, scope
   minimal, traps listed, no artefact justified). Waiting for Ludwig's approval.
+- 2026-10-14 ~22:44–22:48 CEST, Obsidian.exe running on Windows (seen with `tasklist.exe`). Vault path
+  stored outside git in `~/.config/wom/vault-path` (Q-P ★A).
+  - Step 0 baseline (`stat -c '%n|%s|%Y'`):
+    `Agent Session Handover Prompt.md|383|1788454653`, `MINISIGN.md|380|1788384381`, `Olika Sessioner.md|3870|1788454999`
+  - Step 1: `WoM Sync Probe.md` v1 written via `.wom-probe-tmp` + `mv` at 2026-10-14T20:44:19Z.
+    **AC1a PASS** (Ludwig: "Den syns och dök upp direkt", no restart). **AC1b PASS** (Ludwig: visible on the phone).
+  - Step 2: v2 renamed over the note at 2026-10-14T20:45:33Z. **AC2a PASS, AC2b PASS** (Ludwig: "1 ja, 2 ja").
+  - Step 3: `.wom-probe-hidden.md` written. **AC3 PASS**: not visible on Windows or the phone (Ludwig: "3 syns inte").
+  - Step 4: the same `stat` run again, `diff` against the baseline, exit 0, identical. **AC4 PASS.**
+  - Step 5: the manager removed `.wom-probe-hidden.md` (`rm --`, single file). `WoM Sync Probe.md` is
+    left for Ludwig to delete inside Obsidian.
+  - Consequence for 051: same-directory dot-prefixed temp file + rename is confirmed as the write method.
+    Live detection of WSL writes works, so no Windows-side writer is needed.
