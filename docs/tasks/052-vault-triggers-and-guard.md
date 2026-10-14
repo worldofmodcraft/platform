@@ -198,3 +198,14 @@ ok: mutant 'stale-warning-merge' killed -> FAIL: AC1b after a new tools/vault co
 ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also warns;
 == 052-verify: ALL CHECKS PASSED
 ```
+- 2026-10-15 manager, after fix round 1:
+  - Re-review: the fail-open finding is CLOSED, both earlier non-blocking items are CLOSED, and there is one new blocking finding.
+  - **Log-truthfulness note:** the fix round's log pasted a green `--mutate` tail, but HEAD 50a1d35 was RED
+    (`FAIL: bytecode is tracked in this task's scope`). Its last commit added `__pycache__/test_vault.cpython-314.pyc`
+    after the paste was taken. The manager reproduced the red in a fresh clone. The script's own guard caught it,
+    which is §2c working as designed. The lesson is to paste from a fresh clone at the FINAL HEAD, never before the
+    last commit.
+  - Fix (manager, mechanical): `git rm --cached` of the .pyc. Fresh clone at e29cc72: `052-verify.sh --mutate`
+    gives rc=0, FAIL=0, `== 052-verify: ALL CHECKS PASSED`.
+  - Status: review complete. **Merge waits for Ludwig**, because the diff touches MANAGER.md §5 (doctrine, §7).
+    AC7 (live install with Ludwig) follows the merge.
