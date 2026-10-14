@@ -178,3 +178,23 @@ FAIL: AC4 python3 missing exited 127, not 2
 - Step 2, fix: wrapper has no `exec`, checks `command -v python3`, maps any status other than 0/2 to 2; `main()` is wrapped by a catch-all (`guarded_main`) returning 2.
 - Decision (config exists but unreadable or garbled): it counts as configured-but-broken, NOT unconfigured. The vault location is unknown, so I block every call of the four file tools, with a message naming the cause and the recovery line. Narrower options ("block only under determinable vaults") cannot protect the unknown vault, and the recovery path (delete the file) stays available through Bash. An empty file or a multi-line file is treated the same, matching 051's "exactly one line" rule.
 - Step 3/4: new mutants catch-all, exec, status-map, broken-config, branch-filter-merge, all killed; a new fixture (guard exiting 1 mapped to 2) and a post-merge-on-non-main test were added. Existing checks untouched.
+- Fresh-clone tail after the fix (exit 0, 109 ok lines):
+```
+ok: no bytecode is tracked in this task's scope
+== AC6: mutation run (the unmutated copy must be green; each mutant must turn the matching checks red)
+ok: control (unmutated copy) is green
+ok: mutant 'casefold' killed -> FAIL: AC4 upper-case variant (wanted exit 2, got 0: );FAIL: AC4 lower-case variant (wanted exit 2, got 0: );FAIL: AC4 D:\ path, other case
+ok: mutant 'realpath' killed -> FAIL: AC4 symlink into the vault (wanted exit 2, got 0: );
+ok: mutant 'fail-closed' killed -> FAIL: AC4 configured-but-missing vault: a path under it (wanted exit 2, got 0: );FAIL: AC4 configured-but-missing vault: upper-case var
+ok: mutant 'catch-all' killed -> FAIL: AC4 injected crash exited 1, not 2 (the python half must catch everything);
+ok: mutant 'exec' killed -> FAIL: AC4 a guard exiting 1 reached the caller as 1, not 2;
+ok: mutant 'status-map' killed -> FAIL: AC4 a guard exiting 1 reached the caller as 1, not 2;
+ok: mutant 'broken-config' killed -> FAIL: AC4 unreadable vault-path file (vault configured but broken) (wanted exit 2, got 0: );FAIL: AC4 unreadable vault-path file: eve
+ok: mutant 'branch-filter-merge' killed -> FAIL: AC1 post-merge on a non-main branch writes nothing;FAIL: AC1 ...and is silent;
+ok: mutant 'branch-filter' killed -> FAIL: AC1 and the hook is silent there;
+ok: mutant 'installer-refusal' killed -> FAIL: AC3 test mode refuses a git dir not under the temp dir (exit non-zero);FAIL: AC3 ...saying so;FAIL: AC3 ...and wrote nothin
+ok: mutant 'installer-nonwom' killed -> FAIL: AC3 an existing non-WoM hook makes the installer exit non-zero;FAIL: AC3 ...naming the file;FAIL: AC3 ...the foreign hook is
+ok: mutant 'stale-warning-merge' killed -> FAIL: AC1b after a new tools/vault commit the hook warns pinned copy is stale;
+ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also warns;
+== 052-verify: ALL CHECKS PASSED
+```
