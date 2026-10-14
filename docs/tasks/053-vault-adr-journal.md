@@ -21,6 +21,11 @@ notes follow 051's contract, and their idempotence and secret-scan behaviour are
 Each day file is re-rendered on every run and written only if its bytes changed, so a new commit
 rewrites only its own day (051 write rule 3).
 
+**Checked 2026-10-14 on main `3e2b6ef`:** none of the 120 ADR files starts with `---`. History is
+108 commits over 8 Stockholm days. The first live run therefore writes about 130 notes in one LiveSync
+burst (120 ADR notes, 8 Journal days, and the 051 set). That is accepted as a one-off; later runs write
+only what changed. `ADR/` and `Journal/` are created under 051 write rule 5.
+
 ## File scope (declared)
 `tools/vault/wom_vault.py`, `tools/vault/tests/**`, `docs/tools/vault-projection.md`, `docs/tasks/053-verify.sh`, this file's log.
 

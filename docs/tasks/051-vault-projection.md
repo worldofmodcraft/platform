@@ -36,8 +36,12 @@ updated: <committer date of source_commit, ISO 8601>
 ```
 - **Single-source notes:** `source_commit` = `git log -1 --format=%H <ref> -- <paths>` (the last commit
   that touched the source). A merge therefore leaves notes whose sources did not change untouched.
-- **Aggregate notes** (`Status.md`, `Tasks.md`) also depend on branch refs. For them `source_commit` = the
-  ref's HEAD, and they are rewritten only when their bytes change (write rule 3). Churn is limited to these two.
+- **Aggregate notes** (`Status.md`, `Tasks.md`) are derived from main's files **plus the list of local
+  `task/*` branches** (used for ownership and for the `[[Tasks/NNN]]` links of open branches). For them
+  `source_commit` is the ref's HEAD, and they are rewritten only when their bytes change (write rule 3).
+  Churn is limited to these two.
+- **`Tasks/NNN.md`:** `source_path` = the task file's path. `source_commit` = the owning ref's HEAD
+  (main, or the task branch).
 
 ### Mode `main`: `wom_vault.py write --ref main`
 | Note | Derived from, exactly |
@@ -54,8 +58,10 @@ word is `done` or `stopped`, or its file lives in `done/`. A file without a matc
 unparsed` and counted in the run summary. That is not an error.
 
 ### Mode `task`: `wom_vault.py write --ref HEAD`, inside a worktree on branch `task/NNN-*`
-Writes only `Tasks/NNN.md`: branch name, status word, the last bullet line of the task file's log section,
-and `git log --oneline main..HEAD`. On any other branch, or when asked to write any other note:
+Writes only `Tasks/NNN.md`: branch name, status word, the last line starting with `- ` after the
+task file's log heading, and `git log --oneline main..HEAD`. The log heading is the first line matching
+`^#{1,2} (Task [0-9]{3} log|Log)\s*$`; both forms occur in the ledger, checked 2026-10-14. With no
+heading or no bullet, the note says `no log entry` and the run summary counts it. On any other branch, or when asked to write any other note:
 non-zero exit, nothing written.
 
 ### One writer per file
@@ -82,14 +88,16 @@ non-zero exit, nothing written.
    A hit reports note, line number and **pattern name**. It never reports the matched text.
    (Manager check, 2026-10-14, main `3e2b6ef`: the only prefix present in the note sources is one bare
    `github_pat_` in prose. The bounded form does not match it.)
-5. The script never deletes anything.
+5. The script never deletes anything. Subdirectories (`Tasks/`) are created only in the write phase,
+   only inside the validated vault, and never the vault itself.
 6. **Vault reads are limited** to planned targets (frontmatter and bytes). Nothing else is ever opened.
    The hand-written names `Agent Session Handover Prompt.md`, `MINISIGN.md` and `Olika Sessioner.md` are
    hard-coded as forbidden target names, so validation fails before any read.
 7. `WOM_VAULT` is resolved from the environment first, then from `~/.config/wom/vault-path` (one line,
    exists on Ludwig's machine since 2026-10-14). Neither the path nor the file is committed (Q-P = A).
-8. **Test mode.** With `WOM_VAULT_TEST=1`, the script refuses any vault whose `realpath` is not under
-   `realpath(${TMPDIR:-/tmp})`. Without it, the script refuses any vault under `/tmp`.
+8. **Test mode.** With `WOM_VAULT_TEST=1`, the script **ignores `~/.config/wom/vault-path` entirely**,
+   requires `WOM_VAULT` in the environment, and refuses any vault whose `realpath` is not under
+   `realpath(${TMPDIR:-/tmp})`. Without test mode, the script refuses any vault under `/tmp`.
 9. Python 3 stdlib only, run as `python3 -I` (Python 3.14.4 and tzdata are present on this machine).
 
 ### Subcommand `check` (stat only)
@@ -160,3 +168,11 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
   temp repo, `fetch main:main` fires no `post-merge`, while `pull` does. Finding 4's premise was
   overstated: no `ghp_`, `sk-ant-` or PEM header exists on main, only one bare `github_pat_` in prose.
   Its fix (bounded regexes, pinned control) is adopted anyway. ADR and Journal notes were split into 053.
+- 2026-10-14 second independent spec review: NOT PASS, 2 blocking (both in 052) and 5 smaller. Fixed in
+  spec v3: 052 refresh-main.sh (handles main checked out or not), the pinned copy taken from the `main`
+  ref with a stale warning, and the guard no longer blocks repo edits when the vault is unmounted.
+  051 got the log-heading regex (both ledger forms), frontmatter for `Tasks/NNN.md`, the mkdir rule, and
+  test mode ignoring the config file. 053 records the all-ADR scan (0 of 120 start with `---`) and the
+  accepted first-run burst (~130 notes). Previous findings 2–6 and 8–11 were closed by the reviewer.
+  The manager judges spec v3 ready for Ludwig without a third round: every remaining finding was
+  concrete and has a concrete fix in the text.
