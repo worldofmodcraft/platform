@@ -1,6 +1,6 @@
 # Task 053: Decision and journal notes in the vault projection
 
-- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** review (implemented 2026-10-14; spec v3 approved by Ludwig)
+- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** done (2026-10-14) (implemented 2026-10-14; spec v3 approved by Ludwig)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/053-vault-adr-journal / ~/wt/task-053
@@ -133,3 +133,9 @@ AC1 test_ac1_decisions_adr_and_journal_exact + merge test (expected content from
 - Judgement call 1 (extending two 051 test expectations by the newly planned Journal note) accepted by the manager as a spec consequence, not a weakening (section 3.5). The stale-index hard error is accepted for now (ADR-0103); Ludwig's question stays booked.
 - `git merge main` done (no rebase). 051's spec now lives in `docs/tasks/done/`. `051-verify.sh` excludes the spec at both `docs/tasks/` and `docs/tasks/done/`, and fails if the spec exists at not exactly one of them. Negative control: with the spec file renamed, the run prints `FAIL: the 051 spec file must exist at exactly one of ...` and ends `== 051-verify: FAILED`.
 - Fresh clone at 81efc37, `TMPDIR=/tmp`: `053-verify.sh --mutate` exit 0, ends `== 051-verify: ALL CHECKS PASSED` / `== 053-verify: ALL CHECKS PASSED`; `051-verify.sh --mutate` exit 0, `ok: no secret-shaped string in 229 tracked files`, 13 of 13 mutants killed, ends `== 051-verify: ALL CHECKS PASSED`.
+- 2026-10-14 manager re-run at 12c44f5: `TMPDIR=/tmp bash docs/tasks/053-verify.sh --mutate` exited rc=0 and ended `== 053-verify: ALL CHECKS PASSED`.
+- 2026-10-14 independent code review (blind order): one blocking finding, a committed `__pycache__/*.pyc`. The manager
+  untracked it, and the fix is a separate commit. Questions (a)–(f) were all judged sound. Non-blocking: there is no FIFO
+  case under `ADR/`, and a symlinked `Journal/` or `ADR/` directory pointing inside the vault is followed. Both are booked.
+  A `.gitignore` for `__pycache__/` and untracking main's three older `.pyc` files are booked as task 059.
+- Status: done (merged by the manager under §7; all criteria demonstrated and reviewed).
