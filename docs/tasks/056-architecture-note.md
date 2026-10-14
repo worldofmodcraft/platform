@@ -231,3 +231,34 @@ PASS  control 'stale review stamp' caught: FAIL [8] last reviewed 2026-01-01 < n
 - L12 Branch protection NOT observed: `curl -s https://api.github.com/repos/worldofmodcraft/registry/branches/main` -> HTTP 403, `x-ratelimit-remaining: 0` (rate limited). A push test was not run (no push permitted). The row is `specified` with an unverified marker.
 - Fix round 1 changes: rows re-tagged (N1 specified; signing-key copies specified; E10/E11 and exit steps 1, 4, 5, 9 and branch protection/GitHub App split or re-tagged); script gained: observation-evidence check, citation narrowing (unqualified `docs/` and `.github/` resolve in this repository only, other repositories need `site:` or `registry:`), fetch-before-read, and controls for the depgraph link, `source_archive`/`append-only` content, re-tagging to built, undefined observation, unverified marker on built row.
 - Red-first (rule 5): the new checks were added to the script and run against the previous note before any edit; the run failed with 32 FAIL lines, e.g. `FAIL [3] task log defines no observations`, `FAIL [3] `built` item cites no observation (obs L<n>): N1`, `FAIL [3] `built` item carries an unverified marker: Signing private key (working copy)`, and ended `== 25 pass, 4 fail`.
+- Fresh-clone run of fix round 1 (commit 1da6be6, rc=0), head and tail:
+```
+fetched /home/ludwig/registry origin/main=4d4a204
+fetched /home/ludwig/site origin/main=8bbee21
+== main run: /tmp/fc056b/c/docs/architecture/system-overview.md
+info: nodes=['N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8'] edges=15 md-only=['E16']
+info: tagged rows=67 unverified-in-body=15
+info: built items checked for observations=20; defined observations=12
+info: distinct cited paths=34
+PASS  all checks on the real note
+...
+PASS  control 'token' caught: FAIL [7] line 294: GitHub token
+PASS  control 'stale review stamp' caught: FAIL [8] last reviewed 2026-01-01 < newest dependency 2026-10-14
+PASS  control 're-tag specified row N3 as built' caught: FAIL [3] `built` item cites no observation (obs L<n>): N3
+PASS  control 'built row cites undefined observation' caught: FAIL [3] `built` item cites L99, not defined in the task log: N2
+PASS  control 'built row with unverified marker' caught: FAIL [3] `built` item carries an unverified marker: N8
+PASS  control 'exit step 9 re-tagged built' caught: FAIL [3] `built` item cites no observation (obs L<n>): 9. **Accept what is lost:** th
+PASS  control 'cite a site-only path unqualified' caught: FAIL [4] cited path does not resolve in this repository: docs/build.md
+PASS  control 'cite a missing contract' caught: FAIL [4] cited path does not resolve in registry: contracts/nope.md
+PASS  control 'depgraph link removed' caught: FAIL [8] depgraph.md header does not link system-overview.md
+PASS  control 'no source_archive in Moving off GitHub' caught: FAIL [6] 'source_archive' not in 'Moving off GitHub'
+PASS  control 'no append-only in Moving off GitHub' caught: FAIL [6] 'append-only' not in 'Moving off GitHub'
+== 29 pass, 0 fail
+```
+- Red-first run (previous note, new checks), tail:
+```
+FAIL [3] task log defines no observations (lines '- L<n> ...')
+FAIL [3] `built` item cites no observation (obs L<n>): N1
+FAIL [3] `built` item cites no observation (obs L<n>): N2
+== 25 pass, 4 fail
+```
