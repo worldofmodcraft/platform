@@ -1,6 +1,6 @@
 # Task 060: Ludwig's new manual steps (M5–M7, Q-H) in the SITE-V1 runbook
 
-- **Mission:** SITE-V1 — **Status:** review (manager, 2026-10-15; small documentation, §2b solo gate)
+- **Mission:** SITE-V1 — **Status:** done (2026-10-15) (manager, 2026-10-15; small documentation, §2b solo gate)
 - **Agent / model:** doc-writer / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/060-runbook-manual-steps / ~/wt/task-060
@@ -53,3 +53,9 @@ Click-paths for M5-M7 are copied from `008b-pipeline-workflow.md` (unverified th
 unverified in the runbook. Changes from 008b's text: step 9 now says how to move the key (Notepad, straight into the form)
 and 008b's "paste into chat" prohibition is kept. Q-H step 4's advice to re-add the old key is my suggestion, not a
 decision; the runbook says the choice is shared. Not verified: any click-path; M1.2/M1.4 settings; whether `www` 301 target is the apex.
+- 2026-10-15 manager review (small documentation task, solo per §2b scale):
+  - Scope matches: two files.
+  - Secret handling checked by grep. Line 11 states the rule. The only pastes are the public key (to the manager)
+    and the private key straight into GitHub's own Actions-secret form, which GitHub offers no alternative to.
+  - The deviation from criterion 3's wording is accepted; its intent (never into chat, a file or an issue) holds.
+- Status: done.
