@@ -1,6 +1,6 @@
 # Task 008a: Pipeline core — clone, validate, scan, archive, hash, sign (offline)
 
-- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until task 057 (version lifecycle contract) has merged and task 058 (archive URL probe) has reported.** The umbrella's Q1 and Q2 are decided (Ludwig, 2026-10-14: Q-B, Q-C). Touches signing: merge requires Ludwig (MANAGER.md §7).
+- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Split 2026-10-14 on review: 008a is now independent of tasks 057 and 058** (it needs no knowledge of the `pending` state or the `source_archive` URL); the parts that do move to `008c-pipeline-write-back.md`. Q-B and Q-C are decided (Ludwig, 2026-10-14). Touches signing: merge requires Ludwig (MANAGER.md §7).
 - **Agent / model:** implementer / sonnet (the signing and verifier parts get an independent reviewer at the same tier or higher with full tools — OPERATIONS.md, "The reviewer agent cannot run this project's verify artefacts")
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008a-pipeline-core` / `~/wt/registry-task-008a` — **registry** repo (`worldofmodcraft/registry`)
@@ -11,7 +11,7 @@ nothing but a git repository, a 40-hex commit, and a key *file* — the exact ar
 contracts describe: a deterministic `.tar.gz` of that commit with a single rooted directory
 (`archive-layout.md`), its SHA-256, a minisign detached signature whose trusted comment follows
 `signature-format.md`, the release tag and two asset names from `artifact-naming.md`, and a result
-object holding the six write-back values. Every rejection the mission requires (§7.1) is produced
+object holding the computed hash, signature, `key_id` and build time. (Turning those into a registry write-back, and the `source_archive` URL, are task 008c.) Every rejection the mission requires (§7.1) is produced
 by this tool for the pipeline half (non-OSI licence, wrong-extension Blizzard payload, GLB with a
 disallowed embedded payload) and is demonstrated against hostile fixtures. Nothing here touches the
 network, GitHub, or a real key.
@@ -24,8 +24,8 @@ network, GitHub, or a real key.
 - Contracts (registry `origin/main`): `signature-format.md` (all of it, esp. "Deriving `key_id`"
   and the eleven verifier rejections), `artifact-naming.md` (all of it, incl. Windows reserved
   names and the `.` join), `archive-layout.md` (root convention, path-escape rule, malformed
-  archives), `manifest.schema.json`, `entry.schema.json` and `append-only.rules.md` (**as amended by task 057** — the `pending → published` transition and its field-level rules),
-  `validation-report.schema.json`; task 058's report for the `source_archive` URL shape.
+  archives), `manifest.schema.json`, `entry.schema.json` (read-only: the version object's `version`, `commit` and `source_url` fields),
+  `validation-report.schema.json`. (Not needed here, by design: task 057's amendments and task 058's report — 008c.)
 - Code to reuse, not reimplement: `tools/validation/scan_assets.py` (takes a **directory**; exit 0
   accept, 1 reject, 2 usage error — a 2 is never a rejection), `tools/validation/magic.py`,
   `tests/contracts/schema_check.py` (`validate(instance, schema)` raises; `NotImplementedError` on
@@ -68,6 +68,16 @@ $ echo x >> f.tar.gz; minisign -V …                           # exit 1: "Signa
    then `git archive` straight from the object database. **No working tree is ever checked out**:
    no smudge/clean filters, no LFS, no hooks (hooks are not cloned) run on attacker content.
    Submodules are not followed. Any host, no GitHub API (mission D2 step 1).
+   **Transport is restricted (review fix, 2026-10-14).** `entry.schema.json` lets `source_url` be any
+   scheme or an scp-like `user@host:path`; the pipeline accepts only `https://`. Every git invocation
+   runs with `GIT_ALLOW_PROTOCOL=https`, `GIT_TERMINAL_PROMPT=0`, and `-c protocol.ext.allow=never -c protocol.file.allow=never`
+   (so `ext::` and `file:` are refused by git itself, not only by the tool's own check), and the tool
+   rejects any other scheme before spawning git, naming the rule and the remedy ("publish a public https URL").
+   `file://` and bare local paths are accepted **only** behind an explicit `--allow-local-source` flag that
+   tests use and the workflow never passes; with the flag, `GIT_ALLOW_PROTOCOL=file` replaces `https` and
+   `protocol.file.allow` is set to `always` for that process only. Whether this restriction conflicts with
+   ADR-0058 §4's "any host" is a reading: §4 speaks of the host (a public git repo, "not GitHub"), not the
+   transport; ADR-0058 does not mention `ssh`/`git://`. [Judgement, not verified; flagged for the spec reviewer.]
 2. **Tarball:** `git archive --format=tar --prefix=<root>/ <commit> | gzip -n`, `<root>` a fixed
    literal chosen once: `src/` (archive-layout.md leaves the value open; ADR-0103 says one fixed
    boring literal). Deterministic, so a re-run yields the same SHA-256.
@@ -75,9 +85,20 @@ $ echo x >> f.tar.gz; minisign -V …                           # exit 1: "Signa
    *extracted from the produced tarball* into a fresh directory, because that is what users and the
    site receive. `.gitattributes` `export-ignore` could otherwise hide a file from the tarball but
    not from a scan of the clone, or the reverse.
-4. **Extraction is hostile-input safe:** the tool inspects every tar entry before extracting
-   (`archive-layout.md` path-escape rule: `..` segment, absolute path, symlink target escaping the
-   root → reject the whole archive).
+4. **Extraction is hostile-input safe:** the tool inspects every tar entry before extracting and
+   rejects the whole archive on: a `..` segment, an absolute path, a symlink target escaping the root
+   (all three from `archive-layout.md`, "path-escape rule"); **and** — added here because that
+   contract is silent on them (grep of `origin/main:contracts/archive-layout.md` for
+   `hardlink|hard link|device|fifo|special|size|limit|count` matched only the symlink/escape passages, lines
+   150-179 and 232, none concerning these) — a **hard link** entry, a **device node** (character or block),
+   a **FIFO**, any entry type other than regular file, directory or (inspected) symlink, a total **uncompressed size**
+   above 200 MiB, a **compressed size** above 50 MiB, and more than 10,000 **entries**. The three limits are this
+   spec's assumed constants (no ADR or contract states them; the 50 MiB figure matches the site downloader's
+   ceiling in task 055), kept as named constants and recorded in `docs/pipeline/build-pipeline.md`.
+   `git archive` cannot itself emit hard links, devices or FIFOs (git stores neither — *stated from git's
+   object model, not verified here*), so these checks are defence in depth over a tarball the tool did not
+   hand-build; the fixtures hand-build the hostile tars. The same gap exists in `archive-layout.md` and in the
+   site's extractor; amending the contract is the sibling contract work (umbrella, Dependencies), not this task.
 5. **Manifest (decided: Ludwig, 2026-10-14, Q-C):** read `<root>/mod.lua` with the restricted static reader (a literal table only; the file is never executed); project the eleven schema fields;
    validate against `manifest.schema.json`; check `manifest.id == entry id` and
    `manifest.version == version` (both cross-checks are named in the schema's descriptions as
@@ -93,33 +114,33 @@ $ echo x >> f.tar.gz; minisign -V …                           # exit 1: "Signa
 
 ## CLI and result shape
 `python3 tools/pipeline/build_version.py --entry <path to entry.json> --version <semver>
---workdir <empty dir> --key <path> --pubkey <path> --out <dir>`
+--workdir <empty dir> --key <path> --pubkey <path> --out <dir> [--allow-local-source]`  (the flag is for tests only; the workflow never passes it)
 Exit codes: **0** built; **1** rejected (the version is bad — message names the rule/contract
 clause and the remedy); **2** usage/internal error (including scanner exit 2, missing tool, clone
 failure) — distinct, documented, and never conflated (OPERATIONS.md).
 Outputs in `--out`: `<tag>.tar.gz`, `<tag>.tar.gz.minisig` (names per `artifact-naming.md`),
 `result.json` (below), `build.log` (the full log; the thing 008b posts as a PR comment).
-`result.json`: `{ "id", "version", "tag", "assets": {"tarball", "signature"}, "write_back":
-{"source_archive", "source_sha256", "signature", "key_id", "published_at"}, "scan": <validation-report object> }`.
-`source_archive` is **not** computed here: it depends on where 008b uploads. Decided (Ludwig,
-2026-10-14): releases live in `worldofmodcraft/archive` (Q-E), and the value written into the entry is
-a **project-owned URL** that fronts the release asset (Q-G). This task therefore provides two pure
-functions, each with output pinned by a test: `release_asset_url(owner, repo, tag, asset)` — the
-direct `github.com/.../releases/download/...` URL the pipeline and the launcher's mirror fall back to —
-and `source_archive_url(namespace, name, version)` — the project-owned URL written to the entry.
-**The shape of the second is not fixed by this spec: it is the output of task 058 (probe), and
-possibly of an `artifact-naming.md` amendment.** Until 058 reports, criterion 12 and the `source_archive` key of `result.json`
-are blocked, and the function is not to be written against a guessed hostname.
+`result.json`: `{ "id", "version", "tag", "assets": {"tarball", "signature"}, "built_at", "artifact":
+{"source_sha256", "signature", "key_id"}, "scan": <validation-report object> }`; `built_at` is RFC 3339
+UTC. The mapping of these into a registry write-back (`published_at`, `source_archive`, `apply_write_back`)
+and the `source_archive` URL function are **task 008c**. This task provides one pure function for the
+upload step, `release_asset_url(owner, repo, tag, asset)` — the direct
+`https://github.com/<owner>/<repo>/releases/download/<tag>/<asset>` URL; the repository is `worldofmodcraft/archive`
+(decision Q-E, Ludwig 2026-10-14), a value passed in, not hard-coded; its output is pinned by a test.
 
 ## Acceptance criteria
 All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked.
 1. **Standalone CLI with three distinct exits** as above, each shown: a clean build (0), a rejected
    fixture (1), and a usage error such as a missing `--key` (2). Reading 2 as 1 is the recorded
    failure mode.
-2. **Exact-commit fetch.** Against a local fixture repo (created by the test, `file://`-style path):
-   the tool builds from a given 40-hex commit even when the branch has moved on (`HEAD` ≠ commit),
-   and the tarball contains the *older* tree. A commit absent from the repo → exit 1 naming it; a
-   non-40-hex or uppercase `--version`/commit input → exit 1 before any clone.
+2. **Exact-commit fetch.** The commit is **read from the entry**: the tool loads `--entry`, selects the
+   version object whose `version` equals `--version`, and takes that object's `commit` and `source_url`
+   (it accepts no commit on the command line, so there is one source). Against a local fixture repo
+   (created by the test, used through `--allow-local-source`): the tool builds from the entry's commit
+   even when the branch has moved on (`HEAD` ≠ commit), and the tarball contains the *older* tree. A commit
+   absent from the repo → exit 1 naming it. Before any clone, exit 1 for: a `commit` that is not 40 lowercase
+   hex (the schema's pattern; an uppercase-hex commit is the negative case), a `--version` that does not match
+   the semver pattern in `entry.schema.json`, and a `--version` that no version object carries.
 3. **Determinism.** Two builds of the same commit, at different wall-clock times, yield
    byte-identical tarballs and equal SHA-256; the recorded `source_sha256` equals `sha256sum` of the
    file (cross-checked against the OS tool, not against the tool's own code).
@@ -167,14 +188,12 @@ All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked
     would come from and as the content of the throwaway key's *comment*, and asserts the canary
     appears in none of: stdout, stderr, `build.log`, `result.json`, the tarball. Mutation: make the
     tool log its `--key` path's contents; the check must redden.
-12. **Write-back values** `{source_sha256, signature, key_id, published_at}` plus `source_archive` (from `source_archive_url`) are computed and
-    returned; `signature` is the four-line file verbatim with newlines preserved
-    (`signature-format.md`, "What `entry.json`'s `signature` field holds"); `published_at` is
-    RFC 3339 and passes `entry.schema.json`'s pattern. Applying them to an entry (the
-    `pending → published` transition, decided Q-B and defined by task 057) is a pure function `apply_write_back(entry,
-    version, values)` that is tested to change **exactly** the permitted fields: the five write-back fields are added and `status` goes `pending → published`, nothing else and to refuse any
-    other shape (a version already `published`, a `removed` one, an absent one, a different mod's
-    values) — and its output must pass the append-only checker from task 007 and the schema.
+12. **Computed values.** `result.json`'s `artifact` holds `{source_sha256, signature, key_id}` and `built_at`:
+    `source_sha256` equals the OS `sha256sum` of the tarball; `signature` is the four-line file verbatim with
+    newlines preserved (`signature-format.md`, "What `entry.json`'s `signature` field holds"); `built_at` is
+    RFC 3339 UTC and matches the pattern `entry.schema.json` gives `published_at`. `release_asset_url` is pinned by
+    a test over the `artifact-naming.md` examples. (Everything that applies these to an entry —
+    `apply_write_back`, the `pending → published` shape, `source_archive` — is task 008c.)
 13. **Positive controls.** A clean first build, a clean second version of the same mod, and a mod
     carrying only text files all build and verify, beside the hostile cases.
 14. **Mutation, fresh clone.** `008a-verify.sh` was mutation-tested (break the determinism flag
@@ -185,14 +204,37 @@ All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked
     updated if the contract task left it stale. `docs/validation/` gains the manifest reader's
     description. [Read by the reviewer; not script-verified beyond a grep for each section heading.]
 
+16. **Clone transport is restricted (hostile `source_url` fixtures).** Each of these is rejected with exit 1,
+    naming the rule, **and no process is spawned that could run it** (asserted by a canary: a fixture whose
+    `ext::` command would create a marker file, and the test asserts the file does not exist):
+    `ext::sh -c 'touch <marker>'`, `file:///<local repo>` and a bare local path (both without
+    `--allow-local-source`), `ssh://host/x`, `git://host/x`, `http://host/x`, scp-like `user@host:x`, and an
+    `https://` URL carrying userinfo (`https://user:pw@host/x`; credentials in a stored URL are refused). Positive control: with
+    `--allow-local-source`, the local fixture repo builds; an `https://` URL passes the scheme check (the
+    clone itself is not attempted over the network — the test stops at the spawned command line, captured
+    from a stub `git` earlier on `PATH`, and asserts `GIT_ALLOW_PROTOCOL=https` and the two `-c protocol.*` flags
+    are present on it). Mutation: remove each of the three guards (scheme check, env var, `-c` flags) in
+    turn; the check that only that guard satisfies must redden (the `ext::` canary needs the env-var/`-c` guards, so it is run
+    with the tool's own scheme check bypassed in the mutation).
+17. **Tarball hardening (each its own hand-built hostile tar, with a clean tar beside it as positive control).**
+    Rejected whole, exit 1 naming the entry type and the limit: a hard-link entry; a character device; a block device;
+    a FIFO; an entry of an unknown type; 10,001 entries; an uncompressed size over 200 MiB (built sparsely so
+    the test does not write 200 MiB, e.g. a tar header declaring the size with a gzip stream that is small — the test
+    asserts the tool refuses on the declared/streamed size without buffering it); a compressed tarball over 50 MiB
+    (a stub size, since the limit is a constant the test may override downward and then asserts the
+    default value separately). The three pre-existing escapes (`..`, absolute, escaping symlink) stay in
+    criterion 4. Mutation: raise each limit to infinity and drop each type check; each reddens its named
+    fixture. The log states the `archive-layout.md` silence cited in design 4 and links the sibling contract work.
+
 ## Explicitly OUT of scope
 - GitHub Actions, releases, uploads, the write-back PR, secrets, the ownership carve-out, E15 — 008b.
+- `apply_write_back`, `source_archive_url`, the `pending → published` shape and `result.json`'s write-back view — 008c (they need tasks 057 and 058).
 - The `page.json` screenshot scan — task 040 (needs the archive this tool makes).
 - Software Heritage (umbrella Q5). Binary/plugin signing (mission §2).
 
 ## File scope (declared; anything else = stop and report)
 In the **registry** repo:
-- `tools/pipeline/` (new) — the CLI, `release_asset_url`, `source_archive_url`, `apply_write_back`, the reference verifier
+- `tools/pipeline/` (new) — the CLI, `release_asset_url`, the reference verifier
 - `tools/validation/manifest.py` (new) — the Q-C restricted static reader and projection; `tools/validation/` otherwise untouched
 - `tests/pipeline/` (new) — suite and fixtures (all keys are throwaway, generated at test time)
 - `docs/pipeline/build-pipeline.md` (new), `docs/validation/manifest-reader.md` (new), `docs/contracts/README.md` (only if stale)
@@ -214,12 +256,10 @@ stop-and-report (§3.3) and belongs to the contract task.
 - Editing `contracts/`, `reserved-namespaces.json`, or any other task's file.
 
 ## Dependencies and sequencing
-- Needs: tasks 002 (scanner) and 006/025 (contracts) merged — they are. Needs **task 057 merged**
-  (which itself follows 032 and 045), and **task 058's report** (URL shape). Q-B and Q-C are decided
-  (Ludwig, 2026-10-14).
-- Not blocked by 007/039; but criterion 12's output must pass 007's append-only checker, so
-  007 must be merged first or 12's last clause waits. 007 is itself sequenced after 057.
-- Blocks 008b. File overlap with 007: none (`tools/registry/` vs `tools/pipeline/`).
+- Needs: tasks 002 (scanner) and 006/025 (contracts) merged — they are. **Does not need task 057 or 058**
+  (the split of 2026-10-14 exists to remove that dependency); Q-B, Q-C and Q-E are decided (Ludwig, 2026-10-14).
+- Not blocked by 007/039. File overlap with 007: none (`tools/registry/` vs `tools/pipeline/`).
+- Blocks 008b and **008c** (008c extends `tools/pipeline/` after this merges).
 
 ## Verification artefact (MANAGER.md §2c)
 Declared: `docs/tasks/008a-verify.sh`; every criterion except 15's prose is command-based and
@@ -232,9 +272,9 @@ Code + tests + docs + verify script + this file's log section current.
 - Q: root directory literal `src/` vs `<name>-<version>/` | options: A) `src/` / B) per-version
   name | assumed: A (ADR-0103; archive-layout says any non-empty value is valid) | built on: criterion 4.
 - (umbrella Q1/Q2 are decided: Q-B, Q-C, Ludwig 2026-10-14 — see `008-build-pipeline.md`; nothing in this file is built on an assumption about them any more.)
-- **Blocked on task 058:** the shape of the project-owned `source_archive` URL (decision Q-G).
 
 ---
 # Task 008a log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Q-B, Q-C, Q-E, Q-G folded in from Ludwig's answers; two URL functions replace `release_url`; URL shape waits on task 058.
+- 2026-10-14 review fixes: split — `apply_write_back`, `source_archive_url`, the write-back view of `result.json` moved to 008c; clone restricted to https (hostile-URL fixtures, criterion 16); tarball hardening (criterion 17, `archive-layout.md` silence cited); criterion 2 states the commit comes from the entry and drops "uppercase" for `--version`.

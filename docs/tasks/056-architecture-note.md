@@ -23,7 +23,7 @@ fails if each piece disappears**. Every statement is tagged with its state — `
   (static pages from archive), **0077** (scheduled disaster mirror; its text says "SITE-V1's D5
   documentation notes the mirror job as phase 1.5" — this note must), **0103** (restart is the unit),
   **0119**. ADR selection: INDEX.json lookups on "provider", "hosting", "archive", "mirror".
-- Platform docs: `docs/architecture/depgraph.md` (the eight nodes and sixteen edges — the note's
+- Platform docs: `docs/architecture/depgraph.md` (the eight nodes and the edges — **`depgraph.json` carries fifteen, E1–E15 (checked 2026-10-14); `depgraph.md` also carries E16, ownership, added 2026-09-05 on Ludwig's approval (task 032) and absent from the json: a drift, see Q3** — the note's
   skeleton), `docs/architecture/depgraph.json`, `docs/architecture/key-management.md` (**read, link,
   do not duplicate**; D5's key note), `docs/manager/OPERATIONS.md` (repositories table; Pages notes;
   branch protection), `docs/dev-environment.md` (what runs on Ludwig's machines — needed to *state*
@@ -99,8 +99,8 @@ fails if each piece disappears**. Every statement is tagged with its state — `
    *What runs where*, *What is stored where*, *The owner's machines host nothing*, *Moving off
    GitHub*, *If a piece disappears*, *State of this document*.
 2. [script] **Every node and edge of the graph is covered:** the script reads the node ids and edge
-   ids out of `docs/architecture/depgraph.json` and asserts each of N1-N8 and E1-E16 appears in the
-   note's tables; mutation: remove one row, the check names it. (`depgraph.json` carries `nodes[].id` and `edges[].id` — checked 2026-10-14 — so the script reads them from there, not from prose.)
+   ids out of `docs/architecture/depgraph.json` and asserts every id it reads (today N1-N8 and E1-E15) appears in the
+   note's tables, and separately lists any edge id present in `depgraph.md` but not in the json (today E16) and asserts the note covers it too and names the drift in *State of this document* (the ids are never hard-coded in the script); mutation: remove one row, the check names it. (`depgraph.json` carries `nodes[].id` and `edges[].id` — checked 2026-10-14 — so the script reads them from there, not from prose.)
 3. [script] **State tags:** every row in the two main tables carries exactly one of `built`,
    `specified`, `not built`; no untagged row; the count of `[unverified` markers is stated in the
    *State of this document* section and equals the count in the body (a conjunction, so it fails if
@@ -165,7 +165,7 @@ In the **platform** repo only:
 - No file overlap with 008a/008b/010/041/055 (it only reads their outputs); 010 and 056 both touch
   `docs/` but different files. The one-line edit to `depgraph.md` must be sequenced against any
   other open edit of that file (none known).
-- Graph: documents all nodes and edges; **adds none**.
+- Graph: documents all nodes and edges; **adds none**. It does not edit `depgraph.json` or the E16 row.
 
 ## Verification artefact (MANAGER.md §2c)
 Declared: `docs/tasks/056-verify.sh`. Criteria 1-8 and 10 are script-verified; 9 is a human review
@@ -181,6 +181,7 @@ The note, the link line, the verify script, this file's log section current; a l
   fronts `source_archive` before the first publish. Options A (accept lock-in) and C (a portable bucket) are not taken.
   Feasibility on GitHub Pages is **unverified**; task 058 is the probe. If it requires Cloudflare rules,
   that changes the "DNS-only, grey cloud" decision recorded in the runbook and returns to Ludwig.
+- **Q3 (open; for the manager/Ludwig):** `depgraph.json` (15 edges) has not caught up with `depgraph.md`'s E16 (ownership), added 2026-09-05 by an approved amendment. Is the json to be regenerated? That is a graph update (ADR-0117) and so its own task; this note does not assume it. Whether the ownership carve-out for the pipeline's write-back PR needs an edge of its own (it is a new rule on E16, not a new boundary, in my reading — **unverified judgement**) is likewise a question for that task, not assumed here. | assumed: no new edge.
 - **Q2 (open, non-blocking):** Is a "if the project dies" plan (ADR-0006) a separate document, or the *Moving off GitHub*
   section of this note? | options: A★) the section, linked from `README` / B) its own file | assumed: A.
 

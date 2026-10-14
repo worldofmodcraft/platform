@@ -26,7 +26,7 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 - Platform docs: `docs/architecture/depgraph.md` (E15 and the Q4=A rationale in mission log Q4),
   `docs/architecture/key-management.md`, `docs/manager/OPERATIONS.md` ("Consequences of branch
   protection that bite later", "The manager's own permissions"), `docs/runbooks/site-v1-manual-steps.md` (M1.4, M3).
-- Depends on 008a's tool: `tools/pipeline/build_version.py`, `release_url`, `apply_write_back`.
+- Depends on 008a's tool (`tools/pipeline/build_version.py`, `release_asset_url`) and 008c's `tools/pipeline/write_back.py` (`apply_write_back`, `source_archive_url`, `write_back_values`).
 - Graph: nodes **N5**, **N6**, **N2**, **N3**; edges **E7**, **E8**, **E15**, **E16**.
 
 ## Environmental facts (what is verified, what is not)
@@ -105,10 +105,10 @@ script-verified.
    and no `set -x`/`-o xtrace` appears in the workflow. Mutation: add each forbidden pattern to a
    copy of the workflow and show the check redden.
 3. [script] **Naming:** a unit test feeds `(namespace, name, version)` triples through the
-   workflow's naming/URL helpers (008a's `release_asset_url` and `source_archive_url`) and asserts tag, both asset names and both URLs equal the `artifact-naming.md` examples (`mc.hello-world-1.0.0`,
+   workflow's naming/URL helpers (008a's `release_asset_url`, 008c's `source_archive_url`) and asserts tag, both asset names and both URLs equal the `artifact-naming.md` examples (`mc.hello-world-1.0.0`,
    `.tar.gz`, `.tar.gz.minisig`), including a prerelease+build version. The `source_archive_url` expectation comes from task 058's report and any `artifact-naming.md` amendment, not from this sentence.
 4. [script] **The write-back is exactly the permitted transition:** a test builds the PR diff for a
-   fixture entry (using 008a's `apply_write_back`) and runs it through task 007's append-only,
+   fixture entry (using 008c's `apply_write_back`) and runs it through task 007's append-only,
    schema and ownership checkers (with the App's bot user id as PR author, per the carve-out; the id is read after M5, see umbrella F4):
    accepted; the same diff with any extra changed field, a second version touched, or a different
    author id → rejected, each shown.
@@ -176,7 +176,7 @@ No edits to `contracts/`, `reserved-namespaces.json`, or the site repo.
 - Bypassing branch protection, `--force`, editing protection settings, or an "admin merge" to get
   the write-back through. If protection blocks the design, stop and report; Ludwig lifts it loudly or not at all.
 - Overwriting, re-tagging, or deleting a *published* release.
-- Writing `source_archive` as anything other than the URL `release_url` returns.
+- Writing `source_archive` as anything other than the URL 008c's `source_archive_url` returns.
 - Reading, printing, copying or testing for the GitHub App's private key or any installation token beyond the one minting step (CLAUDE.md rule 11); the App's bot user id is read from the **public** API only.
 - Falling back to the built-in `GITHUB_TOKEN` for the write-back PR or the site dispatch if the App path fails: stop and report instead.
 - Reading the author's mod from its live repo after the clone step, or building from a branch name.
@@ -184,8 +184,7 @@ No edits to `contracts/`, `reserved-namespaces.json`, or the site repo.
 
 ## Dependencies and sequencing
 Task 032 merges → task 045 → task **057** (version lifecycle contract) → 007 and 039 merged (this task
-edits 007's ownership module and relies on 039's workflow scaffolding for checks) → 008a (needs 058's
-report) → **008b** → Ludwig's steps M5-M7 (below; M5 and M7 must precede the live criteria) → 010.
+edits 007's ownership module and relies on 039's workflow scaffolding for checks) → 008a → 008c (needs 057, 058, 008a) → **008b** → Ludwig's steps M5-M7 (below; M5 and M7 must precede the live criteria) → 010.
 Also needed before the workflow can be approved: `contracts/pipeline-trigger.md` (E15) and the
 ownership carve-out in `contracts/ownership.md` (E16) — sibling contract tasks, see the umbrella.
 Decisions Q-B, Q-D, Q-E, Q-G are made (Ludwig, 2026-10-14). Parallel-safe with 041 and 056. Shares
@@ -296,3 +295,4 @@ Workflow + helpers + tests + docs + verify script + this file's log section curr
 # Task 008b log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Ludwig's answers folded in (Q-B, Q-D, Q-E, Q-G); manual steps M5-M7 written with unverified click-paths; Q-H and Q-J remain open.
+- 2026-10-14 spec review: write-back functions now come from 008c; 008b depends on 008a and 008c.

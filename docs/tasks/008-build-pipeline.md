@@ -1,9 +1,9 @@
-# Task 008: The build pipeline — umbrella for 008a (core) and 008b (workflow)
+# Task 008: The build pipeline — umbrella for 008a (core), 008c (write-back) and 008b (workflow)
 
 - **Mission:** SITE-V1, deliverable **D2** — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable yet: Q1-Q4 are now decided (Ludwig, 2026-10-14, see "Decisions"), but the contract tasks (057 and the siblings listed under Dependencies), the archive-URL probe (058) and the manual steps M5-M7 must land first; it touches signing, so merge needs Ludwig (MANAGER.md §7).** Revised 2026-10-14 after Ludwig's answers.
-- **Agent / model:** none directly; see 008a and 008b
+- **Agent / model:** none directly; see 008a, 008c and 008b
 - **Budget:** large + large. D2 is plainly larger than "large" (≤ 6 agent-sessions): it is a clone/validate/archive/sign tool, a second asset scanner wiring, a release upload, a protected-branch write-back, a post-merge workflow with a secret, and a contract nobody has written (E15). It is therefore split exactly the way D1 was split into 007 and 039: **the offline-demonstrable core (008a) and the live wiring (008b)**.
-- **Branch / worktree:** none for this file; 008a and 008b carry their own. Both work in the **registry** repo.
+- **Branch / worktree:** none for this file; 008a, 008c and 008b carry their own. Both work in the **registry** repo.
 
 ## Objective
 Mission D2 is done when both halves are done: given an accepted version in the registry, a
@@ -23,13 +23,18 @@ approved.
 - **008b — `docs/tasks/008b-pipeline-workflow.md`:** the wiring. Workflow, secret handling,
   release upload, write-back pull request, the E15 contract, the ownership carve-out for the
   pipeline's own PR. Needs live runs, a protected repository and Ludwig's eyes.
-Dependency: 008b needs 008a. They do not overlap in files.
+- **008c — `docs/tasks/008c-pipeline-write-back.md`** (split out of 008a on spec review, 2026-10-14):
+  the pure functions that depend on contracts not yet written — `apply_write_back` (the
+  `pending → published` shape, task 057), `source_archive_url` (task 058's report), and the write-back
+  view of the result. Offline, fixture-driven, like 008a.
+Dependencies: 008c needs 008a, 057 and 058; 008b needs 008a and 008c. **008a needs neither 057 nor 058.**
+No two of them overlap in files.
 
 ## Graph (ADR-0117)
-| | 008a | 008b |
+| | 008a (+008c, write-back functions) | 008b |
 |---|---|---|
 | Nodes | **N5** build-pipeline (core), **N4** validation-core (manifest half added), N6 (asset naming only) | **N5** (workflow), **N6** artifact-store (the actual upload, into `worldofmodcraft/archive`, decision Q-E), **N2** (write-back target), **N3** (carve-out for the pipeline PR) |
-| Edges | E1 (clone + `mod.lua`), E5/E6 (scanner invocation), E7 (names), E9 (signature bytes), E8 (the object it computes) | E7 (upload), E8 (write-back lands), E15 (post-merge trigger — **contract file missing**, see below), E16 (carve-out) |
+| Edges | E1 (clone + `mod.lua`), E5/E6 (scanner invocation), E7 (names), E9 (signature bytes), E8 (008c: the object it computes) | E7 (upload), E8 (write-back lands), E15 (post-merge trigger — **contract file missing**, see below), E16 (carve-out) |
 | New edges | none | none — but E15 and E8 need contract work first |
 
 ## Findings that shape both halves (each verified 2026-10-14; commands shown)
@@ -103,7 +108,7 @@ machine (`which minisign` → `/home/ludwig/.local/bin/minisign`; `minisign -v` 
 its behaviour was exercised for these specs (see 008a).
 
 ## Acceptance criteria
-1. 008a is `done` with `docs/tasks/008a-verify.sh` green on `main` and in a fresh clone.
+1. 008a is `done` with `docs/tasks/008a-verify.sh` green on `main` and in a fresh clone, and 008c is `done` with `docs/tasks/008c-verify.sh` likewise.
 2. 008b is `done` with `docs/tasks/008b-verify.sh` green, and its live criteria recorded.
 3. The merged contracts and the pipeline agree: F1 resolved by task 057 (merged), F2 (`pipeline-trigger.md`), the ownership carve-out and the `source_archive` URL shape resolved by the sibling contract work listed under Dependencies (merged).
 4. Mission §7.2 ("pipeline completes for `test:hello-world`: archived under the org, SHA-256
@@ -127,12 +132,13 @@ its behaviour was exercised for these specs (see 008a).
   mission log Q3, Q4.
 
 ## File scope (declared)
-`docs/tasks/008-build-pipeline.md` only (this file). Code and workflows are in 008a/008b.
+`docs/tasks/008-build-pipeline.md` only (this file). Code and workflows are in 008a/008c/008b.
 
 ## Forbidden here
-- Dispatching 008a or 008b before task 057 has merged: each would otherwise be coded against a
-  schema its own output cannot satisfy. 008a additionally waits for task 058's report (the
-  `source_archive` URL shape); 008b additionally waits for M5-M7 (below).
+- Dispatching 008c or 008b before task 057 has merged: each would otherwise be coded against a
+  schema its own output cannot satisfy. 008c additionally waits for task 058's report (the
+  `source_archive` URL shape); 008b additionally waits for 008c and M5-M7 (below). 008a waits for
+  neither 057 nor 058 and may start as soon as it is spec-approved.
 - Re-opening Q-B..Q-G by assumption. They are decided; a change needs Ludwig.
 
 ## Dependencies and sequencing
@@ -141,8 +147,9 @@ task **032** merges (its fix round 6 is approved; it touches the contracts index
 (takedown mutation shape in `append-only.rules.md`; same file as 057) → task **057** (version
 lifecycle contract: `entry.schema.json` and `append-only.rules.md`, the `pending → published`
 transition) → task **007** spec re-check (it validates the author PR against the amended schema;
-057 is sequenced before 007 and before 008) → **008a** → **008b** → M3 verified by Ludwig → task 010 live publish.
-In parallel, independent of that chain: task **058** (archive URL probe) must report before 008a
+057 is sequenced before 007 and before 008c/008b) → **008c** (also needs 008a and 058) → **008b** → M3 verified by Ludwig → task 010 live publish.
+**008a is off that chain**: it needs only merged contracts and the scanner, and can run in parallel with 032/045/057/058.
+In parallel, independent of that chain: task **058** (archive URL probe) must report before 008c
 fixes `source_archive`'s shape; Ludwig's manual steps **M5, M6, M7** (below) must be done before
 008b's live criteria.
 
@@ -199,3 +206,4 @@ This file, kept current as the sub-tasks land.
 # Task 008 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 umbrella and split specs written under task 054; nothing dispatched.
 - 2026-10-14 Ludwig's answers recorded (Q-B..Q-G); Q1-Q4 converted to decisions; Q-H, Q5 and Q-J remain open; sibling contract gaps listed under Dependencies.
+- 2026-10-14 spec review: 008a split — 008c (write-back functions; needs 057 and 058) created; 008a no longer depends on 057/058; 008a gains https-only clone and tarball-hardening criteria. Graph note: `depgraph.json` carries E1-E15 while `depgraph.md` also lists E16; see 056 Q3.

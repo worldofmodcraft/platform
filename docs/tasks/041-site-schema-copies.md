@@ -75,9 +75,12 @@ In the **site** repo only:
    and exits 0 only if all three match; exit 1 names every file that differs (all of them, not the
    first); exit 2 on usage error (missing directory, missing file). The three exits are distinct and
    documented in the script header.
-2. [script] **The check is red on the pre-fix tree.** The verify script materialises the site's
-   `origin/main` schemas (the stale ones, from the commit before this task) beside the registry's
-   `origin/main` and shows exit 1 naming `page.schema.json` and `manifest.schema.json` and not
+2. [script] **The check is red on the pre-fix tree, against a pinned input.** The verify script
+   materialises the site's schemas from the recorded pre-fix commit (the stale ones; record its sha in the
+   log) beside the registry's schemas **at a recorded registry commit** (`ec56e9f` when read on 2026-10-14;
+   the log re-verifies the three digests at that commit with `git show <sha>:contracts/...`) or beside
+   checked-in copies under `scripts/tests/fixtures/registry-at-<sha>/`. It never reads live registry
+   `main`: the verdict must not change when the registry merges something. It shows exit 1 naming `page.schema.json` and `manifest.schema.json` and not
    `entry.schema.json` — written and shown failing before the re-sync (MANAGER.md §2c rule 5).
 3. [script] After `sync-schemas.mjs`, `check-schemas.mjs` exits 0 and the three copies equal the
    registry's by full SHA-256. The sync script exits 2 on a registry directory lacking any of the
@@ -92,9 +95,13 @@ In the **site** repo only:
    fixtures validate against the new, stricter `page`/`manifest` schemas. If a fixture fails because
    of the tighter pattern, that is a finding to report, not a fixture to loosen.
 7. [script] Both workflow files contain the check step, against a checkout of
-   `worldofmodcraft/registry` at its default branch, and neither pins a registry commit (a pinned
+   `worldofmodcraft/registry` at its default branch (the live-`main` comparison belongs to the workflows only, by design), and neither pins a registry commit (a pinned
    commit would compare against a stale copy — the original defect). Greps that fail on zero matches.
-8. [external] The new workflow runs green on the task's own PR. To prove it can fail in CI, a
+8. [external] The new workflow runs green on the task's own PR, **with the registry commit it compared
+   against printed in the run log and recorded in this file**. If a registry schema merge lands while the
+   task is open, the run legitimately reddens: the remedy is to re-run `sync-schemas` at the new registry
+   sha and record it, not to treat it as a task failure; the red-demonstration below is independent of the
+   registry's state because it flips one byte of a vendored copy. To prove it can fail in CI, a
    separate throwaway branch that flips one byte of a vendored schema is pushed, shown red, and its
    PR closed unmerged (no history rewrite after push; MANAGER.md §3.9). Both run URLs go in the log.
 9. [script] `schemas/README.md` states the actual procedure and date; greps assert the words
@@ -125,6 +132,18 @@ In the **site** repo only:
 Declared: `docs/tasks/041-verify.sh` (criteria 1-7 and 9 are script-verified; 8 is a live CI run
 and is recorded as such). Criterion 2 is rule 5's forward form: the break (stale `page`/`manifest`)
 is a fixture shown failing before the fix.
+
+## Design consequence (stated so nobody is surprised later)
+Because the deploy workflow checks the vendored copies against the registry's live `main`, **every
+merge to the registry that changes a `contracts/*.schema.json` file turns the site's deploy red until the
+site's copies are re-synced** — including task 057 (the `pending` state; the `oneOf` rewrite of
+`entry.schema.json`). That is the mechanism working as designed (a red deploy is better than a site
+validating against a stale contract). **Who re-syncs and when:** the manager books a small "re-sync
+schemas" task in the site repository **in the same session in which a registry schema change merges**,
+as part of that change's closing checklist (the registry task's log names it); the task runs
+`npm run sync-schemas`, `npm test`, and merges. For 057 specifically it is a precondition of task 055
+and is already named in 055's Dependencies. Until it merges, site deploys fail visibly; no auto-sync
+workflow is built here (a bot rewriting the site's schemas would bypass review).
 
 ## Deliverables
 Scripts + workflows + re-synced schemas + verify script + docs updated + this file's log section current.
