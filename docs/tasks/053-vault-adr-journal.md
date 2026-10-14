@@ -1,6 +1,6 @@
 # Task 053: Decision and journal notes in the vault projection
 
-- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 2b; split out of 051 after the spec review) — **Status:** review (implemented 2026-10-14; spec v3 approved by Ludwig)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/053-vault-adr-journal / ~/wt/task-053
@@ -62,3 +62,70 @@ Everything forbidden in 051. In addition: changing any 051 write rule, and readi
 
 ## Dependency graph
 Same node and edge as 051. The contract document is amended, not replaced.
+
+---
+# Task 053 log
+
+- 2026-10-14 implementer. Code: `tools/vault/wom_vault.py` (render_decisions, render_journal, A1, A2), tests `tools/vault/tests/test_vault_053.py`, mutants `tools/vault/tests/mutate053.py`, script `docs/tasks/053-verify.sh`, A3 in `docs/tasks/051-verify.sh`, contract `docs/tools/vault-projection.md`.
+- Order note (section 2c rule 5): I wrote the tool change before the tests in the working tree; the breaking fixtures were then run against the unmodified tool (`git show 87d3608:tools/vault/wom_vault.py`) and are shown failing below, before the passing run.
+
+## Failing first (fixtures vs the pre-053 tool; A1/A2 = test_ac7/test_ac8, A3 = shim run)
+```
+$ WOM_VAULT_SCRIPT=<pre-053 tool> python3 -I test_vault_053.py   (14 tests)
+Ran 14 tests in 25.296s
+FAILED (failures=29, errors=3)
+FAIL: test_ac1_decisions_adr_and_journal_exact / _inconsistent_index_is_an_error (x4) / _repo_without_decisions_still_gets_journal
+FAIL: test_ac2_only_the_affected_notes_are_rewritten; ERROR: test_ac2_stockholm_day_boundaries, test_ac1_merge_commits_are_listed
+FAIL: test_ac3_adr_starting_with_dashes... [frontmatter] [bare rule] [bom]
+FAIL: test_ac4 (9 of 12 subtests pattern x adr|subject: all of them; the old tool writes no ADR/Journal notes)
+FAIL: test_ac7_main_skips_names_the_conflict_and_task_mode_refuses, test_ac7_main_leaves_an_existing_note_untouched_and_conflict_clears
+FAIL: test_ac8_symlink_target_is_refused_without_opening_it [hand] [generated]; test_ac8_fifo_directory_and_dangling_link [dangling] [dir] [journal-fifo]
+ERROR: test_ac8_fifo_directory_and_dangling_link [fifo]   (the old tool blocks on open() of the FIFO until the 20 s test timeout)
+$ PATH=<dir with grep that exits 2 for "-IEl">:$PATH docs/tasks/051-verify.sh      (unmodified 051-verify.sh)
+ok: no secret-shaped string in 225 tracked files ...
+== 051-verify: ALL CHECKS PASSED          <- A3 defect shown: an erroring grep counted as "none found"
+```
+(The ac4 line count is 12 subtests = 6 patterns x 2 places, all failing.)
+
+## Passing, in a fresh clone of the branch at 4d8910c (`git clone` then `TMPDIR=/tmp docs/tasks/053-verify.sh --mutate`, exit 0)
+```
+== AC1-AC4, AC7, AC8: tests against the real tool
+Ran 14 tests in 6.674s
+OK
+== AC9: a grep that exits 2 turns 051-verify.sh's committed-secret scan red
+ok: with a failing grep 051-verify.sh exits 1: FAIL: secret scan: grep failed on 227 file(s) (exit >= 2); an erroring scan proves nothing
+== AC6: the whole 051 suite still passes
+ok: 051-verify.sh passed
+Ran 32 tests in 40.275s
+OK
+== 051-verify: ALL CHECKS PASSED
+== documentation present  (7 x ok)
+ok: mutant 'journal-tz' killed -> FAIL: test_ac2_stockholm_day_boundaries
+ok: mutant 'skip-identical' killed -> FAIL: test_ac2_only_the_affected_notes_are_rewritten
+ok: mutant 'adr-frontmatter' killed -> FAIL: test_ac3_adr_starting_with_dashes_fails_validation_and_writes_nothing
+ok: mutant 'secret-scan' killed -> FAIL: test_ac4_secret_in_adr_or_commit_subject_blocks_the_run
+ok: mutant 'id-conflict-main' killed -> FAIL: test_ac7_main_skips_names_the_conflict_and_task_mode_refuses
+ok: mutant 'id-conflict-status' killed -> FAIL: test_ac7_main_skips_names_the_conflict_and_task_mode_refuses
+ok: mutant 'id-conflict-task' killed -> FAIL: test_ac7_main_leaves_an_existing_note_untouched_and_conflict_clears FAIL: test_ac7_main_skips_names_the_conflict_and_task_mode_refuses
+ok: mutant 'non-regular' killed -> ERROR/FAIL: test_ac8_fifo_directory_and_dangling_link FAIL: test_ac8_symlink_target_is_refused_without_opening_it
+ok: 051 mutation run passed   (13 of 13 051 mutants killed)
+== 051-verify: ALL CHECKS PASSED
+== 053-verify: ALL CHECKS PASSED
+```
+Separately, a plain `051-verify.sh` in the same clone: `Ran 32 tests ... OK`, `== 051-verify: ALL CHECKS PASSED`.
+Real-repo dry run (temp vault and HOME, test mode, read-only on git): `planned=171 written=171 ... id_conflicts=0 decisions_absent=0` (120 ADR notes, 9 Journal days).
+
+## Acceptance criteria
+AC1 test_ac1_decisions_adr_and_journal_exact + merge test (expected content from `git log` with `TZ=Europe/Stockholm`); AC2 TestAC2Days (21:59:59Z, 22:00:00Z, a -08:00 offset, and a winter instant; minimal-rewrite sets asserted exactly); AC3 TestAC3AdrFrontmatter; AC4 TestAC4Secrets (6 patterns x ADR text x commit subject); AC5 mutants above, fresh clone; AC6 051-verify.sh re-run; AC7 TestAC7DuplicateIds + 2 mutants; AC8 TestAC8NonRegular (audit hook shows zero opens in the vault) + mutant; AC9 shim fixture in 053-verify.sh.
+
+## Decisions taken inside the spec (flag if wrong)
+- 051's `test_vault.py` had two assertions that encode the pre-053 note set: `test_ac1_note_set_and_frontmatter` (exact set) and `test_ac2_second_run...` (subset of changed notes). Mode main now also writes `Journal/2026-10-14.md` for that fixture, so I extended both expectations by that one name; the exact-set assertion stays exact and nothing was relaxed beyond that one file. Nothing else in 051's tests changed.
+- A2 runs after the containment check and before any open, in a first pass over all targets, so no earlier target is opened either. A symlink to the outside still reports "outside the vault" as in 051.
+- A3: the scan is now a per-file grep loop (xargs hides grep's exit status behind 123, which also masked real hits whenever a batch had no match). Nothing else in 051-verify.sh changed.
+- A ref without `docs/decisions/` writes no decision notes and prints `decisions_absent=1` (needed so 051's fixtures, which have no ADRs, still work). ADR files without INDEX.json, or an ADR set that differs from INDEX.json, is an error.
+- Journal: 7-character sha slice (stable across repo size), ordering by committer timestamp descending with git's order as tie-break.
+
+## Questions
+- For Ludwig/manager: is the one-name extension of two 051 test expectations (above) acceptable under "never weaken"? I judged it a spec consequence, not a weakening.
+- When 051's task file moves to `done/`, the 051-verify.sh secret-scan exclusion (`docs/tasks/051-vault-projection.md`) will no longer match and the scan will hit the spec file's patterns. I did not touch it (A3 only); whoever moves the file must add the `done/` path to the exclusion.
+- Ratify: INDEX.json/ADR mismatch is a hard error, so a vault run blocks until the index is regenerated after a new ADR.
