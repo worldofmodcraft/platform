@@ -1,6 +1,6 @@
 # Task 060: Ludwig's new manual steps (M5–M7, Q-H) in the SITE-V1 runbook
 
-- **Mission:** SITE-V1 — **Status:** spec-approved (manager, 2026-10-15; small documentation, §2b solo gate)
+- **Mission:** SITE-V1 — **Status:** review (manager, 2026-10-15; small documentation, §2b solo gate)
 - **Agent / model:** doc-writer / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/060-runbook-manual-steps / ~/wt/task-060
@@ -32,3 +32,24 @@ No verify script: the criteria are documentary, checked by the manager at review
 
 ## Forbidden here
 Credentials of any kind; gh auth/secret commands; editing any other file.
+
+# Task 060 log
+Date 2026-10-15. Only unauthenticated, read-only commands and repo files were used. The GitHub REST API was
+rate-limited (HTTP 403) for this IP, so github.com HTML pages were used instead.
+
+| Step | Marker | Evidence |
+|---|---|---|
+| M0 | done | `curl -s "https://cloudflare-dns.com/dns-query?name=worldofmodcraft.com&type=NS" -H accept:application/dns-json` returned `anastasia.ns.cloudflare.com.`, `dexter.ns.cloudflare.com.` |
+| M1 | done (repos/org); 2FA and Actions settings `[unverified]` | `curl -s -o /dev/null -w "%{http_code}" https://github.com/worldofmodcraft`, `/registry`, `/site` all 200; OPERATIONS.md "Done and verified: the org, both repos, Actions permissions" |
+| M2 | done | same DoH query, type=A: 185.199.108/109/110/111.153; type=CNAME `www`: `worldofmodcraft.github.io.`; type=CAA: no answer; `curl -sI https://worldofmodcraft.com` HTTP/2 200 server GitHub.com; `www` gives 301 |
+| M3 | keypair done; secret `[unverified]` | key id in OPERATIONS.md; no read-only way to see secrets; Q-H open in 008b |
+| M4 | not done | `https://github.com/mbmludric/hello-world` 404; `https://worldofmodcraft.com/mods/test/hello-world` 404; `docs/test-mod` absent in this tree. A repo of another name or a private one cannot be ruled out, so "not done" is unverified-but-likely |
+| M5 | not done | `https://github.com/apps/worldofmodcraft-pipeline` 404 (an App with another name would not be seen) |
+| M6 | not done, `[unverified]` | people page lists member count 1, no `mbmludric` in the HTML; OPERATIONS.md: non-member |
+| M7 | not done | `https://github.com/worldofmodcraft/archive` 404 |
+| Q-H | open | cannot be checked by agents; source 008b Questions section |
+
+Click-paths for M5-M7 are copied from `008b-pipeline-workflow.md` (unverified there), reworded for Ludwig, and marked
+unverified in the runbook. Changes from 008b's text: step 9 now says how to move the key (Notepad, straight into the form)
+and 008b's "paste into chat" prohibition is kept. Q-H step 4's advice to re-add the old key is my suggestion, not a
+decision; the runbook says the choice is shared. Not verified: any click-path; M1.2/M1.4 settings; whether `www` 301 target is the apex.
