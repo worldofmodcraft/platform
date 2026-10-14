@@ -18,8 +18,8 @@ the repository concerned at the date above.
 
 | Tag | Meaning |
 |---|---|
-| `built` | exists on `main` of its repository and was observed, with the command shown or cited |
-| `specified` | specified, not built: a spec-approved task, an accepted ADR or a contract describes it; nothing on `main` runs it. Never read it as working. |
+| `built` | exists, and was observed for this note: the row cites `obs L<n>`, an observation (command and output) in the log section of `docs/tasks/056-architecture-note.md`. A row carrying an unverified marker is never `built`. |
+| `specified` | specified, not built: a spec-approved task, an accepted ADR or a contract describes it; nothing on `main` runs it. Never read it as working. It is also used for items that exist according to a record (the mission log, the key note) but that no agent may or did observe. |
 | `not built` | nothing on `main` and no approved specification beyond a mention; it may be deliberately deferred |
 
 A bracketed marker that begins with the word unverified means the
@@ -38,16 +38,16 @@ is not ours. Nothing in this list is a machine the project owner operates.
 
 | Node | Component | Runs on | Triggered by | State |
 |---|---|---|---|---|
-| N1 | mod-source: the author's own public git repository (external; nothing for the platform to build) | the author's git host | the author pushing a tag; the pipeline clones it at an exact commit | `built` |
-| N2 | registry-data: `mods/<ns>.<name>/entry.json` and `page.json`, the contracts, `reserved-namespaces.json` in `worldofmodcraft/registry` | GitHub (git hosting). No `mods/` directory exists on `main` yet. | pull requests and merges | `built` |
+| N1 | mod-source: the author's own public git repository (external; the canary repository, step M4, does not exist yet, task `docs/tasks/010-test-mod.md`) | the author's git host | the author pushing a tag; the pipeline clones it at an exact commit | `specified` |
+| N2 | registry-data: `mods/<ns>.<name>/entry.json` and `page.json`, the contracts, `reserved-namespaces.json` in `worldofmodcraft/registry` | GitHub (git hosting). No `mods/` directory exists on `main` yet. | pull requests and merges (obs L4) | `built`  |
 | N3 | registry-ci: the PR gates (schema, ownership by numeric id, append-only, PR classification). The registry has no `.github/` on `main`. Checkers are task `docs/tasks/007-registry-ci-checkers.md` (spec-approved); the workflow is `docs/tasks/039-registry-ci-workflow.md` (draft). | GitHub-hosted Actions runner | every pull request to the registry | `specified` |
-| N4 | validation-core, asset scanner: `tools/validation/scan_assets.py` and `tools/validation/magic.py` | GitHub-hosted Actions runner when called by N3 or N5; any Python 3 for local runs | called by N3 (E5) and N5 (E6) | `built` |
+| N4 | validation-core, asset scanner: `tools/validation/scan_assets.py` and `tools/validation/magic.py` | GitHub-hosted Actions runner when called by N3 or N5; any Python 3 for local runs | called by N3 (E5) and N5 (E6) (obs L6) | `built`  |
 | N4 | validation-core, manifest and SPDX validator: no file for it on `main` | GitHub-hosted Actions runner | called by N3 and N5 | `not built` |
 | N5 | build-pipeline: clone, validate, tarball, hash, sign, upload, write back. Core is `docs/tasks/008a-pipeline-core.md` (spec-approved); the workflow is `docs/tasks/008b-pipeline-workflow.md` and the write-back is `docs/tasks/008c-pipeline-write-back.md` (both draft). | GitHub-hosted Actions runner, on the registry's own `main` | a merge to `main` that adds a version (E15) | `specified` |
 | N6 | artifact-store: GitHub Releases of the repository `worldofmodcraft/archive`. The repository did not exist when checked (see State of this document). | GitHub Releases | the pipeline's upload (E7) | `specified` |
-| N7 | site-build, from fixture data: Astro and Pagefind, `.github/workflows/deploy.yml` in `worldofmodcraft/site`; builds from `fixtures/`, not from the real registry | GitHub-hosted Actions runner (`runs-on: ubuntu-latest`) | a push to site `main`, a manual dispatch, or a `registry-updated` dispatch (receiver present) | `built` |
+| N7 | site-build, from fixture data: Astro and Pagefind, `site:.github/workflows/deploy.yml` in `worldofmodcraft/site`; builds from `fixtures/`, not from the real registry | GitHub-hosted Actions runner (`runs-on: ubuntu-latest`) | a push to site `main`, a manual dispatch, or a `registry-updated` dispatch (receiver present) (obs L5, L10) | `built`  |
 | N7 | site-build, from the real registry and the real archive: task `docs/tasks/055-site-live-registry.md` (draft) | GitHub-hosted Actions runner | the registry's dispatch (E12) | `specified` |
-| N8 | site-host: GitHub Pages serving `dist/` at the apex domain; DNS at Cloudflare, DNS-only | GitHub Pages servers; Cloudflare DNS | a deploy job from N7 | `built` |
+| N8 | site-host: GitHub Pages serving `dist/` at the apex domain; DNS at Cloudflare, DNS-only | GitHub Pages servers; Cloudflare DNS | a deploy job from N7 (obs L1, L3) | `built`  |
 
 Observed 2026-10-14: `curl -sI https://worldofmodcraft.com` answered `HTTP/2 200` with `server: GitHub.com`.
 
@@ -69,11 +69,13 @@ this document.
 | E7 | N5 to N6: release tag and asset names | GitHub-hosted runner, pipeline upload | `contracts/artifact-naming.md` | `specified` |
 | E8 | N5 to N2: six write-back fields into the entry, through a same-repository pull request (a direct push to `main` is refused by branch protection, `docs/manager/OPERATIONS.md`) | GitHub-hosted runner, pipeline | `contracts/entry.schema.json` | `specified` |
 | E9 | N5 to the signing key: minisign detached signature | GitHub-hosted runner, key read from an Actions secret | `contracts/signature-format.md` | `specified` |
-| E10 | N2 to N7: the site reads entry and page data | GitHub-hosted runner, site build; today against fixtures only | `contracts/entry.schema.json` | `built` |
-| E11 | N6 to N7: archive interior (README and screenshots in the tarball) | GitHub-hosted runner, site build; today against fixture tarballs, not N6 | `contracts/archive-layout.md` | `built` |
-| E12 | N2 to N7: `repository_dispatch` rebuild trigger. Receiver in `.github/workflows/deploy.yml`; sender not built (registry has no workflows) | GitHub Actions in both repositories | `contracts/rebuild-trigger.md` | `specified` |
-| E13 | N7 to N8: `dist/` plus `CNAME` | GitHub Actions deploy job to Pages | `contracts/site-output.md` | `built` |
-| E14 | N8 to the public: HTTPS on the apex, URL scheme `/mods/<ns>/<name>` | GitHub Pages | `contracts/url-scheme.md` | `built` |
+| E10 | N2 to N7: the site reads entry and page data, fixtures only | GitHub-hosted runner, site build; today against fixtures only | `contracts/entry.schema.json` (obs L10) | `built`  |
+| E10 | N2 to N7: the same read, from the real registry (no `mods/` directory exists yet) | GitHub-hosted runner, site build | `contracts/entry.schema.json` | `specified` |
+| E11 | N6 to N7: archive interior (README and screenshots in the tarball), fixture tarballs only | GitHub-hosted runner, site build; today against fixture tarballs, not N6 | `contracts/archive-layout.md` (obs L10) | `built`  |
+| E11 | N6 to N7: the same read, from the archive repository's Releases (N6 does not exist) | GitHub-hosted runner, site build | `contracts/archive-layout.md` | `specified` |
+| E12 | N2 to N7: `repository_dispatch` rebuild trigger. Receiver in `site:.github/workflows/deploy.yml`; sender not built (registry has no workflows) | GitHub Actions in both repositories | `contracts/rebuild-trigger.md` | `specified` |
+| E13 | N7 to N8: `dist/` plus `CNAME` | GitHub Actions deploy job to Pages | `contracts/site-output.md` (obs L1, L5) | `built`  |
+| E14 | N8 to the public: HTTPS on the apex, URL scheme `/mods/<ns>/<name>` | GitHub Pages | `contracts/url-scheme.md` (obs L1, L10) | `built`  |
 | E15 | N2 (merge to `main`) to N5: post-merge push trigger. The contract file `pipeline-trigger.md` named by the graph does not exist on registry `main`. | GitHub Actions, registry | none on disk | `specified` |
 | E16 | author's forge identity to N3: ownership by numeric account id (`pulls.user.id`) | GitHub-hosted runner, in CI | `contracts/ownership.md` | `specified` |
 
@@ -90,20 +92,21 @@ checked.
 |---|---|---|---|---|
 | Registry entries (`entry.json`) | git, `worldofmodcraft/registry` `main` | the owner's pull request (E2); the pipeline's write-back pull request (E8) | yes by contract (`contracts/append-only.rules.md`); enforced by CI, which is not built | `specified` |
 | Page content (`page.json`) | git, same repository | the owner's pull request (E3) | no, owners edit pages | `specified` |
-| Contracts, `reserved-namespaces.json` | git, same repository | the manager via reviewed pull request; `main` is protected | no, but every change is a reviewed commit | `built` |
+| Contracts, `reserved-namespaces.json` | git, same repository | the manager via reviewed pull request; `main` is protected | no, but every change is a reviewed commit (obs L4) | `built`  |
 | Source tarballs and signatures | GitHub Releases in `worldofmodcraft/archive` | the pipeline, through the organisation-owned GitHub App | intended (names are never reused, `contracts/artifact-naming.md`); Releases themselves are deletable by an organisation owner, so append-only is a convention, not a platform guarantee [unverified — never exercised]. | `specified` |
 | `source_archive` URL | inside each version object in the registry entry | the pipeline write-back, once | yes: `contracts/append-only.rules.md` forbids changing it afterwards | `specified` |
 | The project-owned redirect host that fronts `source_archive` | not chosen; task 058 reports whether GitHub Pages can do it | the owner (DNS and host settings) | no | `specified` |
-| Signing private key (working copy) | Actions secret `MINISIGN_SECRET_KEY` on `worldofmodcraft/registry`, per the mission log, M3, 2026-09-05. [unverified — not checked: no agent may check it, CLAUDE.md rule 11] | the owner | not applicable | `built` |
-| Signing private key (offline backup) | the owner's side, as `docs/architecture/key-management.md` states; the backup is a file, not a service. [unverified — not confirmed: the mission log lists it as the owner's unconfirmed item]. | the owner | not applicable | `built` |
+| Signing private key (working copy) | Actions secret `MINISIGN_SECRET_KEY` on `worldofmodcraft/registry`, per the mission log, M3, 2026-09-05. [unverified — not checked: no agent may check it, CLAUDE.md rule 11] | the owner | not applicable | `specified` |
+| Signing private key (offline backup) | the owner's side, as `docs/architecture/key-management.md` states; the backup is a file, not a service. [unverified — not confirmed: the mission log lists it as the owner's unconfirmed item]. | the owner | not applicable | `specified` |
 | GitHub App private key | an Actions secret on `worldofmodcraft/registry`, plus whatever offline copy the owner keeps (decision Q-D). [unverified — until M5 is done]. | the owner | not applicable | `specified` |
-| Public signing key, `key_id` `6E5B30596A7A8CC4` | `docs/architecture/key-management.md` | pull request to the platform repository | no | `built` |
+| Public signing key, `key_id` `6E5B30596A7A8CC4` | `docs/architecture/key-management.md` | pull request to the platform repository | no (obs L8) | `built`  |
 | Public key on the site (`trusted-keys/`) | site repository, task 055 | pull request to the site repository | no | `specified` |
 | Public key in the launcher | the launcher; it does not exist | pull request | no | `not built` |
-| Site `dist/` | the GitHub Pages deployment artefact; never committed (`contracts/site-output.md`) | the deploy job | no | `built` |
-| DNS records | Cloudflare account, records DNS-only, per `docs/runbooks/site-v1-manual-steps.md` step M2 | the owner | no | `built` |
-| Organisation account, repository settings, branch protection | GitHub, organisation `worldofmodcraft` (numeric id 324218296) | the owner | no | `built` |
-| Decisions, task ledger, mission logs, this note | git, `worldofmodcraft/platform` | pull request; `main` is protected | history is kept by git | `built` |
+| Site `dist/` | the GitHub Pages deployment artefact; never committed (`contracts/site-output.md`) | the deploy job | no (obs L9) | `built`  |
+| DNS records | Cloudflare name servers hold the zone (obs L3); the DNS-only setting is discussed under the runtime table | the owner | no | `built` |
+| Organisation account `worldofmodcraft` (numeric id 324218296, from `docs/architecture/key-management.md`; the page answers, the id was not re-read, obs L7) | GitHub | the owner | no | `built` |
+| Branch protection and repository settings of the three repositories: `main` requires a pull request and refuses a direct push, per `docs/manager/OPERATIONS.md` [unverified — not observed: the unauthenticated API call was rate-limited, L12, and a push test was not run] | GitHub | the owner | no | `specified` |
+| Decisions, task ledger, mission logs | git, `worldofmodcraft/platform` | pull request; `main` is protected | history is kept by git (obs L11) | `built`  |
 | Disaster mirror of registry, index and archives | a second host; ADR-0077 | a scheduled job | read-only copy | `not built` |
 
 ## The owner's machines host nothing
@@ -124,13 +127,15 @@ and must run on a GitHub-hosted runner; a service answers requests.
 | Registry PR checks (N3, N4) | job | GitHub-hosted runner (`ubuntu-latest`) | a pull request | `specified` |
 | Build pipeline and write-back (N5) | job | GitHub-hosted runner (`ubuntu-latest`) | a merge to registry `main` | `specified` |
 | Registry-to-site dispatch sender (E12) | job | GitHub-hosted runner (`ubuntu-latest`) | a push to registry `main` | `specified` |
-| Site build and deploy (N7) | job | GitHub-hosted runner (`ubuntu-latest`) | a site push, a manual dispatch, a dispatch from the registry | `built` |
-| Platform ADR index gate | job | GitHub-hosted runner (`ubuntu-latest`) | a pull request to the platform repository | `built` |
+| Site build and deploy (N7) | job | GitHub-hosted runner (`ubuntu-latest`) | a site push, a manual dispatch, a dispatch from the registry (obs L5) | `built`  |
+| Platform ADR index gate | job | GitHub-hosted runner (`ubuntu-latest`) | a pull request to the platform repository (obs L5) | `built`  |
 | Disaster mirror job (ADR-0077) | job | GitHub-hosted runner (`ubuntu-latest`); ADR-0077 does not name the runner [unverified — not specified] | a schedule | `not built` |
-| Static site serving (N8) | service | GitHub Pages servers | an HTTPS request | `built` |
+| Static site serving (N8) | service | GitHub Pages servers | an HTTPS request (obs L1) | `built`  |
 | Release downloads (N6) | service | GitHub Releases servers | an HTTPS request | `specified` |
-| DNS resolution for the apex domain | service | Cloudflare DNS | a DNS query | `built` |
+| DNS resolution for the apex domain | service | Cloudflare DNS | a DNS query (obs L3) | `built`  |
 | Redirect host that fronts `source_archive` | service | not chosen, see "Moving off GitHub" | an HTTPS request | `specified` |
+
+DNS-only is inferred, not seen: the A records resolve to GitHub Pages addresses and not to a Cloudflare proxy range (obs L3), and `docs/runbooks/site-v1-manual-steps.md` step M2 says grey cloud [unverified — the Cloudflare dashboard was not viewed].
 
 The positive check for this table, which anyone can repeat:
 
@@ -197,12 +202,13 @@ are not.
 | Stored `source_archive` URL | a project-owned URL in front of the real location (Q-G) | the URL is frozen in append-only records; without the redirect, no seam exists | `contracts/entry.schema.json`, `contracts/append-only.rules.md` | `specified` |
 | Publish path: a pull request to a GitHub repository | the registry is "a public git repo"; ADR-0058 section 4 says only this path is to be replaced, later, by portal upload | the PR is the only way in | ADR-0058 section 4 (`docs/decisions/0058-publishing-flow.md`) | `not built` |
 | Ownership gate | the `owner.provider` field | the gate reads GitHub's `pulls.user.id`; another forge needs another reader | `contracts/ownership.md` | `specified` |
-| Reserved namespaces | the record shape allows any provider | the organisation's numeric account id 324218296 is stored in `reserved-namespaces.json` for `mc` and `test` | `reserved-namespaces.json` in the registry | `built` |
-| CI and pipeline runtime | none: the workflows are GitHub Actions files | N3, N5 and N7 run only on Actions; recreating them elsewhere is work, not configuration | `.github/workflows/deploy.yml`; registry workflows are not built | `specified` |
+| Reserved namespaces | the record shape allows any provider | the organisation's numeric account id 324218296 is stored in `reserved-namespaces.json` for `mc` and `test` | `reserved-namespaces.json` in the registry (obs L4) | `built`  |
+| CI and pipeline runtime | none: the workflows are GitHub Actions files | N3, N5 and N7 run only on Actions; recreating them elsewhere is work, not configuration | `site:.github/workflows/deploy.yml`; registry workflows are not built | `specified` |
 | Rebuild trigger E12 | the contract names an event and a payload | `repository_dispatch` is a GitHub Actions feature | `contracts/rebuild-trigger.md` | `specified` |
 | Artifact store | `contracts/artifact-naming.md` names tags and assets, not a URL | GitHub Releases is the store; any object store can hold the same names | `contracts/artifact-naming.md` | `specified` |
-| Site host | `dist/` is plain files plus `CNAME`, so any static host serves it | GitHub Pages is the host; the deploy job uses Pages actions | `contracts/site-output.md`, `.github/workflows/deploy.yml` | `built` |
-| Branch protection, GitHub App | none | settings of the organisation account; they are re-created by hand elsewhere | `docs/manager/OPERATIONS.md` | `built` |
+| Site host | `dist/` is plain files plus `CNAME`, so any static host serves it | GitHub Pages is the host; the deploy job uses Pages actions | `contracts/site-output.md`, `site:.github/workflows/deploy.yml` (obs L5) | `built`  |
+| Branch protection | none | a setting of the GitHub organisation account; re-created by hand elsewhere | `docs/manager/OPERATIONS.md` [unverified — not observed, L12] | `specified` |
+| GitHub App (decision Q-D) | none | an identity of the GitHub organisation account; re-created on the new forge | decision Q-D; step M5 not done | `specified` |
 | Disaster mirror | ADR-0077: a scheduled push to a second host (Codeberg, GitLab or an S3-compatible bucket) | it is `not built`; the ADR places it in phase 1.5 | ADR-0077 (`docs/decisions/0077-disaster-mirror.md`) | `not built` |
 
 ### Exit procedure for a successor
@@ -211,8 +217,7 @@ Follow in order. Each step carries its state.
 
 1. **Clone everything now, before anything else.** Clone `worldofmodcraft/registry`,
    `worldofmodcraft/site` and `worldofmodcraft/platform` (all three are public). Clone the
-   `worldofmodcraft/archive` repository too and download its Release assets once it exists; Release assets are not part of a git clone and are downloaded separately [unverified — not tested here]. State: `built` for the three
-   repositories, `specified` for the archive.
+   `worldofmodcraft/archive` repository too and download its Release assets once it exists; Release assets are not part of a git clone and are downloaded separately [unverified — not tested here]. State: `specified`; the three repositories answer 200 without credentials (obs L2), the archive does not exist (404).
 2. **Use the disaster mirror if one exists.** ADR-0077 says the mirror is a phase 1.5 item. It is
    `not built`: today there is no second copy of the tarballs except the authors' own repositories
    at the pinned commits, and whether a rebuild from them gives the same SHA-256 is [unverified — never exercised]. State: `not built`.
@@ -221,9 +226,9 @@ Follow in order. Each step carries its state.
    `specified`.
 4. **Re-key the signing identity if the old private key is unavailable.** Generate a new key and
    follow the rotation procedure in `docs/architecture/key-management.md`. Old signatures stay valid
-   under the old public key. State: `built` (the procedure is written; it has never been run [unverified — never exercised]).
+   under the old public key, as `docs/architecture/key-management.md` states [unverified — documented, never exercised]. State: `specified`; the procedure is written and has never been run.
 5. **Repoint DNS.** Change the Cloudflare records for `worldofmodcraft.com` to the new static host
-   (`dist/` is plain files). State: `built` for the apex site.
+   (`dist/` is plain files). State: `specified`; never run. Today the apex's A records point at GitHub Pages addresses and the name servers are Cloudflare's (obs L3).
 6. **Repoint the `source_archive` redirect.** Change the redirect host's target to the new tarball
    location; the stored URLs stay unchanged. State: `specified`, depends on task 058.
 7. **Replace the GitHub App.** Re-create the automation identity on the new forge, move its
@@ -231,7 +236,7 @@ Follow in order. Each step carries its state.
 8. **Replace the ownership reader** with one for the new forge (`contracts/ownership.md`), and keep
    the numeric ids already stored; they are provider-qualified. State: `specified`.
 9. **Accept what is lost:** the Actions run history and Release download counts do not move. State:
-   `built` (a statement, not a procedure).
+   `specified`; a statement, not an observed fact.
 
 ## If a piece disappears
 
@@ -251,10 +256,10 @@ of these failures has been rehearsed.
 
 ## State of this document
 
-- **Written:** 2026-10-15, by the task 056 doc-writer, first version.
+- **Written:** 2026-10-15, by the task 056 doc-writer, first version; fix round 1 the same day re-tagged rows so that `built` means observed (observations L1 to L12 in the task log).
 - **Date stamp rule:** the "Last reviewed" date is not earlier than the newest spec-approval date of
   the tasks this note depends on (2026-10-14).
-- **Unverified markers in body:** 12
+- **Unverified markers in body:** 15
 - **What `docs/tasks/056-verify.sh` proves:** the required sections exist; every node id and edge id
   in `docs/architecture/depgraph.json` (and every edge id in `docs/architecture/depgraph.md`) has a
   row; every row of the tables with a State column carries exactly one tag; every cited path

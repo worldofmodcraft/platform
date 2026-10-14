@@ -7,22 +7,39 @@
 # "hosts nothing" table has no row on an owner's machine. WHAT IT CANNOT PROVE: that the prose is
 # true. Criterion 9 (a human review) is separate and recorded in the task log.
 #
-# Usage: 056-verify.sh [--note FILE] [--skip-controls]
+# Usage: 056-verify.sh [--note FILE] [--skip-controls] [--no-fetch]
 # Env:   REGISTRY_REPO (default ~/registry), SITE_REPO (default ~/site): local clones whose
-#        origin/main is read with `git show`; this script does not fetch.
+#        origin/main is read with `git show`. Unless --no-fetch is given the script first runs a
+#        read-only `git fetch origin` in each and prints the sha it then reads; a failed fetch is
+#        a failure of the run. DEPGRAPH_MD and TASKLOG override the depgraph.md and task-log paths
+#        (used by the controls).
+# Citation rule (criterion 4): an unqualified `contracts/...` path is resolved in the registry
+#        only; an unqualified `docs/...` or `.github/...` path in THIS repository only; a path in
+#        another repository must be written `site:<path>` or `registry:<path>`; `branch:path`
+#        (branch not site/registry) is checked in this repository with git cat-file.
+# State rule (criterion 3): a `built` row/step must cite an observation `obs L<n>` that is defined
+#        as a line `- L<n> ...` in the task log, and must not carry an unverified marker.
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 NOTE="$ROOT/docs/architecture/system-overview.md"
-CONTROLS=1
+CONTROLS=1; FETCH=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --note) NOTE="$2"; shift 2;;
     --skip-controls) CONTROLS=0; shift;;
+    --no-fetch) FETCH=0; shift;;
     *) echo "unknown argument $1" >&2; exit 2;;
   esac
 done
 export REGISTRY_REPO="${REGISTRY_REPO:-$HOME/registry}" SITE_REPO="${SITE_REPO:-$HOME/site}"
+export DEPGRAPH_MD="${DEPGRAPH_MD:-$ROOT/docs/architecture/depgraph.md}" TASKLOG="${TASKLOG:-$ROOT/docs/tasks/056-architecture-note.md}"
+if [ $FETCH = 1 ]; then
+  for r in "$REGISTRY_REPO" "$SITE_REPO"; do
+    git -C "$r" fetch -q origin || { echo "FAIL fetch of $r failed (offline? use --no-fetch to read the existing origin/main)"; exit 2; }
+    echo "fetched $r origin/main=$(git -C "$r" rev-parse --short origin/main)"
+  done
+fi
 
 run_checks() {  # $1 = note file ; prints FAIL lines; exit 1 if any
 python3 -I - "$1" "$ROOT" <<'PY'
@@ -74,7 +91,7 @@ alltabs = tables(lines)
 # ---- criterion 2: ids
 g = json.load(open(os.path.join(root, "docs/architecture/depgraph.json")))
 node_ids = [n["id"] for n in g["nodes"]]; edge_ids = [e["id"] for e in g["edges"]]
-md = open(os.path.join(root, "docs/architecture/depgraph.md"), encoding="utf-8").read()
+md = open(os.environ["DEPGRAPH_MD"], encoding="utf-8").read()
 md_edges = re.findall(r"^\|\s*(E\d+)\s*\|", md, re.M)
 drift = [e for e in md_edges if e not in edge_ids]
 if not node_ids or not edge_ids: fail(2, "read zero node or edge ids from depgraph.json")
@@ -108,29 +125,56 @@ if not m: fail(3, "State of this document does not state 'Unverified markers in 
 elif int(m.group(1)) != n_body: fail(3, f"stated unverified count {m.group(1)} != body count {n_body}")
 print(f"info: tagged rows={checked} unverified-in-body={n_body}")
 
+# ---- criterion 3b: every `built` row/step cites an observation defined in the log, no unverified marker
+try: logtxt = open(os.environ["TASKLOG"], encoding="utf-8").read()
+except OSError as e: logtxt = ""; fail(3, f"cannot read task log: {e}")
+defined = set(re.findall(r"^- L(\d+)\b", logtxt, re.M))
+if not defined: fail(3, "task log defines no observations (lines '- L<n> ...')")
+def built_ok(label, rowtext):
+    if "[unverified" in rowtext: fail(3, f"`built` item carries an unverified marker: {label}")
+    refs = re.findall(r"obs ((?:L\d+(?:, )?)+)", rowtext)
+    ids = [x for r in refs for x in re.findall(r"L(\d+)", r)]
+    if not ids: fail(3, f"`built` item cites no observation (obs L<n>): {label}")
+    for i in ids:
+        if i not in defined: fail(3, f"`built` item cites L{i}, not defined in the task log: {label}")
+nbuilt = 0
+for hdr, rows, raw in alltabs:
+    if "State" not in hdr: continue
+    ci = hdr.index("State")
+    for r in rows:
+        if len(r) > ci and r[ci] == "`built`":
+            nbuilt += 1; built_ok(r[0], " | ".join(r))
+steps = re.split(r"\n(?=\d+\. )", "\n".join(section("Moving off GitHub")))
+for st in steps:
+    if not re.match(r"\d+\. ", st): continue
+    tg = re.findall(r"State:\s+`(built|specified|not built)`", st)
+    if len(tg) != 1: fail(3, f"exit step without exactly one State tag: {st[:40]!r}")
+    elif tg[0] == "built": nbuilt += 1; built_ok(st[:30], st)
+print(f"info: built items checked for observations={nbuilt}; defined observations={len(defined)}")
+
 # ---- criterion 4: cited paths
 def git_show(repo, path):
     return subprocess.run(["git","-C",repo,"cat-file","-e",f"origin/main:{path}"],
         capture_output=True).returncode == 0
 cites = re.findall(r"`([^`\n]+)`", text)
-paths = []
-for c in cites:
-    if re.match(r"^[\w./-]+:(docs|contracts|\.github)/\S+$", c) or re.match(r"^(docs|contracts|\.github)/\S+$", c):
-        paths.append(c)
+PFX = r"(?:docs|contracts|\.github)/\S+"
+paths = [c for c in cites if re.match(r"^(?:[\w./-]+:)?" + PFX + "$", c)]
 if not paths: fail(4, "note cites zero paths")
+def cat(repo, ref, path):
+    return subprocess.run(["git","-C",repo,"cat-file","-e",f"{ref}:{path}"], capture_output=True).returncode == 0
 seen = set()
 for c in paths:
     if c in seen: continue
-    seen.add(c); ok = False
-    if re.match(r"^(docs|contracts|\.github)/", c):
-        if c.startswith("contracts/"): ok = git_show(REG, c)
-        elif c.startswith(".github/"): ok = os.path.exists(os.path.join(root, c)) or git_show(SITE, c)
-        else: ok = os.path.exists(os.path.join(root, c)) or git_show(SITE, c) or git_show(REG, c)
-    else:
-        br, p = c.split(":", 1)
-        ok = subprocess.run(["git","-C",root,"cat-file","-e",f"{br}:{p}"], capture_output=True).returncode == 0 \
-             or subprocess.run(["git","-C",root,"cat-file","-e",f"origin/{br}:{p}"], capture_output=True).returncode == 0
-    if not ok: fail(4, f"cited path does not resolve: {c}")
+    seen.add(c)
+    q, _, p = c.partition(":") if re.match(r"^[\w./-]+:", c) else ("", "", c)
+    if not q: p = c
+    if q == "": 
+        ok = cat(REG, "origin/main", p) if p.startswith("contracts/") else (os.path.exists(os.path.join(root, p)))
+        where = "registry" if p.startswith("contracts/") else "this repository"
+    elif q == "site": ok, where = cat(SITE, "origin/main", p), "site"
+    elif q == "registry": ok, where = cat(REG, "origin/main", p), "registry"
+    else: ok, where = cat(root, q, p) or cat(root, "origin/" + q, p), "branch " + q
+    if not ok: fail(4, f"cited path does not resolve in {where}: {c}")
 print(f"info: distinct cited paths={len(seen)}")
 
 # ---- criterion 5: hosts-nothing table
@@ -214,8 +258,8 @@ printf '# empty\n' > "$T/m1z.md";                     expect "no headings at all
 sed '0,/^| N2 | .*`built` |$/s/`built` |$/ |/' "$N" > "$T/m3.md"; expect "strip a state tag" "$T/m3.md" "row without exactly one tag"
 sed 's/^- \*\*Unverified markers in body:\*\* .*/- **Unverified markers in body:** 99/' "$N" > "$T/m3c.md"; expect "wrong unverified count" "$T/m3c.md" "stated unverified count 99"
 # 4: bogus path, zero paths
-{ cat "$N"; echo; echo 'See `docs/architecture/does-not-exist.md`.'; } > "$T/m4.md"; expect "cite a missing file" "$T/m4.md" "does not resolve: docs/architecture/does-not-exist.md"
-sed 's/`\(docs\|contracts\|\.github\|proposal\)\//`x\//g; s/:docs\//:x\//g' "$N" > "$T/m4z.md"; expect "cite zero paths" "$T/m4z.md" "cites zero paths"
+{ cat "$N"; echo; echo 'See `docs/architecture/does-not-exist.md`.'; } > "$T/m4.md"; expect "cite a missing file" "$T/m4.md" "does not resolve in this repository: docs/architecture/does-not-exist.md"
+sed 's/`\(docs\|contracts\|\.github\|proposal\|site:\.github\)\//`x\//g; s/:docs\//:x\//g' "$N" > "$T/m4z.md"; expect "cite zero paths" "$T/m4z.md" "cites zero paths"
 # 5: positive control row on WSL, and a job not on the runner
 sed '0,/^| Static site serving (N8) | service | GitHub Pages servers |/s//| Static site serving (N8) | service | a VPS under the owner'"'"'s desk |/' "$N" > "$T/m5.md"; expect "row on a VPS" "$T/m5.md" "owner/self-hosted machine"
 sed '0,/^| Site build and deploy (N7) | job | GitHub-hosted runner (`ubuntu-latest`) |/s//| Site build and deploy (N7) | job | WSL on the owner machine |/' "$N" > "$T/m5b.md"; expect "job on WSL" "$T/m5b.md" "owner/self-hosted machine"
@@ -230,5 +274,20 @@ sed 's/phase 1\.5/a later phase/g' "$N" > "$T/m6c.md";                    expect
 { cat "$N"; echo "token ghp_$(printf 'a%.0s' $(seq 1 36))"; } > "$T/m7c.md";    expect "token" "$T/m7c.md" "GitHub token"
 # 8: stamp older than the dependency
 sed 's/^- \*\*Last reviewed:\*\* .*/- **Last reviewed:** 2026-01-01/' "$N" > "$T/m8.md"; expect "stale review stamp" "$T/m8.md" "< newest dependency"
+# fix round 1 controls
+sed '/^| N3 |/s/`specified` |$/`built` |/' "$N" > "$T/r1a.md";   expect "re-tag specified row N3 as built" "$T/r1a.md" "item cites no observation (obs L<n>): N3"
+sed '/^| N2 |/s/obs L[0-9, L]*/obs L99/' "$N" > "$T/r1b.md";    expect "built row cites undefined observation" "$T/r1b.md" "cites L99, not defined"
+sed '/^| N8 |/s/(obs [^)]*)/[unverified — x]/' "$N" > "$T/r1c.md"; expect "built row with unverified marker" "$T/r1c.md" "unverified marker: N8"
+python3 -I - "$N" "$T/r1d.md" <<'PYE'
+import sys
+s=open(sys.argv[1]).read(); a="State:\n   `specified`; a statement"; assert a in s
+open(sys.argv[2],'w').write(s.replace(a,"State:\n   `built`; a statement",1))
+PYE
+expect "exit step 9 re-tagged built" "$T/r1d.md" "item cites no observation" 
+{ cat "$N"; echo 'See `docs/build.md` and `.github/workflows/deploy.yml`.'; } > "$T/r1e.md"; expect "cite a site-only path unqualified" "$T/r1e.md" "does not resolve in this repository: docs/build.md"
+{ cat "$N"; echo 'See `contracts/nope.md`.'; } > "$T/r1f.md";      expect "cite a missing contract" "$T/r1f.md" "does not resolve in registry: contracts/nope.md"
+grep -v 'system-overview.md' "$DEPGRAPH_MD" > "$T/dg.md";       DEPGRAPH_MD="$T/dg.md" expect "depgraph link removed" "$N" "does not link system-overview.md"
+awk '/^## /{s=($0=="## Moving off GitHub")} s{gsub(/source_archive/,"src_url")} {print}' "$N" > "$T/r1g.md"; expect "no source_archive in Moving off GitHub" "$T/r1g.md" "'source_archive' not in 'Moving off GitHub'"
+awk '/^## /{s=($0=="## Moving off GitHub")} s{gsub(/append-only/,"immutable")} {print}' "$N" > "$T/r1h.md"; expect "no append-only in Moving off GitHub" "$T/r1h.md" "'append-only' not in 'Moving off GitHub'"
 echo "== $PASS pass, $BAD fail"
 [ $BAD = 0 ]
