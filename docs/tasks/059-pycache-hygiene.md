@@ -1,6 +1,6 @@
 # Task 059: No Python bytecode in the platform repository
 
-- **Mission:** tooling (housekeeping) — **Status:** spec-approved (manager, 2026-10-15; small, §2b solo gate)
+- **Mission:** tooling (housekeeping) — **Status:** review (spec-approved 2026-10-15; implemented, see log)
 - **Agent / model:** scaffolder / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/059-pycache-hygiene / ~/wt/task-059
@@ -24,3 +24,29 @@ Origin: the 053 and 052 reviews (a committed .pyc, twice in one night). Three fi
 
 ## Forbidden here
 Deleting any source file. Touching anything outside the declared scope.
+
+# Task 059 log
+
+Final HEAD before this log commit: `2076fe7`. Run in a fresh clone (`git clone -b task/059-pycache-hygiene`), `docs/tasks/059-verify.sh --mutate`, exit 0:
+
+```
+== environment
+git: git version 2.53.0
+python: 3.14.4
+temp root: /tmp/wom059-BSaRVU (guard passed)
+== AC1: the index of the working tree (/tmp/wom059-fresh-VqI5ig/repo)
+ok: no tracked bytecode in the working tree
+== AC1, AC2, AC4, AC5: fresh clone of committed HEAD
+clone at 2076fe75f1031e02e6d5c03a6024bb9a9bbd1af2
+ok: c1 holds in fresh clone
+ok: c2 holds in fresh clone
+ok: c4 holds in fresh clone
+ok: criteria 1, 2, 4 hold in a fresh clone (criterion 5)
+== AC3: mutation run (each mutant must turn its check red)
+ok: mutant 'no ignore rule' killed -> criterion 2 red
+      x/__pycache__/y.pyc is not ignored (check-ignore rc=1)
+ok: mutant 're-added file' killed -> criterion 1 red
+      tracked bytecode:
+        tools/adr/__pycache__/build_index.cpython-314.pyc
+== 059-verify: ALL CHECKS PASSED
+```
