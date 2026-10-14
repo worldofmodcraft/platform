@@ -1,6 +1,6 @@
 # Task 055: The site builds from the real registry, and a registry merge rebuilds it (E12)
 
-- **Mission:** SITE-V1, deliverables **D3** (the "builds from the registry … rebuild triggered on every registry merge" part) and the live half of §7.4-§7.5 — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until the Ludwig questions are answered and tasks 041 and 008 (at least 008a) are merged.**
+- **Mission:** SITE-V1, deliverables **D3** (the "builds from the registry … rebuild triggered on every registry merge" part) and the live half of §7.4-§7.5 — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until tasks 041, 057 and 008 (at least 008a) are merged, task 058 has reported, and the vendored-schema re-sync after 057 is done. The credential question is decided (Q-D, Ludwig 2026-10-14: the GitHub App); Q-K below is open but has a default.**
 - **Agent / model:** implementer / sonnet
 - **Budget:** large (≤ 6 agent-sessions). Two repositories, a signature verifier, a staging step, a sender and a receiver. If the manager prefers, split at the repo boundary: **055a site side** (criteria 1-9), **055b registry sender** (criteria 10-12); the criteria are written so they separate cleanly.
 - **Branch / worktree:** `task/055-site-live-registry` / `~/wt/site-task-055` in the **site** repo (`worldofmodcraft/site`), and `task/055-site-live-registry` / `~/wt/registry-task-055` in the **registry** repo (`worldofmodcraft/registry`). One task id, two worktrees, two PRs; merge the registry sender **last** (see Dependencies).
@@ -9,7 +9,7 @@
 `https://worldofmodcraft.com` is built from the real registry and the real archived tarballs, not
 from `fixtures/`: the deploy workflow checks out `worldofmodcraft/registry` at the commit that
 triggered it, downloads the current version's tarball for each mod from its `source_archive`
-URL, verifies hash and signature **before extracting** (`signature-format.md`, E9; closes the
+URL (a project-owned URL that redirects to the release asset in `worldofmodcraft/archive`; decisions Q-G and Q-E), verifies hash and signature **before extracting** (`signature-format.md`, E9; closes the
 TODO row in the site's `docs/build.md`), builds, and deploys. And a merge to the registry's
 default branch causes that to happen with no human: a workflow in the registry sends
 `repository_dispatch` with `event_type` exactly `registry-updated` and the two-field payload;
@@ -41,6 +41,7 @@ directory (`git -C /home/ludwig/registry ls-tree -r --name-only origin/main | gr
 has since landed.
 
 ## Context to load (exhaustive)
+- Task 057 (the `pending` state and the `pending → published` transition) and task 058's report (how the project-owned `source_archive` URL is served).
 - ADRs: 0059 §1 (every registry merge triggers the build; archive, never the live repo), 0041
   (verify entry signature → hash → signature before install; keys; archive), 0058 §4 (provider
   neutrality: `source_archive` is an `https://` URL, any host), 0103, 0117, 0099.
@@ -48,7 +49,7 @@ has since landed.
   — a wrong `event_type` is silent), `archive-layout.md` (verify before extract; path-escape),
   `signature-format.md` (all eleven rejections, `key_id` reversal), `artifact-naming.md` (the
   URL shape the downloader may accept), `site-output.md`, `url-scheme.md`, `entry.schema.json`
-  (as amended by the contract task: `pending` versions exist and must be ignored).
+  (as amended by task 057: `pending` versions exist and must be ignored).
 - Site repo: `.github/workflows/deploy.yml`, `src/lib/{config,archive,registry,validate,semver}.mjs`,
   `scripts/prepare-content.mjs`, `scripts/self-test-archive-safety.mjs`, `docs/build.md` (the
   E9 TODO row, the fixtures section, "Assumptions bound to task 025"), `docs/tasks/009-site-build.md`.
@@ -68,7 +69,7 @@ has since landed.
   that `repository_dispatch` returns HTTP 204 and starts the receiving workflow only on the default
   branch's workflow file (documented GitHub behaviour; criterion 11); that a dispatch needs a
   credential with write access to the *target* repository, which the built-in `GITHUB_TOKEN` of the
-  sending repository does not have (documented; this is the reason for Q1); and that Pages serves
+  sending repository does not have (documented; this is the reason Q-D chose a GitHub App); and that Pages serves
   the new build within the ten-minute edge cache OPERATIONS.md records (criterion 12).
 
 ## Design (decisions made in this spec)
@@ -84,9 +85,13 @@ has since landed.
 3. **Staging** (`scripts/stage-archives.mjs`, a step *before* `npm run build`; the Astro build itself
    still never touches the network — task 009's rule is kept): for each mod, the current version =
    highest `published` (existing `highestPublished`); `pending` and `removed` versions are never
-   downloaded. The URL must match the shape `artifact-naming.md` + umbrella Q4 fix (assumed
-   `https://github.com/worldofmodcraft/registry/releases/download/<tag>/<tag>.tar.gz`, tag derived
-   from the entry's own id and version); any other `source_archive` is a hard failure naming the
+   downloaded. The URL must match the project-owned shape fixed by decision Q-G, task 058's report and any
+   `artifact-naming.md` amendment (**the hostname and path are not fixed by this spec — they come from
+   058**; the tag part is derived from the entry's own id and version), and the redirect chain must
+   end at `https://github.com/worldofmodcraft/archive/releases/download/<tag>/<tag>.tar.gz` (decision
+   Q-E; the final host after GitHub's own redirect is unverified, see Q3). If 058 finds the front is an
+   HTML meta-refresh page rather than an HTTP redirect, the staging script's handling of it is
+   specified after 058, not guessed here. Any other `source_archive` is a hard failure naming the
    entry — the registry is data written by a pipeline, but a bad URL is never fetched. Size ceiling
    and timeout are constants in the script (assumed values below, Q3). Output path = what
    `localArchivePathFor` already computes, so `archive.mjs` is unchanged.
@@ -106,7 +111,9 @@ has since landed.
    `POST /repos/worldofmodcraft/site/dispatches` with `event_type` the literal `registry-updated`,
    `client_payload` `{commit: $GITHUB_SHA, triggered_at: <RFC3339 now, UTC>}`, asserting the HTTP
    status is 204 and failing the job otherwise (a silent failure is the contract's named attack).
-   The credential is per Q1.
+   The credential (decided Q-D, Ludwig 2026-10-14) is a token minted from the organisation's GitHub App
+   (the same App as task 008b; installed on `site`, M5) inside the sender step; the App's private key
+   (`secrets.PIPELINE_APP_PRIVATE_KEY`) and id (`vars.PIPELINE_APP_ID`) are referenced only there.
 7. **Empty registry is a supported state:** with zero published versions the build must succeed and
    show an honest "nothing published yet" browse state, so the cutover does not have to wait for the
    canary. (`loadMods` currently throws on a missing/empty `mods/`; changing that is a deliberate
@@ -167,14 +174,14 @@ worktree path as an argument for the cross-repo criterion 9); [live] = real run,
 Registry side —
 10. [script] **Sender shape:** greps (fail on zero) — `on: push` `branches: [main]` with no `paths:` key;
     `event_type` literal; payload keys exactly `commit` and `triggered_at`; the step fails on non-204;
-    the token is referenced once, in that step's `env:`, never echoed; no `pull_request*` trigger.
+    the App secret is referenced once (the token-minting step), never echoed, and no `GITHUB_TOKEN`/PAT fallback exists; no `pull_request*` trigger.
     Payload builder is a small script with unit tests: `commit` is 40 lowercase hex, `triggered_at` is
     RFC 3339 and passes `entry.schema.json`'s `published_at` pattern.
 11. [live] **End to end, E12 and §7.5:** merge one real registry PR (it may be this task's own docs
     change); within five minutes `gh run list --repo worldofmodcraft/site` shows a run whose event is
     `repository_dispatch` and whose resolved ref equals the merge commit's SHA; the run succeeds and
-    deploys. Then a malformed dispatch (sent by hand by Ludwig in session with the credential he
-    controls — the agent does not craft one with a stored token) logs the E12 warning and still
+    deploys. Then a malformed dispatch (sent by hand by Ludwig in session with a credential he
+    controls — the agent does not craft one with a stored token or the App key) logs the E12 warning and still
     builds from the default branch. Run URLs in the log.
 12. [live] **The public result:** after the deploy, `curl -sI` and a content fetch of
     `https://worldofmodcraft.com/` show the new build (compare a build-stamped marker — the build
@@ -191,8 +198,8 @@ Registry side —
 - Verifying older versions' archives (the site only extracts the current one; the version list shows
   hashes from the entry). Booked as a known limit, not silently dropped: the launcher verifies on
   install (ADR-0041).
-- `modcraft://`, Lighthouse tuning, changing contracts. If the manifest source (umbrella Q2) needs
-  the site to parse `mod.lua`, that is **not** done here: see Q2.
+- `modcraft://`, Lighthouse tuning, changing contracts. If the manifest source (decided Q-C) needs
+  the site to parse `mod.lua`, where that port is built is Q-K; it is **not** done here unless Q-K is answered A.
 
 ## File scope (declared; anything else = stop and report)
 **Site repo:**
@@ -208,9 +215,9 @@ Registry side —
   paragraph stating the trigger.
 
 ## Forbidden here (beyond MANAGER.md §3.7)
-- Any stored credential read, printed or tried. The only credential in this task is the dispatch
-  token chosen under Q1; it is created by Ludwig, stored only as a repository secret, referenced in
-  one step, never logged. A denied access is not retried.
+- Any stored credential read, printed or tried. The only credential in this task is the GitHub App
+  (decision Q-D); it is created by Ludwig (M5, see `008b-pipeline-workflow.md`), stored only as a repository
+  secret and variable, referenced in one step, never logged. A denied access is not retried.
 - Fetching `source_archive` (or any URL) from the Astro build itself, from any `src/` module, or from
   anything other than `stage-archives.mjs`.
 - Extracting an archive that has not passed `verify-signature.mjs`; "degrading" a verification failure
@@ -227,8 +234,11 @@ Registry side —
 - **Needs:** task 041 merged (it adds the registry checkout step and the schema check to
   `deploy.yml`; 055 edits the same file — sequence, not parallel). Task 008a merged and 008b built
   (releases and signatures must exist in the real shape; criteria 3-9 use fixtures and do not need a
-  real publish, criteria 4, 11, 12 do). The contract amendment task (entry `pending` state) landed.
-- **Ludwig:** Q1 answered and, if it creates a credential, the one-time step done.
+  real publish, criteria 4, 11, 12 do). Task 057 (entry `pending` state) merged, **and the site's
+  vendored schema copies re-synced to it** — task 041 owns that sync and 055 may not edit them, so the
+  manager books a small re-run of 041's sync after 057 merges (not written here). Task 058 reported.
+- **Ludwig:** M5 done (GitHub App created and installed on `registry`, `site`, `archive`) before the
+  sender's live criteria 11-12; M7 (archive repo) before criterion 4.
 - **Order within the task:** site side first (merge), registry sender last — a sender merged before
   its receiver is verified would fire real dispatches at a workflow that cannot yet use them.
 - **Blocks:** mission §7.3-§7.5 live; task 010's rehearsal of the later runbook steps.
@@ -243,28 +253,26 @@ Declared: `docs/tasks/055-verify.sh` (site repo; takes the registry worktree pat
 Workflows + scripts + verifier + fixtures + tests + docs + verify script + both repos' logs current.
 
 ## Questions  (agent-maintained; see MANAGER.md 8b)
-- **Q1 (Ludwig; blocks 055b and 008b alike):** which credential sends the cross-repository dispatch?
-  The registry's built-in workflow token cannot write to the site repository (documented behaviour;
-  unverified here). A) fine-grained personal access token for `womcraft`, limited to `worldofmodcraft/site`,
-  stored as registry secret `SITE_DISPATCH_TOKEN`; expires, tied to an account. B★) a GitHub App
-  installed on both repositories, token minted per run — the same App as umbrella Q3-B, so one
-  credential serves both jobs. C) no dispatch: the site polls on a `schedule:` cron and builds when
-  the registry head moved — no credential, but it **amends E12** (the contract chooses
-  `repository_dispatch`) and adds latency and Actions minutes. | assumed: A for wording only; the
-  workflow reads whichever secret the answer names. Credential creation is a Ludwig step; CLAUDE.md
-  rule 11 applies.
-- **Q2 (blocks the mod page's licence/type display; umbrella Q2):** the site currently reads
-  `manifest.json` from the archive root (docs/build.md: undecided by E11). If the answer to umbrella
-  Q2 is A (restricted static reader of `mod.lua`), the site needs the same reader in JavaScript with
-  a shared fixture corpus so the two readers cannot drift. | options: A★) include that port in this
-  task (adds ~1 session) / B) a separate follow-up task, with the page degrading to "licence
-  unavailable" meanwhile (mission §7.4 requires the licence to show, so B would leave §7.4 open) |
-  assumed: neither — criteria 8's mod page uses a fixture archive that carries `manifest.json` as
-  today; **the licence display for a real publish is unresolved until this is answered.**
-- **Q3:** staging limits. | assumed: 50 MiB body ceiling, 30 s timeout, 3 redirects, same-origin to
-  `github.com` and `objects.githubusercontent.com` only (the redirect target of release downloads is
-  **unverified** — read it from a real response when implementing and record it) | built on: criterion 3.
+- ~~Q1 credential for the dispatch~~ **decided (Ludwig, 2026-10-14, Q-D):** the organisation's GitHub App,
+  the same one as task 008b's pipeline identity, installed on both repositories, token minted per run.
+  Options A (personal access token) and C (polling, which would have amended E12) are not taken.
+- **Q-K (open, was Q2; non-blocking; the reader itself is decided):** Ludwig decided (Q-C) that `mod.lua`
+  is read by a restricted static reader, so the site needs the same reader in JavaScript with a shared
+  fixture corpus so the two readers cannot drift. *Where that port is built is not covered by his
+  answers.* | options: A★) in this task (adds ~1 session) / B) a separate follow-up task, the page
+  degrading to "licence unavailable" meanwhile (mission §7.4 requires the licence to show, so B would
+  leave §7.4 open) | assumed: neither — criterion 8's mod page uses a fixture archive that carries
+  `manifest.json` as today; **the licence display for a real publish is unresolved until this is answered.**
+- **Q3 (open, assumption):** staging limits. | assumed: 50 MiB body ceiling, 30 s timeout, 3 redirects.
+  The permitted redirect hosts change with decisions Q-G/Q-E: the project-owned host (from 058), then
+  `github.com`, then the host GitHub redirects release downloads to. Observed 2026-10-14 (unauthenticated, a
+  public release of another project, `curl -s -o /dev/null -w '%{http_code} %{redirect_url}' <release asset URL>`):
+  `302` to `https://release-assets.githubusercontent.com/...` with a signed, time-limited query string — so the
+  allowlist needs that host (not `objects.githubusercontent.com`, which earlier drafts assumed), and the final
+  URL can never be the value stored in the registry. GitHub may change this; re-read it when implementing |
+  built on: criterion 3.
 
 ---
 # Task 055 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
+- 2026-10-14 Q-D, Q-E, Q-G folded in from Ludwig's answers; Q1 closed; Q2 renamed Q-K (reader decided, port location open); dependencies on 057/058/M5/M7 added.

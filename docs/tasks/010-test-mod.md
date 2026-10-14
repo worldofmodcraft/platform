@@ -1,6 +1,6 @@
 # Task 010: The `test:hello-world` canary mod, its first-publish runbook, and Ludwig's step M4
 
-- **Mission:** SITE-V1, deliverable **D4** — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until the Ludwig questions below are answered and 008a/008b, 055 are far enough along for the runbook to be rehearsed (see Dependencies).**
+- **Mission:** SITE-V1, deliverable **D4** — **Status:** draft (spec written 2026-10-14 under task 054). **Ludwig's identity question (Q1) is decided (2026-10-14: his personal account joins the organisation, M6); the contents (criteria 1-4) wait on 008a and tasks 057/058; the runbook waits on 008b and 055 being far enough along to rehearse (see Dependencies). Q2 and Q3 below remain open.**
 - **Agent / model:** implementer / sonnet for the mod contents and generator; doc-writer / sonnet for the runbook (two sessions, one branch, sequenced)
 - **Budget:** medium (≤ 3 agent-sessions)
 - **Branch / worktree:** `task/010-test-mod` / `~/wt/task-010` — **platform** repo (`worldofmodcraft/platform`). The mod's own repository is created by Ludwig (M4) and is not a repo this task can touch. The registry PR the runbook describes is opened during the runbook, not by this task.
@@ -17,7 +17,7 @@ by Ludwig end-to-end without improvisation") is his run, recorded, not this task
 ## Context to load (exhaustive)
 - ADRs: 0058 (§1 flow, §3 the namespace-creation confirmation text), 0119 (`test` is reserved and
   bound to the organisation; §3 authorises by **organisation membership** of the PR author — this
-  drives Q1 below), 0059 (§2 `page.json`, §3 the `page.json` PR path), 0030 (manifest fields),
+  drove the identity decision Q-F), 0059 (§2 `page.json`, §3 the `page.json` PR path), 0030 (manifest fields),
   0049 (licence), 0061 (AI-generated assets allowed, must be original, nothing imitating Blizzard
   style), 0120 (whitelist), 0041 (what the pipeline does, what appears on the page).
 - Files: mission §4 D4 and §7.6; `docs/runbooks/site-v1-manual-steps.md` (M4 text to be updated;
@@ -45,16 +45,20 @@ by Ludwig end-to-end without improvisation") is his run, recorded, not this task
    This shows only that `mbmludric` is not a **public** member (an unauthenticated caller cannot
    see private membership; `ownership.md` says a 302 means "the caller cannot see", not "not a
    member"). That he is not a member at all rests on the two platform docs cited above.
-   As written, §7.6 cannot pass with Ludwig's personal account opening the PR. See Q1.
+   As written, §7.6 could not pass with Ludwig's personal account opening the PR. **Resolved: Ludwig
+   decided (2026-10-14, Q-F) that his personal account joins the organisation — manual step M6,
+   whose text is in `008b-pipeline-workflow.md` — so mission §7.6 stands as written** (he opens the PR
+   from `mbmludric`). The runbook therefore has an M6 prerequisite step and a check that the
+   membership exists before the PR is opened.
 2. **The page.json screenshot scan does not exist yet** (task 040): until it lands, a `page.json`
    PR's screenshots are not scanned. The canary's own screenshots are scanned by the pipeline when
    the *version* is built (008a criterion 7), but the runbook's later "add a screenshot via
    `page.json`" step (§7.5) only works for a screenshot that is already **inside the archived
    1.0.0 tarball**, because `page.json` paths resolve into the archive (`archive-layout.md`). So the
    mod's 1.0.0 must ship a spare, unreferenced screenshot for that step. Designed in below.
-3. **`mod.lua` vs `manifest.json`** (umbrella Q2): what the archive must contain for the site to
-   show licence and type depends on that answer. This spec assumes A (the pipeline and site read
-   `mod.lua` directly) and ships only `mod.lua`.
+3. **`mod.lua` vs `manifest.json`** — decided (Ludwig, 2026-10-14, Q-C): the pipeline and the
+   site read `mod.lua` with a restricted static reader (literal table, never executed). The mod
+   ships only `mod.lua`, written within that literal subset (no function calls, no concatenation).
 4. **Lua is not installed on this machine** (`which lua` empty), so the mod's `mod.lua` cannot be
    executed locally; it is validated by 008a's reader, which does not execute it.
 
@@ -74,8 +78,10 @@ Staging tree in the platform repo, `docs/test-mod/hello-world/`, which Ludwig co
   `struct`; abstract geometric/gradient art, not a game scene; no fonts, no Blizzard motif).
   Dimensions fixed in the script (e.g. 1280×720). `spare.png` is deliberately **not** referenced
   from `mod.lua`'s `screenshots`; the runbook's `page.json` step adds it.
-- Registry-side files for the first-publish PR, in `docs/test-mod/registry-pr/` (shape per
-  umbrella Q1, assumed A): the version submission for `1.0.0` (id, owner =
+- Registry-side files for the first-publish PR, in `docs/test-mod/registry-pr/` (shape decided,
+  Ludwig 2026-10-14, Q-B; defined by task 057): the submission for `1.0.0` is an `entry.json` whose
+  one version object holds exactly `version`, `commit`, `source_url` and `status: "pending"` — the
+  five write-back fields are absent and are written by the pipeline's PR (id, owner =
   `{provider: "github", id: 324218296, name_at_registration: "worldofmodcraft"}` — the org, per
   `reserved-namespaces.json`, to be re-read from that file by the task, not from this sentence;
   version, commit placeholder, source_url placeholder), and `page.json` (description that says it
@@ -84,10 +90,10 @@ Staging tree in the platform repo, `docs/test-mod/hello-world/`, which Ludwig co
 
 ## Runbook `docs/runbooks/first-publish.md`
 Steps, each with *Do* (exact command or click) / *You should see* / *This proves*:
-M4 create repo → copy tree and replace placeholders → commit and tag `v1.0.0`, capture the 40-hex
-commit → open the registry PR (identity per Q1) → watch the registry CI checks and read each
-message → merge (who merges, per Q1/§7) → watch the pipeline run, the Release appear, the
-write-back PR open and merge → open `worldofmodcraft.com/mods/test/hello-world` and check each
+M6 join the organisation (check: the people page lists `mbmludric`) → M4 create repo → copy tree and replace placeholders → commit and tag `v1.0.0`, capture the 40-hex
+commit → open the registry PR (from `mbmludric`, Q-F) → watch the registry CI checks and read each
+message → merge (who merges: MANAGER.md §7 / Ludwig's approval) → watch the pipeline run, the Release appear in `worldofmodcraft/archive`, the
+write-back PR (opened by the pipeline's GitHub App) open and merge, and check that the entry's `source_archive` URL (the project-owned one, decision Q-G; shape from task 058) resolves → open `worldofmodcraft.com/mods/test/hello-world` and check each
 element mission §7.4 lists → open the `page.json` PR (change description, add `spare.png`) → merge
 → watch the site rebuild → see the changed page with no new version. Also a final section: the
 **negative checks** Ludwig may run to see the gates refuse (wrong account, modified version),
@@ -113,7 +119,7 @@ and how to tell.
    extracted game asset. State in the log what this does *not* prove: it cannot prove visual
    originality; that is criterion 8.
 3. [script] **Registry-side files validate:** `page.json` validates against `page.schema.json`
-   (using `schema_check.validate`), the submission file validates per Q1's answer, the `page.json`
+   (using `schema_check.validate`), the submission file validates against `entry.schema.json` as amended by task 057 (a `pending` version with exactly the four author fields), the `page.json`
    `screenshots` are a strict subset of `mod.lua`'s, and `spare.png` is in the tree but in neither list.
 4. [script] **Placeholders cannot leak:** a grep for the placeholder tokens over the staging tree
    finds them exactly where intended (non-zero count, asserted — a search that finds nothing is a
@@ -135,8 +141,8 @@ and how to tell.
    control file that contains them and must be caught).
 8. [human] **Visual review:** Ludwig (or the manager on his behalf, recorded as such) has looked at
    the three screenshots and confirms they are original and acceptable on the page.
-9. [human] **M4 recorded:** `docs/runbooks/site-v1-manual-steps.md` M4 section updated to point at
-   `first-publish.md` and to state the identity answer from Q1; status key unchanged (☐ until he does it).
+9. [human] **M4-M7 recorded:** `docs/runbooks/site-v1-manual-steps.md` M4 section updated to point at
+   `first-publish.md` and to state the identity answer (Q-F: personal account, after M6); M5, M6, M7 sections present with the text from `008b-pipeline-workflow.md` (click-paths still marked unverified unless observed by Ludwig); status keys unchanged (☐ until he does them).
 10. [human, mission §7.6] Ludwig runs the runbook; deviations from it are recorded verbatim in the
     mission log. "Without improvisation" is judged by that record. Outside this task's `done`:
     it closes the mission criterion, and this task is `done` only when that record exists.
@@ -153,7 +159,7 @@ and how to tell.
 In the **platform** repo:
 - `docs/test-mod/hello-world/**`, `docs/test-mod/registry-pr/**`
 - `tools/test-mod/make_screenshots.py`, `tools/test-mod/tests/` (generator determinism test)
-- `docs/runbooks/first-publish.md` (new), `docs/runbooks/site-v1-manual-steps.md` (M4 section only)
+- `docs/runbooks/first-publish.md` (new), `docs/runbooks/site-v1-manual-steps.md` (M4-M7 sections only; M5-M7 text is copied from 008b, where it is the source. Because M5 and M7 gate 008b's live criteria, the manager may split this one edit into an earlier docs task)
 - `docs/tasks/010-test-mod.md` (log), `docs/tasks/010-verify.sh` (new, executable)
 Everything else, including `docs/decisions/` and the mission spec, is read-only.
 
@@ -164,16 +170,17 @@ Everything else, including `docs/decisions/` and the mission spec, is read-only.
 - Fabricating "You should see" text; inventing CI messages (copy them from the tools).
 - Putting a real token, key or private repository URL in any file; instructing Ludwig to copy one.
 - Publishing, tagging or pushing anything to a remote as part of rehearsal.
-- Declaring Ludwig's M4 or §7.6 done.
+- Declaring Ludwig's M4-M7 or §7.6 done.
 - Setting `ai_assisted` without Q3's answer (the field is tri-state; omitted shows nothing).
 
 ## Dependencies and sequencing
-- Needs: **Q1 answered** (identity); registry tools at `main` (scanner, schemas — exist);
+- Needs: Q-F decided (it is); registry tools at `main` (scanner, schemas — exist); task 057 merged (the
+  submission shape); task 058 reported (the URL the runbook tells Ludwig to check);
   008a merged (manifest reader, for criterion 1); 039 (so the runbook describes CI messages that exist).
 - The runbook's pipeline and site sections need 008b and 055 *built* to rehearse; criterion 5
   marks what cannot be. So: contents (criteria 1-4) can start after 008a; the runbook is finalised
   after 008b and 055.
-- M3 (secret) is already done per the mission log; M4 is the manual step this task serves.
+- M3 (secret) is already done per the mission log (its existence is unconfirmed: umbrella Q-H); M4 is the manual step this task serves; M5, M6, M7 (GitHub App, org membership, archive repo) must be done before the runbook's live part.
   Task 011 (hardware-key 2FA) is required "before the first non-test publish" — this publish is the
   test one, but Ludwig should be told.
 - Blocks mission §7.2, §7.4-§7.6.
@@ -187,26 +194,18 @@ external and are recorded as such.
 Mod tree, generator, registry-side files, runbook, M4 update, verify script, this file's log current.
 
 ## Questions  (agent-maintained; see MANAGER.md 8b)
-- **Q1 (blocks this task; finding 1) — who opens the first-publish registry PR for a reserved
-  namespace?** A) Ludwig adds `mbmludric` to the `worldofmodcraft` organisation as a member, so the
-  ADR-0119 §3 rule passes with his personal account (cost: a member of the org; what the org's
-  default repository permission gives members is unchecked here). B★) The `womcraft` platform
-  account (already an org member; the manager's session acts as it) opens the registry PR on
-  Ludwig's say-so; he approves and merges in session. §7.6 then reads "Ludwig executes the
-  runbook" with one step performed by the platform account, a deliberate deviation from "from
-  Ludwig's personal GitHub account" (mission §1.5) that needs his explicit acceptance. C) Publish
-  under `mbmludric:hello-world` instead — changes the mission's URL and canary identity; not
-  recommended. | assumed: none — the runbook cannot be written without it.
-- **Q2:** repository name and visibility for M4 (mission says `test/hello-world` under his personal
+- ~~Q1 identity~~ **decided (Ludwig, 2026-10-14, Q-F):** his personal account joins the organisation (M6); he opens the PR; mission §7.6 stands as written. Options B (platform account opens it) and C (publish under his own namespace) are not taken.
+- **Q2 (open):** repository name and visibility for M4 (mission says `test/hello-world` under his personal
   account: GitHub does not allow a slash in a repo name; the repo is `<account>/hello-world`). |
   options: A★) `<account>/wom-test-hello-world` / B) `<account>/hello-world` | assumed: A (avoids
   a generic name; the mod id is in `mod.lua`, not the repo name).
-- **Q3:** `LICENSE` copyright holder and `ai_assisted` value for a mod whose screenshots are
+- **Q3 (open):** `LICENSE` copyright holder and `ai_assisted` value for a mod whose screenshots are
   script-generated and whose README is agent-written. | options: A★) "World of Modcraft
   contributors", `ai_assisted = true` (honest, ADR-0061-compatible) / B) Ludwig's name, omitted |
   assumed: A.
-- umbrella Q1 (submission shape) and Q2 (`mod.lua`) are assumed A in the contents above.
+- Umbrella Q-B and Q-C are decided; the contents above are no longer built on assumptions about them.
 
 ---
 # Task 010 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
+- 2026-10-14 Q-B, Q-C, Q-F folded in from Ludwig's answers; Q1 closed; Q2, Q3 remain open.

@@ -1,6 +1,6 @@
 # Task 056: The D5 architecture note — what runs where, the server hosts nothing, and the way off GitHub
 
-- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** draft (spec written 2026-10-14 under task 054). Dispatchable now **for a first version marked "specified, not built"**; its final form waits on 008b and 055 (see Dependencies).
+- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** draft (spec written 2026-10-14 under task 054). Dispatchable now **for a first version marked "specified, not built"**; its final form waits on 008b, 055 and task 058's report (see Dependencies). The `source_archive` question (was Q1) is decided: Ludwig, 2026-10-14, Q-G.
 - **Agent / model:** doc-writer / sonnet
 - **Budget:** small (≤ 1 agent-session) for the first version; a second small pass after 008b/055 land
 - **Branch / worktree:** `task/056-architecture-note` / `~/wt/task-056` — **platform** repo (`worldofmodcraft/platform`). The mission lets D5 live "in the site or registry repo as appropriate"; this note goes in the platform repo beside `docs/architecture/depgraph.md` and `key-management.md`, the other D5 documents, so the three are read together. If Ludwig wants it served on the site as well, that is a separate, later task.
@@ -38,7 +38,7 @@ fails if each piece disappears**. Every statement is tagged with its state — `
    N4 validation, N5 pipeline: `worldofmodcraft/registry` on GitHub, run by **GitHub-hosted Actions
    runners** (basis: mission D2 and `deploy.yml` use `ubuntu-latest`; the registry has no workflows
    yet — `git ls-tree` of `origin/main` shows no `.github/`; 039/008b will add them). N6 artifact
-   store: GitHub Releases (basis: depgraph N6; *which* repository is umbrella Q4 of task 008).
+   store: GitHub Releases in the separate repository `worldofmodcraft/archive` (basis: depgraph N6; repository decided by Ludwig, 2026-10-14, Q-E; created by his step M7, so `specified` until it exists — check `curl -s -o /dev/null -w '%{http_code}' https://api.github.com/repos/worldofmodcraft/archive` before tagging it `built`). The automated write-back and dispatch run as an organisation-owned GitHub App (decision Q-D; `specified` until M5 is done).
    N7 site build: Actions in `worldofmodcraft/site`. N8 site host: GitHub Pages with DNS at
    Cloudflare, records DNS-only (basis: `docs/runbooks/site-v1-manual-steps.md` M2, OPERATIONS.md
    "done and verified"). Live check to quote in the note: `curl -sI https://worldofmodcraft.com` →
@@ -52,8 +52,8 @@ fails if each piece disappears**. Every statement is tagged with its state — `
    private key's working copy is a repository secret, not a file on a server (basis:
    key-management.md). The note names the two honest exceptions to "nothing": **DNS** (Cloudflare
    account) and **the GitHub organisation account** — both are third-party-hosted but
-   owner-controlled settings, and losing the credentials to either is a handover risk the note states.
-3. **Stored where.** Registry data: git (append-only by CI). Source tarballs and signatures: Releases.
+   owner-controlled settings (the organisation account also holds the GitHub App of decision Q-D and its private key, a credential-bearing item the note lists), and losing the credentials to either is a handover risk the note states.
+3. **Stored where.** Registry data: git (append-only by CI). Source tarballs and signatures: Releases in `worldofmodcraft/archive`. GitHub App private key: an Actions secret on `registry` plus whatever offline copy Ludwig keeps (decision Q-D; existence unverified until M5).
    Signing private key: Actions secret `MINISIGN_SECRET_KEY` + owner's offline backup (existence of
    the secret is **unverified by this spec and may not be checked by an agent** — the note states
    it as "per the mission log, M3, 2026-09-05" with that attribution). Public key: embedded in
@@ -64,11 +64,16 @@ fails if each piece disappears**. Every statement is tagged with its state — `
    a cost, with the proof for each:
    - **`source_archive` is a stored URL in an append-only record.** `entry.schema.json` requires
      `^https://\S+$` and `append-only.rules.md` forbids changing `source_archive` after the fact.
-     If the tarballs are hosted at `github.com/.../releases/download/...`, a move off GitHub cannot
-     rewrite the URLs; it needs either a redirect that the owner controls (a URL on a domain the
-     project owns) or a contract change. ADR-0077's mirror and "repointing is a DNS/URL change" only
-     holds if the URL is on a domain the project controls. See Q1 — this is the note's most
-     important finding and must not be softened.
+     If the tarballs were referenced at `github.com/.../releases/download/...`, a move off GitHub could not
+     rewrite the URLs; it would need a redirect the owner controls (a URL on a domain the project
+     owns) or a contract change. ADR-0077's mirror and "repointing is a DNS/URL change" only hold if
+     the URL is on a domain the project controls. **Decided (Ludwig, 2026-10-14, Q-G): a
+     project-owned URL fronts `source_archive` from the first publish.** The note states this as
+     `specified`, **not** `built`, and says that whether GitHub Pages can serve it is unverified until
+     task 058 reports; if 058 finds it infeasible, the note records that finding and the open question
+     instead of the decision's intended benefit. Even when built, the redirect only helps while the
+     project controls the domain and the redirect host: the note names that host (from 058) and says
+     what is lost if it moves. This remains the note's most important finding and must not be softened.
    - The publish path (a PR to a GitHub repository) — ADR-0058 §4 says this is the one part to be
      replaced by portal upload later.
    - Ownership gate reads GitHub's `pulls.user.id` (`ownership.md`); another forge needs another reader.
@@ -79,7 +84,7 @@ fails if each piece disappears**. Every statement is tagged with its state — `
 5. **Exit procedure** is a numbered list a successor can follow: what to clone (`registry`, `site`,
    `platform`; the mirror per ADR-0077 once it exists), what to re-create (CI under another runner),
    what to re-key (generate a new key per `key-management.md` rotation; old signatures stay valid),
-   what to repoint (DNS, `source_archive` hosting per Q1), and what is lost (the Actions run history,
+   what to repoint (DNS, the `source_archive` redirect per Q-G and 058, the GitHub App's installation and secrets), and what is lost (the Actions run history,
    Release download counts). Each step is marked `built`, `specified` or `not built`; the mirror is
    `not built` (ADR-0077 says phase 1.5) and the note says so.
 6. **Failure table:** for each of GitHub Actions, Releases, Pages, DNS/Cloudflare, the signing key,
@@ -154,7 +159,7 @@ In the **platform** repo only:
 
 ## Dependencies and sequencing
 - **Can start now** for a first version that tags the not-yet-built parts `specified`/`not built`.
-- **Final pass after** 008b (pipeline, Releases location), 055 (site build and E12), 010 (the
+- **Final pass after** 058 (the archive URL probe), 008b (pipeline, Releases location, App), 055 (site build and E12), 010 (the
   canary running) — each flips rows from `specified` to `built`, which criterion 3's tags exist to track.
   Criterion 4's "cited files exist" is re-run at the final pass.
 - No file overlap with 008a/008b/010/041/055 (it only reads their outputs); 010 and 056 both touch
@@ -172,23 +177,14 @@ The note, the link line, the verify script, this file's log section current; a l
 `[unverified]` item with what would confirm it and who.
 
 ## Questions  (agent-maintained; see MANAGER.md 8b)
-- **Q1 (Ludwig; the note's central finding):** `source_archive` is permanent and, as planned, points at
-  `github.com`. Do we put a project-controlled URL in front of it from the first release? Options:
-  A) accept the lock-in for phase 1 and say so (cheapest; every existing and future entry carries a
-  github.com URL forever; leaving GitHub then means a contract change plus a rewrite that
-  append-only forbids, or redirects we cannot create on a domain we do not control) / B★) a
-  project-owned hostname, e.g. `archive.worldofmodcraft.com`, that redirects to the Release asset
-  (the site's own `config.mjs` comment already assumes an `archive.` hostname) — **whether GitHub
-  Pages can serve such redirects, or whether it needs another static host/edge rule, is unverified
-  here**; if it needs Cloudflare rules, that changes the "DNS-only, grey cloud" decision recorded in
-  the runbook / C) store the tarballs on a host chosen for portability (S3-compatible bucket behind
-  the project's domain) — moves N6 off GitHub Releases, contradicting the depgraph's N6 and ADR-0041's
-  "platform-owned storage" only in the host, not the principle. This decision belongs **before**
-  the first publish (task 010): after it, the URL in the registry is fixed. | assumed: A for the
-  first version of the note, which states it as a cost.
-- **Q2:** Is a "if the project dies" plan (ADR-0006) a separate document, or the *Moving off GitHub*
+- ~~Q1 `source_archive` lock-in~~ **decided (Ludwig, 2026-10-14, Q-G): option B** — a project-owned URL
+  fronts `source_archive` before the first publish. Options A (accept lock-in) and C (a portable bucket) are not taken.
+  Feasibility on GitHub Pages is **unverified**; task 058 is the probe. If it requires Cloudflare rules,
+  that changes the "DNS-only, grey cloud" decision recorded in the runbook and returns to Ludwig.
+- **Q2 (open, non-blocking):** Is a "if the project dies" plan (ADR-0006) a separate document, or the *Moving off GitHub*
   section of this note? | options: A★) the section, linked from `README` / B) its own file | assumed: A.
 
 ---
 # Task 056 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
+- 2026-10-14 Q-D, Q-E, Q-G folded in from Ludwig's answers; Q1 closed; Q2 remains open.

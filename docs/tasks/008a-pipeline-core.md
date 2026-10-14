@@ -1,6 +1,6 @@
 # Task 008a: Pipeline core — clone, validate, scan, archive, hash, sign (offline)
 
-- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until umbrella questions Q1 and Q2 are answered and the contract-amendment task has landed.** Touches signing: merge requires Ludwig (MANAGER.md §7).
+- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable until task 057 (version lifecycle contract) has merged and task 058 (archive URL probe) has reported.** The umbrella's Q1 and Q2 are decided (Ludwig, 2026-10-14: Q-B, Q-C). Touches signing: merge requires Ludwig (MANAGER.md §7).
 - **Agent / model:** implementer / sonnet (the signing and verifier parts get an independent reviewer at the same tier or higher with full tools — OPERATIONS.md, "The reviewer agent cannot run this project's verify artefacts")
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008a-pipeline-core` / `~/wt/registry-task-008a` — **registry** repo (`worldofmodcraft/registry`)
@@ -24,8 +24,8 @@ network, GitHub, or a real key.
 - Contracts (registry `origin/main`): `signature-format.md` (all of it, esp. "Deriving `key_id`"
   and the eleven verifier rejections), `artifact-naming.md` (all of it, incl. Windows reserved
   names and the `.` join), `archive-layout.md` (root convention, path-escape rule, malformed
-  archives), `manifest.schema.json`, `entry.schema.json` (as amended by the contract task),
-  `validation-report.schema.json`, `append-only.rules.md`.
+  archives), `manifest.schema.json`, `entry.schema.json` and `append-only.rules.md` (**as amended by task 057** — the `pending → published` transition and its field-level rules),
+  `validation-report.schema.json`; task 058's report for the `source_archive` URL shape.
 - Code to reuse, not reimplement: `tools/validation/scan_assets.py` (takes a **directory**; exit 0
   accept, 1 reject, 2 usage error — a 2 is never a rejection), `tools/validation/magic.py`,
   `tests/contracts/schema_check.py` (`validate(instance, schema)` raises; `NotImplementedError` on
@@ -78,7 +78,7 @@ $ echo x >> f.tar.gz; minisign -V …                           # exit 1: "Signa
 4. **Extraction is hostile-input safe:** the tool inspects every tar entry before extracting
    (`archive-layout.md` path-escape rule: `..` segment, absolute path, symlink target escaping the
    root → reject the whole archive).
-5. **Manifest:** read `<root>/mod.lua` with the Q2 reader; project the eleven schema fields;
+5. **Manifest (decided: Ludwig, 2026-10-14, Q-C):** read `<root>/mod.lua` with the restricted static reader (a literal table only; the file is never executed); project the eleven schema fields;
    validate against `manifest.schema.json`; check `manifest.id == entry id` and
    `manifest.version == version` (both cross-checks are named in the schema's descriptions as
    "pipeline logic"). Licence validity is the schema's SPDX-OSI enum (task 006); `LicenseRef-*`
@@ -100,10 +100,16 @@ failure) — distinct, documented, and never conflated (OPERATIONS.md).
 Outputs in `--out`: `<tag>.tar.gz`, `<tag>.tar.gz.minisig` (names per `artifact-naming.md`),
 `result.json` (below), `build.log` (the full log; the thing 008b posts as a PR comment).
 `result.json`: `{ "id", "version", "tag", "assets": {"tarball", "signature"}, "write_back":
-{"source_sha256", "signature", "key_id", "published_at"}, "scan": <validation-report object> }`.
-`source_archive` is **not** computed here: the URL depends on where 008b uploads (Q4); 008b fills it
-from the tag and asset name by a pure function this task provides (`release_url(owner, repo, tag, asset)`)
-whose output is pinned by a test.
+{"source_archive", "source_sha256", "signature", "key_id", "published_at"}, "scan": <validation-report object> }`.
+`source_archive` is **not** computed here: it depends on where 008b uploads. Decided (Ludwig,
+2026-10-14): releases live in `worldofmodcraft/archive` (Q-E), and the value written into the entry is
+a **project-owned URL** that fronts the release asset (Q-G). This task therefore provides two pure
+functions, each with output pinned by a test: `release_asset_url(owner, repo, tag, asset)` — the
+direct `github.com/.../releases/download/...` URL the pipeline and the launcher's mirror fall back to —
+and `source_archive_url(namespace, name, version)` — the project-owned URL written to the entry.
+**The shape of the second is not fixed by this spec: it is the output of task 058 (probe), and
+possibly of an `artifact-naming.md` amendment.** Until 058 reports, criterion 12 and the `source_archive` key of `result.json`
+are blocked, and the function is not to be written against a guessed hostname.
 
 ## Acceptance criteria
 All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked.
@@ -123,7 +129,7 @@ All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked
    missing in the produced archive" (proves scanning is of the tarball); a fixture using
    `export-subst` records what happened in the log and is accepted or rejected per the test's
    stated expectation — the test asserts the observed behaviour, whichever it is, so the doc states it.
-5. **Manifest (Q2 assumed A).** The reader accepts a literal table with comments and nested tables
+5. **Manifest (decided Q-C, Ludwig, 2026-10-14).** The reader accepts a literal table with comments and nested tables
    and rejects, with a named message: a function call, string concatenation, `require`, a
    `dofile`, an unterminated string, and a file that does not `return` a table. `mod.lua` carrying
    kernel-only keys (`depends`, `permissions`, …) is accepted (they are ignored by projection);
@@ -161,12 +167,12 @@ All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked
     would come from and as the content of the throwaway key's *comment*, and asserts the canary
     appears in none of: stdout, stderr, `build.log`, `result.json`, the tarball. Mutation: make the
     tool log its `--key` path's contents; the check must redden.
-12. **Write-back values** `{source_sha256, signature, key_id, published_at}` are computed and
+12. **Write-back values** `{source_sha256, signature, key_id, published_at}` plus `source_archive` (from `source_archive_url`) are computed and
     returned; `signature` is the four-line file verbatim with newlines preserved
     (`signature-format.md`, "What `entry.json`'s `signature` field holds"); `published_at` is
     RFC 3339 and passes `entry.schema.json`'s pattern. Applying them to an entry (the
-    `pending → published` transition, Q1 assumed A) is a pure function `apply_write_back(entry,
-    version, values)` that is tested to change **exactly** the permitted fields and to refuse any
+    `pending → published` transition, decided Q-B and defined by task 057) is a pure function `apply_write_back(entry,
+    version, values)` that is tested to change **exactly** the permitted fields: the five write-back fields are added and `status` goes `pending → published`, nothing else and to refuse any
     other shape (a version already `published`, a `removed` one, an absent one, a different mod's
     values) — and its output must pass the append-only checker from task 007 and the schema.
 13. **Positive controls.** A clean first build, a clean second version of the same mod, and a mod
@@ -186,8 +192,8 @@ All command-based; all demonstrated by `docs/tasks/008a-verify.sh` unless marked
 
 ## File scope (declared; anything else = stop and report)
 In the **registry** repo:
-- `tools/pipeline/` (new) — the CLI, `release_url`, `apply_write_back`, the reference verifier
-- `tools/validation/manifest.py` (new) — the Q2 reader and projection; `tools/validation/` otherwise untouched
+- `tools/pipeline/` (new) — the CLI, `release_asset_url`, `source_archive_url`, `apply_write_back`, the reference verifier
+- `tools/validation/manifest.py` (new) — the Q-C restricted static reader and projection; `tools/validation/` otherwise untouched
 - `tests/pipeline/` (new) — suite and fixtures (all keys are throwaway, generated at test time)
 - `docs/pipeline/build-pipeline.md` (new), `docs/validation/manifest-reader.md` (new), `docs/contracts/README.md` (only if stale)
 - `docs/tasks/008a-pipeline-core.md` (this file as log), `docs/tasks/008a-verify.sh` (new, executable)
@@ -208,10 +214,11 @@ stop-and-report (§3.3) and belongs to the contract task.
 - Editing `contracts/`, `reserved-namespaces.json`, or any other task's file.
 
 ## Dependencies and sequencing
-- Needs: tasks 002 (scanner) and 006/025 (contracts) merged — they are. Needs the **contract
-  amendment task** (umbrella) and answers to **Q1, Q2**.
+- Needs: tasks 002 (scanner) and 006/025 (contracts) merged — they are. Needs **task 057 merged**
+  (which itself follows 032 and 045), and **task 058's report** (URL shape). Q-B and Q-C are decided
+  (Ludwig, 2026-10-14).
 - Not blocked by 007/039; but criterion 12's output must pass 007's append-only checker, so
-  007 must be merged first or 12's last clause waits.
+  007 must be merged first or 12's last clause waits. 007 is itself sequenced after 057.
 - Blocks 008b. File overlap with 007: none (`tools/registry/` vs `tools/pipeline/`).
 
 ## Verification artefact (MANAGER.md §2c)
@@ -224,9 +231,10 @@ Code + tests + docs + verify script + this file's log section current.
 ## Questions  (agent-maintained; see MANAGER.md 8b)
 - Q: root directory literal `src/` vs `<name>-<version>/` | options: A) `src/` / B) per-version
   name | assumed: A (ADR-0103; archive-layout says any non-empty value is valid) | built on: criterion 4.
-- Q: umbrella Q1 (version-object pending shape) | assumed A | built on: criterion 12.
-- Q: umbrella Q2 (mod.lua reader) | assumed A | built on: criteria 5, 6, `tools/validation/manifest.py`.
+- (umbrella Q1/Q2 are decided: Q-B, Q-C, Ludwig 2026-10-14 — see `008-build-pipeline.md`; nothing in this file is built on an assumption about them any more.)
+- **Blocked on task 058:** the shape of the project-owned `source_archive` URL (decision Q-G).
 
 ---
 # Task 008a log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
+- 2026-10-14 Q-B, Q-C, Q-E, Q-G folded in from Ludwig's answers; two URL functions replace `release_url`; URL shape waits on task 058.
