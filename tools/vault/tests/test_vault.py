@@ -187,6 +187,7 @@ class TestAC1Projection(Base):
         files = self.files(vault)
         want = {"Status.md", "Tasks.md", "Gotchas.md", "Commands.md", "Mission Log.md"} | {
             "Tasks/%s.md" % i for i in ("001", "060", "061", "062", "063", "064")}
+        want.add("Journal/2026-10-14.md")  # task 053: mode main also writes one Journal file per commit day
         self.assertEqual(set(files), want)
         head = r.git("rev-parse", "main")
         single = {"Gotchas.md": "docs/manager/OPERATIONS.md", "Commands.md": "docs/manager/COMMANDS.md",
@@ -246,7 +247,8 @@ class TestAC2Idempotence(Base):
         after = self.files(self.vault)
         changed = {n for n in after if after[n] != before[n]}
         self.assertIn("Gotchas.md", changed)
-        self.assertTrue(changed <= {"Gotchas.md", "Status.md", "Tasks.md"}, changed)
+        # task 053: the new commit lands in the existing day's Journal file, which is rewritten
+        self.assertTrue(changed <= {"Gotchas.md", "Status.md", "Tasks.md", "Journal/2026-10-14.md"}, changed)
         for n in ("Commands.md", "Mission Log.md", "Tasks/060.md", "Tasks/001.md"):
             self.assertEqual(after[n][1], before[n][1], n + " must keep its mtime_ns")
 
