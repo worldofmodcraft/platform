@@ -24,7 +24,8 @@ Ludwig" section is binding and is not asked again.
 |---|---|---|---|
 | 1 | 050 vault sync probe (manual, no code) | C | Ludwig approves spec |
 | 2 | 051 vault projection generator | C | 050 passed, Q-C2, Q-P |
-| 3 | 052 vault triggers and guard hook | C | 051 merged, Q-C1 |
+| 3 | 053 ADR and Journal notes (split from 051) | C | 051 merged |
+| 3b | 052 vault triggers and guard hook | C | 053 merged, Q-C1 |
 | 4 | 048 doctrine (draft items 2–6, token-guard text) | A | Ludwig's answers Q2–Q6, Q-T |
 | 5 | 049 safety hooks in bash (draft item 1) | B | Q1, 048 merged |
 

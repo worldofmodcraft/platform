@@ -1,147 +1,162 @@
-# Task 051: A generator that projects the repository's notes into the Obsidian vault
+# Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** draft (manager's spec gate run 2026-10-14; independent spec review pending; Ludwig's approval pending)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** draft (spec v2 after the independent spec review, 2026-10-14; second review pending; Ludwig's approval pending)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
-- **Budget:** medium (≤ 3 agent-sessions)
+- **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051
-- **Blocked by:** task 050 passing AC1–AC3; Ludwig's answers Q-C2 (source of `Commands.md`) and Q-P (what may be committed).
+- **Unblocked by:** task 050 PASS (2026-10-14: WSL writes appear live on Windows and the phone; rename-over works; dotfiles do not sync), Q-C2 = A, Q-P = A (Ludwig, 2026-10-14).
 
 ## Objective
-`tools/vault/wom_vault.py` exists. Run against a directory named by `WOM_VAULT`, it writes a fixed
-set of English notes, all regenerable from git, and it never touches anything else. The script either
-writes every planned note or none. A second run with no repository change writes nothing. A
-hand-written note cannot be overwritten. A note containing a secret pattern is never written. Its
-behaviour is proven by `docs/tasks/051-verify.sh`, which runs only against temporary directories and
-never against the real vault.
+`tools/vault/wom_vault.py` exists. Run against the directory `WOM_VAULT`, it writes a fixed set of
+English notes, all regenerable from git. It writes every planned note or none. A run with no relevant
+repository change writes nothing. It cannot overwrite a hand-written note, never opens one, and never
+writes a note containing a secret. All of this is proven by `docs/tasks/051-verify.sh`, which runs only
+against temporary directories.
 
 ## Context to load (exhaustive)
-- `docs/tasks/047-arcane-practices.md`, `docs/tasks/050-vault-sync-probe.md` (including its log results)
-- `docs/manager/MANAGER.md` §2c (verification artefact rules 1–5), §3.6, §3.7, §3.10
+- `docs/tasks/047-arcane-practices.md`, `docs/tasks/050-vault-sync-probe.md` (including its log)
+- `docs/manager/MANAGER.md` §2c rules 1–5, §3.6–3.6c, §3.7, §3.10
 - `docs/manager/OPERATIONS.md` (it is also the source for `Gotchas.md`)
-- ADRs: 0056 (English), 0103 (boring and restartable), 0115 (measure outcomes), 0117 (contracts)
-- Reference only, never copied verbatim: `~/wom/docs/tasks/inbox/arcane-reference/hooks/vault-guard.ps1`
-  and `hooks/common.ps1` (untracked; read in place)
+- ADRs (INDEX.json lookup done 2026-10-14 on the keys documentation, tooling, English, boring, outcomes, contracts):
+  0056 English, 0103 boring and restartable, 0115 measure outcomes, 0117 contracts, plus the
+  "Documentation as a product" ADR (look its number up in `docs/tools/adr-index.md`)
+- Reference only, never copied: `~/wom/docs/tasks/inbox/arcane-reference/hooks/vault-guard.ps1` (untracked; read in place)
 
-## Contract (the repo → vault edge)
-Source = git objects of a named commit, **never the working tree**. Notes are UTF-8 with LF line
-endings. Each note starts with this frontmatter:
+## Contract (the repo → vault edge). Written into `docs/tools/vault-projection.md`
+**Source:** git objects of a named ref, **never the working tree**. Notes are UTF-8 with LF line endings.
+Frontmatter:
 ```
 ---
 generated: true
-source_ref: <main | task/NNN-slug>
+source_ref: <main | task/NNN-…>
 source_commit: <full sha>
-source_path: <repo path, or a list of paths>
+source_path: <repo path(s)>
 updated: <committer date of source_commit, ISO 8601>
 ---
 ```
-`updated` comes from git, never from the wall clock, so output is deterministic.
+- **Single-source notes:** `source_commit` = `git log -1 --format=%H <ref> -- <paths>` (the last commit
+  that touched the source). A merge therefore leaves notes whose sources did not change untouched.
+- **Aggregate notes** (`Status.md`, `Tasks.md`) also depend on branch refs. For them `source_commit` = the
+  ref's HEAD, and they are rewritten only when their bytes change (write rule 3). Churn is limited to these two.
 
-### Mode `main` (`wom_vault.py write --ref main`), source = local ref `main`
-| Note | Derived from |
+### Mode `main`: `wom_vault.py write --ref main`
+| Note | Derived from, exactly |
 |---|---|
-| `Status.md` (open first) | Mission log: the latest top-level `## ` section whose heading starts with `SESSION`, every heading inside it containing `For Ludwig`, and the open tasks (task files on main whose Status is not done/stopped) with a link to `Tasks/<NNN>-<slug>` for each open `task/*` branch |
-| `Tasks.md` | Every `docs/tasks/[0-9]*.md` and `docs/tasks/done/[0-9]*.md` on main: id, title, Status line, link |
-| `Decisions.md` + `ADR/<file>.md` | `docs/decisions/INDEX.json` + each `docs/decisions/NNNN-*.md`, body verbatim |
-| `Commands.md` | **Pending Q-C2.** Assumed for planning: a new hand-maintained `docs/manager/COMMANDS.md`, projected verbatim |
+| `Status.md` | (a) The **last in file order** section of `docs/tasks/MISSION-worldofmodcraft-site-v1-log.md` whose heading matches `^## SESSION`, verbatim. (b) Every later top-level `## ` section whose heading contains `For Ludwig`, verbatim. (c) A table of open tasks with a `[[Tasks/NNN]]` link each. |
+| `Tasks.md` | Every `docs/tasks/[0-9][0-9][0-9]-*.md` and `docs/tasks/done/[0-9][0-9][0-9]-*.md` on the ref: id, title (first `# ` line), status word, `[[Tasks/NNN]]` |
 | `Gotchas.md` | `docs/manager/OPERATIONS.md`, verbatim |
+| `Commands.md` | `docs/manager/COMMANDS.md`, verbatim (Q-C2 = A; created by this task) |
 | `Mission Log.md` | `docs/tasks/MISSION-worldofmodcraft-site-v1-log.md`, verbatim |
-| `Journal/YYYY-MM-DD.md` | Every commit reachable from main, grouped by committer date in Europe/Stockholm. One line per commit: short sha, subject |
-| `Tasks/<NNN>-<slug>.md` | Only for tasks that are **not** owned by an open branch (ownership rule below) |
+| `Tasks/NNN.md` | Only for ids **owned by main**: id, title, status word, task file path |
 
-### Mode `task` (`wom_vault.py write --ref HEAD`, run inside a task worktree on `task/NNN-slug`)
-Writes only `Tasks/<NNN>-<slug>.md`: branch, the Status line of that branch's task file, its last
-log entry, and `git log --oneline main..HEAD`. Refuses (non-zero exit, nothing written) to write any
-other note, or to run on a branch that does not match `task/NNN-*`.
+**Status word** = the capture of `\*\*Status:\*\*\s*\**([a-z-]+)`. A task is **open** unless its status
+word is `done` or `stopped`, or its file lives in `done/`. A file without a match is listed as `status
+unparsed` and counted in the run summary. That is not an error.
+
+### Mode `task`: `wom_vault.py write --ref HEAD`, inside a worktree on branch `task/NNN-*`
+Writes only `Tasks/NNN.md`: branch name, status word, the last bullet line of the task file's log section,
+and `git log --oneline main..HEAD`. On any other branch, or when asked to write any other note:
+non-zero exit, nothing written.
 
 ### One writer per file
-- A `Tasks/` note is owned by branch `task/NNN-*` while that local branch exists and is not merged into
-  main; otherwise it is owned by `main`. Both modes compute this from refs and skip what they do not own.
-- Every run holds an exclusive `flock` on a lock file in `$(git rev-parse --git-common-dir)` for its
-  whole duration. The lock is shared by all worktrees and never lives in the vault.
+- **Key = the three-digit id `NNN` only.** File and branch slugs differ (`052-vault-triggers-and-guard.md` versus `task/052-vault-triggers`).
+- `Tasks/NNN.md` is owned by a local branch matching `task/NNN-*` while that branch exists and is not an
+  ancestor of `main` (`git merge-base --is-ancestor`). Otherwise it is owned by main. A branch deleted
+  without merging means main owns the note. WoM merges are merge commits. A squash-merged branch would
+  stay branch-owned until deleted, and the docs say so.
+- Every run holds an exclusive `flock` on `$(git rev-parse --git-common-dir)/wom-vault.lock`, waiting at
+  most 30 s. On timeout it exits non-zero with `lock timeout`, and nothing is written.
 
 ### Write rules
-1. Two phases. First render and validate every planned note. Then write. Any validation failure means
-   **nothing is written** and the exit code is non-zero.
-2. Validation fails when: `WOM_VAULT` is unset, empty, relative, nonexistent, a symlink, or resolves to
-   something else; a target path resolves outside `WOM_VAULT`; a target exists without `generated: true`
-   in its frontmatter (a hand-written note); a secret pattern matches (rule 4).
-3. Writes are atomic: a dot-prefixed temp file in the target's directory (or outside the vault if 050's
-   AC3 failed), then fsync, then `os.replace`. A target with byte-identical content is not rewritten.
-4. Secret scan over every rendered note. At minimum: GitHub tokens (`ghp_`, `gho_`, `ghu_`, `ghs_`,
-   `ghr_`, `github_pat_`), PEM private-key headers, minisign secret-key comment lines, `sk-ant-`, AWS
-   access key ids. On a hit the script reports note, line number and pattern **name**. It never prints
-   the matched text.
-5. The script never deletes anything. A stale generated note stays where it is (deletion is a later task
-   if Ludwig wants it).
-6. The script reads from the vault only two things: a target's frontmatter (to check `generated: true`)
-   and its bytes (to compare before writing). The vault is never a source of content.
-7. `WOM_VAULT` is resolved from the environment first, then from `~/.config/wom/vault-path` (one line).
-   Neither the path nor the config file is committed.
-8. The script is Python 3 stdlib only and is run with `python3 -I`.
+1. Two phases: render and validate everything, then write. Any validation failure → **nothing written**, non-zero exit.
+2. Validation fails when: `WOM_VAULT` cannot be resolved, is relative, is missing, is not a directory, or is
+   itself a symlink; a target's `realpath` falls outside `realpath(WOM_VAULT)`; a planned target exists
+   without `generated: true` in its frontmatter; a target name is on the forbidden list (rule 6); a
+   secret pattern matches (rule 4).
+3. Atomic writes, **as proven by task 050**: a dot-prefixed temp file in the target's own directory, fsync,
+   `os.replace`. A target with identical bytes is not rewritten.
+4. **Secret scan** over every rendered note, using length- and charset-bounded regexes, so prose that
+   names a prefix does not match:
+   `gh[pousr]_[A-Za-z0-9]{36}`, `github_pat_[A-Za-z0-9_]{82}`, `-----BEGIN [A-Z ]*PRIVATE KEY-----`,
+   `untrusted comment: minisign encrypted secret key`, `sk-ant-[A-Za-z0-9_-]{32,}`, `(AKIA|ASIA)[A-Z0-9]{16}`.
+   A hit reports note, line number and **pattern name**. It never reports the matched text.
+   (Manager check, 2026-10-14, main `3e2b6ef`: the only prefix present in the note sources is one bare
+   `github_pat_` in prose. The bounded form does not match it.)
+5. The script never deletes anything.
+6. **Vault reads are limited** to planned targets (frontmatter and bytes). Nothing else is ever opened.
+   The hand-written names `Agent Session Handover Prompt.md`, `MINISIGN.md` and `Olika Sessioner.md` are
+   hard-coded as forbidden target names, so validation fails before any read.
+7. `WOM_VAULT` is resolved from the environment first, then from `~/.config/wom/vault-path` (one line,
+   exists on Ludwig's machine since 2026-10-14). Neither the path nor the file is committed (Q-P = A).
+8. **Test mode.** With `WOM_VAULT_TEST=1`, the script refuses any vault whose `realpath` is not under
+   `realpath(${TMPDIR:-/tmp})`. Without it, the script refuses any vault under `/tmp`.
+9. Python 3 stdlib only, run as `python3 -I` (Python 3.14.4 and tzdata are present on this machine).
 
-### Subcommand `check`
-`wom_vault.py check --baseline <file>` / `--save-baseline <file>`: records (name, size, mtime) of every
-file under `WOM_VAULT` without `generated: true` (metadata plus frontmatter only), and later verifies
-that none changed. This guards the hand-written notes on every live run.
+### Subcommand `check` (stat only)
+`check --save-baseline F` / `check --baseline F` record (name, size, mtime_ns) via `stat` for every file
+under `WOM_VAULT` whose name is **not** a planned generated name. Later the command reports any changed,
+added or removed entry and exits non-zero on a difference. It never opens a file in the vault.
 
 ## File scope (declared)
-`tools/vault/wom_vault.py`, `tools/vault/tests/**` (fixtures and test runner), `docs/tools/vault-projection.md`
-(the contract above, setup and running), `docs/manager/COMMANDS.md` (only if Q-C2 = A),
-`docs/manager/OPERATIONS.md` (one entry: how to run it), `docs/tasks/051-verify.sh`, this file's log.
+`tools/vault/wom_vault.py`, `tools/vault/tests/**`, `docs/tools/vault-projection.md`,
+`docs/manager/COMMANDS.md` (new; first content: the commands Ludwig uses most, including the projection
+commands themselves), `docs/manager/OPERATIONS.md` (one entry), `docs/tasks/051-verify.sh`, this file's log.
 
-## Acceptance criteria (all script-verified through `051-verify.sh` unless marked)
-1. In a temporary git repo fixture with a vault path containing spaces and a non-ASCII character,
-   mode `main` produces exactly the specified note set with correct frontmatter, and `source_commit`
-   equals `git rev-parse main`.
-2. An immediate second run writes zero files (every mtime unchanged).
-3. A hand-written fixture note (no `generated: true`) named like a generated one (`Status.md`) causes a
-   non-zero exit with **zero files written**. Fixtures with the three real hand-written notes' **names**
-   (`Agent Session Handover Prompt.md`, `MINISIGN.md`, `Olika Sessioner.md`, dummy content) stay
-   byte- and mtime-identical.
-4. One fixture per secret-pattern class produces a non-zero exit, zero files written, and output that
-   names the pattern. The test asserts that the fixture's secret string appears **nowhere** in stdout or stderr.
-   Positive control: the real repository's current main renders with no hit.
-5. Each invalid `WOM_VAULT` case in write rule 2 exits non-zero, writes nothing, and creates no directory.
-6. Mode `task` in a fixture with main plus an open task branch writes only that task's note. A main run
-   skips that note. After the branch is merged, a main run writes it with the Status line from main.
-   Mode `task` refuses to write a main-derived note.
-7. Two concurrent runs serialize on the lock. No temp files remain, and the final content equals a
-   single run's output.
-8. A stale generated note that is not in the current set is left untouched.
-9. `check` detects a changed, added or removed hand-written fixture note and passes when nothing changed.
-10. **Mutation proof (§2c rule 2):** the log shows each of these checks turning red when its guard is
-    removed: the `generated: true` check, the secret scan, two-phase writing, the ownership rule, the
-    lock, and skip-identical.
+## Acceptance criteria
+Script-verified by `051-verify.sh` (output pasted in the log) unless marked **human**.
+1. In a temp git repo fixture, with a vault path containing a space and a non-ASCII character, mode `main`
+   produces exactly the note set above with correct frontmatter. Each single-source note's
+   `source_commit` equals `git log -1 --format=%H main -- <source_path>`.
+2. A second run writes zero files. A new commit touching only `OPERATIONS.md` rewrites only `Gotchas.md`,
+   plus `Status.md`/`Tasks.md` only if their bytes change (checked via mtime_ns).
+3. A fixture `Status.md` without `generated: true` gives a non-zero exit with zero files written. Fixture
+   files with the three forbidden names are rejected as targets **before any open**. Demonstrated with
+   `strace -f -e trace=openat` if available. Otherwise the implementer states the method used and why it
+   proves no open.
+4. One fixture per secret pattern gives a non-zero exit, zero files written, and output naming the pattern.
+   **Fixtures build secret strings at runtime; none are committed.** The test asserts the string appears
+   nowhere in stdout, stderr, tracebacks or the temp tree. Positive control: the repository at pinned
+   commit `3e2b6ef` renders with no hit.
+5. Each invalid-vault case in rule 2, plus both test-mode refusals in rule 8, exits non-zero, writes nothing
+   and creates no directory.
+6. Mode `task` with main plus an open `task/NNN-x` branch writes only `Tasks/NNN.md`. A main run skips it.
+   After the merge, a main run writes it with main's status word. A deleted unmerged branch hands ownership
+   to main. Mode `task` refuses any other note.
+7. Two concurrent runs serialize, and no temp files remain. The result equals a single run. A lock held
+   past 30 s gives `lock timeout` and nothing written.
+8. A stale generated note outside the planned set stays byte- and mtime-identical.
+9. `check` detects a changed, added or removed non-generated fixture file, and passes when nothing changed.
+10. **`051-verify.sh --mutate`** re-runnably mutates a temp copy of the script and shows the matching check
+    turn red for: the `generated: true` check, the secret scan, two-phase writing, path containment, the
+    symlink check, the forbidden-names rule, the ownership rule, the lock, skip-identical, and the test-mode refusal.
 11. `051-verify.sh` passes in a fresh clone of the task branch (§2c rule 4).
-12. `docs/tools/vault-projection.md` documents the contract, setup (`~/.config/wom/vault-path`) and
-    commands. Its claims about Obsidian/LiveSync behaviour cite task 050's results.
-13. **Human, after merge, with Ludwig present:** the first live run (`check --save-baseline`, `write --ref main`,
-    `check`) shows the notes on Windows and on the phone, and `check` stays green. This is recorded in
-    the log as Ludwig's confirmation.
+12. `051-verify.sh` refuses to run unless the resolved test vault is under the temp dir, and neither under
+    `/mnt/` nor under the real `$HOME`.
+13. `docs/tools/vault-projection.md` documents the contract, setup and commands. Its Obsidian/LiveSync
+    claims cite task 050's log.
+14. **Human, after merge, Ludwig present:** the first live run (`check --save-baseline`, `write --ref main`,
+    `check`). The notes appear on Windows and the phone, and `check` stays green.
 
 ## Forbidden here
-- **Running anything against the real vault before AC13.** `051-verify.sh` and every test must set
-  `WOM_VAULT` to a `mktemp -d` path **and** `HOME` to a temp dir, so the config-file fallback cannot
-  reach the real vault. The script refuses to run if either is unset.
-- Committing in the task worktree as part of a test. Tests build their own temp repos. (Task 052 will
-  install git hooks shared by all worktrees.)
-- Reading the content of anything in the real vault, ever. The task log never contains the vault path.
-- Any network access, any dependency outside the Python stdlib, any Obsidian install.
-- Printing a matched secret. Catch-and-ignore around a write (§3.7).
-- Writing to `.claude/`, `.git/hooks` or any other doctrine file (that is task 052 and 048).
+- Anything against the real vault before AC14. Committing secret-shaped strings. Printing a matched secret.
+- Opening any non-planned file in any vault, real or fixture (rule 6).
+- Committing inside the task worktree as part of a test; tests build their own temp repos.
+- The vault path in any committed file or in the task log.
+- Network access, non-stdlib dependencies, catch-and-ignore around writes (§3.7).
+- Touching `.claude/`, `.git/hooks`, MANAGER.md or CLAUDE.md.
 
 ## Dependency graph
-Creates tooling node `vault-projection` (outside SITE-V1's graph; Ludwig's direct request). It has one
-edge, repo → vault, whose contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1
-nodes.
-
-## Deliverables
-Code, tests, `051-verify.sh` (output pasted in the log), docs, and the log current.
+Creates the tooling node `vault-projection`, outside SITE-V1's graph. It has one edge, repo → vault, whose
+contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 nodes. Sequencing:
+051 → 053 (same script) → 052 (installs the script).
 
 ## Questions (agent-maintained; MANAGER.md §8b)
 
 ---
 # Task 051 log
-- 2026-10-14 manager: spec written. Gate items 1–8 checked by the manager. This task writes outside the
-  repo and contains a secret scan, so it is security-touching: an independent spec review by the reviewer
-  is required before delegation (§2b).
+- 2026-10-14 manager: spec v1 written and gate run.
+- 2026-10-14 independent spec review (reviewer agent): NOT PASS, 11 findings. Spec v2 addresses all of
+  them that concern 051. Before acting, the manager re-checked two (§3.6c). Finding 2 is confirmed: in a
+  temp repo, `fetch main:main` fires no `post-merge`, while `pull` does. Finding 4's premise was
+  overstated: no `ghp_`, `sk-ant-` or PEM header exists on main, only one bare `github_pat_` in prose.
+  Its fix (bounded regexes, pinned control) is adopted anyway. ADR and Journal notes were split into 053.
