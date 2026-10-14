@@ -193,3 +193,35 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
   accepted first-run burst (~130 notes). Previous findings 2–6 and 8–11 were closed by the reviewer.
   The manager judges spec v3 ready for Ludwig without a third round: every remaining finding was
   concrete and has a concrete fix in the text.
+- 2026-10-14 implementer: built `tools/vault/wom_vault.py` (+ `tests/test_vault.py`, `audit_run.py`, `mutate.py`),
+  `docs/tools/vault-projection.md`, `docs/manager/COMMANDS.md` (new), one OPERATIONS.md entry,
+  `docs/tasks/051-verify.sh`. Status set to review. Nothing was run against a real vault; every run used
+  `WOM_VAULT_TEST=1`, a `mktemp` vault and a temp `HOME`.
+  - Decisions: main-owned `Tasks/NNN.md` uses the last commit touching the task file (Q-1, AC2 requires it);
+    `--note` and `--repo` options added (Q-4); no `unlink` anywhere, so a crashed run can leave a hidden
+    `.NAME.pid.ns.wom-tmp` (documented); first tests pass was green, so mutation run is the evidence the
+    checks can fail.
+  - strace is not installed (`command -v strace` empty). AC3's "no open before the forbidden-name rejection" is
+    proven with a Python audit hook (`tests/audit_run.py`) that logs every `open`/`os.open`/scandir/listdir of
+    the interpreter running the tool; git child processes never receive the vault path. A control test shows
+    the hook sees the opens of a normal run, so an empty log is not blindness.
+  - AC evidence (all from `docs/tasks/051-verify.sh`, re-runnable): AC1 `test_ac1_*`; AC2 `test_ac2_*`;
+    AC3 `test_ac3_*`; AC4 `test_ac4_*` (6 patterns built at runtime, positive control on pin `3e2b6ef`,
+    plus the committed-secret scan with a control); AC5 `test_ac5_*`; AC6 `test_ac6_*`; AC7 `test_ac7_*`
+    (incl. the real 30 s timeout); AC8 `test_ac8_*`; AC9 `test_ac9_*`; AC10 `--mutate` (12 mutants, all killed,
+    the unmutated copy green each time); AC11 fresh clone run below; AC12 guard (see below); AC13 the doc
+    checks in the script. AC14 is human and OPEN: it happens after merge with Ludwig present.
+  - AC12 demonstration: `TMPDIR=/mnt/x docs/tasks/051-verify.sh` printed
+    `refusing to run: TMPDIR '/mnt/x' is under /mnt/` (rc=3, string check, /mnt never touched);
+    `TMPDIR=$HOME/zz ...` printed `refusing to run: TMPDIR '/home/ludwig/zz' is under HOME` (rc=3).
+    The test module applies the same rule to its own root, and the test mode of the tool itself refuses
+    any vault outside `realpath(TMPDIR)`.
+  - `051-verify.sh --mutate` in the authoring worktree: rc=0, `Ran 32 tests ... OK`, then for each of
+    generated-true, secret-scan, two-phase, containment, vault-symlink, forbidden-names, ownership, lock,
+    skip-identical, test-mode-refusal, nontest-tmp-refusal, never-deletes: `control green` then
+    `ok: mutant '<name>' killed -> FAIL: <tests>` (e.g. `ok: mutant 'lock' killed -> FAIL:
+    test_ac7_lock_serializes FAIL: test_ac7_lock_timeout_after_30s`), ending `== 051-verify: ALL CHECKS PASSED`.
+  - AC11, fresh clone of branch at `660496f` into a temp dir, `docs/tasks/051-verify.sh --mutate`:
+    `Ran 32 tests in 39.847s`, `OK`, 12 mutants killed, `== 051-verify: ALL CHECKS PASSED`, `clone rc=0`.
+    Full output: re-run the command (it is the artefact).
+  - Remaining: AC14 (human, after merge). Booked questions Q-1..Q-5 above. Task 053 will extend the same script.
