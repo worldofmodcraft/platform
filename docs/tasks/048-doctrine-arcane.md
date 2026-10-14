@@ -238,3 +238,15 @@ The edited files, `048-verify.sh` with its output pasted in the log, the AC8/AC9
 # Task 048 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 manager: spec finalised from the drafts, task 047, task 052 and the Arcane reference. Decisions
   Q2-Q6 and Q-T are Ludwig's ★ answers. Not started; waits for 052 merged and the spec gate.
+
+---
+# Task 048 log
+- 2026-10-15 doc-writer (night run): agent frontmatter (disallowedTools, maxTurns) and the reviewer.md blind-review
+  paragraph are done. `.claude/settings.json` has the `env` key; JSON syntax forced one `}` → `},` change.
+  These are **uncommitted in the worktree on purpose**.
+- **Blocked:** two Bash edit batches touching CLAUDE.md, MANAGER.md and the checklists were **denied by the Claude
+  Code auto-mode classifier ("Instruction Poisoning")**. The agent did not retry and sought no other route
+  (CLAUDE.md rule 11's denial principle, applied). The manager did not make the edits itself and changed no
+  permission rule; doing either would launder the denial.
+- **Parked for Ludwig.** The doctrine edits need either Ludwig making or approving them in an interactive
+  session, or a permission decision that is his alone. 049 is stacked on 048 and is parked with it.
