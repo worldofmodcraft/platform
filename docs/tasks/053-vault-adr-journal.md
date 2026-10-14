@@ -128,3 +128,8 @@ AC1 test_ac1_decisions_adr_and_journal_exact + merge test (expected content from
 - For Ludwig/manager: is the one-name extension of two 051 test expectations (above) acceptable under "never weaken"? I judged it a spec consequence, not a weakening.
 - When 051's task file moves to `done/`, the 051-verify.sh secret-scan exclusion (`docs/tasks/051-vault-projection.md`) will no longer match and the scan will hit the spec file's patterns. I did not touch it (A3 only); whoever moves the file must add the `done/` path to the exclusion.
 - Ratify: INDEX.json/ADR mismatch is a hard error, so a vault run blocks until the index is regenerated after a new ADR.
+
+## Follow-up 2026-10-14 (manager triage after review)
+- Judgement call 1 (extending two 051 test expectations by the newly planned Journal note) accepted by the manager as a spec consequence, not a weakening (section 3.5). The stale-index hard error is accepted for now (ADR-0103); Ludwig's question stays booked.
+- `git merge main` done (no rebase). 051's spec now lives in `docs/tasks/done/`. `051-verify.sh` excludes the spec at both `docs/tasks/` and `docs/tasks/done/`, and fails if the spec exists at not exactly one of them. Negative control: with the spec file renamed, the run prints `FAIL: the 051 spec file must exist at exactly one of ...` and ends `== 051-verify: FAILED`.
+- Fresh clone at 81efc37, `TMPDIR=/tmp`: `053-verify.sh --mutate` exit 0, ends `== 051-verify: ALL CHECKS PASSED` / `== 053-verify: ALL CHECKS PASSED`; `051-verify.sh --mutate` exit 0, `ok: no secret-shaped string in 229 tracked files`, 13 of 13 mutants killed, ends `== 051-verify: ALL CHECKS PASSED`.
