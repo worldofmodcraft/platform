@@ -1725,3 +1725,6 @@ Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's who
      **Still Ludwig-only:** signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine.
   4. **Overnight §8 waiver:** a blocked chain is parked, with its question written under "For Ludwig", and
      independent chains continue. The session halts fully at five open Ludwig items.
+- 2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
+  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only. Context was 23 % when he said it.
+  Compaction caution (§5.5) still applies: anything remembered is verified against disk before acting.
