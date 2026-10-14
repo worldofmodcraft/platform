@@ -1,6 +1,6 @@
 # Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** review (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051
@@ -159,6 +159,23 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
 051 → 053 (same script) → 052 (installs the script).
 
 ## Questions (agent-maintained; MANAGER.md §8b)
+- **Q-1 (non-blocking) `source_commit` of main-owned `Tasks/NNN.md`.** The contract says "the owning ref's HEAD",
+  but AC2 says a commit touching only OPERATIONS.md rewrites only Gotchas.md (plus Status/Tasks), and "churn is
+  limited to these two". With HEAD, every main commit would rewrite every `Tasks/NNN.md`. Options: A) last commit
+  that touched the task file (single-source rule) ★; B) main HEAD (literal, breaks AC2). Assumed A for main-owned
+  notes; branch-owned notes (task mode) use the branch HEAD as specified. Rests on: AC2 passing as written.
+- **Q-2 (non-blocking) `check` and `.obsidian/`.** The spec says `check` covers every non-generated file. Obsidian
+  rewrites files under `.obsidian/` (workspace.json etc.) while it runs, so AC14's "check stays green" may fail
+  for reasons unrelated to the tool. Options: A) as specified ★ (implemented); B) skip dot-directories (they do
+  not sync, task 050 AC3); C) a `--ignore PREFIX` flag. Rests on: AC14 on Ludwig's machine.
+- **Q-3 (non-blocking) two unmerged branches with one id** (this repo has `task/046-method-handover` and
+  `task/046-start-here`). The spec's one-writer rule names no tie-break. Implemented: main skips the note, and
+  task mode writes it from whichever of the branches runs last. Alternative: refuse. Rests on: nothing in AC.
+- **Q-4 (non-blocking) `--note NAME` option** was added so that "asked to write any other note" and the
+  forbidden-name refusal (AC3) are expressible at all. Also `--repo PATH` (default: current directory).
+- **Q-5 (information) pinned-commit control.** `3e2b6ef` has no `docs/manager/COMMANDS.md`, and a missing source
+  is an error. The AC4 control therefore clones the repo, resets a throwaway `main` to `3e2b6ef` and adds
+  COMMANDS.md from the branch before rendering. Sources are otherwise the pin's.
 
 ---
 # Task 051 log
