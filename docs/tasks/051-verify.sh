@@ -61,7 +61,7 @@ planted="$TMP/planted.txt"; printf 'x %s%s y\n' 'gh''p_' 'aB3dE5gH7jK9mN1pQ3sT5v
 if grep -Eq "$SECRET_RX" "$planted"; then say "ok: control search matches a runtime-built secret"; else red "control search found nothing"; fi
 nfiles="$(git -C "$REPO" ls-files | wc -l)"
 [ "$nfiles" -gt 10 ] || red "git ls-files returned only $nfiles files"
-if (cd "$REPO" && git ls-files -z -- . ':!docs/tasks/051-vault-projection.md' | xargs -0 grep -IEl "$SECRET_RX" 2>/dev/null); then red "secret-shaped string committed (files above)"; else say "ok: no secret-shaped string in $nfiles tracked files (the spec file is excluded: it quotes the minisign comment as a pattern definition)"; fi
+if (cd "$REPO" && git ls-files -z -- . ':!docs/tasks/051-vault-projection.md' ':!docs/tasks/051-verify.sh' | xargs -0 grep -IEl "$SECRET_RX" 2>/dev/null); then red "secret-shaped string committed (files above)"; else say "ok: no secret-shaped string in $nfiles tracked files (the spec file and this script are excluded: they define the patterns)"; fi
 
 say "== the real vault path is not committed"
 if (cd "$REPO" && git grep -nE '/mnt/[a-z]/' -- tools/vault docs/tools/vault-projection.md docs/manager/COMMANDS.md); then red "a drive-mount path is committed"; else say "ok: none"; fi
