@@ -26,8 +26,18 @@ rewrites only its own day (051 write rule 3).
 burst (120 ADR notes, 8 Journal days, and the 051 set). That is accepted as a one-off; later runs write
 only what changed. `ADR/` and `Journal/` are created under 051 write rule 5.
 
+## Amendment 2026-10-14 (approved by Ludwig: "Ja på 053 med dina ändringar"), from task 051's review
+These change 051 behaviour inside `tools/vault/wom_vault.py`. 051's contract doc is amended to match.
+- **A1 duplicate ids.** If more than one local branch matching `task/NNN-*` is unmerged into main for the
+  same `NNN`, then mode `main` writes nothing for `Tasks/NNN.md`, and mode `task` refuses (non-zero exit,
+  nothing written). `Status.md` lists the conflict, and the run summary counts it (`id_conflicts=`).
+- **A2 non-regular targets.** A planned target that exists but is not a regular file (a symlink, FIFO,
+  directory or device) fails validation **before any open**. It is checked with `lstat`. Nothing is written.
+- **A3 verify honesty.** In `051-verify.sh`, the committed-secret scan must fail when grep errors (exit ≥ 2),
+  not count the error as "none found". The `2>/dev/null` masking is removed.
+
 ## File scope (declared)
-`tools/vault/wom_vault.py`, `tools/vault/tests/**`, `docs/tools/vault-projection.md`, `docs/tasks/053-verify.sh`, this file's log.
+`tools/vault/wom_vault.py`, `tools/vault/tests/**`, `docs/tools/vault-projection.md`, `docs/tasks/053-verify.sh`, `docs/tasks/051-verify.sh` (A3 only), this file's log.
 
 ## Acceptance criteria (all script-verified by `053-verify.sh`, output pasted in the log)
 1. In a fixture repo: the note set includes `Decisions.md`, one ADR note per ADR file, and one Journal file
@@ -40,6 +50,12 @@ only what changed. `ADR/` and `Journal/` are created under 051 write rule 5.
    run, as in 051 AC4.
 5. `053-verify.sh --mutate` turns the checks for criteria 2 and 3 red. The script passes in a fresh clone.
 6. All of 051's verify suite still passes (re-run, output pasted).
+7. A1: a fixture with two unmerged `task/NNN-*` branches. Main skips the note and `Status.md` names the
+   conflict. Task mode on either branch exits non-zero with nothing written. A mutant removing the check is killed.
+8. A2: a symlink at `Status.md` pointing at a fixture hand-written note, plus a FIFO at a planned name. Each
+   gives a non-zero exit, zero files written, and no open of the link target (051's audit hook). A mutant
+   removing the check is killed.
+9. A3: a fixture making grep exit 2 turns `051-verify.sh`'s scan red.
 
 ## Forbidden here
 Everything forbidden in 051. In addition: changing any 051 write rule, and reading the vault beyond 051 rule 6.
