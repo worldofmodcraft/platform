@@ -20,7 +20,10 @@ import re
 import subprocess
 import sys
 import time
+import stat
 import unicodedata
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 LOCK_TIMEOUT_SECONDS = 30
 
@@ -51,8 +54,14 @@ VERBATIM_NOTES = (
     ("Mission Log.md", MISSION_LOG),
 )
 AGGREGATE_NOTES = ("Status.md", "Tasks.md")
-PLANNED_TOP_LEVEL = frozenset(AGGREGATE_NOTES + tuple(n for n, _ in VERBATIM_NOTES))
+DECISIONS_NOTE = "Decisions.md"
+DECISIONS_INDEX = "docs/decisions/INDEX.json"
+ADR_FILE_RE = re.compile(r"^docs/decisions/([0-9]{4}-[^/]+)\.md$")
+JOURNAL_TZ = "Europe/Stockholm"
+PLANNED_TOP_LEVEL = frozenset(AGGREGATE_NOTES + tuple(n for n, _ in VERBATIM_NOTES) + (DECISIONS_NOTE,))
 PLANNED_TASK_NOTE_RE = re.compile(r"^Tasks/[0-9]{3}\.md$")
+PLANNED_ADR_NOTE_RE = re.compile(r"^ADR/[0-9]{4}-[^/]+\.md$")
+PLANNED_JOURNAL_NOTE_RE = re.compile(r"^Journal/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$")
 TASK_NOTE_NAME_RE = re.compile(r"^Tasks/[0-9]{3}\.md$")
 
 
@@ -236,7 +245,9 @@ def esc(cell):
 def render_main(repo, ref_name, sha):
     tasks = list_tasks(repo, sha)
     owners = unmerged_task_branches(repo)
-    notes, skipped, counters = {}, [], {"status_unparsed": 0, "no_log_entry": 0}
+    conflicts = {tid: brs for tid, brs in owners.items() if len(brs) > 1}  # A1
+    notes, skipped = {}, []
+    counters = {"status_unparsed": 0, "no_log_entry": 0, "id_conflicts": len(conflicts), "decisions_absent": 0}
     head_date_fm = lambda paths: frontmatter(ref_name, repo, sha, paths)
 
     for name, src in VERBATIM_NOTES:
@@ -268,8 +279,13 @@ def render_main(repo, ref_name, sha):
     if len(open_rows) == 2:
         open_rows.append("| - | no open tasks | - | - | - |")
 
+    conflict_section = ""
+    if conflicts:
+        conflict_section = "\n## Task id conflicts\n\n" + "\n".join(
+            "- %s: unmerged branches %s; no `Tasks/%s.md` is written until one is merged or deleted" % (
+                tid, ", ".join("`%s`" % b for b in brs), tid) for tid, brs in sorted(conflicts.items())) + "\n"
     notes["Status.md"] = (head_date_fm([MISSION_LOG, "docs/tasks/"]) + "# Status\n\n" + "\n\n".join(parts)
-                          + "\n\n## Open tasks\n\n" + "\n".join(open_rows) + "\n")
+                          + "\n\n## Open tasks\n\n" + "\n".join(open_rows) + "\n" + conflict_section)
     branch_rows = ["| Id | Branch | Note |", "|---|---|---|"]
     for tid in sorted(owners):
         for br in owners[tid]:
@@ -281,6 +297,8 @@ def render_main(repo, ref_name, sha):
 
     for tid in sorted(tasks):
         t = tasks[tid]
+        if tid in conflicts:  # CHECK:id-conflict-main
+            continue
         if tid in owners:
             skipped.append(tid)
             continue
@@ -289,7 +307,72 @@ def render_main(repo, ref_name, sha):
         notes["Tasks/%s.md" % tid] = (
             frontmatter(ref_name, repo, commit, [t.path])
             + "# Task %s: %s\n\n- Status: %s\n- Task file: `%s`\n" % (tid, t.title, t.status_text, t.path))
+    notes.update(render_decisions(repo, ref_name, sha, counters))
+    notes.update(render_journal(repo, ref_name, sha))
     return notes, skipped, counters
+
+
+def render_decisions(repo, ref_name, sha, counters):
+    """Decisions.md and ADR/<stem>.md (task 053).  No docs/decisions at all counts as decisions_absent=1."""
+    raw = git(repo, "ls-tree", "-r", "-z", "--name-only", sha, "--", "docs/decisions").stdout
+    paths = sorted(p for p in raw.decode("utf-8", "strict").split("\0") if p)
+    adr_paths = [p for p in paths if ADR_FILE_RE.match(p)]
+    if DECISIONS_INDEX not in paths:
+        if adr_paths:
+            raise WomError("%s is missing but %d ADR files exist" % (DECISIONS_INDEX, len(adr_paths)))
+        counters["decisions_absent"] = 1
+        return {}
+    try:
+        index = json.loads(read_blob(repo, sha, DECISIONS_INDEX))
+        entries = index["adrs"]
+        rows = [(int(e["number"]), e["filename"], e["title"]) for e in entries]
+    except (ValueError, KeyError, TypeError) as exc:
+        raise WomError("%s is not a valid ADR index (%s: %s)" % (DECISIONS_INDEX, type(exc).__name__, exc))
+    by_name = {p[len("docs/decisions/"):]: p for p in adr_paths}
+    listed = {fn for _, fn, _ in rows}
+    for fn in sorted(listed - set(by_name)):
+        raise WomError("%s lists %s, which does not exist at %s" % (DECISIONS_INDEX, fn, sha[:12]))
+    for fn in sorted(set(by_name) - listed):
+        raise WomError("ADR file %s is not listed in %s" % (fn, DECISIONS_INDEX))
+    if len(listed) != len(rows):
+        raise WomError("%s lists a filename twice" % DECISIONS_INDEX)
+    notes = {}
+    table = ["| Id | Title | Note |", "|---|---|---|"]
+    for number, fn, title in sorted(rows):
+        stem = fn[:-len(".md")]
+        if not stem.startswith("%04d-" % number):
+            raise WomError("%s: number %d does not match filename %s" % (DECISIONS_INDEX, number, fn))
+        table.append("| %04d | %s | [[ADR/%s]] |" % (number, esc(title), stem))
+        src = by_name[fn]
+        body = read_blob(repo, sha, src)
+        if body.lstrip("\ufeff").startswith("---"):  # CHECK:adr-frontmatter
+            raise WomError("%s starts with '---'; an ADR with its own frontmatter would merge two blocks" % src)
+        commit = last_commit(repo, sha, [src])
+        notes["ADR/%s.md" % stem] = frontmatter(ref_name, repo, commit, [src]) + body
+    commit = last_commit(repo, sha, [DECISIONS_INDEX])
+    notes[DECISIONS_NOTE] = frontmatter(ref_name, repo, commit, [DECISIONS_INDEX]) + "# Decisions\n\n" + "\n".join(table) + "\n"
+    return notes
+
+
+def render_journal(repo, ref_name, sha):
+    """Journal/YYYY-MM-DD.md: every commit reachable from the ref, grouped by Stockholm committer day."""
+    tz = ZoneInfo(JOURNAL_TZ)  # CHECK:journal-tz
+    raw = git(repo, "log", "--format=%H%x00%ct%x00%s%x01", sha).stdout.decode("utf-8", "strict")
+    days = {}
+    for rec in raw.split("\x01"):
+        rec = rec.strip("\n")
+        if not rec:
+            continue
+        full, ct, subject = rec.split("\x00", 2)
+        day = datetime.fromtimestamp(int(ct), tz).strftime("%Y-%m-%d")
+        days.setdefault(day, []).append((int(ct), full, subject))
+    notes = {}
+    for day, commits in days.items():
+        commits.sort(key=lambda c: -c[0])  # stable: git's order breaks ties
+        lines = ["- %s %s" % (full[:7], subject) for _, full, subject in commits]
+        notes["Journal/%s.md" % day] = (frontmatter(ref_name, repo, commits[0][1], ["git log " + ref_name])
+                                        + "# Journal %s\n\n" % day + "\n".join(lines) + "\n")
+    return notes
 
 
 def render_task(repo):
@@ -298,15 +381,20 @@ def render_task(repo):
     if not m:
         raise WomError("mode task needs a worktree on a task/NNN-* branch (this is %r)" % branch)
     tid = m.group(1)
-    if tid not in unmerged_task_branches(repo) or branch not in unmerged_task_branches(repo)[tid]:
+    owners = unmerged_task_branches(repo)
+    if tid not in owners or branch not in owners[tid]:
         raise WomError("branch %s is merged into main, so main owns Tasks/%s.md" % (branch, tid))
+    if len(owners[tid]) > 1:  # CHECK:id-conflict-task
+        raise WomError("id conflict: %s is carried by several unmerged branches (%s); nothing written" % (
+            tid, ", ".join(owners[tid])))
     sha = resolve_commit(repo, "HEAD")
     tasks = list_tasks(repo, sha)
     if tid not in tasks:
         raise WomError("branch %s has no task file for id %s" % (branch, tid))
     t = tasks[tid]
     text = read_blob(repo, sha, t.path)
-    counters = {"status_unparsed": 1 if t.status is None else 0, "no_log_entry": 0}
+    counters = {"status_unparsed": 1 if t.status is None else 0, "no_log_entry": 0,
+                "id_conflicts": 0, "decisions_absent": 0}
     lines = text.split("\n")
     entry = None
     for i, line in enumerate(lines):
@@ -334,7 +422,8 @@ def check_names(requested, mode):
         if base in FORBIDDEN_NAMES:  # CHECK:forbidden-names
             raise WomError("forbidden target name: %s is a hand-written note" % rel)
     for rel in requested:
-        planned = rel in PLANNED_TOP_LEVEL or TASK_NOTE_NAME_RE.match(rel)
+        planned = (rel in PLANNED_TOP_LEVEL or TASK_NOTE_NAME_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
+                   or PLANNED_JOURNAL_NOTE_RE.match(rel))
         if not planned:
             raise WomError("%s is not a note this tool writes" % rel)
         if mode == "task" and not TASK_NOTE_NAME_RE.match(rel):
@@ -368,8 +457,8 @@ def is_generated(data):
 def validate(vault, real_vault, notes):
     """Phase 1 target checks.  Returns {rel: (target_path, new_bytes, existing_bytes_or_None)}."""
     scan_secrets(notes)  # CHECK:secret-scan
-    plan = {}
-    for rel in sorted(notes):
+    targets = {}
+    for rel in sorted(notes):  # pass 1: no file is opened here
         target = os.path.join(vault, *rel.split("/"))
         real_target = os.path.realpath(target)
         if not _under(real_target, real_vault):  # CHECK:containment
@@ -377,10 +466,18 @@ def validate(vault, real_vault, notes):
         parent = os.path.dirname(target)
         if os.path.lexists(parent) and not os.path.isdir(parent):
             raise WomError("%s: parent exists and is not a directory" % rel)
+        try:
+            mode = os.lstat(target).st_mode
+        except FileNotFoundError:
+            mode = None
+        if mode is not None and not stat.S_ISREG(mode):  # CHECK:non-regular
+            raise WomError("target %s exists but is not a regular file (symlink, FIFO, directory or device)" % rel)
+        targets[rel] = target
+    plan = {}
+    for rel in sorted(notes):  # pass 2: only regular files are opened
+        target = targets[rel]
         existing = None
         if os.path.lexists(target):
-            if os.path.isdir(target):
-                raise WomError("target %s is a directory" % rel)
             with open(target, "rb") as fh:
                 existing = fh.read()
             if not is_generated(existing):  # CHECK:generated-true
@@ -459,9 +556,10 @@ def cmd_write(args):
     for rel in written:
         print("wrote %s" % rel)
     print("wom-vault: mode=%s ref=%s planned=%d written=%d unchanged=%d skipped_branch_owned=%d "
-          "status_unparsed=%d no_log_entry=%d" % (
+          "status_unparsed=%d no_log_entry=%d id_conflicts=%d decisions_absent=%d" % (
               mode, ref_label, len(plan), len(written), len(unchanged), len(skipped),
-              counters["status_unparsed"], counters["no_log_entry"]))
+              counters["status_unparsed"], counters["no_log_entry"], counters["id_conflicts"],
+              counters["decisions_absent"]))
     os.close(lock_fd)
     return 0
 
@@ -477,7 +575,8 @@ def stat_tree(vault):
                 if e.is_dir(follow_symlinks=False):
                     stack.append(rel)
                     continue
-                if rel in PLANNED_TOP_LEVEL or PLANNED_TASK_NOTE_RE.match(rel):
+                if (rel in PLANNED_TOP_LEVEL or PLANNED_TASK_NOTE_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
+                        or PLANNED_JOURNAL_NOTE_RE.match(rel)):
                     continue
                 st = e.stat(follow_symlinks=False)
                 entries[rel] = [st.st_size, st.st_mtime_ns]
