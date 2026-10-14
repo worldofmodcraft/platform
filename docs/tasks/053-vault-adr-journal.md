@@ -77,7 +77,7 @@ FAILED (failures=29, errors=3)
 FAIL: test_ac1_decisions_adr_and_journal_exact / _inconsistent_index_is_an_error (x4) / _repo_without_decisions_still_gets_journal
 FAIL: test_ac2_only_the_affected_notes_are_rewritten; ERROR: test_ac2_stockholm_day_boundaries, test_ac1_merge_commits_are_listed
 FAIL: test_ac3_adr_starting_with_dashes... [frontmatter] [bare rule] [bom]
-FAIL: test_ac4 (9 of 12 subtests pattern x adr|subject: all of them; the old tool writes no ADR/Journal notes)
+FAIL: test_ac4 (all 12 subtests, 6 patterns x adr|subject; the old tool writes no ADR/Journal notes)
 FAIL: test_ac7_main_skips_names_the_conflict_and_task_mode_refuses, test_ac7_main_leaves_an_existing_note_untouched_and_conflict_clears
 FAIL: test_ac8_symlink_target_is_refused_without_opening_it [hand] [generated]; test_ac8_fifo_directory_and_dangling_link [dangling] [dir] [journal-fifo]
 ERROR: test_ac8_fifo_directory_and_dangling_link [fifo]   (the old tool blocks on open() of the FIFO until the 20 s test timeout)
@@ -85,7 +85,6 @@ $ PATH=<dir with grep that exits 2 for "-IEl">:$PATH docs/tasks/051-verify.sh   
 ok: no secret-shaped string in 225 tracked files ...
 == 051-verify: ALL CHECKS PASSED          <- A3 defect shown: an erroring grep counted as "none found"
 ```
-(The ac4 line count is 12 subtests = 6 patterns x 2 places, all failing.)
 
 ## Passing, in a fresh clone of the branch at 4d8910c (`git clone` then `TMPDIR=/tmp docs/tasks/053-verify.sh --mutate`, exit 0)
 ```
