@@ -1,6 +1,6 @@
 # Task 050: Prove that a note written from WSL reaches Obsidian on Windows and the phone
 
-- **Mission:** tooling (task 047, part C, step 1) — **Status:** in-progress (spec-approved by Ludwig, in session, 2026-10-14)
+- **Mission:** tooling (task 047, part C, step 1) — **Status:** done (2026-10-14; AC1–AC4 passed)
 - **Agent / model:** none. The manager runs the shell steps and Ludwig confirms what he sees. No production code is written.
 - **Budget:** small (one sitting, about 15 minutes of Ludwig's time)
 - **Branch / worktree:** task/047-arcane-practices (this file and its log only)
