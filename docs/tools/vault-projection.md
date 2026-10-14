@@ -169,7 +169,7 @@ ignores `post-commit`'s status). The 30 s lock cap of the tool applies, so a com
 `.claude/settings.json` has one PreToolUse entry, matcher `Write|Edit|MultiEdit|NotebookEdit`, command
 `"$CLAUDE_PROJECT_DIR"/.claude/hooks/vault-guard.sh` (a wrapper around `vault_guard.py`). Exit 2 blocks the call;
 settings-file hooks also fire for subagents' tool calls. It checks `tool_input.file_path` and `tool_input.notebook_path`:
-a relative path is joined to the call's `cwd`; `D:\...` and `d:/...` map to `/mnt/d/...`; the result goes through
+a relative path is joined to the call's `cwd`; `D:\...` and `d:/...` map to the WSL drive mount (the lowercase drive letter under `/mnt`); the result goes through
 `realpath` and is compared case-folded (drvfs is case-insensitive) with the vault. The vault is every value found in
 `WOM_VAULT` and in `~/.config/wom/vault-path`; a path inside either blocks.
 - Vault not configured: allow, and count the skip in `~/.config/wom/guard-skips.log` (a fresh clone is not bricked).
