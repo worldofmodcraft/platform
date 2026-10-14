@@ -1,5 +1,5 @@
 {
-  "count": 120,
+  "count": 121,
   "adrs": [
     {
       "number": 1,
@@ -1999,6 +1999,29 @@
       "amends": [
         4
       ],
+      "amended_by": []
+    },
+    {
+      "number": 121,
+      "filename": "0121-version-lifecycle-pending.md",
+      "title": "Version lifecycle — a `pending` state, a one-time pipeline write-back, and a post-merge build",
+      "status": "Proposed (awaiting Ludwig; not law until he accepts it)",
+      "date": "2026-10-14",
+      "area": "Registry / Build pipeline",
+      "touches": [
+        "registry",
+        "registry/ci",
+        "build-pipeline",
+        "launcher/resolution"
+      ],
+      "related": [
+        39,
+        40,
+        41,
+        58,
+        119
+      ],
+      "amends": [],
       "amended_by": []
     }
   ]
