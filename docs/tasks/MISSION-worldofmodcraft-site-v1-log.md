@@ -1742,3 +1742,50 @@ Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's who
   - **Q-F:** Ludwig's personal account joins the organisation (manual step), so mission §7.6 stands as written.
   - **Q-G:** a project-owned URL fronts `source_archive` before the first publish. Feasibility on Pages is unverified and gets a probe.
   - **Q-H** (does the `MINISIGN_SECRET_KEY` secret exist?) is a fact question, still unanswered.
+
+## SESSION STATUS — 2026-10-15 morning (session 8, overnight run)
+
+### Done and merged
+- **Vault projection:** 050 (sync probe), 051 (generator), 053 (ADR + Journal notes, A1–A3). The vault holds
+  Status, Tasks, Gotchas, Commands, Mission Log, one note per task and per ADR, and the Journal.
+- **032 ownership contract** (registry PR #4) after fix round 6. The blocker in front of 007 is gone.
+- **041** site schema copies synced, with a CI check (site PR #2). Live green, and a throwaway PR proved red.
+- **054** the remaining SITE-V1 specs: 008/008a/008b/008c, 010, 055, 056, 057, 058.
+- **059** no bytecode in the repo. **060** the runbook shows M0–M7 and Q-H truthfully.
+
+### Built and reviewed, waiting for Ludwig's merge
+- **052** vault triggers + guard (branch `task/052-vault-triggers`). It touches MANAGER.md §5, which is doctrine.
+  AC7 (live install) is done with Ludwig after merge.
+- **008a** pipeline core (registry PR #7). Signing is involved. Security review PASS; 114 checks and 47 mutations.
+- **056** architecture note (platform PR #43). Criterion 9 is Ludwig's read-through.
+
+### Blocked on Ludwig
+- **ADR-0121 proposal** (branch `proposal/adr-0121-version-lifecycle`): the `pending → published` lifecycle,
+  Q-L (born-pending only) and Q-J (`pending → rejected`). It blocks 057, which blocks 007, 008b, 008c and 010.
+- **048 doctrine:** the auto-mode classifier denied the edits to CLAUDE.md, MANAGER.md and the checklists. They are
+  not retried and not worked around. Agent frontmatter edits sit uncommitted in `~/wt/task-048b`. 049 is stacked on it.
+- **058 live part:** a Pages deploy probe that needs a push to the live site.
+- **Manual steps (runbook):** M4, M5 (GitHub App), M6 (personal account joins the org), M7 (archive repo),
+  Q-H (does `MINISIGN_SECRET_KEY` exist? look only).
+
+### For Ludwig (★ = manager's lean)
+1. **ADR-0121:** ★accept as proposed (Q-L yes, Q-J `rejected` status, never deletion).
+2. **Merge 052:** ★yes, then install the hooks together (AC7).
+3. **Merge 008a:** ★yes.
+4. **056:** read docs/architecture/system-overview.md (PR #43), then ★merge.
+5. **048:** the classifier blocks agents from editing doctrine. ★A: Ludwig applies the doctrine diff in an
+   interactive session with the manager (text ready in the spec). B: drop 048's doctrine half and keep only the
+   agent-frontmatter half.
+6. **Token-guard text (Q-T):** rule 0 says "for a specific moment", while Ludwig's lift was open-ended. Covered by 048.
+7. **SSRF policy for 008b:** ★clone in a job that holds no signing secret.
+
+### Process notes from the night (precedents)
+- Every implementation got an independent review in blind order. Blocking findings were caught on 053 (.pyc),
+  052 (guard fail-open, then a log paste taken before the last commit), 056 (rule-9 tags, twice; §3.4
+  escalation used once, then passed) and 032 (prefix-only pins).
+- The manager re-ran every verify script in a fresh clone before merge. It caught 052's red HEAD behind a green
+  paste.
+- One permission denial (048) was treated as an answer, not an obstacle.
+
+### Next steps
+After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and the final demo. Parallel: 058 live, 049 after 048.
