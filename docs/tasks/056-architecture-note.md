@@ -189,3 +189,29 @@ The note, the link line, the verify script, this file's log section current; a l
 # Task 056 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Q-D, Q-E, Q-G folded in from Ludwig's answers; Q1 closed; Q2 remains open.
+- 2026-10-15 doc-writer: first version written. Files: `docs/architecture/system-overview.md` (new), one "See also" line in `docs/architecture/depgraph.md`, `docs/tasks/056-verify.sh` (new, executable). Q2 assumed A (the section, not a separate file). No credentials touched; no `gh secret`; no file outside declared scope.
+- Findings reported in the note's "State of this document": (1) `depgraph.json` lacks E16 (Q3 stays open, not assumed); (2) E15's contract `contracts/pipeline-trigger.md` does not exist on registry `origin/main` (the graph names it; the verify script's citation check caught it when first cited as a path); (3) `append-only.rules.md` examples use `cdn.worldofmodcraft.org` while the domain is `.com`; (4) the `source_archive` lock-in finding, stated `specified`, not built, 058 unreported.
+- Observed 2026-10-15: `https://github.com/worldofmodcraft/archive` -> 404 (N6 `specified`); registry/site/platform -> 200; the unauthenticated API call for the archive repo was rate-limited (403) and was not used.
+- Verify script development: first runs failed on real defects (unverified count 0 vs 12; the E15 path), and one control was weak ("cite zero paths" left a branch-form path); fixed, re-run.
+- [script] result, fresh clone (`git clone -b task/056-architecture-note` of commit 92c4881 into an empty directory, `./docs/tasks/056-verify.sh`), rc=0. Head and tail as printed:
+```
+== main run: /tmp/fc056/c/docs/architecture/system-overview.md
+info: nodes=['N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8'] edges=15 md-only=['E16']
+info: tagged rows=63 unverified-in-body=12
+info: distinct cited paths=32
+PASS  all checks on the real note
+== mutation and positive controls (each must be CAUGHT, naming what we broke)
+PASS  control 'remove row E7' caught: FAIL [2] id E7 has no table row in the note
+PASS  control 'remove row N6' caught: FAIL [2] id N6 has no table row in the note
+...
+PASS  control 'drop 'phase 1.5'' caught: FAIL [6] 'phase 1.5' absent from note
+PASS  control 'secret header' caught: FAIL [7] line 289: minisign secret-key header
+PASS  control 'key path' caught: FAIL [7] line 289: private key path
+PASS  control 'token' caught: FAIL [7] line 289: GitHub token
+PASS  control 'stale review stamp' caught: FAIL [8] last reviewed 2026-01-01 < newest dependency 2026-10-14
+== 20 pass, 0 fail
+```
+  Controls cover criteria 1-8 (row removed E7/N6/E16, heading renamed, tag stripped, wrong count, missing path, zero paths, row on a VPS, job on WSL, job off-runner, forbidden phrases, dropped "phase 1.5", secret header/path/token, stale stamp). The script reads registry/site files from local clones' `origin/main` (`REGISTRY_REPO`, `SITE_REPO`, default `~/registry`, `~/site`) and does not fetch; those clones were last fetched 2026-10-15.
+- [human] criterion 9 (a reviewer reads only the note and answers the five questions): NOT DONE. Needs a full-tools reviewer at the same tier or higher, or Ludwig. Kept apart from the script results.
+- Unverified items and what confirms them (the note carries 12 `[unverified` markers): working secret `MINISIGN_SECRET_KEY` exists (owner or manager with Ludwig's approval, never an agent); offline key backup exists (Ludwig); GitHub App and its secret (Ludwig, step M5); Releases deletion/append-only behaviour (throwaway-repo test); Actions/Pages/org-account failure behaviour (never exercised); release assets not in a git clone (quick test); identical tarball bytes on rebuild (008a verification); the `.org` host ownership (Ludwig); the ADR-0077 mirror runner (the mirror task).
+- Second pass due after 058, 008b, 055, 010 and ADR-0121 acceptance: flip `specified` rows, re-run the script.
