@@ -1,6 +1,6 @@
 # Task 051: A core generator that projects the repository's notes into the Obsidian vault
 
-- **Mission:** tooling (task 047, part C, step 2) — **Status:** review (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 2) — **Status:** in-progress (AC1–AC13 done and reviewed; AC14 human, after merge) (spec-approved by Ludwig, in session, 2026-10-14; spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (≤ 3 agent-sessions). ADR and Journal notes were split out to task 053 to keep this inside budget.
 - **Branch / worktree:** task/051-vault-projection / ~/wt/task-051
@@ -225,3 +225,16 @@ contract is `docs/tools/vault-projection.md`. There are no edges to SITE-V1 node
     `Ran 32 tests in 39.847s`, `OK`, 12 mutants killed, `== 051-verify: ALL CHECKS PASSED`, `clone rc=0`.
     Full output: re-run the command (it is the artefact).
   - Remaining: AC14 (human, after merge). Booked questions Q-1..Q-5 above. Task 053 will extend the same script.
+- 2026-10-14 manager re-runs at a5cb9b4: `bash docs/tasks/051-verify.sh` ended `== 051-verify: ALL CHECKS PASSED` (39 s).
+  `bash docs/tasks/051-verify.sh --mutate` killed every mutant, re-ran the control green each time, and ended
+  `== 051-verify: ALL CHECKS PASSED` (exit 0).
+- 2026-10-14 independent code review (reviewer, blind order: spec + diff before the log): **PASS**, no blocking findings.
+- Manager triage of the booked questions:
+  - **Q-1 accepted.** The spec contradicted AC2; per-note last-touch follows the contract's single-source rule. Spec intent wins (the manager answers per §8b.3a).
+  - **Q-2 non-issue.** `.obsidian/` sits at the vault root, not inside the project folder that `WOM_VAULT` names. A listing of that folder on 2026-10-14 (task 050) showed no `.obsidian`. The reviewer's concern assumed otherwise.
+  - **Q-3 latent.** Both `task/046-*` branches are ancestors of main (verified with `git merge-base --is-ancestor`), so nothing flip-flops today. The tie-break rule is proposed as a 053 amendment, awaiting Ludwig.
+  - **Q-4 and Q-5 accepted.**
+- Reviewer's non-blocking notes 2 and 5 are proposed as 053 amendments, together with Q-3:
+  - Note 2: a symlink or other non-regular file at a planned target name gets past rule 6.
+  - Note 5: in `051-verify.sh`, a grep error in the committed-secret scan reads as "none found".
+- Status: AC1–AC13 demonstrated. AC14 is human and happens after merge, per the spec.
