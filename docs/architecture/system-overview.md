@@ -69,7 +69,7 @@ this document.
 | E7 | N5 to N6: release tag and asset names | GitHub-hosted runner, pipeline upload | `contracts/artifact-naming.md` | `specified` |
 | E8 | N5 to N2: six write-back fields into the entry, through a same-repository pull request (a direct push to `main` is refused by branch protection, `docs/manager/OPERATIONS.md`) | GitHub-hosted runner, pipeline | `contracts/entry.schema.json` | `specified` |
 | E9 | N5 to the signing key: minisign detached signature | GitHub-hosted runner, key read from an Actions secret | `contracts/signature-format.md` | `specified` |
-| E10 | N2 to N7: the site reads entry and page data, fixtures only | GitHub-hosted runner, site build; today against fixtures only | `contracts/entry.schema.json` (obs L10) | `built`  |
+| E10 | N2 to N7: the site reads entry and page data, fixtures only | GitHub-hosted runner, site build; today against fixtures only | `contracts/entry.schema.json` (obs L13) | `built`  |
 | E10 | N2 to N7: the same read, from the real registry (no `mods/` directory exists yet) | GitHub-hosted runner, site build | `contracts/entry.schema.json` | `specified` |
 | E11 | N6 to N7: archive interior (README and screenshots in the tarball), fixture tarballs only | GitHub-hosted runner, site build; today against fixture tarballs, not N6 | `contracts/archive-layout.md` (obs L10) | `built`  |
 | E11 | N6 to N7: the same read, from the archive repository's Releases (N6 does not exist) | GitHub-hosted runner, site build | `contracts/archive-layout.md` | `specified` |
@@ -92,7 +92,7 @@ checked.
 |---|---|---|---|---|
 | Registry entries (`entry.json`) | git, `worldofmodcraft/registry` `main` | the owner's pull request (E2); the pipeline's write-back pull request (E8) | yes by contract (`contracts/append-only.rules.md`); enforced by CI, which is not built | `specified` |
 | Page content (`page.json`) | git, same repository | the owner's pull request (E3) | no, owners edit pages | `specified` |
-| Contracts, `reserved-namespaces.json` | git, same repository | the manager via reviewed pull request; `main` is protected | no, but every change is a reviewed commit (obs L4) | `built`  |
+| Contracts, `reserved-namespaces.json` | git, same repository | the manager via reviewed pull request | no, but every change is a reviewed commit (obs L4) | `built`  |
 | Source tarballs and signatures | GitHub Releases in `worldofmodcraft/archive` | the pipeline, through the organisation-owned GitHub App | intended (names are never reused, `contracts/artifact-naming.md`); Releases themselves are deletable by an organisation owner, so append-only is a convention, not a platform guarantee [unverified — never exercised]. | `specified` |
 | `source_archive` URL | inside each version object in the registry entry | the pipeline write-back, once | yes: `contracts/append-only.rules.md` forbids changing it afterwards | `specified` |
 | The project-owned redirect host that fronts `source_archive` | not chosen; task 058 reports whether GitHub Pages can do it | the owner (DNS and host settings) | no | `specified` |
@@ -106,7 +106,7 @@ checked.
 | DNS records | Cloudflare name servers hold the zone (obs L3); the DNS-only setting is discussed under the runtime table | the owner | no | `built` |
 | Organisation account `worldofmodcraft` (numeric id 324218296, from `docs/architecture/key-management.md`; the page answers, the id was not re-read, obs L7) | GitHub | the owner | no | `built` |
 | Branch protection and repository settings of the three repositories: `main` requires a pull request and refuses a direct push, per `docs/manager/OPERATIONS.md` [unverified — not observed: the unauthenticated API call was rate-limited, L12, and a push test was not run] | GitHub | the owner | no | `specified` |
-| Decisions, task ledger, mission logs | git, `worldofmodcraft/platform` | pull request; `main` is protected | history is kept by git (obs L11) | `built`  |
+| Decisions, task ledger, mission logs | git, `worldofmodcraft/platform` | pull request | history is kept by git (obs L11) | `built`  |
 | Disaster mirror of registry, index and archives | a second host; ADR-0077 | a scheduled job | read-only copy | `not built` |
 
 ## The owner's machines host nothing
@@ -206,7 +206,7 @@ are not.
 | CI and pipeline runtime | none: the workflows are GitHub Actions files | N3, N5 and N7 run only on Actions; recreating them elsewhere is work, not configuration | `site:.github/workflows/deploy.yml`; registry workflows are not built | `specified` |
 | Rebuild trigger E12 | the contract names an event and a payload | `repository_dispatch` is a GitHub Actions feature | `contracts/rebuild-trigger.md` | `specified` |
 | Artifact store | `contracts/artifact-naming.md` names tags and assets, not a URL | GitHub Releases is the store; any object store can hold the same names | `contracts/artifact-naming.md` | `specified` |
-| Site host | `dist/` is plain files plus `CNAME`, so any static host serves it | GitHub Pages is the host; the deploy job uses Pages actions | `contracts/site-output.md`, `site:.github/workflows/deploy.yml` (obs L5) | `built`  |
+| Site host | `dist/` is plain files plus `CNAME`, so any static host serves it | GitHub Pages is the host; the deploy job uses Pages actions | `contracts/site-output.md`, `site:.github/workflows/deploy.yml` (obs L5, L14) | `built`  |
 | Branch protection | none | a setting of the GitHub organisation account; re-created by hand elsewhere | `docs/manager/OPERATIONS.md` [unverified — not observed, L12] | `specified` |
 | GitHub App (decision Q-D) | none | an identity of the GitHub organisation account; re-created on the new forge | decision Q-D; step M5 not done | `specified` |
 | Disaster mirror | ADR-0077: a scheduled push to a second host (Codeberg, GitLab or an S3-compatible bucket) | it is `not built`; the ADR places it in phase 1.5 | ADR-0077 (`docs/decisions/0077-disaster-mirror.md`) | `not built` |
@@ -256,7 +256,7 @@ of these failures has been rehearsed.
 
 ## State of this document
 
-- **Written:** 2026-10-15, by the task 056 doc-writer, first version; fix round 1 the same day re-tagged rows so that `built` means observed (observations L1 to L12 in the task log).
+- **Written:** 2026-10-15, by the task 056 doc-writer, first version; fix round 1 the same day re-tagged rows so that `built` means observed (observations L1 to L14 in the task log).
 - **Date stamp rule:** the "Last reviewed" date is not earlier than the newest spec-approval date of
   the tasks this note depends on (2026-10-14).
 - **Unverified markers in body:** 15

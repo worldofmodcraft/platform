@@ -130,7 +130,14 @@ try: logtxt = open(os.environ["TASKLOG"], encoding="utf-8").read()
 except OSError as e: logtxt = ""; fail(3, f"cannot read task log: {e}")
 defined = set(re.findall(r"^- L(\d+)\b", logtxt, re.M))
 if not defined: fail(3, "task log defines no observations (lines '- L<n> ...')")
+CLAIMS = {"protect": "protect"}  # claim word in a built row -> must appear in each cited observation line, which must not say NOT observed
+obsline = {m.group(1): m.group(2) for m in re.finditer(r"^- L(\d+)\b(.*)$", logtxt, re.M)}
 def built_ok(label, rowtext):
+    for w in CLAIMS:
+        if re.search(w, rowtext, re.I):
+            ids2 = [x for r in re.findall(r"obs ((?:L\d+(?:, )?)+)", rowtext) for x in re.findall(r"L(\d+)", r)]
+            if not any(i in obsline and re.search(CLAIMS[w], obsline[i], re.I) and "NOT observed" not in obsline[i] for i in ids2):
+                fail(3, f"`built` item claims '{w}' but no cited observation shows it: {label}")
     if "[unverified" in rowtext: fail(3, f"`built` item carries an unverified marker: {label}")
     refs = re.findall(r"obs ((?:L\d+(?:, )?)+)", rowtext)
     ids = [x for r in refs for x in re.findall(r"L(\d+)", r)]
@@ -275,6 +282,9 @@ sed 's/phase 1\.5/a later phase/g' "$N" > "$T/m6c.md";                    expect
 # 8: stamp older than the dependency
 sed 's/^- \*\*Last reviewed:\*\* .*/- **Last reviewed:** 2026-01-01/' "$N" > "$T/m8.md"; expect "stale review stamp" "$T/m8.md" "< newest dependency"
 # fix round 1 controls
+# fix round 2 control: re-add the unobserved protection claim to built rows
+sed '/^| Contracts, `reserved-namespaces.json` |/s/reviewed pull request |/reviewed pull request; `main` is protected |/' "$N" > "$T/r2a.md"; expect "re-add 'main is protected' to a built row" "$T/r2a.md" "claims 'protect' but no cited observation shows it: Contracts"
+sed '/^| Decisions, task ledger/s/pull request |/pull request; `main` is protected |/' "$N" > "$T/r2b.md"; expect "re-add 'main is protected' to second built row" "$T/r2b.md" "claims 'protect' but no cited observation shows it: Decisions"
 sed '/^| N3 |/s/`specified` |$/`built` |/' "$N" > "$T/r1a.md";   expect "re-tag specified row N3 as built" "$T/r1a.md" "item cites no observation (obs L<n>): N3"
 sed '/^| N2 |/s/obs L[0-9, L]*/obs L99/' "$N" > "$T/r1b.md";    expect "built row cites undefined observation" "$T/r1b.md" "cites L99, not defined"
 sed '/^| N8 |/s/(obs [^)]*)/[unverified — x]/' "$N" > "$T/r1c.md"; expect "built row with unverified marker" "$T/r1c.md" "unverified marker: N8"
