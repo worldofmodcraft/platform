@@ -1709,3 +1709,4 @@ Lean marked ★. Q1–Q6 are the draft's items 1–6.
   OPERATIONS.md code blocks / C drop the note.
 Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's whole trigger design (Q-C1),
 048 and 049 entirely.
+**Answered 2026-10-14 by Ludwig, in session:** "Allt enligt stjärna, godkänner spec 050". Every item above = ★.

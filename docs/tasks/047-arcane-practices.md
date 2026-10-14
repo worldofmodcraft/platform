@@ -60,3 +60,10 @@ Q-T, Q-P, Q-C1, Q-C2.
 - 2026-10-14 manager: read the draft, the reference folder and the vault guide §9; checked the draft's
   claims against repo and vault (findings above). Split into 048–052. Spec gate run on 050, 051 and 052;
   048 and 049 stay draft until Q1–Q6 are answered.
+- 2026-10-14 Ludwig, in session: "Allt enligt stjärna, godkänner spec 050". Q1–Q6, Q-T, Q-P, Q-C1 and
+  Q-C2 are all answered ★ as listed in the mission log's "For Ludwig — task 047". Spec 050 approved.
+  Manager note for Q-C1: checked in a temp repo, `git fetch origin main:main` does not fire `post-merge`
+  (`git pull` does). So under ★A the manager step is the trigger that updates main's notes, and the
+  hook covers Ludwig's own pulls.
+- 2026-10-14 independent spec review of 051/052: NOT PASS, 11 findings. Revision pending; the reworked
+  051 text was not saved.
