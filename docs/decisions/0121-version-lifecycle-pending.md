@@ -1,10 +1,10 @@
 # ADR-0121: Version lifecycle — a `pending` state, a one-time pipeline write-back, and a post-merge build
 
-- **Status:** Proposed (awaiting Ludwig; not law until he accepts it)
+- **Status:** Accepted (Ludwig, in session, 2026-10-15: "Stjärna på allt")
 - **Date:** 2026-10-14 · **Area:** Registry / Build pipeline
 - **Touches:** registry, registry/ci, build-pipeline, launcher/resolution
 - **Related:** ADR-0039, ADR-0040, ADR-0041, ADR-0058, ADR-0119; task 057 (the contract change this unblocks)
-- **Will amend on acceptance:** ADR-0041, ADR-0058 (deliberately not in an `Amends:` header yet: the generator requires matching `Amended by` lines in the targets, and a proposal must not edit accepted ADRs. The accepting commit converts this line to `Amends:` and adds both back-references.)
+- **Amends:** ADR-0041 (status list; immutability gains one pipeline write-back), ADR-0058 §1 (build after merge, write-back PR, rejections)
 
 ## Context
 ADR-0041 says versions are immutable and lists the statuses. ADR-0058 §1 describes one flow in
@@ -85,7 +85,7 @@ legal) belong to `append-only.rules.md`; who may carry T1/T3 (the pipeline ident
 reject every T1 or T3 mutation whoever authors it (fail closed).
 
 ### Q-L — newly appended versions may only be `pending`
-**Proposed, awaiting Ludwig.** Manager's lean: yes. A newly appended element must be `pending` with
+**Accepted by Ludwig, 2026-10-15** (the manager's lean, as proposed): yes. A newly appended element must be `pending` with
 exactly four keys. Today an author PR may append a version already `published` or already
 `removed`; under Q-B that would let an author write their own hashes and skip the pipeline, so
 shape-level rejection of born-published and born-removed is the safe default. There are no registry
@@ -93,7 +93,7 @@ entries to migrate (task 057 spec, checked 2026-10-14). If Ludwig answers no, bo
 versions remain shape-legal and only the ownership layer stops forgery.
 
 ### Q-J — a version whose build is rejected
-**Proposed, awaiting Ludwig.** Manager's lean: a third transition `pending → rejected`. The pipeline's
+**Accepted by Ludwig, 2026-10-15** (the manager's lean, as proposed): a third transition `pending → rejected`. The pipeline's
 PR sets `status: "rejected"` and adds `reason` (non-empty after trimming) and `build_log_url` (a link
 to the full build log). The version is never deleted and its version string stays occupied; the
 author fixes the problem and publishes a new version. `rejected` is terminal, and a `rejected`
