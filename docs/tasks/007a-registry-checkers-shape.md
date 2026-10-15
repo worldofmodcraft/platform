@@ -24,8 +24,8 @@ under `tests/registry/` and `docs/tasks/007a-verify.sh`:
    `contracts/append-only.rules.md` as merged by task 057: file-level existence states, rules 1–5,
    the four-state shape table, born-`pending` only, T1/T2/T3 and their coexistence, ordering,
    remove-and-re-add, malformed edits. Its verdict **classifies each changed element** (unchanged /
-   appended / T1 / T2 / T3 / violation with rule id), because 007b's fail-closed rule consumes that
-   classification. It does **not** decide authority: a T1 or T3 is shape-legal here. **Its verdict
+   appended / T1 / T2 / T3 / violation with the **list** of rule ids it breaks, e.g. `["rule 2", "rule 4"]`),
+   because 007b's R11 decision consumes that classification (007b's fail-closed key deliberately does not). It does **not** decide authority: a T1 or T3 is shape-legal here. **Its verdict
    therefore carries `authority_required`**, the list of transitions present that need an authority
    decision (`["T1"]`, `["T3"]`, `["T2"]`, or combinations), and the CLI documents that an `accepted`
    exit from `append_only` alone is never a merge signal when that list is non-empty (task 039 must

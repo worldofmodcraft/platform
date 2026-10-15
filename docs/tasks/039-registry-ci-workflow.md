@@ -1,10 +1,10 @@
 # Task 039: The registry CI workflow — the checkers wired onto real pull requests
 
 - **Mission:** SITE-V1, deliverable **D1** (the other half of the CI section) — **Status:** **draft**
+  (manager, 2026-09-06). **Not spec-approved; not dispatchable.**
 - **Note (2026-10-15, session 9):** task 007 is now an umbrella split into **007a** (shape checkers) and
   **007b** (ownership checker). Every reference below to "task 007" or "the four checkers" means both;
   this task depends on 007a **and** 007b being merged. The spec text below is otherwise unrevised.
-  (manager, 2026-09-06). **Not spec-approved; not dispatchable.**
 - **Agent / model:** to be decided at spec time (implementer / sonnet, expected)
 - **Budget:** medium (≤ 3 agent-sessions), to be confirmed when the spec is written
 - **Branch / worktree:** to be created in the **registry** repo
