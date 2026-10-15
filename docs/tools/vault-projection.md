@@ -41,6 +41,7 @@ updated: <committer date of source_commit, ISO 8601>
 | `Tasks/NNN.md` | only for ids owned by main: id, title, status word, task file path |
 | `Decisions.md` | `docs/decisions/INDEX.json`: one row per ADR with id, title and a `[[ADR/<file stem>]]` link; `source_commit` is the last commit touching INDEX.json |
 | `ADR/<file>.md` | `docs/decisions/NNNN-*.md`, body verbatim under the generated frontmatter; `source_commit` is the last commit touching that file |
+| `Runbooks/<stem>.md` | every `docs/runbooks/<stem>.md` on the ref (top level only, stem `[A-Za-z0-9][A-Za-z0-9._-]*`), body verbatim under the generated frontmatter; `source_commit` is the last commit touching that file; `Status.md` gains one `Runbooks: [[Runbooks/<stem>]], ...` line before its open-tasks table |
 | `Journal/YYYY-MM-DD.md` | every commit reachable from the ref, merges included, grouped by committer date in `Europe/Stockholm` (`zoneinfo`); one line per commit, newest first: 7-character sha, subject; `source_commit` is the newest commit of that day |
 
 **Decisions and journal (task 053).** ADRs carry no YAML frontmatter. An ADR whose text starts with `---`
@@ -52,6 +53,13 @@ INDEX.json are an error. Each Journal day is re-rendered on every run and writte
 new commit rewrites only its own day. The first live run writes about 130 notes in one LiveSync burst (accepted
 as a one-off); later runs write only what changed. Commit subjects and ADR text go through the secret scan like
 every other note.
+
+**Runbooks (task 061).** Task 053's rules A1-A3 apply unchanged. Like an ADR, a runbook whose text starts with `---`
+(after an optional BOM) fails validation (nothing written), a runbook that is not a regular file in git, has an
+unaccepted name or carries a forbidden hand-written note's name is an error, and the secret scan covers the notes.
+A ref with no `docs/runbooks/` writes no `Runbooks/` notes, creates no `Runbooks/` folder and `Status.md` has no
+`Runbooks:` line. Non-`.md` files and subdirectories of `docs/runbooks/` are not runbooks. `check` ignores
+`Runbooks/<stem>.md` like the other planned names. Verified by `docs/tasks/061-verify.sh [--mutate]`.
 
 Headings inside code fences are not section boundaries. A missing source file, or a mission log with no
 `## SESSION` heading, is an error (nothing written), never an empty note.
@@ -108,7 +116,7 @@ on a branch already merged into main, or with `--note` naming any other note: no
 ### Subcommand `check` (stat only)
 `check --save-baseline FILE` records (size, `mtime_ns`) via `stat` for every file under `WOM_VAULT` whose
 path is not a planned generated name (`Status.md`, `Tasks.md`, `Gotchas.md`, `Commands.md`, `Mission
-Log.md`, `Tasks/NNN.md`, `Decisions.md`, `ADR/NNNN-*.md`, `Journal/YYYY-MM-DD.md`). `check --baseline FILE` reports every changed, added or removed entry and exits
+Log.md`, `Tasks/NNN.md`, `Decisions.md`, `ADR/NNNN-*.md`, `Runbooks/<stem>.md`, `Journal/YYYY-MM-DD.md`). `check --baseline FILE` reports every changed, added or removed entry and exits
 non-zero on a difference. It never opens a file in the vault. Note: `.obsidian/` is included, and
 Obsidian rewrites files there while it runs; see the open question in task 051.
 
@@ -126,6 +134,7 @@ python3 -I tools/vault/wom_vault.py check --baseline "$HOME/wom-vault-baseline.j
 python3 -I tools/vault/wom_vault.py write --ref HEAD      # inside a task/NNN-* worktree
 docs/tasks/051-verify.sh [--mutate]                       # self-test, temp dirs only
 docs/tasks/053-verify.sh [--mutate]                       # 053 additions, A1-A3; re-runs 051-verify.sh
+docs/tasks/061-verify.sh [--mutate]                       # runbook notes; re-runs 051, 053 and 052 verifiers
 ```
 Exit status 0 means success; 1 means a refusal (reason on stderr, nothing written); 2 is a usage error.
 

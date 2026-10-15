@@ -1,6 +1,6 @@
 # Task 061: Runbooks in the vault projection
 
-- **Mission:** tooling (vault projection, follow-up to 051/053) — **Status:** spec-approved (Ludwig chose option A in session 2026-10-15: "A lägg till den (i projektet Projekt World of Modcraft)"; manager gate, small)
+- **Mission:** tooling (vault projection, follow-up to 051/053) — **Status:** review (Ludwig chose option A in session 2026-10-15: "A lägg till den (i projektet Projekt World of Modcraft)"; manager gate, small)
 - **Agent / model:** implementer / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/061-vault-runbooks / ~/wt/task-061, **stacked on task/052-vault-triggers**: both touch
@@ -35,3 +35,12 @@ table row), `docs/tasks/061-verify.sh`, and this file's log. No `.pyc` files.
 
 ## Forbidden here
 Anything against the real vault or `~/.config/wom` before criterion 9. Credentials. Weakening any existing check.
+
+## Task 061 log
+- Fixtures first: `tools/vault/tests/test_vault_061.py` (13 tests) was run against the unchanged tool and failed
+  with 19 failures (commit "fixtures first"). Then `render_runbooks` was added to `wom_vault.py`.
+- `Runbooks:` line is omitted when there are no runbooks (AC6). Runbook names outside `[A-Za-z0-9][A-Za-z0-9._-]*`,
+  forbidden names and non-regular git modes are errors, not silent skips.
+- Verification tails: see the final report / `docs/tasks/061-verify.sh` output.
+- `tools/adr/__pycache__/*.pyc` are tracked on the base branch (outside this task's scope); the bytecode check in
+  `061-verify.sh` covers `tools/vault` only, like 052's. Reported to the manager.
