@@ -305,3 +305,10 @@ is the trigger that updates the vault. Fetching into a branch checked out in som
 ### `~/wom` was left on a task branch, so new sessions read stale doctrine
 Until session 8's handover, the main checkout sat on `task/046-start-here`, so a fresh session loaded old CLAUDE.md and
 `.claude/`. Keep `~/wom` on `main` (untracked inbox files are harmless) and do task work in worktrees.
+
+### Two green registry PRs can make main red together (session 9, 2026-10-15)
+Registry PR #9 (062) and PR #10 (007a) were each green on their own branch; merged one after the other, `main` failed
+`032-verify.sh` N5b, a text pin on a README sentence that 007a was required to rewrite. Neither branch ran the other's
+change. **Before merging a registry PR, run every closed task's verify script against the merge result**, not only the
+branch: once 062 is on `main`, that is `docs/tasks/062-verify.sh /tmp/fc041/node_modules` (ajv path until task 066) on the
+PR branch rebased or merged onto current `main`, in a fresh clone. After a merge, run it again on `main`. Fixed by task 067.

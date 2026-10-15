@@ -1886,3 +1886,11 @@ After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secre
   (A) the pipeline App's bot, (B) a dedicated takedown-only account or App that only Ludwig controls, (C) `womcraft`.
   Manager lean ★B when 039/008b go live: C is the account manager sessions act as, and A would let the publishing
   automation also remove. Until then `r11_identity = None` and every takedown is rejected (fail closed).
+
+### After the merges (session 9)
+- Merged with Ludwig's approval: registry #9 (062), #10 (007a); platform #55 (063), #56 (session 9). #56 conflicted with #55
+  (both added the 063 task file); resolved by taking main's version, which holds the full log.
+- Post-merge check on registry `main` (`3c94cf2`, fresh clone): `007a-verify.sh` green; `062-verify.sh` **red, 3 checks**, all
+  `032-verify.sh` N5b — a text pin on the README sentence 007a rewrote (its criterion 12). Combination effect of two
+  individually green PRs. Booked and dispatched as task 067 (re-pin N5b); gotcha recorded in OPERATIONS.md.
+- `tools/vault/refresh-main.sh` run after the merges: written=12, id_conflicts=0.
