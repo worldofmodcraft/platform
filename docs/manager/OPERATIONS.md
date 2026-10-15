@@ -286,3 +286,22 @@ commands are in `docs/tools/git-guard.md`, "Recovery".
 then `tools/manager/check-log-entry.sh check docs/tasks/NNN-slug.md BASELINE` after the report-back. Exit 0 = a new
 entry with a valid, not-future date; 1 = no new dated entry (the run is not accepted); 2 = usage error, unreadable file
 or no log section. A dated entry is a line `- YYYY-MM-DD ...` after the `# Task NNN log` heading.
+
+## Four things session 8 paid for (2026-10-14/15)
+
+### A verify paste taken before the last commit is not evidence
+Task 052's fix round pasted a green `--mutate` tail, but HEAD was red: the round's last commit added a `.pyc`.
+The manager's fresh-clone re-run caught it. Briefs now say: run in a fresh clone at the FINAL HEAD, after the last commit.
+
+### The auto-mode classifier denies agents' edits to doctrine files
+Agent batches editing CLAUDE.md, MANAGER.md and the checklists were denied as "Instruction Poisoning" (task 048).
+The denial is an answer: no retry, no workaround, no permission change. Doctrine text is written by the manager in an
+interactive session with Ludwig present, and agents write the verify scripts.
+
+### `git fetch origin main:main` fires no post-merge hook
+Proved in a temp repo (task 050/052). `git pull` does. After `gh pr merge`, the manager's `tools/vault/refresh-main.sh`
+is the trigger that updates the vault. Fetching into a branch checked out in some worktree is refused.
+
+### `~/wom` was left on a task branch, so new sessions read stale doctrine
+Until session 8's handover, the main checkout sat on `task/046-start-here`, so a fresh session loaded old CLAUDE.md and
+`.claude/`. Keep `~/wom` on `main` (untracked inbox files are harmless) and do task work in worktrees.
