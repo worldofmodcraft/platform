@@ -1,6 +1,6 @@
 # Task 049: Mechanical enforcement of the git rules WoM already has (bash PreToolUse hook) and the per-subagent log-entry check
 
-- **Mission:** tooling (task 047, part B, plus Q6) — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
+- **Mission:** tooling (task 047, part B, plus Q6) — **Status:** review (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (two small scripts, a fixture set, a verify script with mutations)
 - **Branch / worktree:** task/049-safety-hooks / ~/wt/task-049
@@ -309,3 +309,50 @@ the docs, AC9's evidence once the live check is run, the log current.
 # Task 049 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 manager: spec finalised from the drafts, task 047, task 052 and the Arcane `block-destructive.ps1`
   reference. Q1 ★B and Q6 ★B are Ludwig's answers. Not started; waits for 052 and 048 merged and the spec gate.
+- 2026-10-15 implementer: built in worktree ~/wt/task-049 (from main with 048 and 052 merged). Not pushed. Ludwig lifted
+  the token guard for this run. Nothing was activated for a live session; the hooks were only fed JSON fixtures.
+- 2026-10-15 implementer: section 2c red stage, commit 53eda90. Fixtures (`049-fixtures/cases.jsonl`, 106 JSON cases, plus
+  wrapper, log, wiring and `check-log-entry.sh` checks in `run_suite.py`) were written first against allow-everything
+  stubs (`exit 0`). Result against the stubs: `TOTAL 151 checks, 109 red`; the positive controls were the 42 green ones.
+  RED-GROUPS were: AC1-*, AC1b-* (all 31), AC3-*, AC4-* (blocking ones), AC5-*, AC6-*, AC7-* ... (full list in the commit's
+  first run; every block-expecting group was red).
+- 2026-10-15 implementer: implemented `git-guard.sh`, `git_guard.py`, `check-log-entry.sh`, wired `.claude/settings.json`
+  (one PreToolUse entry, matcher `Bash`; the permission system allowed the edit), wrote `docs/tools/git-guard.md` and the
+  OPERATIONS.md section. Commit a0fe6ec. First full run was green (151 checks, 0 red).
+- 2026-10-15 implementer: mutation run found five survivors on the first pass and each was a real defect in the
+  suite, fixed before the table was frozen: (1) `rm-long` survived because `--force` contains an `r`, so the cluster
+  branch caught it: the cluster branch now excludes `--` options; (2) `no-command` survived because a crash on `None`
+  also exits 2 (correct behaviour, so the mutation now makes the missing command an allow); (3) AC7 future-date fixture
+  used the year 2999, which the spec's dated-line regex `20[0-9]{2}` never matches, so it passed for the wrong reason:
+  fixture now 2099; (4) `undated` was redundantly caught by the date-validity test: the last date is now read only
+  from a strictly dated line, so the two checks are independent; (5) `no-section` was caught twice by two die lines.
+- 2026-10-15 implementer: DEVIATIONS from the spec text, each for a stated reason (none changes a rule):
+  (a) AC8 says "exactly the named group goes red". For core-rule mutations that is impossible by construction, because the
+  bypass fixtures (`env`, `sudo`, `bash -c`, ...) are the same command in a disguise: deleting the `--force` clause
+  reddens every group whose fixture is a force push. The table pins the exact observed set, reviewed one by one; it is
+  explained in `docs/tools/git-guard.md`, "Verification". (b) AC8's "delete the hook file after wiring" was replaced by
+  "settings points at a missing file" (deleting the file reddens every group, which proves nothing about wiring).
+  (c) AC8 "missing .py treated as allow" reddens AC5-wrapper-missing only (python3 exits 2 on a missing file anyway, so the
+  mutation changes the wrapper's own `exit 2` to `exit 0`); the wrapper pass-through mutation reddens crash, traceback and
+  signal only, the three pre-checks (missing, non-executable, no python3) have their own mutations. (d) AC1b `-c k=v` also
+  reddens `alias-c`, because that fixture needs the skip. (e) The non-executable-file wrapper case needs an explicit
+  `[ -x ]` check (python3 would run a 0644 script happily), so the wrapper has one. (f) Added beyond the spec: `nice`,
+  `--git-dir <space>`, `-Rf`, `-fu`, `--force-if-includes`, `branch -vD`, `echo "$(...)"`, an indented `<<-` heredoc, a
+  same-line `# ... ; rm -rf x` comment, a vault config that is present but unreadable (agents' Bash is refused, fail
+  closed, the stance of 052), `nice`, and a LOG-lines check that every fixture's decision left a block/allow line.
+- 2026-10-15 implementer: evidence at commit a0fe6ec, from a FRESH CLONE (`git clone` of the worktree, `checkout a0fe6ec`),
+  `docs/tasks/049-verify.sh --mutate`, rc=0, 241 ok lines, 0 FAIL. Tails:
+  `TOTAL 151 checks, 0 red` / `RED-GROUPS: ` (empty) / `== AC8: mutation run ...` / `ok: mutant validdate killed -> AC7-baddate` /
+  `ok: mutant no-section killed -> AC7-no-section` / `ok: mutant missing-file killed -> AC7-missing-file` /
+  `== 75 mutations, 0 problems` / `== 049-verify: ALL CHECKS PASSED`. The tree at the final HEAD differs from a0fe6ec
+  only in this file; the final-HEAD fresh-clone run is repeated and reported in the hand-off message.
+- 2026-10-15 implementer: AC status. AC1, AC1b, AC2, AC2b, AC3, AC4, AC5, AC6, AC7 and AC10: script-verified (group names
+  `AC1-*` ... `AC7-*` in the run). AC8: `--mutate`, 75 mutants all killed with their expected sets. **AC9 is NOT
+  script-verified**: it needs a fresh session after merge (Ludwig + manager); it settles the unverified assumption (a),
+  that `agent_type` is absent in the main session. Unverified (b), that the hook inherits `WOM_VAULT`, is not relied on.
+- 2026-10-15 implementer: OPEN ITEMS for the manager. (1) MANAGER.md section 5 still says `check-log-entry.sh` "does not exist
+  until 049 merges"; editing MANAGER.md is outside this task's scope (Forbidden here), so the manager updates that sentence
+  after merge. (2) The two Questions stay open (agent_type absent: closed by AC9; merge/cherry-pick/revert on main: left as a
+  documented gap). (3) During testing a harness safety check refused a command of mine that contained a `rm -r "$HOME"` in a
+  compound line; it did not run, I did not retry it, and I removed nothing outside `mktemp` directories I created.
+  (4) Ludwig approves the merge (section 7: command-security control).
