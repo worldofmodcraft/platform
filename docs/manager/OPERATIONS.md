@@ -272,3 +272,17 @@ locally, so after each `gh pr merge` (as its own bare command) and at handover t
 `git fetch origin main:main`), re-pins the tool copy and runs `write --ref main`. The hooks and this script run a
 **pinned copy** of `wom_vault.py` in the git common dir; if a hook prints `pinned copy is stale; run refresh-main.sh`,
 run it. Details: `docs/tools/vault-projection.md`, "Triggers and guard".
+
+### git-guard.log and check-log-entry.sh (task 049)
+`.claude/hooks/git-guard.sh` (contract: `docs/tools/git-guard.md`) refuses force pushes, `git reset --hard`, `rm -rf`,
+commits on main, an agent's `git branch -D`, and an agent's Bash command that mentions the vault. **Reading its log:**
+`~/.config/wom/git-guard.log` holds `TIMESTAMP RULE DECISION AGENT` lines. `grep ' block ' ~/.config/wom/git-guard.log |
+tail` shows the recent refusals and who triggered them (`main` or an `agent_type`); `grep -c ' allow '` counts allows;
+`vault-unconfigured` lines mean rule 6 was skipped because no vault is configured. If Bash is unusable, the recovery
+commands are in `docs/tools/git-guard.md`, "Recovery".
+
+**After every subagent run** the manager checks that the task log gained a dated entry (Q6, no handover file):
+`tools/manager/check-log-entry.sh count docs/tasks/NNN-slug.md` before delegating (write the number in the task log),
+then `tools/manager/check-log-entry.sh check docs/tasks/NNN-slug.md BASELINE` after the report-back. Exit 0 = a new
+entry with a valid, not-future date; 1 = no new dated entry (the run is not accepted); 2 = usage error, unreadable file
+or no log section. A dated entry is a line `- YYYY-MM-DD ...` after the `# Task NNN log` heading.

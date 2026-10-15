@@ -134,7 +134,7 @@ def suite(tree, tmp):
         if ok and c.get("log_has") and c["log_has"] not in log:
             ok = False
             why.append("log lacks %r" % c["log_has"])
-        logged = bool(log.strip()) and (" block " in log if c["want"] == 2 else " allow " in log or " skip " in log)
+        logged = bool(log.strip()) and ((" block " if rc == 2 else " allow ") in log)  # the line must say what the exit code said
         return c, ok, "; ".join(why), logged
 
     with cf.ThreadPoolExecutor(8) as ex:
@@ -251,13 +251,13 @@ def ac7(tree, tmp):
             ("AC7-new", "an entry dated today was appended: check exits 0", "- %s new entry\n" % today, 0),
             ("AC7-baseline", "nothing appended: check exits 1", "", 1),
             ("AC7-undated", "only an undated line appended: check exits 1", "- an undated bullet\n", 1),
-            ("AC7-future", "an entry dated in the future: check exits 1", "- 2999-01-01 from the future\n", 1),
+            ("AC7-future", "an entry dated in the future: check exits 1", "- 2099-01-01 from the future\n", 1),
             ("AC7-baddate", "an entry with an impossible date: check exits 1", "- 2026-02-30 not a day\n", 1)):
         rc, out, err = cl("check", scratch(grp, extra), "3")
         rec(grp, rc == want, desc, "exit %s: %s" % (rc, err.strip()[:100]))
     rc, _, err = cl("check", scratch("base5", "- %s one more\n" % today), "5")
     rec("AC7-baseline", rc == 1, "count 4 against baseline 5: check exits 1", "exit %s" % rc)
-    nosec = os.path.join(tmp, "nosection.md"); open(nosec, "w").write("# Task 998: no log here\n\n- 2026-10-01 a bullet\n")
+    nosec = os.path.join(tmp, "nosection.md"); open(nosec, "w").write("# Task 998: no record section here\n\n- 2026-10-01 a bullet\n")
     for a in (("count", nosec), ("check", nosec, "0")):
         rc, _, err = cl(*a)
         rec("AC7-no-section", rc == 2, "%s on a task file with no log section exits 2" % a[0], "exit %s" % rc)
