@@ -12,6 +12,10 @@ a final `"\n"`. Found by task 007a's independent review (finding F1, 2026-10-15)
 Task 007a closes the hole inside its own checkers; this task fixes the shared root, which the 006 and 057 contract
 suites also rely on.
 
+**Same class, also in scope (007a delta review N1, 2026-10-15):** Python's `\d` in `str` patterns matches Unicode
+digits, ECMA's does not; `published_at = "２０２６-10-15T09:00:00Z"` (fullwidth digits) passes today. Compile pattern
+checks with `re.ASCII`, in `schema_check.py` and in 007a's strict check (`tools/registry/schema.py`, after 007a merges).
+
 ## Acceptance criteria (to be completed at the spec gate)
 1. Red first: a fixture per affected contract pattern with a trailing `"\n"`, shown accepted by the current validator.
 2. Fixed validator rejects them; unanchored patterns keep search semantics; all existing contract suites stay green.
