@@ -1894,3 +1894,16 @@ After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secre
   `032-verify.sh` N5b — a text pin on the README sentence 007a rewrote (its criterion 12). Combination effect of two
   individually green PRs. Booked and dispatched as task 067 (re-pin N5b); gotcha recorded in OPERATIONS.md.
 - `tools/vault/refresh-main.sh` run after the merges: written=12, id_conflicts=0.
+- **067** merged (registry PR #11, manager authority: reviewed test change). Registry `main` at `ac22c8f`, fresh clone:
+  `062-verify.sh` ALL CHECKS PASSED, `007a-verify.sh` failed=0, `032-verify.sh` ALL CHECKS PASSED. Main is green again.
+- Worktrees of merged tasks removed (062, 007a, 067, 063). Task files are not yet moved to `docs/tasks/done/` (next session).
+
+### Next session starts here
+1. **007b** (spec-approved; 007a is merged): create `~/wt/registry-task-007b`, dispatch implementer, independent review,
+   merge needs Ludwig (security-relevant CI). Before merging: run `062-verify.sh` on the PR branch merged onto `main`
+   (OPERATIONS.md gotcha, session 9).
+2. Spec gates for **064**, **065**, **066** (drafts); then 039 after 007b.
+3. Runbook markers (M3 secret, M5, M7 done; M6 open) as a small docs task; move done task files to `docs/tasks/done/`.
+4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
+
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-15 (session 9) i missionsloggen och fortsätt med 'Next session starts here'."
