@@ -36,7 +36,7 @@ first implementation task, the manager draws its dependency graph (nodes = compo
 boundary edge names its contract — ADR-0117); specs identify their nodes/edges, ordering is
 derived topologically, and parallelism from disjoint subgraphs.
 
-**Size (task 048; Ludwig's decision Q4, 2026-10-14).** A task is within the soft cap at most 5 source
+**Size (task 048; Ludwig's decision Q4, 2026-10-14).** A task is within the soft cap if it has at most 5 source
 files, at most 300 changed lines and at most 10 files in its reading list. Tests, fixtures and `NNN-verify.sh`
 scripts are excluded from the counts; documentation is excluded from the file and line counts. Exceeding a number
 needs a written justification under a `Size` heading in the task file at the spec gate (SPEC-CHECKLIST item 5b).
@@ -134,10 +134,10 @@ manager session side by side, all under this same doctrine — never an intermed
 or between them. A new layer is added only when it produces something no existing layer can
 produce; coordination and summarisation do not qualify.
 
-**Nesting is off by configuration** (task 048; Ludwig's decision Q2, 2026-10-14). `.claude/settings.json` sets
+**Nesting is configured off** (task 048; Ludwig's decision Q2, 2026-10-14). `.claude/settings.json` sets
 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` and every agent definition carries `disallowedTools: Agent`, so "one
-manager, flat roster" is enforced rather than described. (Verified 2026-10-14 against the official Claude Code docs:
-the variable exists from v2.1.217 and defaults to 3; installed version 2.1.300.) A mission that needs a second
+manager, flat roster" is configured rather than only described (live proof: task 048 AC9). (Source: https://code.claude.com/docs/en/env-vars.md, read 2026-10-14 by a claude-code-guide agent:
+the variable exists from v2.1.217 and defaults to 3. Installed version 2.1.300 per `claude --version`, 2026-10-15.) A mission that needs a second
 manager starts a second session.
 
 ## 4. Delegation and model routing

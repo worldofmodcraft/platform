@@ -23,7 +23,7 @@ Rules:
 5. Cost visibility: HUD/statusline per-agent token counts; `/usage` for session totals. Anomalies (an agent burning far beyond its task size) are a stop-and-look signal, not background noise.
 
 ## Turn caps and nesting (task 048; Ludwig's decisions Q2 and Q5, 2026-10-14)
-Nesting is off: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` in `.claude/settings.json` and `disallowedTools: Agent`
+Nesting is configured off (live proof: task 048 AC9): `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` in `.claude/settings.json` and `disallowedTools: Agent`
 in every agent definition. Each agent has a `maxTurns` cap; reaching it is a budget stop (MANAGER.md §8).
 The numbers are estimates, not measurements; revise them from observed runs.
 

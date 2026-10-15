@@ -280,3 +280,15 @@ ok   mutation 'drop blind-review phrase (checklist)' -> red: FAIL c7: REVIEW-CHE
 == mutations: all reddened
 == AC8, AC9 (live) and AC11 (human) are not covered by this script
 ```
+- 2026-10-15 manager, after review round 1 (3 blocking findings):
+  - (1) "Nesting is off" in MANAGER §3b and ROUTING is reworded to "configured off", pending AC9's live proof.
+  - (2) **AC8 evidence, collected AFTER the agent files were edited** (an order deviation, stated plainly): in
+    this manager session (Claude Code 2.1.300, `claude --version` → `2.1.300 (Claude Code)`), the subagent tool
+    available to the manager is named **`Agent`**, which the session's own tool list shows. The sub-agents doc
+    agrees: "In version 2.1.63, the Task tool was renamed to Agent." So `disallowedTools: Agent` names the real
+    tool. The edit order does not change the result.
+  - (3) Scope: commit 93e84c1 carries the **spec-approved** 048 and 049 task files onto this branch, replacing their
+    drafts on main. That is ledger maintenance by the manager (task files travel with the work), not task output.
+    Ludwig can ask for it to be split out.
+  - Non-blocking: the §2b grammar is fixed, and sources are added for the version facts.
+  - Doctrine files still show 0 deleted lines vs main.
