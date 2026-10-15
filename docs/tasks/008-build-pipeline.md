@@ -27,7 +27,7 @@ approved.
   the pure functions that depend on contracts not yet written — `apply_write_back` (the
   `pending → published` shape, task 057), `source_archive_url` (task 058's report), and the write-back
   view of the result. Offline, fixture-driven, like 008a.
-Dependencies: 008c needs 008a, 057 and 058; 008b needs 008a and 008c. **008a needs neither 057 nor 058.**
+Dependencies: 008c needs 008a, 057 and 058; 008b needs 008a and 008c. **008a needs neither 057 nor 058** (008a is merged, registry PR #7, 2026-10-15; 032 and 045 are merged; 057 is spec gate-ready).
 No two of them overlap in files.
 
 ## Graph (ADR-0117)
@@ -197,10 +197,9 @@ This file, kept current as the sub-tasks land.
   and is the offline backup done?** The mission log says M3 was completed 2026-09-05; no agent may
   check (CLAUDE.md rule 11; `gh secret` forbidden). Ludwig answers by looking at the secrets page
   himself. Blocks 008b's live criteria 6 and 10, not its script criteria.
-- **Q-J (open; design hole, inherited from 008b): what removes a rejected pending version?** Append-only
-  forbids deletion, and Q-B means a pending version sits on `main`. See 008b "Questions" for options
-  A/B/C (lean ★C: PR-time dry build, so rejections never reach `main`). Also touches 057, which
-  deliberately adds no `rejected` state.
+- **Q-J (decided, ADR-0121, Ludwig 2026-10-15): a rejected pending version** becomes `rejected` through a
+  pipeline PR (`pending → rejected`, with `reason` and `build_log_url`); never deleted. Written into the
+  contracts by task 057; 008b design 7 reports it. SSRF (008a A-3) is decided the same day: 008b clones in a job with no signing secret (008b design 8).
 
 ---
 # Task 008 log  (append-only, updated continuously by the executing agent)

@@ -59,8 +59,14 @@ Declared: `docs/tasks/008c-verify.sh`; every criterion is command-based.
 Module, tests, docs section, verify script, this file's log current.
 
 ## Questions  (agent-maintained; see MANAGER.md 8b)
-- Blocked on 058 for the URL shape (decision Q-G). Inherits umbrella Q-J (what removes a rejected `pending` version): if it is answered with a new state, `apply_write_back`'s refusals change.
+- Blocked on 058 for the URL shape (decision Q-G). Q-J is decided (ADR-0121, 2026-10-15): `rejected` is a fourth state reached by T3. `apply_write_back` must refuse a non-`pending` version, including a `rejected` one; building the T3 diff (`reason`, `build_log_url`) is 008b's, using 057's oracle shape, not this task's.
 
 ---
 # Task 008c log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 split out of 008a on spec review; nothing started.
+
+## Decision recorded 2026-10-15 (Ludwig, in session: "Kör på A")
+**Build logs live in `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`**, committed by the
+pipeline. `build_log_url` is that file's permanent https URL in a repo the project owns (ADR-0041: nothing
+unpublished). The Actions run log is not used as the permanent reference (retention believed ~90 days,
+[unverified]). Depends on M7 (archive repo exists).
