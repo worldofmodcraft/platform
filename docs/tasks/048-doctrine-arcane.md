@@ -250,3 +250,7 @@ The edited files, `048-verify.sh` with its output pasted in the log, the AC8/AC9
   permission rule; doing either would launder the denial.
 - **Parked for Ludwig.** The doctrine edits need either Ludwig making or approving them in an interactive
   session, or a permission decision that is his alone. 049 is stacked on 048 and is parked with it.
+- 2026-10-15: Ludwig chose option A ("Stjärna på allt"). The manager wrote the doctrine additions in the interactive
+  session with Ludwig present, commit after 043fc2a. `git diff --numstat origin/main` shows 0 deleted lines in
+  CLAUDE.md, MANAGER.md, REVIEW-CHECKLIST.md, ROUTING.md, SPEC-CHECKLIST.md and TASK-TEMPLATE.md. Waiver quotes were
+  copied from main's mission log. `048-verify.sh` is delegated next.
