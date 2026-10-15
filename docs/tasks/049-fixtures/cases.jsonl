@@ -1,0 +1,106 @@
+{"id": "c000", "group": "AC1-force", "command": "git push --force origin x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c001", "group": "AC1-force", "command": "git push -f", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c002", "group": "AC1-force", "command": "git push --force-with-lease", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c003", "group": "AC1-force", "command": "git push --force-if-includes", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c004", "group": "AC1-force", "command": "git push origin +main", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c005", "group": "AC1-force", "command": "git push -fu origin x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c006", "group": "AC1-reset", "command": "git reset --hard HEAD~1", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c007", "group": "AC1-rm", "command": "rm -rf /tmp/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c008", "group": "AC1-rm", "command": "rm -fr x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c009", "group": "AC1-rm", "command": "rm -r -f x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c010", "group": "AC1-rm", "command": "rm --recursive --force x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c011", "group": "AC1-rm", "command": "/bin/rm -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c012", "group": "AC1-rm", "command": "rm -Rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c013", "group": "AC1-main", "command": "git commit -m x", "want": 2, "cwd": "@MAIN@", "home": "plain", "stderr": "commit-on-main"}
+{"id": "c014", "group": "AC1-main", "command": "git commit --allow-empty -m x", "want": 2, "cwd": "@MAIN@", "home": "plain", "stderr": "commit-on-main"}
+{"id": "c015", "group": "AC1-C", "command": "git -C @MAIN@ commit -m x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "commit-on-main"}
+{"id": "c016", "group": "AC1-cd", "command": "cd @MAIN@ && git commit -m x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "commit-on-main"}
+{"id": "c017", "group": "AC1-bash-c", "command": "bash -c \"git push --force\"", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c018", "group": "AC1-chain", "command": "echo x; git reset --hard", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c019", "group": "AC1b-env", "command": "env X=1 git push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c020", "group": "AC1b-bare", "command": "X=1 git push -f", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c021", "group": "AC1b-command", "command": "command git push -f", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c022", "group": "AC1b-sudo", "command": "sudo rm -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c023", "group": "AC1b-nohup", "command": "nohup git push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c024", "group": "AC1b-time", "command": "time git reset --hard", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c025", "group": "AC1b-timeout", "command": "timeout 5 rm -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c026", "group": "AC1b-exec", "command": "exec git push -f", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c027", "group": "AC1b-nice", "command": "nice -n 5 rm -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c028", "group": "AC1b-xargs", "command": "xargs rm -rf", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c029", "group": "AC1b-xargs", "command": "echo x | xargs git push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c030", "group": "AC1b-pathprefix", "command": "/usr/bin/git push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c031", "group": "AC1b-shlex-forms", "command": "\\git reset --hard", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c032", "group": "AC1b-shlex-forms", "command": "\"git\" push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c033", "group": "AC1b-shlex-forms", "command": "'rm' -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c034", "group": "AC1b-shlex-forms", "command": "git push \"--force\"", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c035", "group": "AC1b-subst", "command": "$(git reset --hard)", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c036", "group": "AC1b-subst", "command": "echo \"$(git reset --hard)\"", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c037", "group": "AC1b-backtick", "command": "`git reset --hard`", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c038", "group": "AC1b-subshell", "command": "(git reset --hard)", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c039", "group": "AC1b-brace", "command": "{ rm -rf x; }", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c040", "group": "AC1b-eval", "command": "eval \"rm -rf x\"", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c041", "group": "AC1b-git-c", "command": "git -c user.name=x push --force", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c042", "group": "AC1b-git-dir", "command": "git --git-dir=/tmp/r.git reset --hard", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c043", "group": "AC1b-git-dir", "command": "git --git-dir /tmp/r.git reset --hard", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c044", "group": "AC1b-newline", "command": "echo a\nrm -rf x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c045", "group": "AC1b-abbreviations", "command": "git push --forc", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c046", "group": "AC1b-abbreviations", "command": "git reset --har", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c047", "group": "AC1b-abbreviations", "command": "rm --recurs --forc x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "rm-rf"}
+{"id": "c048", "group": "AC1b-alias-c", "command": "git -c alias.p='push --force' p", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "force-push"}
+{"id": "c049", "group": "AC1b-alias-config", "command": "git config alias.p 'reset --hard' && git p", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "reset-hard"}
+{"id": "c050", "group": "AC2-allow", "command": "git push origin task/049-x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c051", "group": "AC2-allow", "command": "git reset --soft HEAD~1", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c052", "group": "AC2-allow", "command": "rm file", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c053", "group": "AC2-allow", "command": "rm -r dir", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c054", "group": "AC2-allow", "command": "rm -f file", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c055", "group": "AC2-allow", "command": "git worktree remove ../wt/task-1", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c056", "group": "AC2-allow", "command": "git status", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c057", "group": "AC2-allow", "command": "echo \"rm -rf is dangerous\"", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c058", "group": "AC2-allow", "command": "git commit -m x", "want": 0, "cwd": "@TASK@", "home": "plain"}
+{"id": "c059", "group": "AC2-allow", "command": "git commit -m x", "want": 0, "cwd": "@DETACHED@", "home": "plain", "log_has": "commit-detached-head"}
+{"id": "c060", "group": "AC2-allow", "command": "git commit -m x", "want": 0, "cwd": "@OTHER@", "home": "plain", "log_has": "commit-no-repo"}
+{"id": "c061", "group": "AC2b-quote-sep", "command": "echo \"a; rm -rf x\"", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c062", "group": "AC2b-quote-text", "command": "echo 'git push --force'", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c063", "group": "AC2b-heredoc", "command": "cat <<'EOF'\nrm -rf x\ngit push --force\nEOF", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c064", "group": "AC2b-heredoc", "command": "cat <<-EOF\n\trm -rf x\n\tEOF\nls", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c065", "group": "AC2b-commit-msg", "command": "git commit -m \"document why git push --force is banned\"", "want": 0, "cwd": "@TASK@", "home": "plain"}
+{"id": "c066", "group": "AC2b-grep", "command": "grep -- --force file", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c067", "group": "AC2b-grep", "command": "grep -rn \"rm -rf\" docs/", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c068", "group": "AC2b-grep", "command": "git log --grep=--hard", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c069", "group": "AC2b-comment", "command": "# rm -rf x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c070", "group": "AC2b-comment", "command": "echo ok # note; rm -rf x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c071", "group": "AC3-both", "command": "git branch -D task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c072", "group": "AC3-both", "command": "git branch -D task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c073", "group": "AC3-empty", "command": "git branch -D task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": ""}
+{"id": "c074", "group": "AC3-null", "command": "git branch -D task/x", "want": 0, "cwd": "@OTHER@", "home": "plain", "agent_type": null}
+{"id": "c075", "group": "AC3-safe-delete", "command": "git branch -d task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c076", "group": "AC3-safe-delete", "command": "git branch -d task/x", "want": 0, "cwd": "@OTHER@", "home": "plain", "agent_type": "implementer"}
+{"id": "c077", "group": "AC3-forms", "command": "git branch -df task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c078", "group": "AC3-forms", "command": "git branch -df task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c079", "group": "AC3-forms", "command": "git branch -fd task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c080", "group": "AC3-forms", "command": "git branch -fd task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c081", "group": "AC3-forms", "command": "git branch -d -f task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c082", "group": "AC3-forms", "command": "git branch -d -f task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c083", "group": "AC3-forms", "command": "git branch --delete --force task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c084", "group": "AC3-forms", "command": "git branch --delete --force task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c085", "group": "AC3-forms", "command": "git branch --force --delete task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c086", "group": "AC3-forms", "command": "git branch --force --delete task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c087", "group": "AC3-forms", "command": "git branch -vD task/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c088", "group": "AC3-forms", "command": "git branch -vD task/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "branch-D", "agent_type": "implementer"}
+{"id": "c089", "group": "AC4-path", "command": "cat @VAULT@/Status.md", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c090", "group": "AC4-dback", "command": "type D:\\WomVault\\Status.md", "want": 2, "cwd": "@OTHER@", "home": "drive", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c091", "group": "AC4-dfwd", "command": "cat D:/WomVault/x", "want": 2, "cwd": "@OTHER@", "home": "drive", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c092", "group": "AC4-mnt", "command": "cat /mnt/d/WomVault/x", "want": 2, "cwd": "@OTHER@", "home": "drive", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c093", "group": "AC4-case", "command": "cat @VAULT_UP@/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c094", "group": "AC4-case", "command": "cat d:\\womvault\\x", "want": 2, "cwd": "@OTHER@", "home": "drive", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c095", "group": "AC4-literal", "command": "cat $WOM_VAULT/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c096", "group": "AC4-literal", "command": "cat ${WOM_VAULT}/x", "want": 2, "cwd": "@OTHER@", "home": "plain", "stderr": "vault", "agent_type": "implementer"}
+{"id": "c097", "group": "AC4-env", "command": "cat @VAULTENV@/x", "want": 2, "cwd": "@OTHER@", "home": "none", "stderr": "vault", "agent_type": "implementer", "env": {"WOM_VAULT": "@VAULTENV@"}}
+{"id": "c098", "group": "AC4-exempt", "command": "cat @VAULT@/Status.md", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c099", "group": "AC4-exempt", "command": "type D:\\WomVault\\Status.md", "want": 0, "cwd": "@OTHER@", "home": "drive"}
+{"id": "c100", "group": "AC4-exempt", "command": "cat D:/WomVault/x", "want": 0, "cwd": "@OTHER@", "home": "drive"}
+{"id": "c101", "group": "AC4-exempt", "command": "cat /mnt/d/WomVault/x", "want": 0, "cwd": "@OTHER@", "home": "drive"}
+{"id": "c102", "group": "AC4-exempt", "command": "cat $WOM_VAULT/x", "want": 0, "cwd": "@OTHER@", "home": "plain"}
+{"id": "c103", "group": "AC4-clean", "command": "ls /tmp", "want": 0, "cwd": "@OTHER@", "home": "plain", "agent_type": "implementer"}
+{"id": "c104", "group": "AC4-clean", "command": "cat /mnt/c/other/file", "want": 0, "cwd": "@OTHER@", "home": "drive", "agent_type": "implementer"}
+{"id": "c105", "group": "AC4-unconfigured", "command": "cat $WOM_VAULT/x", "want": 0, "cwd": "@OTHER@", "home": "none", "agent_type": "implementer", "log_has": "vault-unconfigured"}
