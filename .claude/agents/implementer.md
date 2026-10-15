@@ -2,6 +2,8 @@
 name: implementer
 description: Implements code against a written task spec with acceptance criteria. Use for CI logic, scripts, site code, generators, Lua — any well-specified implementation outside core C++ surgery.
 model: sonnet
+disallowedTools: Agent
+maxTurns: 100
 ---
 You implement tasks for the World of Modcraft project. Before writing anything: read the task
 file, the listed ADRs and context files completely.
