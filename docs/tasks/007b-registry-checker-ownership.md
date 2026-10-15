@@ -1,7 +1,7 @@
 # Task 007b: Registry checkers, authority half — ownership by numeric id, reserved namespaces, R11, fail-closed T1/T3
 
-- **Mission:** SITE-V1, D1 — **Status:** draft, revised after spec review round 1 (FAIL, 2026-10-15);
-  independent re-review required before approval (security-relevant CI). Not dispatchable until 007a merges.
+- **Mission:** SITE-V1, D1 — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–3: FAIL, FAIL,
+  PASS). Not dispatchable until 007a merges.
 - **Umbrella:** `docs/tasks/007-registry-ci-checkers.md` — read it in full, including the
   "Revision 2026-10-15" section, which overrides its older text.
 - **Agent / model:** implementer / sonnet
@@ -78,8 +78,8 @@ is never a merge signal on its own.
 Source files: 1–2 (`ownership.py`, optionally a small `ownership_cli.py`), within the cap. Changed source lines:
 expected 300–450, over the 300 cap. Reason not to split: R1–R11 and I1–I8 are one contract with explicit
 precedence between rules (R3/R7/R11), and the fail-closed rule must be evaluated before them; splitting would
-put precedence across two branches. Reading list: 11 entries (umbrella, five ADRs, `ownership.md`, `append-only.rules.md`, `reserved-namespaces.json`,
-`032-b1-fixtures.json`, 007a's modules) plus doctrine — one over the cap. Every entry is a direct input of a
+put precedence across two branches. Reading list: 10 entries (umbrella, four ADRs, `ownership.md`, `append-only.rules.md`, `reserved-namespaces.json`,
+`032-b1-fixtures.json`, 007a's modules) plus doctrine — at the cap, one over with doctrine. Every entry is a direct input of a
 rule this checker implements; none can be dropped.
 
 ## Acceptance criteria — all demonstrated by `docs/tasks/007b-verify.sh`, whose output the log pastes
@@ -106,12 +106,12 @@ Umbrella criteria **1, 2, 4, 5, 6, 9, 10 (ownership messages), 11, 12 (ownership
   bypass fail-closed; let any author use R11; let R11 admit a non-takedown change; make R11's precedence
   shape-based rather than authority-based (`ownership.md`'s round-3 attempt); let a binding PR rebind an
   existing namespace; reject everything (positive control).
-- **B6. Truncation and composition cells.** A PR truncating `versions[]` trips fail-closed for every author; a
-  malformed T2 from `r11_identity` is not authorised by R11; a PR from `r11_identity` editing
-  `reserved-namespaces.json` alongside a T2 is not authorised. Each has a reddening mutation.
 - **B5. The seam is explicit.** No network, environment or file reads beyond the paths passed in (asserted:
   patched `socket`, `os.environ` and `open` outside the given inputs raise).
 
+- **B6. Truncation and composition cells.** A PR truncating `versions[]` trips fail-closed for every author; a
+  malformed T2 from `r11_identity` is not authorised by R11; a PR from `r11_identity` editing
+  `reserved-namespaces.json` alongside a T2 is not authorised. Each has a reddening mutation.
 ## File scope (declared)
 `tools/registry/ownership*.py` (new), `tests/registry/test_ownership*.py` (new),
 `docs/tasks/007b-registry-checker-ownership.md` (log), `docs/tasks/007b-verify.sh` (new),
@@ -137,3 +137,4 @@ After 007a (merged). Blocks 039. Task 008b later amends `ownership.md` and this 
 - 2026-10-15 manager: spec written (session 9) from the umbrella's revision.
 - 2026-10-15 manager: revised after spec review round 1 (FAIL, findings 1–3, 5, 7): inputs stated, fail-closed key
   made independent of 007a, R11 identity injected with `None` = nobody, mutation set per rule, Size section.
+- 2026-10-15 manager: spec review rounds 1-3 (FAIL, FAIL, PASS); spec-approved.

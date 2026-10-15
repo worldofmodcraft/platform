@@ -1,7 +1,7 @@
 # Task 007a: Registry checkers, shape half — PR classification, schema validation, append-only (T1/T2/T3)
 
-- **Mission:** SITE-V1, D1 — **Status:** draft (independent spec review required before approval:
-  security-relevant CI, SPEC-CHECKLIST preamble)
+- **Mission:** SITE-V1, D1 — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–3:
+  FAIL, FAIL, PASS)
 - **Umbrella:** `docs/tasks/007-registry-ci-checkers.md` — read it in full, **including the
   "Revision 2026-10-15" section, which overrides its older text**. This file states only what is
   specific to 007a.
@@ -116,3 +116,4 @@ After 057 (merged). Parallel-safe with 062 (disjoint files). Blocks 007b. 039 fo
 ---
 # Task 007a log
 - 2026-10-15 manager: spec written (session 9) from the umbrella's revision.
+- 2026-10-15 manager: spec review rounds 1-3 (FAIL, FAIL, PASS); spec-approved.
