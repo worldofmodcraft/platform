@@ -39,11 +39,18 @@ D1's checker half is done when both are merged; task 039 (wiring) follows.
   `[0, 1, 3]`. 007a keeps both: (i) the full four-element fixture, rejected, with the schema verdict
   asserted as REJECT; (ii) the three-element variant, asserted schema-**valid**, which append-only must
   reject. Per-element expectations under the new rules: element 0 — rule 2 (born-`pending` only;
-  born `published`); element 1 — rule 2 and rule 4 (duplicate `version` with element 0); element 2 —
-  rule 2; element 3 — rule 2 (born `removed`; the whitespace `reason` is no longer the deciding
-  clause). If the agent's reading of `append-only.rules.md` yields a different attribution, that is a
+  born `published`) and rule 4 (the pairwise duplicate with element 1); element 1 — rule 2 and rule 4;
+  element 2 — rule 2; element 3 — rule 2 (born `removed`; the whitespace `reason` is no longer the
+  deciding clause). The tests assert **at least** these rules per element, each as its own assertion;
+  any further rule a checker reports is recorded in the log with the contract line that justifies it. If the agent's reading of `append-only.rules.md` yields a different attribution, that is a
   stop-and-report, not a choice.
-- **Criterion 7 (takedown) becomes T1/T2/T3.** T2 keeps the original wording; T1 and T3 are shape-legal
+- **Criterion 7 (takedown) becomes T1/T2/T3.** T2 keeps the original wording **except** its "changing a
+  second element in the same PR, is rejected" clause, which contradicts the merged contracts
+  (`ownership.md` R11: a takedown PR may carry any number of takedown mutations provided the diff contains
+  nothing else; `append-only.rules.md` classifies each element independently). Restated: a second changed
+  element that is **not itself a valid T2** is rejected; N valid T2s in one PR are shape-legal, and accepted
+  at the authority layer only with R11 authority. A multi-T2 accept fixture is required (007a shape, 007b
+  authority); T1 and T3 are shape-legal
   at the append-only layer exactly as `append-only.rules.md` states, and are **rejected at the
   authority layer** by 007b (fail closed).
 - **New criterion 13 (007a): 057 fixture parity.** The append-only checker returns the recorded
@@ -86,7 +93,7 @@ demonstrated against hostile fixtures:
 2. **Schema validation** — every changed JSON file validated against the schema its path implies,
    using the repository's own stdlib validator.
 3. **Append-only** — a field-level diff of `old`/`new` `entry.json` implementing
-   `contracts/append-only.rules.md` exactly, including the single permitted takedown transition.
+   `contracts/append-only.rules.md` exactly, including the single permitted takedown transition. *(Superseded 2026-10-15: three in-place transitions, T1/T2/T3; see the revision.)*
 4. **Ownership** — the PR author's **numeric account id** compared against `owner.id` for every
    namespace the PR touches, implementing `contracts/ownership.md` (E16), including first-publish
    binding and the ADR-0119 reserved-namespace path.
@@ -96,7 +103,7 @@ two hostile fixtures named below permanently in the suite.
 
 ## Context to load (complete; ADR selection performed against docs/decisions/INDEX.json)
 **Contracts (the specification — these are implemented, not interpreted):**
-- `contracts/append-only.rules.md` — 511 lines, all of it. The five `versions[]` rules, the
+- `contracts/append-only.rules.md` — all of it (511 lines when first written; 708 at `e009ef0`). The five `versions[]` rules, the
   comparison model, the four file-level existence states, the takedown carve-out, the ordering /
   remove-and-re-add / malformed-edit sections, and "What this document does not cover".
 - `contracts/ownership.md` — **merged by registry PR #4**; the E16 contract. Read the merged text,
@@ -138,6 +145,8 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
    `docs/tasks/006-verify.sh` lines 210-264, and the append-only checker **rejects it**. The test
    asserts **which rule rejects which element**, not merely that it was rejected:
 
+   *(The table below is superseded by the revision's re-based criterion 3; kept as history.)*
+
    | Element | Content | Must be rejected by |
    |---|---|---|
    | 0 | `version "1.2.0"` | **rule 4** (with element 1) |
@@ -162,7 +171,7 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
    message naming ADR-0119. Membership is a live-API fact: it enters the checker through an
    **injected oracle** (a parameter/callable), so the logic is testable offline and the only
    untestable part is the one real API call, which belongs to task 039. State this seam explicitly.
-7. **The takedown transition is implemented and is the only in-place mutation accepted.** A PR
+7. *(Superseded in part by the revision: the "second element" clause is restated there.)* **The takedown transition is implemented and is the only in-place mutation accepted.** A PR
    flipping an existing element's `status` to `"removed"` with a non-empty `reason` passes; the same
    PR without a reason, or changing any other field of that element, or changing a second element in
    the same PR, is rejected. **The checker never merges anything** — MANAGER.md §7 makes a takedown
@@ -216,7 +225,7 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
   is removed.
 
 ## Dependencies and sequencing
-- **Blocked on registry PR #4 (task 032, `contracts/ownership.md`) merging.** Criteria 4-6 are
+- *(Met: PR #4 merged as `4d4a204`.)* **Blocked on registry PR #4 (task 032, `contracts/ownership.md`) merging.** Criteria 4-6 are
   implemented *from that document*; dispatching before it merges means coding the ownership gate
   from an ADR read cold, which is precisely what the E16 amendment was created to prevent.
 - Needs task **006** (merged, registry PR #2) and task **025** (merged, registry PR #3).
