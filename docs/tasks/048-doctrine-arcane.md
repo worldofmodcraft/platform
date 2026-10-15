@@ -254,3 +254,29 @@ The edited files, `048-verify.sh` with its output pasted in the log, the AC8/AC9
   session with Ludwig present, commit after 043fc2a. `git diff --numstat origin/main` shows 0 deleted lines in
   CLAUDE.md, MANAGER.md, REVIEW-CHECKLIST.md, ROUTING.md, SPEC-CHECKLIST.md and TASK-TEMPLATE.md. Waiver quotes were
   copied from main's mission log. `048-verify.sh` is delegated next.
+
+- 2026-10-15 doc-writer: `docs/tasks/048-verify.sh` written (commit a2c0cb1). Run in a fresh clone (`git clone` of the worktree, `origin/main` as base), `--mutate`, exit 1 because of one real AC5 gap, below. AC1-AC4, AC6, AC7 pass; AC10 mutations all redden (positive control = clean tree, 3 FAIL lines, all c5b). **AC8, AC9 (live) and AC11 (human) are not script-verified.** Doctrine not touched.
+  - **AC5 FAILS against the committed doctrine:** the spec wants the word "expired" in each of the three waiver entries; MANAGER.md puts it only in the subsection preamble ("each is **expired; not a precedent...**"). Quotations themselves match main verbatim. Fix is a doctrine edit (manager/Ludwig), not made here.
+  - Note AC7: REVIEW-CHECKLIST says the independent pass "comes first"; it does not literally say findings come first in the verdict (reviewer.md does). Script checks the checklist for "comes first".
+  - Tail of the fresh-clone run:
+```
+== clean tree: 3 failing check line(s)
+== mutations: each runs on a temp copy; the expected check must show a FAIL line that the clean tree did not have
+ok   mutation 'delete a line from MANAGER.md' -> red: FAIL c1: docs/manager/MANAGER.md has 1 deleted/changed lines vs origin/main
+ok   mutation 'alter one char inside the rule-0 block' -> red: FAIL c1: CLAUDE.md has 1 deleted/changed lines vs origin/main
+ok   mutation 'env value set to 3' -> red: FAIL c2: settings env: AssertionError: env value is not the string 1
+ok   mutation 'remove 052's PreToolUse entry' -> red: FAIL c2: PreToolUse entry missing: KeyError: 'PreToolUse'
+ok   mutation 'remove disallowedTools from one agent' -> red: FAIL c3: debugger lacks 'disallowedTools: Agent' in frontmatter
+ok   mutation 'change one maxTurns' -> red: FAIL c3: reviewer maxTurns is not 80 (got: maxTurns: 81)
+ok   mutation 'delete one agent file (count 9)' -> red: FAIL c3: agent file count is 9, expected 10
+ok   mutation 'copy one agent file (count 11)' -> red: FAIL c3: agent file count is 11, expected 10
+ok   mutation 'drop the CLAUDE.md marker line' -> red: FAIL c4: CLAUDE.md has no SUSPENDED marker
+ok   mutation 'drop the MANAGER.md marker line' -> red: FAIL c4: docs/manager/MANAGER.md has no SUSPENDED marker
+ok   mutation 'drop one waiver entry (§8)' -> red: FAIL c5a: entries found for sections ['5', '7'], expected 5, 7, 8
+ok   mutation 'alter one quoted waiver fragment' -> red: FAIL c5c: §8 quotation not found verbatim in the source log: 'Overnight §8 waiver: a blocke
+ok   mutation 'drop the 300' -> red: FAIL c6: 5b does not name '300 changed lines'
+ok   mutation 'drop blind-review phrase (reviewer.md)' -> red: FAIL c7: reviewer.md lacks 'Findings formed before reading the log'
+ok   mutation 'drop blind-review phrase (checklist)' -> red: FAIL c7: REVIEW-CHECKLIST lacks 'Findings formed before reading the log'
+== mutations: all reddened
+== AC8, AC9 (live) and AC11 (human) are not covered by this script
+```
