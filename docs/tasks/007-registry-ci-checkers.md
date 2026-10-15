@@ -1,16 +1,63 @@
 # Task 007: Registry CI checkers — the gates that decide what a registry PR is allowed to do
 
 - **Mission:** SITE-V1, deliverable **D1** ("CI checks (GitHub Actions), each with a clear failure
-  message") — **Status:** **spec-approved (manager, 2026-09-06)**, dispatch gated on registry PR #4
-  merging (see Dependencies).
-- **Agent / model:** implementer / sonnet
-- **Budget:** medium (≤ 3 agent-sessions). Exceeding it is a stop-and-report event (MANAGER.md §8),
-  not something to push through.
-- **Branch / worktree:** `task/007-registry-ci-checkers` — **registry** repo, worktree
-  `~/wt/registry-task-007`. The platform side is this spec file only.
+  message") — **Status:** **umbrella (revised 2026-10-15, session 9).** The 2026-09-06 approval is
+  withdrawn: ADR-0121 and task 057 changed the contract this spec implements. Work is dispatched as
+  **007a** and **007b** (see "Revision 2026-10-15"), each with its own status.
+- **Agent / model:** none directly; see 007a and 007b (implementer / sonnet each)
+- **Budget:** medium + medium (was medium for the whole; see the revision's Size note).
+- **Branch / worktree:** none for this file; 007a and 007b carry their own, in the **registry** repo.
 - **Graph:** builds node **N3 `registry-ci`**. Implements edges **E2** (`entry.schema.json`),
   **E3** (`page.schema.json`), **E4** (`append-only.rules.md`) and **E16** (`ownership.md`).
   Introduces **no new edges**.
+
+## Revision 2026-10-15 (session 9) — read this first; it overrides the text below where they differ
+**Why revised.** ADR-0121 (accepted 2026-10-15) and task 057 (registry PR #8, `e009ef0`) replaced the
+version-object contract this spec was written against: four states (`pending`, `published`, `removed`,
+`rejected`), born-`pending` only, three in-place transitions (T1 `pending → published`, T2 the takedown,
+T3 `pending → rejected`), and a **fail-closed rule**: until `ownership.md` carries the pipeline's
+carve-out (booked under task 008b), a checker must reject every PR containing a T1 or T3 mutation,
+whoever its author is (`append-only.rules.md`, "Coexistence of T1, T2 and T3"; ADR-0121 Decision).
+The dependency on registry PR #4 is met (merged as `4d4a204`).
+
+**Split (MANAGER.md §2b size cap).** Four checkers with the new lifecycle rules are well over 300
+changed source lines; splitting is the default answer. The cut is the contract boundary:
+- **007a — `docs/tasks/007a-registry-checkers-shape.md`:** PR classification, schema validation and
+  append-only (E2, E3, E4), plus the shared report/exit-code module. Branch `task/007a-registry-checkers-shape`.
+- **007b — `docs/tasks/007b-registry-checker-ownership.md`:** the ownership checker (E16), including
+  reserved namespaces, the R11 takedown authorisation and the fail-closed T1/T3 rejection. Branch
+  `task/007b-registry-checker-ownership`, cut after 007a merges (it imports 007a's report module and
+  its transition classification).
+D1's checker half is done when both are merged; task 039 (wiring) follows.
+
+**Criterion changes against the text below** (every other criterion stands, assigned as listed):
+- **Criterion 3 (malicious first publish) is re-based, not dropped.** Measured 2026-10-15 against
+  registry `e009ef0` with `tests/contracts/schema_check.py` (probe script and output in 007a's "Measured facts"):
+  `entry.schema.json` now **rejects** the four-element `attacker:mod` entry (element 2, born `removed`
+  with no `reason`, matches none of the `oneOf` branches) but **accepts** elements 0, 1 and 3 each on
+  their own. So the 006 premise ("the schema accepts it") now holds only for the three-element variant
+  `[0, 1, 3]`. 007a keeps both: (i) the full four-element fixture, rejected, with the schema verdict
+  asserted as REJECT; (ii) the three-element variant, asserted schema-**valid**, which append-only must
+  reject. Per-element expectations under the new rules: element 0 — rule 2 (born-`pending` only;
+  born `published`); element 1 — rule 2 and rule 4 (duplicate `version` with element 0); element 2 —
+  rule 2; element 3 — rule 2 (born `removed`; the whitespace `reason` is no longer the deciding
+  clause). If the agent's reading of `append-only.rules.md` yields a different attribution, that is a
+  stop-and-report, not a choice.
+- **Criterion 7 (takedown) becomes T1/T2/T3.** T2 keeps the original wording; T1 and T3 are shape-legal
+  at the append-only layer exactly as `append-only.rules.md` states, and are **rejected at the
+  authority layer** by 007b (fail closed).
+- **New criterion 13 (007a): 057 fixture parity.** The append-only checker returns the recorded
+  `expect` for every fixture in registry `docs/tasks/057-transition-fixtures.json` (73 when written),
+  read from that file at test time (not copied), with zero disagreements. `057-oracle.py` is a
+  reference, never imported by the checker.
+- **New criterion 14 (007b): fail-closed T1/T3, requested by task 057's independent reviewer.** A PR whose diff
+  contains a T1 or a T3 mutation is rejected by the ownership checker for **every** author: the
+  namespace owner, a stranger, a reserved-namespace org member, and an author id equal to the
+  pipeline App's id (injected as a parameter; no real id is hard-coded). The message names
+  ADR-0121 and says the pipeline carve-out does not exist yet. Mutation: remove the fail-closed branch
+  and show the owner-authored T1 and T3 fixtures go green-accepted (red test).
+- **Criteria 4, 5, 6 and the ownership half of 10 move to 007b**; 1, 2, 3, 7 (shape), 8, 9, 11, 12 apply
+  to each sub-task for its own checkers.
 
 ## Why this task was split, and where the other half went
 Written down because the ledger has been wrong about this shape before. Mission D1's CI section is
