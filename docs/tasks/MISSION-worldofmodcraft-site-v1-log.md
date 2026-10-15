@@ -1824,3 +1824,18 @@ After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and th
 
 ### Kickoff line for the next session
 "Kör din vanliga sessionsstart. Läs SESSION STATUS / HANDOVER 2026-10-15 (session 8) i missionsloggen och fortsätt med punkt 1–4."
+
+### Ludwig's manual steps, 2026-10-15 (after the handover entry)
+- **M5 done:** the GitHub App `worldofmodcraft-pipeline` is created under the org (a first attempt under the user account
+  `womcraft` was deleted and recreated). It is installed on `registry`, `site` and `archive`, and its key and App ID are
+  stored as registry Actions secrets per runbook step 9. Public page https://github.com/apps/worldofmodcraft-pipeline
+  answers 200 (manager, unauthenticated).
+- **M7 done:** https://github.com/worldofmodcraft/archive is public with 1 commit (manager, unauthenticated API, 200).
+- **Q-H answered:** "MINISIGN_SECRET_KEY finns" (Ludwig looked; nothing was copied).
+- **M6 not done.** It is needed before task 010 / the final demo, not before 008b: ADR-0119 requires the publisher in the
+  `test` namespace to be an org member, and Ludwig chose Q-F A (his personal account joins).
+- Next session: update the runbook markers (M3 secret ✓, M5 ✓, M7 ✓, M6 open) as a small docs task. 008b/008c are now
+  unblocked on Ludwig's side. Also: `~/wom`'s `branch.main.merge` points at a stale `chore/handover-review-verdict`; fix it with
+  `git -C ~/wom branch --set-upstream-to=origin/main main`.
+- Separately: `womcraft/worldofmodcraft` (user-account repo, 404 unauthenticated, so private or absent) is not part of the
+  project. Ludwig mentioned it on 2026-10-15; no action decided.
