@@ -290,3 +290,9 @@ Workflow + helpers + tests + docs + verify script + this file's log section curr
 - 2026-10-14 Ludwig's answers folded in (Q-B, Q-D, Q-E, Q-G); manual steps M5-M7 written with unverified click-paths; Q-H and Q-J remain open.
 - 2026-10-14 spec review: write-back functions now come from 008c; 008b depends on 008a and 008c.
 - 2026-10-15 finalised: 008a merged (PR #7) and its real CLI read; ADR-0121 closes Q-J (failure path is now a T3 PR); the SSRF job split is a requirement (design 8) with criteria 15-16; the 008a no-sign-only-mode gap is recorded; dependencies updated (007, 039, 057, 058, 008c still pending).
+
+## Decision recorded 2026-10-15 (Ludwig, in session: "Kör på A")
+**Build logs live in `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`**, committed by the
+pipeline. `build_log_url` is that file's permanent https URL in a repo the project owns (ADR-0041: nothing
+unpublished). The Actions run log is not used as the permanent reference (retention believed ~90 days,
+[unverified]). Depends on M7 (archive repo exists).

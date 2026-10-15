@@ -64,3 +64,9 @@ Module, tests, docs section, verify script, this file's log current.
 ---
 # Task 008c log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 split out of 008a on spec review; nothing started.
+
+## Decision recorded 2026-10-15 (Ludwig, in session: "Kör på A")
+**Build logs live in `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`**, committed by the
+pipeline. `build_log_url` is that file's permanent https URL in a repo the project owns (ADR-0041: nothing
+unpublished). The Actions run log is not used as the permanent reference (retention believed ~90 days,
+[unverified]). Depends on M7 (archive repo exists).
