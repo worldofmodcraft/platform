@@ -226,11 +226,11 @@ and the bullets after it. Each is quoted verbatim; each is **expired; not a prec
 unchanged and in force.**
 - **§7:** "Overnight §7 waiver (2026-10-14/15 only): the manager may merge PRs that touch CI security checks
   (registry CI, tasks 007/039) when the independent review is PASS and verification is green. Still Ludwig-only:
-  signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine."
+  signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine." **Expired; not a precedent; the section's text is unchanged and in force.**
 - **§8:** "Overnight §8 waiver: a blocked chain is parked, with its question written under "For Ludwig", and
-  independent chains continue. The session halts fully at five open Ludwig items."
+  independent chains continue. The session halts fully at five open Ludwig items." **Expired; not a precedent; the section's text is unchanged and in force.**
 - **§5:** "2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
-  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only." Compaction caution (§5.5) still applied.
+  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only." Compaction caution (§5.5) still applied. **Expired; not a precedent; the section's text is unchanged and in force.**
 
 ## 8b. Question discipline
 
