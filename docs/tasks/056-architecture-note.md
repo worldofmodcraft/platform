@@ -1,6 +1,6 @@
 # Task 056: The D5 architecture note — what runs where, the server hosts nothing, and the way off GitHub
 
-- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
+- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** review (doc-writer, 2026-10-15; first version; second pass due after 058, 008b, 055, 010)
 - **Agent / model:** doc-writer / sonnet
 - **Budget:** small (≤ 1 agent-session) for the first version; a second small pass after 008b/055 land
 - **Branch / worktree:** `task/056-architecture-note` / `~/wt/task-056` — **platform** repo (`worldofmodcraft/platform`). The mission lets D5 live "in the site or registry repo as appropriate"; this note goes in the platform repo beside `docs/architecture/depgraph.md` and `key-management.md`, the other D5 documents, so the three are read together. If Ludwig wants it served on the site as well, that is a separate, later task.
@@ -189,3 +189,84 @@ The note, the link line, the verify script, this file's log section current; a l
 # Task 056 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Q-D, Q-E, Q-G folded in from Ludwig's answers; Q1 closed; Q2 remains open.
+- 2026-10-15 doc-writer: first version written. Files: `docs/architecture/system-overview.md` (new), one "See also" line in `docs/architecture/depgraph.md`, `docs/tasks/056-verify.sh` (new, executable). Q2 assumed A (the section, not a separate file). No credentials touched; no `gh secret`; no file outside declared scope.
+- Findings reported in the note's "State of this document": (1) `depgraph.json` lacks E16 (Q3 stays open, not assumed); (2) E15's contract `contracts/pipeline-trigger.md` does not exist on registry `origin/main` (the graph names it; the verify script's citation check caught it when first cited as a path); (3) `append-only.rules.md` examples use `cdn.worldofmodcraft.org` while the domain is `.com`; (4) the `source_archive` lock-in finding, stated `specified`, not built, 058 unreported.
+- Observed 2026-10-15: `https://github.com/worldofmodcraft/archive` -> 404 (N6 `specified`); registry/site/platform -> 200; the unauthenticated API call for the archive repo was rate-limited (403) and was not used.
+- Verify script development: first runs failed on real defects (unverified count 0 vs 12; the E15 path), and one control was weak ("cite zero paths" left a branch-form path); fixed, re-run.
+- [script] result, fresh clone (`git clone -b task/056-architecture-note` of commit 92c4881 into an empty directory, `./docs/tasks/056-verify.sh`), rc=0. Head and tail as printed:
+```
+== main run: /tmp/fc056/c/docs/architecture/system-overview.md
+info: nodes=['N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8'] edges=15 md-only=['E16']
+info: tagged rows=63 unverified-in-body=12
+info: distinct cited paths=32
+PASS  all checks on the real note
+== mutation and positive controls (each must be CAUGHT, naming what we broke)
+PASS  control 'remove row E7' caught: FAIL [2] id E7 has no table row in the note
+PASS  control 'remove row N6' caught: FAIL [2] id N6 has no table row in the note
+...
+PASS  control 'drop 'phase 1.5'' caught: FAIL [6] 'phase 1.5' absent from note
+PASS  control 'secret header' caught: FAIL [7] line 289: minisign secret-key header
+PASS  control 'key path' caught: FAIL [7] line 289: private key path
+PASS  control 'token' caught: FAIL [7] line 289: GitHub token
+PASS  control 'stale review stamp' caught: FAIL [8] last reviewed 2026-01-01 < newest dependency 2026-10-14
+== 20 pass, 0 fail
+```
+  Controls cover criteria 1-8 (row removed E7/N6/E16, heading renamed, tag stripped, wrong count, missing path, zero paths, row on a VPS, job on WSL, job off-runner, forbidden phrases, dropped "phase 1.5", secret header/path/token, stale stamp). The script reads registry/site files from local clones' `origin/main` (`REGISTRY_REPO`, `SITE_REPO`, default `~/registry`, `~/site`) and does not fetch; those clones were last fetched 2026-10-15.
+- [human] criterion 9 (a reviewer reads only the note and answers the five questions): NOT DONE. Needs a full-tools reviewer at the same tier or higher, or Ludwig. Kept apart from the script results.
+- Unverified items and what confirms them (the note carries 12 `[unverified` markers): working secret `MINISIGN_SECRET_KEY` exists (owner or manager with Ludwig's approval, never an agent); offline key backup exists (Ludwig); GitHub App and its secret (Ludwig, step M5); Releases deletion/append-only behaviour (throwaway-repo test); Actions/Pages/org-account failure behaviour (never exercised); release assets not in a git clone (quick test); identical tarball bytes on rebuild (008a verification); the `.org` host ownership (Ludwig); the ADR-0077 mirror runner (the mirror task).
+- Second pass due after 058, 008b, 055, 010 and ADR-0121 acceptance: flip `specified` rows, re-run the script.
+
+## Observation log (fix round 1, 2026-10-15; every `built` row in the note cites these as `obs L<n>`)
+- L1 `curl -sI https://worldofmodcraft.com | head -3` -> `HTTP/2 200`, `server: GitHub.com`, `content-type: text/html; charset=utf-8`.
+- L2 `curl -s -o /dev/null -w '%{http_code}' https://github.com/worldofmodcraft/<repo>` (unauthenticated) -> registry 200, site 200, platform 200, archive 404.
+- L3 `dig` is not installed here; DNS over HTTPS instead: `curl -s -H 'accept: application/dns-json' 'https://cloudflare-dns.com/dns-query?name=worldofmodcraft.com&type=A'` -> 185.199.108.153, .109.153, .110.153, .111.153 (GitHub Pages addresses); `type=NS` -> anastasia.ns.cloudflare.com, dexter.ns.cloudflare.com. This shows Cloudflare name servers and A records that are not a Cloudflare proxy range; it does not show the dashboard's proxy setting.
+- L4 `git -C ~/registry ls-tree --name-only origin/main` (fetched, 4d4a204) -> `.gitignore README.md contracts docs reserved-namespaces.json tests tools`; zero paths under `.github/`; no `mods/`. `reserved-namespaces.json` contains `324218296` twice (namespaces mc and test).
+- L5 site `origin/main` (8bbee21) `.github/workflows/deploy.yml`: `runs-on: ubuntu-latest` at lines 35 and 78; `repository_dispatch` `types: [registry-updated]` at line 19. Platform `.github/workflows/adr-index.yml`: `runs-on: ubuntu-latest` at line 30.
+- L6 `git -C ~/registry ls-tree --name-only origin/main tools/validation/` -> `magic.py`, `scan_assets.py` only.
+- L7 `curl -s -o /dev/null -w '%{http_code}' https://github.com/worldofmodcraft` -> 200. The unauthenticated API call for the organisation was rate-limited (403), so the numeric id was not re-read; it comes from `docs/architecture/key-management.md`.
+- L8 platform `origin/main` contains `docs/architecture/key-management.md`; line 41 reads "`key_id`: `6E5B30596A7A8CC4`".
+- L9 site `origin/main`: `.gitignore` line 3 is `dist/`; `public/CNAME` is `worldofmodcraft.com`; no `dist/` path is tracked.
+- L10 `curl -sL https://worldofmodcraft.com/mods/fixture/campfire-tales` -> final URL `.../campfire-tales/`, status 200; the page text contains "fixture data for", the sentence from the fixture tarball's README (`fixtures/archives-src/fixture/campfire-tales/1.2.0/README.md` in the site repository). So the live site is built from fixtures: E10, E11, E14 against fixtures.
+- L11 platform `origin/main`: `docs/decisions` holds 123 files; `docs/tasks`, `docs/manager`, `docs/architecture` present.
+- L12 Branch protection NOT observed: `curl -s https://api.github.com/repos/worldofmodcraft/registry/branches/main` -> HTTP 403, `x-ratelimit-remaining: 0` (rate limited). A push test was not run (no push permitted). The row is `specified` with an unverified marker.
+- L13 `curl -sL https://worldofmodcraft.com/mods/fixture/campfire-tales/` (read-only): the page text contains the `description` sentence "Storytelling NPCs that gather at campfires" and the link `fixture-author-one/campfire-tales` (both from `fixtures/registry/mods/fixture.campfire-tales/page.json` in the site repository), and the commit prefix `a1b2c3d` and date `2026-06-01` (from `entry.json`). `grep -c` of "Storytelling NPCs that gather\|fixture-author-one" in the 1.2.0 README returns 0, so these values reach the page from entry and page data, not from the tarball. Supports E10 (against fixtures).
+- L14 site `origin/main` `.github/workflows/deploy.yml` `uses:` lines: `actions/checkout@v4` (38, 57), `actions/setup-node@v4` (68), `actions/upload-pages-artifact@v3` (83), `actions/deploy-pages@v4` (96).
+- Fix round 2 red-first: the claim-word check and two controls were added, then run against the a35b9f8 note: `FAIL [3] `built` item claims 'protect' but no cited observation shows it: Contracts, `reserved-namespaces.json`` and the same for `Decisions, task ledger, mission logs`. Round 2 also: E10 cites L13, the Pages-actions claim cites L14, protection removed from both `built` rows.
+- Fix round 1 changes: rows re-tagged (N1 specified; signing-key copies specified; E10/E11 and exit steps 1, 4, 5, 9 and branch protection/GitHub App split or re-tagged); script gained: observation-evidence check, citation narrowing (unqualified `docs/` and `.github/` resolve in this repository only, other repositories need `site:` or `registry:`), fetch-before-read, and controls for the depgraph link, `source_archive`/`append-only` content, re-tagging to built, undefined observation, unverified marker on built row.
+- Red-first (rule 5): the new checks were added to the script and run against the previous note before any edit; the run failed with 32 FAIL lines, e.g. `FAIL [3] task log defines no observations`, `FAIL [3] `built` item cites no observation (obs L<n>): N1`, `FAIL [3] `built` item carries an unverified marker: Signing private key (working copy)`, and ended `== 25 pass, 4 fail`.
+- Fresh-clone run of fix round 1 (commit 1da6be6, rc=0), head and tail:
+```
+fetched /home/ludwig/registry origin/main=4d4a204
+fetched /home/ludwig/site origin/main=8bbee21
+== main run: /tmp/fc056b/c/docs/architecture/system-overview.md
+info: nodes=['N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8'] edges=15 md-only=['E16']
+info: tagged rows=67 unverified-in-body=15
+info: built items checked for observations=20; defined observations=12
+info: distinct cited paths=34
+PASS  all checks on the real note
+...
+PASS  control 'token' caught: FAIL [7] line 294: GitHub token
+PASS  control 'stale review stamp' caught: FAIL [8] last reviewed 2026-01-01 < newest dependency 2026-10-14
+PASS  control 're-tag specified row N3 as built' caught: FAIL [3] `built` item cites no observation (obs L<n>): N3
+PASS  control 'built row cites undefined observation' caught: FAIL [3] `built` item cites L99, not defined in the task log: N2
+PASS  control 'built row with unverified marker' caught: FAIL [3] `built` item carries an unverified marker: N8
+PASS  control 'exit step 9 re-tagged built' caught: FAIL [3] `built` item cites no observation (obs L<n>): 9. **Accept what is lost:** th
+PASS  control 'cite a site-only path unqualified' caught: FAIL [4] cited path does not resolve in this repository: docs/build.md
+PASS  control 'cite a missing contract' caught: FAIL [4] cited path does not resolve in registry: contracts/nope.md
+PASS  control 'depgraph link removed' caught: FAIL [8] depgraph.md header does not link system-overview.md
+PASS  control 'no source_archive in Moving off GitHub' caught: FAIL [6] 'source_archive' not in 'Moving off GitHub'
+PASS  control 'no append-only in Moving off GitHub' caught: FAIL [6] 'append-only' not in 'Moving off GitHub'
+== 29 pass, 0 fail
+```
+- Red-first run (previous note, new checks), tail:
+```
+FAIL [3] task log defines no observations (lines '- L<n> ...')
+FAIL [3] `built` item cites no observation (obs L<n>): N1
+FAIL [3] `built` item cites no observation (obs L<n>): N2
+== 25 pass, 4 fail
+```
+- 2026-10-15 manager:
+  - Re-review after fix round 1: 2 blocking findings on the rule-9 criterion, the second failure of the same criterion.
+    Under §3.4 the author was stopped and ONE escalation was run: a fresh agent with an exact spec. Result 62ee3bf.
+  - Manager fresh-clone re-run at 62ee3bf: `== 31 pass, 0 fail`. No `built` row claims protection any more.
+  - Status: script criteria green. **Criterion 9 (Ludwig's read-through) is open.** The PR stays unmerged until Ludwig reads it.
