@@ -1877,3 +1877,12 @@ Token guard: suspended by Ludwig (2026-10-14), not checked.
 
 ### Next steps
 After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secret, M5, M7 done; M6 open), 008b.
+
+### Ludwig's answers, 2026-10-15 (session 9, verbatim)
+"★ på alla. Avseende 3. får du förklara lite mer?"
+- Merges approved: platform #55 (063), registry #10 (007a), registry #9 (062), platform #56 (this status). Recorded in each task log.
+- ajv location: A (★) — a pinned `package.json` + `npm ci` in a registry dev-tools folder; booked as task 066 (draft).
+- R11 identity: ★ answer later. Explained in session: the org cannot open PRs itself, so the authorised id is one of
+  (A) the pipeline App's bot, (B) a dedicated takedown-only account or App that only Ludwig controls, (C) `womcraft`.
+  Manager lean ★B when 039/008b go live: C is the account manager sessions act as, and A would let the publishing
+  automation also remove. Until then `r11_identity = None` and every takedown is rejected (fail closed).
