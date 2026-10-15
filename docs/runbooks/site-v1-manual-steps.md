@@ -4,20 +4,28 @@ Every step says what to click, what to enter, and **what you should see when it 
 Do them in order; each one unblocks tasks that cannot start without it.
 Nothing here is reversible-by-accident: no step deletes anything.
 
-Status key: ☑ done · ☐ waiting on you · ⏸ waiting on a decision first
+Status key: ☑ done · ☐ waiting on you · ⏸ waiting on a decision first · `[unverified]` = no evidence
+found; check it yourself.
+**Last reviewed: 2026-10-15 (task 060).** Evidence for every marker is in
+`docs/tasks/060-runbook-manual-steps.md`, section "Task 060 log".
+**Rule for every step below: you never copy or paste a secret into chat, a file or an issue. Where a
+step handles a secret, it goes from GitHub's own page straight into GitHub's own form.**
 
 ---
 
 ## ☑ M0 — Register worldofmodcraft.com
-Done 2026-09-02, at Cloudflare. (Checked before you said so: the domain was NXDOMAIN — no
+Done 2026-09-02, at Cloudflare (re-checked 2026-10-15: the domain's nameservers are Cloudflare's). (Checked before you said so: the domain was NXDOMAIN — no
 nameservers at all — so this genuinely was step zero, and the mission spec assumed it away.)
 
 ---
 
-## ☐ M1 — GitHub organisation, repos, Actions permissions
+## ☑ M1 — GitHub organisation, repos, Actions permissions
 **This is the gate for all implementation work.** Until the repos exist, no agent can start:
 every deliverable in this mission lives in `worldofmodcraft/registry` or `worldofmodcraft/site`.
 Budget ~15 minutes.
+**Status:** organisation, `registry` and `site` exist (checked 2026-10-15). Two-factor and Actions permissions
+are `[unverified]` by us (they are private settings); `docs/manager/OPERATIONS.md` records the org and repos as
+"done and verified".
 
 ### M1.1 Create the organisation
 1. Go to **https://github.com/organizations/plan**
@@ -62,7 +70,9 @@ Repeat 1 and 2 on `site`.
 
 ---
 
-## ☐ M2 — DNS at Cloudflare (do after M1.3; safe to do now)
+## ☑ M2 — DNS at Cloudflare
+**Done.** Checked 2026-10-15: four A records and the `www` CNAME resolve as listed below, no CAA records exist, and
+`https://worldofmodcraft.com` answers HTTP 200 from GitHub Pages. The text below is kept as the record of what was set.
 Cloudflare dashboard → select **worldofmodcraft.com** → **DNS → Records**.
 
 Add these **four A records**, each with **Proxy status: DNS only** (click the orange cloud so it
@@ -104,6 +114,8 @@ returns the four addresses. Tell me when the records are in and I will verify th
 ---
 
 ## ☐ M3 — Signing keypair → Actions secret  — decided: Q3=A (minisign, Ed25519)
+**Status: keypair done (key id `6E5B30596A7A8CC4`, OPERATIONS.md); whether the secret still exists is `[unverified]` —
+see Q-H below. Do not redo this step; do Q-H first.**
 Every command below is one I ran end-to-end against minisign 0.12 before writing it here: I
 generated a throwaway key, signed a file, verified it, tampered with the file, confirmed
 verification fails with exit code 1, then destroyed the throwaway key.
@@ -150,14 +162,97 @@ the crown jewels regardless.
 ---
 
 ## ☐ M4 — The `test:hello-world` repository  — decided: Q2=A (`test` is a reserved namespace)
-ADR-0119 (drafted this session, awaiting your read) reserves `mc` and `test` as
-organisation-owned namespaces, so `test:hello-world` is now legal without weakening the ownership
-check. The URL stays `worldofmodcraft.com/mods/test/hello-world`.
+**Status: not done.** `https://github.com/mbmludric/hello-world` returns 404 (checked 2026-10-15), and the staging
+files from task 010 are not in the repo yet. **Waiting on task 010.** Do not create the repo yet: task 010 will give
+you a tree to push and exact commands (`docs/runbooks/first-publish.md`).
+ADR-0119 reserves `mc` and `test` as organisation-owned namespaces, so `test:hello-world` is legal. The URL stays
+`worldofmodcraft.com/mods/test/hello-world`. The repo is created under your personal account `mbmludric`, **after M6**.
 
-I will prepare the complete repository contents — `mod.lua` manifest, `README.md`, MIT `LICENSE`,
-and original placeholder screenshots (AI-generated is fine per ADR-0061, as long as nothing
-imitates Blizzard style) — as task 009. You then create one **public** repo under your personal
-account and push what I hand you. Nothing to do yet; this step waits on tasks 003–007.
+---
+
+## ☐ M5 — Create the organisation's GitHub App  (decision Q-D, Ludwig 2026-10-14)
+**Why:** the build pipeline must open and merge the write-back pull request and notify the site. Pull requests made with
+the built-in token do not start other workflows; ones made by an App do. **When:** task 008b's live checks wait for this
+(and for M7). **Status:** not done — `https://github.com/apps/worldofmodcraft-pipeline` returns 404 (2026-10-15).
+All click-paths in M5–M7 are `[unverified — check on screen]`: if a screen differs from the text, follow the screen
+and tell the manager what differed. Do M7 first if you can, so the App can be installed on `archive` in step 8.
+
+1. Open `https://github.com/organizations/worldofmodcraft/settings/apps/new`
+   (or: github.com → your profile picture → Your organizations → worldofmodcraft → Settings → Developer settings →
+   GitHub Apps → New GitHub App).
+2. GitHub App name: `worldofmodcraft-pipeline` (if taken, add a suffix and tell the manager the final name).
+   Homepage URL: `https://worldofmodcraft.com`.
+3. Webhook: untick **Active**.
+4. Repository permissions, exactly these and nothing else: **Contents: Read and write**, **Pull requests: Read and
+   write**. ("Metadata: Read-only" appears by itself.)
+5. Where can this GitHub App be installed: **Only on this account**.
+6. Click **Create GitHub App**. On the page that opens, write down the **App ID** (a number; it is not a secret).
+7. On the same page, under **Private keys**, click **Generate a private key**. A `.pem` file downloads. **This file is
+   a secret. Do not open it, copy its text, or send it to anyone.**
+8. Left menu **Install App** → next to worldofmodcraft click **Install** → **Only select repositories** → pick
+   `registry`, `site` and `archive` → **Install**.
+9. Store the key in GitHub, on `registry`: open `https://github.com/worldofmodcraft/registry/settings/secrets/actions`.
+   - **New repository secret** → Name `PIPELINE_APP_PRIVATE_KEY` → for the value, open the `.pem` file in Notepad,
+     select all, copy, paste into the Secret box, **Add secret**. This is the only place the text goes.
+   - Then open the **Variables** tab → **New repository variable** → Name `PIPELINE_APP_ID` → Value: the App ID
+     from step 6 → **Add variable**.
+10. Keep the `.pem` file offline next to your minisign key backup, or delete it. If it is lost, generate a new key on the
+    App's page.
+11. Tell the manager only the App's name (its public page is `https://github.com/apps/<name>`).
+
+*You should see:* the App under organisation → Settings → GitHub Apps with "Installed on 3 repositories", and the
+secret name and variable name on registry's Actions secrets page (values are never shown).
+
+---
+
+## ☐ M6 — Your personal account joins the organisation  (decision Q-F, Ludwig 2026-10-14)
+**Why:** `test` is a reserved namespace and ADR-0119 §3 accepts a pull request there only from an organisation member;
+task 010 plans to open the first-publish PR from `mbmludric`. **When:** before M4 and task 010's runbook.
+**Status:** not done — `mbmludric` is documented as a non-member (OPERATIONS.md), and the organisation's public people
+page (2026-10-15) lists 1 member, not `mbmludric`. Private members are invisible to us, so this is `[unverified]`.
+
+1. Sign in to github.com as the account that **owns** the organisation. (Which account is the owner is
+   `[unverified]`; if unsure, try `mbmludric` first, then your other account.)
+2. Open `https://github.com/orgs/worldofmodcraft/people` → **Invite member** → type `mbmludric` → role **Member** →
+   send the invitation.
+3. Sign in as `mbmludric`, open `https://github.com/orgs/worldofmodcraft/invitation` → **Join worldofmodcraft**.
+   The organisation requires two-factor (M1.2); `mbmludric` must have it on at `https://github.com/settings/security`
+   or the join is refused.
+4. Optional: on the people page, find your own row and set visibility to **Public**. (Whether our checks can see a
+   private membership is `[unverified]`; they refuse when they cannot see.)
+5. Open organisation → Settings → Member privileges and read what **Base permissions** says. Tell the manager the value.
+
+*You should see:* the people page listing `mbmludric` as Member.
+
+---
+
+## ☐ M7 — Create the `archive` repository  (decision Q-E, Ludwig 2026-10-14)
+**Why:** published source tarballs and signatures are stored as Releases in a separate repo. **When:** before task 008b's
+live checks (criterion 6). **Status:** not done — `https://github.com/worldofmodcraft/archive` returns 404 (2026-10-15).
+
+1. Open `https://github.com/organizations/worldofmodcraft/repositories/new`
+2. Name `archive`. Description `Source tarballs and signatures for published mods`. Visibility **Public**.
+3. This time **do tick "Add a README file"** (unlike M1.3). Reason, `[unverified]`: a release needs a commit to point at.
+4. No `.gitignore`, no licence. Click **Create repository**.
+
+*You should see:* `https://github.com/worldofmodcraft/archive` with one commit and a README.
+
+---
+
+## ☐ Q-H — Does the `MINISIGN_SECRET_KEY` secret exist?  (open fact question)
+**Why:** the pipeline signs with it (task 008b, step 6); M3 was reported done 2026-09-05 but nobody has looked since, and
+no agent may check (`gh secret` is forbidden, CLAUDE.md rule 11). **When:** 008b cannot sign without it.
+**Look, do not copy: this step only reads names. Do not click any secret, and do not paste or copy any value anywhere.**
+
+1. Open `https://github.com/worldofmodcraft/registry/settings/secrets/actions` while signed in as an organisation owner.
+2. Under **Repository secrets**, look for the name `MINISIGN_SECRET_KEY`. GitHub shows only names and dates.
+3. Tell the manager one of: "listed" (and its "Updated" date) or "not listed". Do nothing else.
+4. If it is **not listed**: tell the manager. Do not redo M3 by yourself; the key id `6E5B30596A7A8CC4` is published, so the
+   old private key (the backup at `~/wom-keys/worldofmodcraft.key`) should be re-added rather than a new one made.
+   That decision is the manager's and yours together.
+5. Also say whether the offline backup of the private key exists (yes/no). Do not open or send the file.
+
+*You should see:* a list of secret names with no values.
 
 ---
 

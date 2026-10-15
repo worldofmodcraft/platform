@@ -36,6 +36,12 @@ first implementation task, the manager draws its dependency graph (nodes = compo
 boundary edge names its contract — ADR-0117); specs identify their nodes/edges, ordering is
 derived topologically, and parallelism from disjoint subgraphs.
 
+**Size (task 048; Ludwig's decision Q4, 2026-10-14).** A task is within the soft cap if it has at most 5 source
+files, at most 300 changed lines and at most 10 files in its reading list. Tests, fixtures and `NNN-verify.sh`
+scripts are excluded from the counts; documentation is excluded from the file and line counts. Exceeding a number
+needs a written justification under a `Size` heading in the task file at the spec gate (SPEC-CHECKLIST item 5b).
+It is a warning that needs a reason, not a hard stop; splitting stays the default answer.
+
 ## 2c. Verification is a runnable artefact, not a transcript
 
 **Any task whose acceptance criteria are command-based ships `docs/tasks/NNN-verify.sh`**, committed
@@ -128,6 +134,12 @@ manager session side by side, all under this same doctrine — never an intermed
 or between them. A new layer is added only when it produces something no existing layer can
 produce; coordination and summarisation do not qualify.
 
+**Nesting is configured off** (task 048; Ludwig's decision Q2, 2026-10-14). `.claude/settings.json` sets
+`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` and every agent definition carries `disallowedTools: Agent`, so "one
+manager, flat roster" is configured rather than only described (live proof: task 048 AC9). (Source: https://code.claude.com/docs/en/env-vars.md, read 2026-10-14 by a claude-code-guide agent:
+the variable exists from v2.1.217 and defaults to 3. Installed version 2.1.300 per `claude --version`, 2026-10-15.) A mission that needs a second
+manager starts a second session.
+
 ## 4. Delegation and model routing
 
 See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
@@ -147,6 +159,12 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
   3. **Self-service reading**, same technique as the token guard: the HUD's context cache at `~/.claude/plugins/claude-hud/context-cache/*.json` carries `used_percentage` and `context_window_size`. Read it at session start and at every report-back, and log it beside the token-guard checkpoints so drift toward the threshold is visible early. Missing or stale (>10 min) → **unknown → ask Ludwig**, exactly as with usage.
   4. **The handover procedure:** (a) update every open task log to a resumable state; (b) write the session-status entry in the mission log — done / in progress / blocked on Ludwig / next steps — and append any fresh gotchas to `OPERATIONS.md`; (c) verify with `ls` and `git status` that everything cited exists and is committed; (c2) run `tools/vault/refresh-main.sh` so the vault shows main's final state (the same step follows every `gh pr merge`; see `OPERATIONS.md`); (d) tell Ludwig it is handover time and give him the exact kickoff line to paste into the fresh session.
   5. **Never rely on auto-compaction.** If it triggers anyway, treat the session as **untrusted for operational detail** and verify against disk before acting on anything remembered. A summariser keeps narrative and drops exactly the operational detail that has already caused false verifications here.
+
+- **Log-entry check after every subagent** (task 048; Ludwig's decision Q6, 2026-10-14). After every subagent
+  run the manager runs `tools/manager/check-log-entry.sh`; a non-zero exit means the run is not accepted until
+  the agent, or a fresh one, writes the entry. **That script is built in task 049 and does not exist until 049
+  merges**; until then the manager counts the dated entries in the task log before and after the run by hand and
+  logs both counts. No separate handover file is introduced: the task log stays the single handover (§5).
 
 ## 6. Worktree isolation (anti-derailment rule #2)
 
@@ -179,6 +197,7 @@ holds an account.
 - Every task file declares an **effort budget** (small ≤ 1 agent-session, medium ≤ 3, large ≤ 6). Exceeding budget = stop, report, ask. Budget overruns are information ("this was mis-scoped"), never something to push through quietly.
 - A session that produces two consecutive stop-and-ask events halts entirely until Ludwig responds — accumulating blocked questions and continuing elsewhere is how scope drifts.
 - Absolute stop conditions (halt session, do not attempt to fix): signing key or secrets exposed in any output; an agent modified files outside its worktree; main differs from expected; registry history rewritten; **a takedown PR merged without Ludwig's written approval** (§7).
+- **SUSPENDED by Ludwig 2026-10-14 until he revokes it** ("Glöm token kontrollen, du kan framgent ignorera den regeln och alla subagents också", mission log, 2026-10-14). The text below is retained and takes effect again the moment he revokes the suspension. While suspended, the manager and agents skip the usage checkpoints; no one deletes or edits the rule, and revocation is Ludwig's alone, in writing. (Applies to the token-guard bullet that follows.)
 - **The token guard (inviolable; CLAUDE.md rule 0).** Ludwig's Claude Max subscription is shared
   with his daily work, so headroom for him is a hard constraint, not a courtesy. **Halt all work at
   90 %** of the binding usage window (5-hour or weekly, whichever is more constrained): launch
@@ -196,6 +215,22 @@ holds an account.
   direction**, during a session in which task 023's round had started real `claude` sessions of its own. This rule outranks mission progress, open tasks and
   momentum; only Ludwig may lift it, explicitly and in writing, for a specific moment, and any
   figure he states is authoritative immediately.
+
+- **Turn caps** (task 048; Ludwig's decision Q5, 2026-10-14). Every agent definition carries `maxTurns`
+  (table in ROUTING.md). Reaching it returns partial output; the manager handles it exactly like an exceeded
+  effort budget: stop, read the log, report, no silent retry.
+
+### Waivers recorded as historical (not standing)
+Source: `docs/tasks/MISSION-worldofmodcraft-site-v1-log.md`, session 8, "Ludwig's rulings, 2026-10-14 evening"
+and the bullets after it. Each is quoted verbatim; each is **expired; not a precedent; the section's text is
+unchanged and in force.**
+- **§7:** "Overnight §7 waiver (2026-10-14/15 only): the manager may merge PRs that touch CI security checks
+  (registry CI, tasks 007/039) when the independent review is PASS and verification is green. Still Ludwig-only:
+  signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine." **Expired; not a precedent; the section's text is unchanged and in force.**
+- **§8:** "Overnight §8 waiver: a blocked chain is parked, with its question written under "For Ludwig", and
+  independent chains continue. The session halts fully at five open Ludwig items." **Expired; not a precedent; the section's text is unchanged and in force.**
+- **§5:** "2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
+  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only." Compaction caution (§5.5) still applied. **Expired; not a precedent; the section's text is unchanged and in force.**
 
 ## 8b. Question discipline
 

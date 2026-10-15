@@ -11,6 +11,10 @@ applies to specs too).
 4. **Context list** is complete: the INDEX.json lookup was performed; every ADR the diff could
    touch is listed (ADR-0116 layer 2).
 5. **Budget** is set and plausible for the scope; if in doubt, the task is split.
+5b. **Size** (task 048, Q4): at most 5 source files, 300 changed lines (`git diff --numstat`, added + deleted)
+   and 10 reading-list files; tests, fixtures and verify scripts excluded; documentation excluded from files and
+   lines. Over any number → a `Size` section in the task file justifies it, including why splitting is worse.
+   Missing justification fails the gate.
 6. **Task-specific traps** are listed under Forbidden (beyond the standing §3.7 list).
 7. **Dependencies/sequencing** against other open tasks are stated (file overlaps = sequence);
    the task's node(s)/edge(s) are identified in the dependency graph and no new undeclared

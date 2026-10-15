@@ -209,3 +209,4 @@ ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also w
     gives rc=0, FAIL=0, `== 052-verify: ALL CHECKS PASSED`.
   - Status: review complete. **Merge waits for Ludwig**, because the diff touches MANAGER.md §5 (doctrine, §7).
     AC7 (live install with Ludwig) follows the merge.
+- 2026-10-15 Ludwig, in session: "Ja till merge" (asked as "ja 052"). Merge approved under §7 (doctrine: MANAGER.md §5).
