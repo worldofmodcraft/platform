@@ -1,6 +1,6 @@
 # Task 008b: Pipeline workflow — post-merge run, release upload, protected write-back
 
-- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft (spec written 2026-10-14 under task 054). **Not dispatchable yet** (needs 008a, task 057, task 058, the sibling contract tasks listed in the umbrella, and Ludwig's steps M5-M7; Q-B, Q-D, Q-E, Q-G are decided, Ludwig, 2026-10-14). Touches the signing secret and a CI security check: **merge requires Ludwig's explicit approval (MANAGER.md §7).** An independent reviewer performs a spec review before delegation (SPEC-CHECKLIST: security-touching).
+- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft, gate-ready pending its upstreams (spec written 2026-10-14 under task 054; finalised 2026-10-15). **Not dispatchable yet**: 008a is merged (registry PR #7, `a50daac`), but it still needs task 057 (spec-approved, not yet merged), 008c, task 058, 007 and 039, the sibling contract tasks listed in the umbrella, and Ludwig's steps M5-M7. Decided: Q-B, Q-D, Q-E, Q-G (Ludwig, 2026-10-14); Q-J and the `pending → rejected` transition (ADR-0121, Accepted 2026-10-15); the SSRF policy (Ludwig, 2026-10-15, "Stjärna på allt": the clone runs in a job that holds no signing secret, and the signing job receives only the built artefact). Touches the signing secret and a CI security check: **merge requires Ludwig's explicit approval (MANAGER.md §7).** An independent reviewer performs a spec review before delegation (SPEC-CHECKLIST: security-touching).
 - **Agent / model:** implementer / sonnet
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008b-pipeline-workflow` / `~/wt/registry-task-008b` — **registry** repo
@@ -15,10 +15,9 @@ workflow, only on `push` to `main`, never from a fork-triggered run. A failed bu
 log where the author will see it. The contract for the trigger (E15) exists first.
 
 ## Context to load (exhaustive)
-- ADRs: 0041 (key in build secrets, usable only by the build workflow; archiving), 0058 §1 (the
-  pipeline "merges" write-back; rejections return the full log in the PR), 0040 §5, 0099 (CI
+- ADRs: **0121** (the `pending` lifecycle, the post-merge build, the write-back PR and rejections; amends 0041 and 0058 §1 — it is the authority for design 2, 4 and 7 below), 0041 (key in build secrets, usable only by the build workflow; archiving), 0058 §1 (as amended by 0121), 0040 §5, 0099 (CI
   gates), 0059 §3, 0103, 0117, 0119, 0120.
-- Contracts: `entry.schema.json` / `append-only.rules.md` **as amended by task 057** (the `pending → published` transition — the write-back PR's entire diff); `artifact-naming.md` (never overwrite an existing tag; "What this document does not
+- Contracts: `entry.schema.json` / `append-only.rules.md` **as amended by task 057** (T1 `pending → published` and T3 `pending → rejected` — each pipeline PR's entire diff); `artifact-naming.md` (never overwrite an existing tag; "What this document does not
   cover" lists idempotency as this task's), `signature-format.md`, `archive-layout.md`,
     `origin/task/032-ownership-contract:contracts/ownership.md` (the identity rule; `GITHUB_ACTOR*`
   forbidden as an identity source), `rebuild-trigger.md` (E12 — **not this task**; see 055, but the
@@ -26,10 +25,11 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 - Platform docs: `docs/architecture/depgraph.md` (E15 and the Q4=A rationale in mission log Q4),
   `docs/architecture/key-management.md`, `docs/manager/OPERATIONS.md` ("Consequences of branch
   protection that bite later", "The manager's own permissions"), `docs/runbooks/site-v1-manual-steps.md` (M1.4, M3).
-- Depends on 008a's tool (`tools/pipeline/build_version.py`, `release_asset_url`) and 008c's `tools/pipeline/write_back.py` (`apply_write_back`, `source_archive_url`, `write_back_values`).
+- Depends on 008a's tool, **merged**: `tools/pipeline/build_version.py` (CLI `--entry --version --workdir --key --pubkey --out`; exit 0 built, 1 rejected, 2 pipeline fault; outputs `<tag>.tar.gz`, `<tag>.tar.gz.minisig`, `result.json`, `build.log`), `tools/pipeline/naming.py` (`release_tag`, `asset_names`, `release_asset_url`), `signing.py`, `reference_verify.py`, `archive.py` — read from `git -C /home/ludwig/registry show origin/main:<path>` on 2026-10-15 (head `a50daac`). The test-only flags (`--allow-local-source`, `--clone-timeout`, `--max-*`, `--scanner`) must never appear in the workflow (008a booked finding 1). And on 008c's `tools/pipeline/write_back.py` (`apply_write_back`, `source_archive_url`, `write_back_values`).
 - Graph: nodes **N5**, **N6**, **N2**, **N3**; edges **E7**, **E8**, **E15**, **E16**.
 
 ## Environmental facts (what is verified, what is not)
+- **Verified 2026-10-15 (against registry `origin/main` `a50daac`):** `build_version.py` is one process that clones, archives, scans, hashes **and signs**, taking `--key` and `--pubkey`: `git show origin/main:tools/pipeline/build_version.py | grep -n 'gitops.clone\|signing.sign'` finds both inside `execute()`. It has **no clone-only or sign-only mode**. The SSRF job split (design 8) therefore cannot be met by calling it once; see design 8 and the Questions. `PyYAML` 6.0.3 imports in this session (`python3 -c 'import yaml; print(yaml.__version__)'`); whether it is on the CI runner is unverified.
 - **Verified 2026-10-14:** `origin/main` of the registry has no `.github/` directory (`git -C
   /home/ludwig/registry ls-tree -r --name-only origin/main | grep -c '^\.github'` → `0`), and no
   `contracts/pipeline-trigger.md` (see umbrella F2). `github-actions[bot]` is numeric id 41898282
@@ -62,14 +62,14 @@ log where the author will see it. The contract for the trigger (E15) exists firs
    Never `pull_request`, never `pull_request_target`, never `workflow_run` from a fork. A
    `workflow_dispatch` with a `dry_run` input exists for tests (criterion 10).
 2. **What to build:** the workflow diffs the pushed range, lists version objects in the `pending`
-   state (decided Q-B, Ludwig 2026-10-14; shape defined by task 057), and builds each. Zero pending versions → the run succeeds doing
+   state (decided Q-B, Ludwig 2026-10-14; ADR-0121; shape defined by task 057), and builds each. Zero pending versions → the run succeeds doing
    nothing (this is what stops the write-back merge's own push from looping). It never trusts the
    diff for *authority*: the entry's content on `main` is the input, and 008a re-validates
    everything.
 3. **Concurrency:** `concurrency: { group: pipeline, cancel-in-progress: false }`. Two merges
    queue; the second run sees the first's write-back PR (or waits for it).
 4. **Branch and PR:** push `pipeline/<ns>.<name>-<version>` to this repository, open a PR to
-   `main` whose diff is exactly one version object's `pending → published` transition (task 057). Two PRs per
+   `main` whose diff is exactly one version object's `pending → published` transition T1 (task 057) — or, on rejection (design 7), exactly one `pending → rejected` transition T3. Two PRs per
    publish (OPERATIONS.md), by design. **Identity (decided Q-D, Ludwig 2026-10-14): the organisation-owned GitHub App**
    — one installation token minted per run, used for opening the PR, merging it, and (task 055) the
    site dispatch. The App id is a repository *variable* `PIPELINE_APP_ID`; the private key is the
@@ -84,12 +84,8 @@ log where the author will see it. The contract for the trigger (E15) exists firs
    008a's tool as a process-substitution path (or a 0600 file under `$RUNNER_TEMP` removed in an
    `if: always()` step). No `set -x` anywhere in that step. The step prints nothing derived from the
    key. Whether the secret exists is **not** checked by this spec (see Questions).
-7. **Failure:** a build rejection (008a exit 1) → comment `build.log` on the originating merged
-   PR, mark the version's pipeline PR not opened, fail the run with a distinct message. Exit 2 is
-   a pipeline fault → fail the run, comment nothing about the author's mod. A rejected version
-   stays `pending` on `main`; the remedy is a new version PR — **Q-J, open: what removes a rejected
-   pending version?** (append-only forbids deletion; task 057 deliberately adds no `rejected` state;
-   see Questions).
+7. **Failure (decided: ADR-0121 Q-J, Ludwig 2026-10-15):** a build rejection (008a exit 1) is reported in two places and never by blocking a merge (the author's PR has already merged): (a) a comment with the full `build.log` on the originating merged PR; (b) a pipeline PR, from the same App identity, whose diff is exactly one T3 transition — `status: "rejected"`, plus `reason` (non-empty after trimming; the rule/clause line from 008a's rejection message) and `build_log_url` (an `https://` link to the full log; where the log is stored is an open question below). The version is never deleted; the author publishes a new version. Exit 2 is a pipeline fault → fail the run, comment nothing about the author's mod and open no T3 PR (a fault is not a verdict on the version; it stays `pending` and the run is retried by a fresh dispatch). A `rejected` version is not `pending`, so the planning step never rebuilds it.
+8. **SSRF job split (decided: Ludwig 2026-10-15; requirement, not a preference).** `source_url` is author-controlled and may be an https URL naming an internal address; 008a does not filter addresses (008a Questions, A-3). The workflow therefore has at least three jobs with this separation: (i) **clone/build job** — clones the author's repository, runs 008a's validation, archive and scan, and holds **no** secret: no `secrets.*` reference of any kind, no `secrets: inherit`, no job- or workflow-level `env` derived from a secret, `permissions:` limited to `contents: read`, and it never mints the App token; (ii) **signing job** (`needs:` the first) — receives **only the built artefact** (tarball and `result.json` via workflow artifacts) and never runs `git clone`, `build_version.py` or any fetch of `source_url`; it re-verifies the tarball (size and entry limits via 008a's `archive.inspect_archive`, sha256 against `result.json`) before signing, and holds only `MINISIGN_SECRET_KEY`; (iii) **write-back job** — holds only the App secret, mints the token, uploads the release and opens the PR. **Gap, verified above:** 008a's tool signs inside the same process as the clone, and has no sign-only entry point. This spec's resolution (the implementer may propose a better one, the reviewer decides): the clone/build job generates a throwaway minisign keypair in-job (`minisign -G`; unverified on the runner), passes it as `--key`/`--pubkey`, and discards the resulting throwaway `.minisig`; a **new** thin `tools/pipeline/sign_built.py` (in this task's file scope; it imports 008a's `signing` and `reference_verify`, and does not edit 008a) performs the real signing in the signing job. If that is judged unacceptable, the alternative is a small amendment to 008a (a separate task, 008d), which stops this task. The throwaway key is not a credential for anything and is never published.
 
 ## Acceptance criteria
 Script = `docs/tasks/008b-verify.sh`; live = a real run, recorded with run URLs, **not**
@@ -107,14 +103,14 @@ script-verified.
 3. [script] **Naming:** a unit test feeds `(namespace, name, version)` triples through the
    workflow's naming/URL helpers (008a's `release_asset_url`, 008c's `source_archive_url`) and asserts tag, both asset names and both URLs equal the `artifact-naming.md` examples (`mc.hello-world-1.0.0`,
    `.tar.gz`, `.tar.gz.minisig`), including a prerelease+build version. The `source_archive_url` expectation comes from task 058's report and any `artifact-naming.md` amendment, not from this sentence.
-4. [script] **The write-back is exactly the permitted transition:** a test builds the PR diff for a
+4. [script] **The write-back is exactly a permitted transition (T1; and T3 for the rejection PR):** a test builds the PR diff for a
    fixture entry (using 008c's `apply_write_back`) and runs it through task 007's append-only,
    schema and ownership checkers (with the App's bot user id as PR author, per the carve-out; the id is read after M5, see umbrella F4):
-   accepted; the same diff with any extra changed field, a second version touched, or a different
+   accepted (the T3 diff likewise, built by the same helper); the same diff with any extra changed field, a second version touched, or a different
    author id → rejected, each shown.
 5. [script] **The carve-out is narrow and tested both ways:** the ownership gate accepts the
    pipeline identity's id *only* for a PR whose changes are exactly the transition in criterion 4 and
-   rejects it for: a first publish, a new version, a `page.json` edit, a takedown, any change under
+   rejects it for: a first publish, a new version, a `page.json` edit, a takedown, a mixed T1 and T3 PR, a T3 whose `reason` is blank or whose `build_log_url` is not `https://`, any change under
    `contracts/` or `.github/`. The hostile fixture from task 007 (id differs, username matches) still
    rejects. Positive control: an owner's ordinary PR still accepts. [Needs Ludwig's approval: CI
    security check.]
@@ -144,11 +140,13 @@ script-verified.
     This is the only live signing run before task 010's real publish.
 11. [live] **Failure path:** a dry run against a deliberately bad commit (a public throwaway repo
     containing a `.png` with DBC magic bytes) fails with exit 1 semantics: the log is attached where
-    specified in design 7, and no release or PR is created.
+    specified in design 7(a), and no release or PR is created (a dry run opens no T3 PR). The T3 PR itself is shown by [script] criterion 4 (fixture) and, live, by task 010's deliberately bad publish if the manager schedules one; until then T3 live is unproven and the log says so.
 12. [script] **Idempotence of the no-op:** run the planning step against `main` after a write-back
     merge: zero pending versions, no build, success.
-13. `docs/tasks/008b-verify.sh` exists, is executable, mutation-tested (criteria 1-2, 4-5), run in a
+13. `docs/tasks/008b-verify.sh` exists, is executable, mutation-tested (criteria 1-2, 4-5, 15-16), run in a
     fresh clone, output pasted in the log; the log separates [script] from [live] results.
+15. [script] **The clone job has no access to the signing secret — a workflow-level check.** The verify script parses `.github/workflows/pipeline.yml` (PyYAML, or a stdlib parser if the CI runner lacks it; runner availability unverified) and asserts, for the job that runs `build_version.py`: (a) the job's whole subtree contains no `secrets.` token, no `secrets: inherit`, and no `uses:` of a reusable workflow; (b) neither the workflow-level nor the job-level `env`/`permissions` references a secret, and the job's `permissions` is exactly `contents: read`; (c) the job has no step with `MINISIGN_SECRET_KEY` or `PIPELINE_APP_PRIVATE_KEY` as a name; and, for the signing job: (d) it contains `secrets.MINISIGN_SECRET_KEY` exactly once, `needs:` the build job, and has no `git clone`, no `build_version.py`, no `source_url` and no `actions/checkout` of anything but this repository's own tools at the pinned `main` sha; and the write-back job: (e) is the only job containing `secrets.PIPELINE_APP_PRIVATE_KEY`. The check **fails on zero matches** of the build job (it must find the job by its `build_version.py` step, never pass vacuously). **Mutations**, each shown red then restored byte-identically: add `${{ secrets.MINISIGN_SECRET_KEY }}` to the build job's `env`; add `secrets: inherit`; move the signing step into the build job; add `build_version.py` to the signing job; widen the build job's `permissions` to `contents: write`. Positive control: the unmodified workflow passes. This criterion proves the *structure*; that GitHub withholds a job's secrets from other jobs is documented behaviour, not observed here (`[unverified]`), and the live fork-safety criterion 8 covers only forks. No command in this task prints, tests for, or lists the secret.
+16. [script] **Test-only flags absent:** the workflow contains none of `--allow-local-source`, `--clone-timeout`, `--max-clone-bytes`, `--max-compressed-bytes`, `--max-uncompressed-bytes`, `--max-entries`, `--scanner` (grep, with a mutation that adds one and shows red).
 14. **Docs move with code:** `docs/pipeline/build-pipeline.md` gains the workflow, the failure
     modes, the manual recovery for a half-finished release, and a "what Ludwig must do" section;
     `docs/architecture/key-management.md` is **not** edited here (D5 key note is Ludwig's task 056
@@ -162,7 +160,7 @@ script-verified.
 ## File scope (declared; anything else = stop and report)
 In the **registry** repo:
 - `.github/workflows/pipeline.yml` (new)
-- `tools/pipeline/plan_pending.py` (new — lists pending versions; the unit-testable half of the workflow), `tools/pipeline/release.sh` (new — thin, `set -euo pipefail`, no logging of env)
+- `tools/pipeline/plan_pending.py` (new — lists pending versions; the unit-testable half of the workflow), `tools/pipeline/sign_built.py` (new — re-verifies a built tarball and signs it; design 8), `tools/pipeline/release.sh` (new — thin, `set -euo pipefail`, no logging of env)
 - `tools/registry/ownership.py` (narrow carve-out only; the file is task 007's — sequence after it merges)
 - `tests/pipeline/` (additions), `docs/pipeline/build-pipeline.md` (additions)
 - `docs/tasks/008b-pipeline-workflow.md` (log), `docs/tasks/008b-verify.sh` (new, executable)
@@ -183,11 +181,11 @@ No edits to `contracts/`, `reserved-namespaces.json`, or the site repo.
 - Any use of `GITHUB_ACTOR`/`GITHUB_ACTOR_ID` as the author identity (ownership.md).
 
 ## Dependencies and sequencing
-Task 032 merges → task 045 → task **057** (version lifecycle contract) → 007 and 039 merged (this task
-edits 007's ownership module and relies on 039's workflow scaffolding for checks) → 008a → 008c (needs 057, 058, 008a) → **008b** → Ludwig's steps M5-M7 (below; M5 and M7 must precede the live criteria) → 010.
+Task 032 (merged, registry PR #4) → task 045 (merged, PR #6) → ADR-0121 (accepted) → task **057** (version lifecycle contract; spec gate-ready, not merged) → 007 and 039 merged (this task
+edits 007's ownership module and relies on 039's workflow scaffolding for checks; neither is on registry `main` on 2026-10-15: `git ls-tree -r --name-only origin/main | grep -c '^tools/registry'` prints 0 and the tree has no `.github/`) → 008a (**merged**, PR #7) → 008c (needs 057, 058, 008a) → **008b** → Ludwig's steps M5-M7 (below; M5 and M7 must precede the live criteria) → 010.
 Also needed before the workflow can be approved: `contracts/pipeline-trigger.md` (E15) and the
 ownership carve-out in `contracts/ownership.md` (E16) — sibling contract tasks, see the umbrella.
-Decisions Q-B, Q-D, Q-E, Q-G are made (Ludwig, 2026-10-14). Parallel-safe with 041 and 056. Shares
+Decisions Q-B, Q-D, Q-E, Q-G (Ludwig, 2026-10-14), Q-J/ADR-0121 and the SSRF policy (2026-10-15) are made. Parallel-safe with 041 and 056. Shares
 no file with 055, but 055's registry sender uses the same App (decision Q-D).
 
 ## Ludwig's manual steps this task creates
@@ -281,18 +279,14 @@ Workflow + helpers + tests + docs + verify script + this file's log section curr
   answers.
 - **For Ludwig/manager (open):** do the branch-protection rules on registry `main` require status checks,
   and which? (Determines whether the App's write-back PR must wait for checks, and which.)
-- **Q-J (open; design hole — decision needed from Ludwig):** a version whose build is rejected stays
-  `pending` forever on `main` under Q-B; the append-only rule forbids deleting it, and task 057 adds no
-  new state. Options: A) a `pending → rejected` transition performed by the pipeline with a reason (new
-  terminal state, new schema enum value; amends 057) / B) `pending` versions may be withdrawn by the
-  author's own PR (a new carve-out) / C) rejected submissions never reach `main`: PR-time checks run
-  the 008a build in a no-secret mode and block the merge. ★C is the closest to ADR-0058's "rejections
-  return the full log in the PR" and adds no new state — but it moves the full build onto untrusted PR
-  content (safe only because 008a never executes mod code). | assumed: none; design item 7 is provisional.
-- Umbrella Q5 (Software Heritage) applies; Q-B..Q-G are decided and no longer questions.
+- **Q-J: closed** by ADR-0121 (Ludwig, 2026-10-15): `pending → rejected` with `reason` and `build_log_url`; design 7 follows it.
+- **Open (non-blocking for the spec, needed before dispatch):** where does the full build log live so `build_log_url` is a stable `https://` link? Candidates, none verified: the workflow run's log URL (retention-limited); a file attached to the merged author PR's comment; an asset on a release in `worldofmodcraft/archive`. Lean: the comment on the merged author PR, because design 7(a) already creates it; retention of both is `[unverified]`.
+- **Open (for the manager/reviewer):** the design 8 gap — 008a has no sign-only mode. Options: A) throwaway key in the build job plus new `sign_built.py` (as specified) ★ / B) amend 008a (task 008d) with `--stage build` and `--stage sign`. | assumed: A.
+- Umbrella Q5 (Software Heritage) applies; Q-B..Q-G and Q-J are decided and no longer questions.
 
 ---
 # Task 008b log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054; nothing started.
 - 2026-10-14 Ludwig's answers folded in (Q-B, Q-D, Q-E, Q-G); manual steps M5-M7 written with unverified click-paths; Q-H and Q-J remain open.
 - 2026-10-14 spec review: write-back functions now come from 008c; 008b depends on 008a and 008c.
+- 2026-10-15 finalised: 008a merged (PR #7) and its real CLI read; ADR-0121 closes Q-J (failure path is now a T3 PR); the SSRF job split is a requirement (design 8) with criteria 15-16; the 008a no-sign-only-mode gap is recorded; dependencies updated (007, 039, 057, 058, 008c still pending).
