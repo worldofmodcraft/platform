@@ -13,6 +13,9 @@ One paragraph. What exists when this is done that does not exist now.
 - Files: ...
 - Survey docs: ...
 
+## Size  (only if over a soft cap — SPEC-CHECKLIST 5b)
+Which number is exceeded, by how much, and why splitting is worse.
+
 ## File scope (declared)
 Paths this task may create/modify. Anything else = stop and report.
 
