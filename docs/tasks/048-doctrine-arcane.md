@@ -292,3 +292,4 @@ ok   mutation 'drop blind-review phrase (checklist)' -> red: FAIL c7: REVIEW-CHE
     Ludwig can ask for it to be split out.
   - Non-blocking: the §2b grammar is fixed, and sources are added for the version facts.
   - Doctrine files still show 0 deleted lines vs main.
+- 2026-10-15 Ludwig, in session: "Ok", in reply to "Merga 048? ★ja" and "specfilerna i samma PR? ★OK". Doctrine merge approved under §7; the spec files are carried in the same PR. AC9 (live: nesting refused) and AC11 follow after merge.
