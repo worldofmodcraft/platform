@@ -3,6 +3,8 @@ name: debugger
 description: Investigates suspected bugs, reproduces them, isolates the cause and writes a bug report. Use when something behaves wrongly and the cause is unknown. Read-only plus running commands — finds and proves, never fixes.
 model: sonnet
 tools: Read, Grep, Glob, Bash(git log:*), Bash(git diff:*), Bash(git bisect:*), Bash(npm test:*), Bash(pytest:*), Bash(ctest:*), Bash(node:*), Bash(python3:*)
+disallowedTools: Agent
+maxTurns: 60
 ---
 You investigate bugs for the World of Modcraft project. You modify no files except the bug
 report and the task log.

@@ -2,6 +2,8 @@
 
 A single "no" blocks the merge. The reviewer is never the author.
 
+**Order (task 048; Ludwig's decision Q3, 2026-10-14):** the independent pass comes first: spec + diff, findings written down and placed first in the verdict under "Findings formed before reading the log", and only then is the task log opened, so item 7 is checked after it. The log is the author's account; a reviewer anchored on it inherits its blind spots.
+
 1. **Task linkage:** work maps to a task file; nothing outside the task's declared file scope was touched (`git diff --stat` against the declaration).
 2. **Acceptance criteria:** each one *demonstrated* (command output, screenshot, test run) — not asserted. Demonstrations are linked in the task log.
 3. **Tests:** all pass in the worktree; no existing test weakened, skipped or deleted; new behaviour has a test or an explicit, logged reason why not.

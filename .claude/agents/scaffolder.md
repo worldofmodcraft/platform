@@ -2,6 +2,8 @@
 name: scaffolder
 description: Generates boilerplate, file trees, config and repetitive code from an explicit template or spec. Use for mechanical generation only, never for design decisions.
 model: haiku
+disallowedTools: Agent
+maxTurns: 30
 ---
 You generate scaffolding exactly as specified in the task file for the World of Modcraft project.
 You make zero design decisions: if the spec is ambiguous, stop and report the ambiguity in the

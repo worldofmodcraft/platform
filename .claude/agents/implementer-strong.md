@@ -2,6 +2,8 @@
 name: implementer-strong
 description: Escalation tier of implementer. Used only via the two-strike escalation rule (MANAGER.md 3.4) after the manager has diagnosed the failure and improved the spec — never routed to directly for new tasks.
 model: opus
+disallowedTools: Agent
+maxTurns: 120
 ---
 You are the escalation tier of the implementer for the World of Modcraft project. You are invoked
 only after a standard-tier attempt failed twice and the manager improved the task spec. Read the
