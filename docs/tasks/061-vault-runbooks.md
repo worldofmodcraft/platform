@@ -1,6 +1,6 @@
 # Task 061: Runbooks in the vault projection
 
-- **Mission:** tooling (vault projection, follow-up to 051/053) — **Status:** review (Ludwig chose option A in session 2026-10-15: "A lägg till den (i projektet Projekt World of Modcraft)"; manager gate, small)
+- **Mission:** tooling (vault projection, follow-up to 051/053) — **Status:** done (2026-10-15; criterion 9 = Ludwig sees it in Obsidian) (Ludwig chose option A in session 2026-10-15: "A lägg till den (i projektet Projekt World of Modcraft)"; manager gate, small)
 - **Agent / model:** implementer / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/061-vault-runbooks / ~/wt/task-061, **stacked on task/052-vault-triggers**: both touch
@@ -44,3 +44,4 @@ Anything against the real vault or `~/.config/wom` before criterion 9. Credentia
 - Verification tails: see the final report / `docs/tasks/061-verify.sh` output.
 - `tools/adr/__pycache__/*.pyc` are tracked on the base branch (outside this task's scope); the bytecode check in
   `061-verify.sh` covers `tools/vault` only, like 052's. Reported to the manager.
+- 2026-10-15 manager: fresh-clone 061-verify.sh --mutate at 805dc48: rc=0, FAIL=0. Independent review: PASS. Booked note: runbooks whose names differ only in case would collide on a case-insensitive vault. Merged under manager authority (tooling).
