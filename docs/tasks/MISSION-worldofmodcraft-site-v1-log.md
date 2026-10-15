@@ -1942,3 +1942,15 @@ Vault refreshed after the merges: written=9, id_conflicts=0.
    Rests on it: task 039 (registry CI going live) must not ship before this is answered; 007b merges either way.
 2. **R11 identity** (carried over from session 9, not blocking): which `pulls.user.id` the platform's takedown PRs carry.
    ★B (a dedicated takedown-only account or App that only you control) when 039/008b go live.
+
+### Merges and gates (session 10)
+- **066 merged** (registry #14, `198dc98`): review PASS; gate `062-verify.sh` ALL CHECKS PASSED on the merge result.
+  **Manager's gap:** that gate ran only 062, which does not run 067; 067 AC5.1 had been red on any later branch, so `main`
+  was red on 067 from `198dc98` until 069 fixed it. From then on every merge gate runs **every** closed verify script, one
+  at a time, on a quiet machine.
+- **069 merged** (registry #15, `2347ffb`): 008a temp-dir race fixed (per-run TMPDIR), 007a and 067 AC5.1 re-pinned to
+  their PR ranges, 062 AC6.034 allowance for 064. Review PASS; gate: 007a, 008a, 032, 034, 057, 062, 066, 067, 069 green.
+- **007b gate** on its merge result: all green except **067 AC2.4** (`git diff BASE HEAD` on `docs/contracts/README.md`,
+  which 007b edits in scope). Same defect class for the fourth time → **task 070**: audit every closed verify script for
+  own-change checks measured against HEAD, re-pin them all, plus the ajv default for 067/069. 007b and 064 merge after it.
+- Ledger hygiene (move done task files) is renumbered **071**.
