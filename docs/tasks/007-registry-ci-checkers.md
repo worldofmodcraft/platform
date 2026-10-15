@@ -1,16 +1,70 @@
 # Task 007: Registry CI checkers — the gates that decide what a registry PR is allowed to do
 
 - **Mission:** SITE-V1, deliverable **D1** ("CI checks (GitHub Actions), each with a clear failure
-  message") — **Status:** **spec-approved (manager, 2026-09-06)**, dispatch gated on registry PR #4
-  merging (see Dependencies).
-- **Agent / model:** implementer / sonnet
-- **Budget:** medium (≤ 3 agent-sessions). Exceeding it is a stop-and-report event (MANAGER.md §8),
-  not something to push through.
-- **Branch / worktree:** `task/007-registry-ci-checkers` — **registry** repo, worktree
-  `~/wt/registry-task-007`. The platform side is this spec file only.
+  message") — **Status:** **umbrella (revised 2026-10-15, session 9).** The 2026-09-06 approval is
+  withdrawn: ADR-0121 and task 057 changed the contract this spec implements. Work is dispatched as
+  **007a** and **007b** (see "Revision 2026-10-15"), each with its own status.
+- **Agent / model:** none directly; see 007a and 007b (implementer / sonnet each)
+- **Budget:** medium + medium (was medium for the whole; see the revision's Size note).
+- **Branch / worktree:** none for this file; 007a and 007b carry their own, in the **registry** repo.
 - **Graph:** builds node **N3 `registry-ci`**. Implements edges **E2** (`entry.schema.json`),
   **E3** (`page.schema.json`), **E4** (`append-only.rules.md`) and **E16** (`ownership.md`).
   Introduces **no new edges**.
+
+## Revision 2026-10-15 (session 9) — read this first; it overrides the text below where they differ
+**Why revised.** ADR-0121 (accepted 2026-10-15) and task 057 (registry PR #8, `e009ef0`) replaced the
+version-object contract this spec was written against: four states (`pending`, `published`, `removed`,
+`rejected`), born-`pending` only, three in-place transitions (T1 `pending → published`, T2 the takedown,
+T3 `pending → rejected`), and a **fail-closed rule**: until `ownership.md` carries the pipeline's
+carve-out (booked under task 008b), a checker must reject every PR containing a T1 or T3 mutation,
+whoever its author is (`append-only.rules.md`, "Coexistence of T1, T2 and T3"; ADR-0121 Decision).
+The dependency on registry PR #4 is met (merged as `4d4a204`).
+
+**Split (MANAGER.md §2b size cap).** Four checkers with the new lifecycle rules are well over 300
+changed source lines; splitting is the default answer. The cut is the contract boundary:
+- **007a — `docs/tasks/007a-registry-checkers-shape.md`:** PR classification, schema validation and
+  append-only (E2, E3, E4), plus the shared report/exit-code module. Branch `task/007a-registry-checkers-shape`.
+- **007b — `docs/tasks/007b-registry-checker-ownership.md`:** the ownership checker (E16), including
+  reserved namespaces, the R11 takedown authorisation and the fail-closed T1/T3 rejection. Branch
+  `task/007b-registry-checker-ownership`, cut after 007a merges (it imports 007a's report module and
+  its transition classification).
+D1's checker half is done when both are merged; task 039 (wiring) follows.
+
+**Criterion changes against the text below** (every other criterion stands, assigned as listed):
+- **Criterion 3 (malicious first publish) is re-based, not dropped.** Measured 2026-10-15 against
+  registry `e009ef0` with `tests/contracts/schema_check.py` (probe script and output in 007a's "Measured facts"):
+  `entry.schema.json` now **rejects** the four-element `attacker:mod` entry (element 2, born `removed`
+  with no `reason`, matches none of the `oneOf` branches) but **accepts** elements 0, 1 and 3 each on
+  their own. So the 006 premise ("the schema accepts it") now holds only for the three-element variant
+  `[0, 1, 3]`. 007a keeps both: (i) the full four-element fixture, rejected, with the schema verdict
+  asserted as REJECT; (ii) the three-element variant, asserted schema-**valid**, which append-only must
+  reject. Per-element expectations under the new rules: element 0 — rule 2 (born-`pending` only;
+  born `published`) and rule 4 (the pairwise duplicate with element 1); element 1 — rule 2 and rule 4;
+  element 2 — rule 2; element 3 — rule 2 (born `removed`; the whitespace `reason` is no longer the
+  deciding clause). The tests assert **at least** these rules per element, each as its own assertion;
+  any further rule a checker reports is recorded in the log with the contract line that justifies it. If the agent's reading of `append-only.rules.md` yields a different attribution, that is a
+  stop-and-report, not a choice.
+- **Criterion 7 (takedown) becomes T1/T2/T3.** T2 keeps the original wording **except** its "changing a
+  second element in the same PR, is rejected" clause, which contradicts the merged contracts
+  (`ownership.md` R11: a takedown PR may carry any number of takedown mutations provided the diff contains
+  nothing else; `append-only.rules.md` classifies each element independently). Restated: a second changed
+  element that is **not itself a valid T2** is rejected; N valid T2s in one PR are shape-legal, and accepted
+  at the authority layer only with R11 authority. A multi-T2 accept fixture is required (007a shape, 007b
+  authority); T1 and T3 are shape-legal
+  at the append-only layer exactly as `append-only.rules.md` states, and are **rejected at the
+  authority layer** by 007b (fail closed).
+- **New criterion 13 (007a): 057 fixture parity.** The append-only checker returns the recorded
+  `expect` for every fixture in registry `docs/tasks/057-transition-fixtures.json` (73 when written),
+  read from that file at test time (not copied), with zero disagreements. `057-oracle.py` is a
+  reference, never imported by the checker.
+- **New criterion 14 (007b): fail-closed T1/T3, requested by task 057's independent reviewer.** A PR whose diff
+  contains a T1 or a T3 mutation is rejected by the ownership checker for **every** author: the
+  namespace owner, a stranger, a reserved-namespace org member, and an author id equal to the
+  pipeline App's id (injected as a parameter; no real id is hard-coded). The message names
+  ADR-0121 and says the pipeline carve-out does not exist yet. Mutation: remove the fail-closed branch
+  and show the owner-authored T1 and T3 fixtures go green-accepted (red test).
+- **Criteria 4, 5, 6 and the ownership half of 10 move to 007b**; 1, 2, 3, 7 (shape), 8, 9, 11, 12 apply
+  to each sub-task for its own checkers.
 
 ## Why this task was split, and where the other half went
 Written down because the ledger has been wrong about this shape before. Mission D1's CI section is
@@ -39,7 +93,7 @@ demonstrated against hostile fixtures:
 2. **Schema validation** — every changed JSON file validated against the schema its path implies,
    using the repository's own stdlib validator.
 3. **Append-only** — a field-level diff of `old`/`new` `entry.json` implementing
-   `contracts/append-only.rules.md` exactly, including the single permitted takedown transition.
+   `contracts/append-only.rules.md` exactly, including the single permitted takedown transition. *(Superseded 2026-10-15: three in-place transitions, T1/T2/T3; see the revision.)*
 4. **Ownership** — the PR author's **numeric account id** compared against `owner.id` for every
    namespace the PR touches, implementing `contracts/ownership.md` (E16), including first-publish
    binding and the ADR-0119 reserved-namespace path.
@@ -49,7 +103,7 @@ two hostile fixtures named below permanently in the suite.
 
 ## Context to load (complete; ADR selection performed against docs/decisions/INDEX.json)
 **Contracts (the specification — these are implemented, not interpreted):**
-- `contracts/append-only.rules.md` — 511 lines, all of it. The five `versions[]` rules, the
+- `contracts/append-only.rules.md` — all of it (511 lines when first written; 708 at `e009ef0`). The five `versions[]` rules, the
   comparison model, the four file-level existence states, the takedown carve-out, the ordering /
   remove-and-re-add / malformed-edit sections, and "What this document does not cover".
 - `contracts/ownership.md` — **merged by registry PR #4**; the E16 contract. Read the merged text,
@@ -91,6 +145,8 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
    `docs/tasks/006-verify.sh` lines 210-264, and the append-only checker **rejects it**. The test
    asserts **which rule rejects which element**, not merely that it was rejected:
 
+   *(The table below is superseded by the revision's re-based criterion 3; kept as history.)*
+
    | Element | Content | Must be rejected by |
    |---|---|---|
    | 0 | `version "1.2.0"` | **rule 4** (with element 1) |
@@ -115,7 +171,7 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
    message naming ADR-0119. Membership is a live-API fact: it enters the checker through an
    **injected oracle** (a parameter/callable), so the logic is testable offline and the only
    untestable part is the one real API call, which belongs to task 039. State this seam explicitly.
-7. **The takedown transition is implemented and is the only in-place mutation accepted.** A PR
+7. *(Superseded in part by the revision: the "second element" clause is restated there.)* **The takedown transition is implemented and is the only in-place mutation accepted.** A PR
    flipping an existing element's `status` to `"removed"` with a non-empty `reason` passes; the same
    PR without a reason, or changing any other field of that element, or changing a second element in
    the same PR, is rejected. **The checker never merges anything** — MANAGER.md §7 makes a takedown
@@ -169,7 +225,7 @@ rounds; the faithful-checker walkthrough near the end is the reading this task t
   is removed.
 
 ## Dependencies and sequencing
-- **Blocked on registry PR #4 (task 032, `contracts/ownership.md`) merging.** Criteria 4-6 are
+- *(Met: PR #4 merged as `4d4a204`.)* **Blocked on registry PR #4 (task 032, `contracts/ownership.md`) merging.** Criteria 4-6 are
   implemented *from that document*; dispatching before it merges means coding the ownership gate
   from an ADR read cold, which is precisely what the E16 amendment was created to prevent.
 - Needs task **006** (merged, registry PR #2) and task **025** (merged, registry PR #3).

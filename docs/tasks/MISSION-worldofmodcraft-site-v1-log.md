@@ -1839,3 +1839,50 @@ After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and th
   `git -C ~/wom branch --set-upstream-to=origin/main main`.
 - Separately: `womcraft/worldofmodcraft` (user-account repo, 404 unauthenticated, so private or absent) is not part of the
   project. Ludwig mentioned it on 2026-10-15; no action decided.
+
+## SESSION STATUS — 2026-10-15 (session 9)
+Kickoff (Ludwig): "Kör din vanliga sessionsstart … Börja med att rätta upstream för main i ~/wom, fortsätt sedan med punkt 2–4."
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Done
+- **Upstream fixed:** `git branch --set-upstream-to=origin/main main` in `~/wom`; `git status -sb` now shows `## main...origin/main`
+  (it tracked the deleted `chore/handover-review-verdict`). Local config only, no remote or history change.
+- **062** (handover item 2) built, verified, reviewed: registry PR #9. Closed tasks' scope checks (006, 008a, 032, 057) now
+  measure their own pinned base..final range; 006 C1.5b, C8.2, C8.3a, C8.3b retired with named 057 successors; the stale
+  heading quote in `ownership.md` fixed. Manager fresh-clone re-run: normal and `--mutate` ALL CHECKS PASSED. Review PASS.
+- **063** (item 3) doctrine fix in MANAGER.md §5, written by the manager (the classifier allowed it this time): platform PR #55.
+  Verify green and mutation-tested in a fresh clone; review PASS.
+- **007** (item 4) revised for ADR-0121/057 and split into **007a** (shape: classify, schema, append-only) and **007b**
+  (ownership, R11, fail-closed T1/T3). Independent spec review: FAIL, FAIL, PASS; both spec-approved.
+  Measured before writing: `entry.schema.json` now rejects the four-element `attacker:mod` entry, so 006's premise holds only
+  for the variant without element 2 (criterion 3 re-based).
+- **007a** built, verified, reviewed: registry PR #10. 150 tests, 057 fixtures 73/73 parity, `--mutate` 78 mutations,
+  not_red=0 (manager fresh-clone re-run). Review FAIL (Python `$` accepted a trailing newline on pattern fields) → fix round
+  with red-first tests → delta review PASS.
+- Booked: **064** (draft; `schema_check.py` end anchor + Unicode `\d`), **065** (draft; `key_id` format in `entry.schema.json`
+  per `signature-format.md`). 039 got a dependency note (needs 007a and 007b).
+
+### Waiting for Ludwig (merge approvals)
+- **Platform PR #55 (063, doctrine):** ★approve.
+- **Registry PR #10 (007a, security-relevant CI):** ★approve. 007b starts only after this merges.
+- **Registry PR #9 (062):** ★approve. It edits two quoting sentences in `contracts/ownership.md`; held because of that.
+
+### For Ludwig (★ = manager's lean)
+1. **Canonical ajv 8 location** (062 Q1): `057-verify.sh` and `062-verify.sh` need ajv 8; the only copy here is
+   `/tmp/fc041/node_modules`, which a reboot can wipe. A: ★a pinned `package.json` + `npm ci` in a registry dev-tools folder
+   (small task); B: install it in the site repo and point there; C: keep `/tmp` and accept re-creating it.
+2. **R11 identity** (007b, `ownership.md` R11 mechanism): which `pulls.user.id` do the platform's own takedown PRs carry?
+   Until answered, `r11_identity = None` and every takedown is rejected (fail closed, as the contract intends). ★Answer it
+   when 039/008b produce a real organisation-authored PR; nothing blocks on it now.
+
+### Next steps
+After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secret, M5, M7 done; M6 open), 008b.
+
+### Ludwig's answers, 2026-10-15 (session 9, verbatim)
+"★ på alla. Avseende 3. får du förklara lite mer?"
+- Merges approved: platform #55 (063), registry #10 (007a), registry #9 (062), platform #56 (this status). Recorded in each task log.
+- ajv location: A (★) — a pinned `package.json` + `npm ci` in a registry dev-tools folder; booked as task 066 (draft).
+- R11 identity: ★ answer later. Explained in session: the org cannot open PRs itself, so the authorised id is one of
+  (A) the pipeline App's bot, (B) a dedicated takedown-only account or App that only Ludwig controls, (C) `womcraft`.
+  Manager lean ★B when 039/008b go live: C is the account manager sessions act as, and A would let the publishing
+  automation also remove. Until then `r11_identity = None` and every takedown is rejected (fail closed).
