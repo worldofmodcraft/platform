@@ -1,6 +1,6 @@
 # Task 049: Mechanical enforcement of the git rules WoM already has (bash PreToolUse hook) and the per-subagent log-entry check
 
-- **Mission:** tooling (task 047, part B, plus Q6) — **Status:** review (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
+- **Mission:** tooling (task 047, part B, plus Q6) — **Status:** done (2026-10-15; AC9 live after merge) (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (two small scripts, a fixture set, a verify script with mutations)
 - **Branch / worktree:** task/049-safety-hooks / ~/wt/task-049
@@ -356,3 +356,5 @@ the docs, AC9's evidence once the live check is run, the log current.
   documented gap). (3) During testing a harness safety check refused a command of mine that contained a `rm -r "$HOME"` in a
   compound line; it did not run, I did not retry it, and I removed nothing outside `mktemp` directories I created.
   (4) Ludwig approves the merge (section 7: command-security control).
+- 2026-10-15 manager: fresh-clone 049-verify.sh --mutate at 373d8be: rc=0, 75 mutations, 0 problems. Security review: PASS, with a full deletion-safety audit (the harness-denied `rm -r "$HOME"` was a one-off agent command, not code). Deviation (a), multi-group reddening, is accepted.
+- 2026-10-15 Ludwig, in session: "Ja bpda". Merge approved.
