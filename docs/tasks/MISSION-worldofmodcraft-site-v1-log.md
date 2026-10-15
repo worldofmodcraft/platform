@@ -1789,3 +1789,38 @@ Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's who
 
 ### Next steps
 After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and the final demo. Parallel: 058 live, 049 after 048.
+
+## SESSION STATUS / HANDOVER — 2026-10-15 (session 8, day part), context 48 % of 1M (past the 40 % hard threshold)
+
+### Merged today (Ludwig's approvals recorded verbatim in each task log)
+- **ADR-0121** accepted (version lifecycle). **057** contracts implement it (registry PR #8).
+- **008a** pipeline core (registry PR #7). **052** vault triggers + guard (PR #47). **048** doctrine additions (PR #50), written
+  by the manager in session with Ludwig because the auto-mode classifier denied agent edits to doctrine. **049** safety hooks
+  + `tools/manager/check-log-entry.sh` (PR #51). Specs: 057/008b approved (PR #49).
+
+### Open, in order
+1. **061** runbooks in the vault: built and verified (fresh clone at 805dc48, `061-verify.sh --mutate` green). An
+   independent review was still running at handover. Next session: read the verdict; on PASS merge (manager authority,
+   tooling), run the projection, and Ludwig checks `Runbooks/site-v1-manual-steps` in Obsidian (criterion 9).
+2. **062 (to write):** registry test maintenance after 057.
+   - Retire or annotate 006-verify.sh C1.5b, C8.2, C8.3a and C8.3b (stale pins of the born-`removed` rule).
+   - Re-base the scope pins in 006 C9.4/C9.6, 032 S4 and 008a's scope check.
+   - Fix ownership.md's quote of the old "one permitted in-place mutation" heading.
+   Changing tests is its own reviewed task (§3.5).
+3. **063 (to write, doctrine, Ludwig approves):** MANAGER.md §5 still says check-log-entry.sh "does not exist". It does now (049).
+4. **007** registry CI checkers: revise the spec for ADR-0121/057, and add the fail-closed fixture the 057 reviewer asked
+   for (T1/T3 by an author PR). Then build. 039 (workflow + CONTRIBUTING) follows.
+5. **008b → 008c** need Ludwig's M5 (GitHub App), M6 (personal account joins the org), M7 (archive repo), and Q-H
+   (MINISIGN secret). The runbook has the steps.
+6. **055** (site on the live registry), then **010** (test mod), then Ludwig's M4 and the final demo.
+7. **Live checks with Ludwig:** 052 AC7 (install the vault git hooks in ~/wom), 048 AC9 (nesting refused) and 049 AC9
+   (hook live). All three need a fresh session that has loaded main's `.claude/` (see the gotcha below).
+8. **056** (PR #43) is waiting for Ludwig's read-through. **058** live part needs a Pages deploy.
+
+### For Ludwig
+- Read 056 (PR #43) when convenient.
+- Manual steps Q-H, M5, M6 and M7 (runbook).
+- In the next session, let the manager do the three live checks in item 7 with you.
+
+### Kickoff line for the next session
+"Kör din vanliga sessionsstart. Läs SESSION STATUS / HANDOVER 2026-10-15 (session 8) i missionsloggen och fortsätt med punkt 1–4."
