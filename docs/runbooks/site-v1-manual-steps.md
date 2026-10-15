@@ -6,8 +6,10 @@ Nothing here is reversible-by-accident: no step deletes anything.
 
 Status key: ☑ done · ☐ waiting on you · ⏸ waiting on a decision first · `[unverified]` = no evidence
 found; check it yourself.
-**Last reviewed: 2026-10-15 (task 060).** Evidence for every marker is in
-`docs/tasks/060-runbook-manual-steps.md`, section "Task 060 log".
+**Last reviewed: 2026-10-15 (task 068).** Evidence for the markers as of task 060 is in
+`docs/tasks/060-runbook-manual-steps.md`, section "Task 060 log". Markers M3, M5, M7 and Q-H were updated by task 068
+for Ludwig's manual steps of 2026-10-15; the new evidence is in `docs/tasks/068-runbook-markers-session9.md`, section
+"Task 068 log".
 **Rule for every step below: you never copy or paste a secret into chat, a file or an issue. Where a
 step handles a secret, it goes from GitHub's own page straight into GitHub's own form.**
 
@@ -113,9 +115,10 @@ returns the four addresses. Tell me when the records are in and I will verify th
 
 ---
 
-## ☐ M3 — Signing keypair → Actions secret  — decided: Q3=A (minisign, Ed25519)
-**Status: keypair done (key id `6E5B30596A7A8CC4`, OPERATIONS.md); whether the secret still exists is `[unverified]` —
-see Q-H below. Do not redo this step; do Q-H first.**
+## ☑ M3 — Signing keypair → Actions secret  — decided: Q3=A (minisign, Ed25519)
+**Status: done.** Keypair made (key id `6E5B30596A7A8CC4`, OPERATIONS.md); the `MINISIGN_SECRET_KEY` Actions secret
+existed on 2026-09-05 (Ludwig; checked then with `gh secret list`, mission log "M3 is DONE") and Ludwig re-confirmed on
+2026-10-15 that it is listed (Q-H below). Do not redo this step. His offline backup of the private key is unconfirmed.
 Every command below is one I ran end-to-end against minisign 0.12 before writing it here: I
 generated a throwaway key, signed a file, verified it, tampered with the file, confirmed
 verification fails with exit code 1, then destroyed the throwaway key.
@@ -170,10 +173,13 @@ ADR-0119 reserves `mc` and `test` as organisation-owned namespaces, so `test:hel
 
 ---
 
-## ☐ M5 — Create the organisation's GitHub App  (decision Q-D, Ludwig 2026-10-14)
+## ☑ M5 — Create the organisation's GitHub App  (decision Q-D, Ludwig 2026-10-14)
 **Why:** the build pipeline must open and merge the write-back pull request and notify the site. Pull requests made with
 the built-in token do not start other workflows; ones made by an App do. **When:** task 008b's live checks wait for this
-(and for M7). **Status:** not done — `https://github.com/apps/worldofmodcraft-pipeline` returns 404 (2026-10-15).
+(and for M7). **Status: done (Ludwig, 2026-10-15).** The App `worldofmodcraft-pipeline` is created under the organisation, installed
+on `registry`, `site` and `archive`, and its key and App ID are stored as registry Actions secrets (step 9). Its public
+page `https://github.com/apps/worldofmodcraft-pipeline` answers HTTP 200 (unauthenticated check, 2026-10-15). The steps
+below are kept as the record.
 All click-paths in M5–M7 are `[unverified — check on screen]`: if a screen differs from the text, follow the screen
 and tell the manager what differed. Do M7 first if you can, so the App can be installed on `archive` in step 8.
 
@@ -226,9 +232,10 @@ page (2026-10-15) lists 1 member, not `mbmludric`. Private members are invisible
 
 ---
 
-## ☐ M7 — Create the `archive` repository  (decision Q-E, Ludwig 2026-10-14)
+## ☑ M7 — Create the `archive` repository  (decision Q-E, Ludwig 2026-10-14)
 **Why:** published source tarballs and signatures are stored as Releases in a separate repo. **When:** before task 008b's
-live checks (criterion 6). **Status:** not done — `https://github.com/worldofmodcraft/archive` returns 404 (2026-10-15).
+live checks (criterion 6). **Status: done (Ludwig, 2026-10-15).** `https://github.com/worldofmodcraft/archive` is public with one commit; an
+unauthenticated request answers HTTP 200 (2026-10-15).
 
 1. Open `https://github.com/organizations/worldofmodcraft/repositories/new`
 2. Name `archive`. Description `Source tarballs and signatures for published mods`. Visibility **Public**.
@@ -239,7 +246,9 @@ live checks (criterion 6). **Status:** not done — `https://github.com/worldofm
 
 ---
 
-## ☐ Q-H — Does the `MINISIGN_SECRET_KEY` secret exist?  (open fact question)
+## ☑ Q-H — Does the `MINISIGN_SECRET_KEY` secret exist?  (open fact question)
+**Answered (Ludwig, 2026-10-15):** "MINISIGN_SECRET_KEY finns" — he looked; nothing was copied. Whether the offline
+backup exists was not answered.
 **Why:** the pipeline signs with it (task 008b, step 6); M3 was reported done 2026-09-05 but nobody has looked since, and
 no agent may check (`gh secret` is forbidden, CLAUDE.md rule 11). **When:** 008b cannot sign without it.
 **Look, do not copy: this step only reads names. Do not click any secret, and do not paste or copy any value anywhere.**

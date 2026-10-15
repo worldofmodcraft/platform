@@ -47,3 +47,30 @@ which the runbook cites.
 # Task 068 log
 - 2026-10-15 manager (session 10): spec written and approved (solo gate, SPEC-CHECKLIST 1–8; small documentation).
 - 2026-10-15 manager: worktree `~/wt/task-068` cut from platform origin/main `3f25f03`; dispatched. check-log-entry baseline = 2.
+- 2026-10-15 doc-writer: runbook edited. M3, M5, M7, Q-H headings now ☑ with one evidence note each (sources: mission log
+  "M3 is DONE" entry, and section "Ludwig's manual steps, 2026-10-15 (after the handover entry)", read from
+  `origin/session/9-specs`). M4 and M6 keep ☐ (M6 text already says it is needed before task 010, not 008b; unchanged).
+  "Last reviewed" now names 2026-10-15 and task 068. No step instructions changed. No authenticated call, no credential read.
+- 2026-10-15 doc-writer: unauthenticated re-checks (`curl -s -o /dev/null -w '%{http_code}'`):
+  `https://github.com/worldofmodcraft/archive` -> 200; `https://github.com/apps/worldofmodcraft-pipeline` -> 200.
+- 2026-10-15 doc-writer: `docs/tasks/068-verify.sh` (text checks, no network), normal run: 14 PASS lines (M3/M5/M7/Q-H
+  heading ☑ and evidence note; M4/M6 heading ☐; M5 and M7 free of "not done"/"returns 404"; Last reviewed line; no
+  secret-looking value), then `ALL PASS`, exit 0.
+- 2026-10-15 doc-writer: `068-verify.sh --mutate` output (each mutation applied to a temp copy), exit 0:
+  ```
+  MUTATION M3 revert to ☐: red as expected -> M3 heading is ☑
+  MUTATION M5 revert to ☐: red as expected -> M5 heading is ☑
+  MUTATION M7 revert to ☐: red as expected -> M7 heading is ☑
+  MUTATION Q-H revert to ☐: red as expected -> Q-H heading is ☑
+  MUTATION M4 flipped to ☑: red as expected -> M4 heading stays ☐
+  MUTATION M6 flipped to ☑: red as expected -> M6 heading stays ☐
+  MUTATION M5 old 404 text: red as expected -> M5 has no 'not done'/'returns 404'
+  MUTATION M7 old 404 text: red as expected -> M7 has no 'not done'/'returns 404'
+  MUTATION M3 evidence gone: red as expected -> M3 has evidence note (who/when)
+  MUTATION Q-H evidence gone: red as expected -> Q-H has evidence note (who/when)
+  MUTATION Last reviewed old: red as expected -> Last reviewed names 2026-10-15 and task 068
+  MUTATION secret planted: red as expected -> no secret-looking value
+  ```
+  The first --mutate run had one NO-OP (the M7 pattern was split across a line break); the pattern was fixed and the run above is the second.
+- 2026-10-15 doc-writer: gap, not papered over: the M3 evidence "2026-09-05, `gh secret list`" is the mission log's claim; this
+  task could not re-check it (forbidden). The 2026-10-15 re-confirmation is Ludwig's own statement, as recorded in the log.
