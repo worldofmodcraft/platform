@@ -264,3 +264,11 @@ temp `WOM_VAULT` (test mode ignores `~/.config/wom/vault-path`); the tool never 
 a hidden `.NAME.pid.ns.wom-tmp` to remove by hand; `strace` is not installed on this machine, so "never opened
 a file" is proven with a Python audit hook (`tools/vault/tests/audit_run.py`). Self-test:
 `docs/tasks/051-verify.sh [--mutate]`.
+
+### Vault refresh after a merge: run `tools/vault/refresh-main.sh` (task 052)
+`git fetch origin main:main` fires no `post-merge` hook (verified in a temp repo), and `gh pr merge` never runs one
+locally, so after each `gh pr merge` (as its own bare command) and at handover the manager runs
+`tools/vault/refresh-main.sh`. It pulls main (`--ff-only` in the worktree that has main checked out, otherwise
+`git fetch origin main:main`), re-pins the tool copy and runs `write --ref main`. The hooks and this script run a
+**pinned copy** of `wom_vault.py` in the git common dir; if a hook prints `pinned copy is stale; run refresh-main.sh`,
+run it. Details: `docs/tools/vault-projection.md`, "Triggers and guard".

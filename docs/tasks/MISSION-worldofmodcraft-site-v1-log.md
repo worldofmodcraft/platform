@@ -1710,3 +1710,82 @@ Lean marked ★. Q1–Q6 are the draft's items 1–6.
 Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's whole trigger design (Q-C1),
 048 and 049 entirely.
 **Answered 2026-10-14 by Ludwig, in session:** "Allt enligt stjärna, godkänner spec 050". Every item above = ★.
+
+### Ludwig's rulings, 2026-10-14 evening (verbatim answers recorded)
+- Design mission for the game: **C**, "vi fortsätter med SITE V1". No game design until SITE-V1 is done.
+- "Men kör hela natten nu, vill att site v1 ska vara klart när jag vaknar". The manager answered that the
+  mission's binary success criterion needs Ludwig: DNS (M2), the test-mod repo on his personal account (M4),
+  the final demo, and §7 approvals. Everything else runs overnight.
+- "Kör på dina rekommendationer, godkänner alla". All four questions are answered with the starred option:
+  1. **Task 032 D1:** R11 (takedown) applies to **every** namespace, owned or not. The manager's 2026-09-08 reading is confirmed.
+  2. **Task 032 D2:** one authorised takedown PR may carry **any number** of takedown mutations, provided the
+     diff contains nothing else. The manager's 2026-09-08 decision is confirmed.
+  3. **Overnight §7 waiver (2026-10-14/15 only):** the manager may merge PRs that touch CI security checks
+     (registry CI, tasks 007/039) when the independent review is PASS and verification is green.
+     **Still Ludwig-only:** signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine.
+  4. **Overnight §8 waiver:** a blocked chain is parked, with its question written under "For Ludwig", and
+     independent chains continue. The session halts fully at five open Ludwig items.
+- 2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
+  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only. Context was 23 % when he said it.
+  Compaction caution (§5.5) still applies: anything remembered is verified against disk before acting.
+- 2026-10-14 late, Ludwig: "Stjärna på allt". These questions are answered with the starred option (manager's bundle, session 8):
+  - **Q-A:** task 032 fix round 6 approved (§3.4, Ludwig's call). Pin full sentences instead of 70-char prefixes, add a tail-append
+    fixture shown red first, remove the "pending Ludwig" markings now that D1/D2 are confirmed, and re-prove in a fresh clone at HEAD.
+  - **Q-B:** the author PR adds a version with only `version`, `commit` and `source_url`, plus `status: pending`. The pipeline's
+    write-back PR fills in the remaining fields and sets `published`. This is the second permitted in-place transition, beside the
+    takedown, and it is written into the contracts by its own reviewed task (057). It resolves the contradiction task 054 found:
+    entry.schema requires 9 fields that the author cannot supply, and append-only forbids the write-back. The manager verified that
+    contradiction on registry origin/main.
+  - **Q-C:** `mod.lua` is read by a restricted static reader, which accepts a literal table only and never executes code.
+  - **Q-D:** the pipeline acts as a GitHub App owned by the organisation. Creating it is a new manual step for Ludwig (M5, runbook).
+  - **Q-E:** archives live in a separate repo, `worldofmodcraft/archive`.
+  - **Q-F:** Ludwig's personal account joins the organisation (manual step), so mission §7.6 stands as written.
+  - **Q-G:** a project-owned URL fronts `source_archive` before the first publish. Feasibility on Pages is unverified and gets a probe.
+  - **Q-H** (does the `MINISIGN_SECRET_KEY` secret exist?) is a fact question, still unanswered.
+
+## SESSION STATUS — 2026-10-15 morning (session 8, overnight run)
+
+### Done and merged
+- **Vault projection:** 050 (sync probe), 051 (generator), 053 (ADR + Journal notes, A1–A3). The vault holds
+  Status, Tasks, Gotchas, Commands, Mission Log, one note per task and per ADR, and the Journal.
+- **032 ownership contract** (registry PR #4) after fix round 6. The blocker in front of 007 is gone.
+- **041** site schema copies synced, with a CI check (site PR #2). Live green, and a throwaway PR proved red.
+- **054** the remaining SITE-V1 specs: 008/008a/008b/008c, 010, 055, 056, 057, 058.
+- **059** no bytecode in the repo. **060** the runbook shows M0–M7 and Q-H truthfully.
+
+### Built and reviewed, waiting for Ludwig's merge
+- **052** vault triggers + guard (branch `task/052-vault-triggers`). It touches MANAGER.md §5, which is doctrine.
+  AC7 (live install) is done with Ludwig after merge.
+- **008a** pipeline core (registry PR #7). Signing is involved. Security review PASS; 114 checks and 47 mutations.
+- **056** architecture note (platform PR #43). Criterion 9 is Ludwig's read-through.
+
+### Blocked on Ludwig
+- **ADR-0121 proposal** (branch `proposal/adr-0121-version-lifecycle`): the `pending → published` lifecycle,
+  Q-L (born-pending only) and Q-J (`pending → rejected`). It blocks 057, which blocks 007, 008b, 008c and 010.
+- **048 doctrine:** the auto-mode classifier denied the edits to CLAUDE.md, MANAGER.md and the checklists. They are
+  not retried and not worked around. Agent frontmatter edits sit uncommitted in `~/wt/task-048b`. 049 is stacked on it.
+- **058 live part:** a Pages deploy probe that needs a push to the live site.
+- **Manual steps (runbook):** M4, M5 (GitHub App), M6 (personal account joins the org), M7 (archive repo),
+  Q-H (does `MINISIGN_SECRET_KEY` exist? look only).
+
+### For Ludwig (★ = manager's lean)
+1. **ADR-0121:** ★accept as proposed (Q-L yes, Q-J `rejected` status, never deletion).
+2. **Merge 052:** ★yes, then install the hooks together (AC7).
+3. **Merge 008a:** ★yes.
+4. **056:** read docs/architecture/system-overview.md (PR #43), then ★merge.
+5. **048:** the classifier blocks agents from editing doctrine. ★A: Ludwig applies the doctrine diff in an
+   interactive session with the manager (text ready in the spec). B: drop 048's doctrine half and keep only the
+   agent-frontmatter half.
+6. **Token-guard text (Q-T):** rule 0 says "for a specific moment", while Ludwig's lift was open-ended. Covered by 048.
+7. **SSRF policy for 008b:** ★clone in a job that holds no signing secret.
+
+### Process notes from the night (precedents)
+- Every implementation got an independent review in blind order. Blocking findings were caught on 053 (.pyc),
+  052 (guard fail-open, then a log paste taken before the last commit), 056 (rule-9 tags, twice; §3.4
+  escalation used once, then passed) and 032 (prefix-only pins).
+- The manager re-ran every verify script in a fresh clone before merge. It caught 052's red HEAD behind a green
+  paste.
+- One permission denial (048) was treated as an answer, not an obstacle.
+
+### Next steps
+After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and the final demo. Parallel: 058 live, 049 after 048.
