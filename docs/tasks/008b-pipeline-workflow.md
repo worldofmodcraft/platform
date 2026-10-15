@@ -1,6 +1,6 @@
 # Task 008b: Pipeline workflow — post-merge run, release upload, protected write-back
 
-- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft, gate-ready pending its upstreams (spec written 2026-10-14 under task 054; finalised 2026-10-15). **Not dispatchable yet**: 008a is merged (registry PR #7, `a50daac`), but it still needs task 057 (spec-approved, not yet merged), 008c, task 058, 007 and 039, the sibling contract tasks listed in the umbrella, and Ludwig's steps M5-M7. Decided: Q-B, Q-D, Q-E, Q-G (Ludwig, 2026-10-14); Q-J and the `pending → rejected` transition (ADR-0121, Accepted 2026-10-15); the SSRF policy (Ludwig, 2026-10-15, "Stjärna på allt": the clone runs in a job that holds no signing secret, and the signing job receives only the built artefact). Touches the signing secret and a CI security check: **merge requires Ludwig's explicit approval (MANAGER.md §7).** An independent reviewer performs a spec review before delegation (SPEC-CHECKLIST: security-touching).
+- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–2: PASS) 
 - **Agent / model:** implementer / sonnet
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008b-pipeline-workflow` / `~/wt/registry-task-008b` — **registry** repo
@@ -309,3 +309,4 @@ pipeline. `build_log_url` is that file's permanent https URL in a repo the proje
 unpublished). The Actions run log is not used as the permanent reference (retention believed ~90 days,
 [unverified]). Depends on M7 (archive repo exists).
 - 2026-10-15 spec review fixes: design 8 rewritten around `--no-sign` and a sign step (throwaway-key design deleted); `build_version.py` brought into scope; retry path (design 9, criterion 17); Size section; build-log location integrated into design 7; criteria renumbered 1-18; ownership.md cited from registry main.
+- 2026-10-15 manager gate note: test (a) must state whether the one-shot result.json carries `signed`; if not, the pinned difference lists it (review round 2, minor).

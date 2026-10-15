@@ -1,6 +1,6 @@
 # Task 057: The version lifecycle contract — `pending → published` in `entry.schema.json` and `append-only.rules.md`
 
-- **Mission:** SITE-V1 (unblocks deliverables D1 and D2) — **Status:** draft, gate-ready (spec written 2026-10-14 under task 054; finalised 2026-10-15). **Unblocked: ADR-0121 is accepted and merged and settles B1, Q-L and Q-J (below). Dispatchable once Ludwig spec-approves this file.**
+- **Mission:** SITE-V1 (unblocks deliverables D1 and D2) — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–2: PASS) 
 - **Repo:** registry (`worldofmodcraft/registry`); this file is kept in the platform repository's `docs/tasks/` with the other 054 specs and copied to the registry branch's `docs/tasks/` as that task's log.
 - **Agent / model:** doc-writer / sonnet for the contract text; implementer / sonnet for the schema, the `oneOf` support in the test validator, and the verify artefact (one branch, sequenced). Independent reviewer required: this amends two accepted contracts.
 - **Budget:** medium (≤ 3 agent-sessions)
