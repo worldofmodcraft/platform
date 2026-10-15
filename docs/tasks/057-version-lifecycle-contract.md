@@ -37,7 +37,7 @@ Recorded consequence, now answered: a `pending` version occupies its `version` s
 into a recorded, explained terminal state. The squat itself remains possible (ADR-0121 Consequences).
 
 ## Context to load (exhaustive)
-- ADRs: 0041, 0058, 0039, 0119 (reserved namespaces: their `owner` freeze), 0103 (boring), 0117 (graph first). Task 054 finding F1 (umbrella `docs/tasks/008-build-pipeline.md`).
+- ADRs: 0121 in full; 0041, 0058 as quoted in it; 0119 (the `owner` freeze). See Size. Task 054 finding F1 (umbrella `docs/tasks/008-build-pipeline.md`).
 - Registry `origin/main` (ec56e9f when read): `contracts/entry.schema.json`, `contracts/append-only.rules.md` (all of it, esp. "File-level existence", rules 1-5, "The one permitted in-place mutation: takedown"), `contracts/examples/entry/**`, `tests/contracts/test_contracts.py`, `tests/contracts/schema_check.py` (supported keywords: `type pattern minimum minLength maxLength minItems enum required properties additionalProperties items` plus annotation keywords; **no `oneOf`, `anyOf`, `if`, `const`, `$ref`** — read 2026-10-14; unsupported keywords raise `NotImplementedError`), `docs/contracts/README.md`.
 - ADR-0121 (read in full), plus the ADRs it amends: 0041, 0058.
 - `contracts/ownership.md` on registry `origin/main` (task 032, merged as PR #4): rule `R11` ("takedown exception"; precedence over `R3` and `R7`; one authorised takedown PR may carry any number of takedown mutations provided the diff contains nothing else). Verified 2026-10-15: `git -C /home/ludwig/registry show origin/main:contracts/ownership.md | grep -c R11` prints a non-zero count (the 2026-10-14 draft could not find it on the then-unmerged branch). The pipeline carve-out for T1/T3 is **not** in that file (`grep -n -i carve` finds only the takedown carve-out discussion); it is a sibling task.
@@ -95,6 +95,9 @@ Today rule 2 lets any PR append an element already `published` (with nine fields
 ### D-3 What does *not* change
 `id`, `owner` freeze; `deprecated` (a mod-level flag, not a version status); rules 3-5 (length, uniqueness by exact string, no monotonicity); the takedown's field-level shape and one-way terminal rule (045's precision work lands first and is not redone here); `page.json`.
 
+## Size (5b)
+Medium (≤ 3 agent-sessions), one branch, sequenced: contract text, then schema plus the `oneOf` keyword, then fixtures, oracle and verify script. The reading list is longer than ten items because this task amends two accepted contracts, but it is bounded: required in full are ADR-0121, `append-only.rules.md`, `entry.schema.json`, `schema_check.py` and `test_contracts.py`; the rest is skimmed for one fact each — ADR-0041 and 0058 §1 (quoted in ADR-0121, so not re-read), ADR-0119 (the `owner` freeze), `ownership.md` R11 (the takedown precedence), the site's `validate.mjs` (Ajv strict mode, criterion 4 only), and `docs/contracts/README.md` (two table rows). ADRs 0039, 0103 and 0117 are dropped from the required list. Split trigger: if the schema/validator/Ajv-agreement work (criteria 3-4) is not green after session 2, it becomes its own task and the text, fixtures and oracle (criteria 2, 5-7) land first.
+
 ## Edit map (so the diff is reviewable against anchors that exist today)
 `contracts/append-only.rules.md`, quoted anchors verified 2026-10-14 on `origin/main`:
 | anchor (text today) | change |
@@ -107,7 +110,7 @@ Today rule 2 lets any PR append an element already `published` (with nine fields
 | New sections "T1: `pending → published`" and "T3: `pending → rejected`" | the numbered conditions, the "exactly once" argument, the fail-closed sentence, worked examples, attack attempts |
 | Section "What this document does not cover" and any sentence saying "one permitted in-place mutation" (ADR-0121: wording becomes plural) | updated to the plural; `grep -n "one permitted\|only status transition"` returns zero afterwards (positive control on the pre-change blob) |
 `contracts/entry.schema.json`: items `required`, `status` enum (+`pending`, +`rejected`), new property `build_log_url` (pattern `^https://\S+$`), the item and field descriptions that say "required-9-field", "starts published", "Every element is a single published version", and `source_archive`'s "absent until the pipeline runs" (the sentence that contradicted `required`). `docs/contracts/README.md`: rows for both files updated, task 057 named.
-Examples: `contracts/examples/entry/valid/pending-first-publish.json`, `…/valid/removed-version-with-reason.json` kept; `valid/rejected-version.json`; `invalid/pending-with-signature.json`, `invalid/published-with-reason.json`, `invalid/rejected-without-reason.json`, `invalid/rejected-without-build-log-url.json`, `invalid/rejected-with-signature.json`, `invalid/rejected-empty-reason.json` (whitespace only; shape-valid for the schema, caught by the checker/oracle, so it lives in the transition fixtures instead if the schema cannot express trimming), `invalid/status-unknown.json` (replaces the former `status-rejected` case, which is now a valid status); the existing `invalid/missing-key-id.json` must stay invalid.
+Examples: `contracts/examples/entry/valid/pending-first-publish.json`, `…/valid/removed-version-with-reason.json` kept; `valid/rejected-version.json`; `invalid/pending-with-signature.json`, `invalid/published-with-reason.json`, `invalid/rejected-without-reason.json`, `invalid/rejected-without-build-log-url.json`, `invalid/rejected-with-signature.json`, `invalid/rejected-empty-reason.json` (whitespace only; shape-valid for the schema, caught by the checker/oracle, so it lives in the transition fixtures instead if the schema cannot express trimming); the existing `invalid/status-not-in-enum.json` stays unchanged (its value is `"yanked"`, still outside the enum; checked on `origin/main` 2026-10-15), and its `_comment` is the one text to update ("one of published or removed"). the existing `invalid/missing-key-id.json` must stay invalid.
 
 ## Acceptance criteria
 1. **The authority is on record:** this file cites ADR-0121 (Accepted) as above; the verify script greps `docs/decisions/0121-version-lifecycle-pending.md` on the base commit for `Status:** Accepted` and fails on zero matches.
@@ -149,6 +152,11 @@ House style of `docs/tasks/032-verify.sh`: deterministic checks only decide the 
 | t1-plus-whitespace-only-change-elsewhere | accept | comparison over parsed values (whitespace carries no meaning) |
 | t1-plus-owner-change | reject | `owner` frozen |
 | t1-reorders-versions | reject | ordering |
+| first-publish-pending-with-reason (born `pending` with a fifth key `reason`) | reject | Q-L: exactly four keys |
+| first-publish-pending-with-build-log-url (fifth key `build_log_url`) | reject | Q-L: exactly four keys |
+| t1-version-changed | reject | frozen author fields |
+| t3-version-changed | reject | frozen author fields |
+| t3-reason-not-a-string (number; null; object: three fixtures) | reject | Q-J: reason is a string |
 | t3-exact | accept | the rejection transition |
 | t3-missing-reason | reject | Q-J: reason required |
 | t3-whitespace-only-reason | reject | Q-J: non-empty after trimming |
@@ -169,7 +177,7 @@ House style of `docs/tasks/032-verify.sh`: deterministic checks only decide the 
 | t1-and-t3-different-elements | accept (shape layer) | per-element classification |
 | delete-pending-version | reject | rule 3 |
 
-**Oracle mutations (each must redden a named fixture):** drop the frozen-author-field check; allow `pending → removed`; stop requiring all five; allow `reason` on T1; allow born-published; allow born-rejected; allow `pending → removed`-style skips (`published → rejected`); allow `rejected → pending`; allow T3 without `reason` or without `build_log_url`; allow deletion of a `rejected` element; allow `published → pending`; compare raw text instead of parsed values; treat the T1 key set as "at least" instead of "exactly".
+**Oracle mutations (each must redden a named fixture):** skip all pattern checks (reddens `t1-published-at-not-rfc3339`, `t1-sha256-wrong-length`, `t1-source-archive-http`); T3 key set "at least" instead of "exactly" (reddens `t3-extra-key` and the five `t3-carries-signature` fixtures); accept an `http://` `build_log_url` (reddens `t3-build-log-url-http`); accept a whitespace-only `reason` (reddens `t3-whitespace-only-reason`); accept a fifth key on a born-`pending` element (reddens both `first-publish-pending-with-*` fixtures); skip the `version` frozen check (reddens `t1-version-changed`, `t3-version-changed`); accept a non-string `reason` (reddens the three `t3-reason-not-a-string` fixtures); also drop the frozen-author-field check; allow `pending → removed`; stop requiring all five; allow `reason` on T1; allow born-published; allow born-rejected; allow `pending → removed`-style skips (`published → rejected`); allow `rejected → pending`; allow T3 without `reason` or without `build_log_url`; allow deletion of a `rejected` element; allow `published → pending`; compare raw text instead of parsed values; treat the T1 key set as "at least" instead of "exactly".
 **Text mutations:** delete the fail-closed sentence (and, separately, the words "or T3" from it); delete the born-`pending` sentence; delete the T3 "terminal" sentence; delete the "exactly once" paragraph; change "exactly" to "at least" in condition 4; append a permissive sentence to the T1 section (tail-append); restore a stale takedown sentence.
 **Positive controls** are the `accept` rows; a suite that rejects everything must fail here.
 
