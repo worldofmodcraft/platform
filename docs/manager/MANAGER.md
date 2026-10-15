@@ -160,11 +160,12 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
   4. **The handover procedure:** (a) update every open task log to a resumable state; (b) write the session-status entry in the mission log — done / in progress / blocked on Ludwig / next steps — and append any fresh gotchas to `OPERATIONS.md`; (c) verify with `ls` and `git status` that everything cited exists and is committed; (c2) run `tools/vault/refresh-main.sh` so the vault shows main's final state (the same step follows every `gh pr merge`; see `OPERATIONS.md`); (d) tell Ludwig it is handover time and give him the exact kickoff line to paste into the fresh session.
   5. **Never rely on auto-compaction.** If it triggers anyway, treat the session as **untrusted for operational detail** and verify against disk before acting on anything remembered. A summariser keeps narrative and drops exactly the operational detail that has already caused false verifications here.
 
-- **Log-entry check after every subagent** (task 048; Ludwig's decision Q6, 2026-10-14). After every subagent
-  run the manager runs `tools/manager/check-log-entry.sh`; a non-zero exit means the run is not accepted until
-  the agent, or a fresh one, writes the entry. **That script is built in task 049 and does not exist until 049
-  merges**; until then the manager counts the dated entries in the task log before and after the run by hand and
-  logs both counts. No separate handover file is introduced: the task log stays the single handover (§5).
+- **Log-entry check after every subagent** (task 048; Ludwig's decision Q6, 2026-10-14; script built by task 049).
+  Before delegating, the manager runs `tools/manager/check-log-entry.sh count docs/tasks/NNN-slug.md` and writes
+  the number in the task log; after the report-back it runs
+  `tools/manager/check-log-entry.sh check docs/tasks/NNN-slug.md BASELINE`. A non-zero exit means the run is not
+  accepted until the agent, or a fresh one, writes the entry (exit codes: `OPERATIONS.md`, "git-guard.log and
+  check-log-entry.sh"). No separate handover file is introduced: the task log stays the single handover (§5).
 
 ## 6. Worktree isolation (anti-derailment rule #2)
 

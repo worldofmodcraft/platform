@@ -1,6 +1,6 @@
 # Task 063: MANAGER.md §5 describes check-log-entry.sh as it exists, not as a future script
 
-- **Mission:** SITE-V1 (doctrine upkeep) — **Status:** spec-approved (manager, 2026-10-15); **merge needs Ludwig's
+- **Mission:** SITE-V1 (doctrine upkeep) — **Status:** review (awaiting Ludwig's merge approval); spec-approved by the manager 2026-10-15; **merge needs Ludwig's
   written approval** (doctrine, MANAGER.md §7)
 - **Agent / model:** the manager writes the doctrine text in session with Ludwig, as for task 048 (the auto-mode
   classifier denied agent edits to doctrine on 2026-10-14; that denial is not worked around). Independent review:
@@ -58,3 +58,52 @@ None. Independent of 062 and 007.
 ---
 # Task 063 log
 - 2026-10-15 manager: spec written (session 9) from the session-8 handover item 3.
+- 2026-10-15 verify agent: wrote and committed `docs/tasks/063-verify.sh` (3b7197f). Run in a fresh clone of the branch with `./docs/tasks/063-verify.sh --mutate`; its first block is exactly what the plain run `docs/tasks/063-verify.sh` prints (the plain run in the worktree was also run and is green). Output pasted from the script, rc=0. Notes: (a) the doctrine quotes the OPERATIONS.md section name across a line break, so the script joins lines before searching; (b) the AC1 mutation "edit outside the bullet" merges into the bullet's hunk because the edited heading is adjacent, so it is caught by the inside-bullet check, not the hunk count; (c) AC6 (Ludwig approves the merge) is human and not script-verified.
+
+```
+base: ac407bf311995c11adf1a845c639b0c3fc886852 (Merge pull request #54 from worldofmodcraft/session/8-manual-steps)
+== AC1-AC4 on /home/ludwig/.claude/jobs/05479e5e/tmp/fresh.Ff5BzF/c ==
+  PASS AC1 exactly one hunk (hunks=1, expected 1)
+  PASS AC1 bullet located in §5 (before '## 6.') (range='163 169')
+  PASS AC1 hunk lies inside bullet lines 163-169 (hunks seen=1 outside=0)
+  PASS AC2 positive control: 'does not exist until 049' on base blob (count=1, expected 1)
+  PASS AC2 'does not exist until 049' absent from doctrine (count=0, expected 0)
+  PASS AC2 positive control: 'by hand and' on base blob (count=1, expected 1)
+  PASS AC2 'by hand and' absent from doctrine (count=0, expected 0)
+  PASS AC3 header lists both modes (count, check) (modes=count check)
+  PASS AC3 doctrine quotes 'count' with 1 args as in header (matches=1)
+  PASS AC3 doctrine quotes 'check' with 2 args as in header (matches=1)
+  PASS AC3 OPERATIONS.md section cited by the doctrine exists (count=1)
+  PASS AC3 doctrine cites that section (count=1)
+  PASS AC3 'count' runs and prints an integer (rc=0 out=1)
+  PASS AC3 'check' with baseline count-1 exits 0 (rc=0)
+  PASS AC3 'check' with baseline=count exits 1 (rc=1)
+  PASS AC4 changed files (docs/manager/MANAGER.md docs/tasks/063-doctrine-log-entry-check.md docs/tasks/063-verify.sh) subset of scope (offenders='')
+  PASS AC4 control: out-of-scope path rejected (rc=1)
+  PASS AC4 control: empty change set rejected (rc=1)
+result: GREEN
+== AC5 mutations (temporary clone, this tree untouched) ==
+-- mutation: restore old sentence
+  before: ac2 failing=0 (expected 0)
+    FAIL AC2 'does not exist until 049' absent from doctrine (count=1, expected 0)
+    FAIL AC2 'by hand and' absent from doctrine (count=1, expected 0)
+  mutated: ac2 failing=2 (expected >0)
+  restored: ac2 failing=0 (expected 0)
+-- mutation: count -> counts
+  before: ac3 failing=0 (expected 0)
+    FAIL AC3 doctrine quotes 'count' with 1 args as in header (matches=0)
+  mutated: ac3 failing=1 (expected >0)
+  restored: ac3 failing=0 (expected 0)
+-- mutation: edit outside the bullet (AC1)
+  before: ac1 failing=0 (expected 0)
+    FAIL AC1 hunk lies inside bullet lines 163-169 (hunks seen=1 outside=1)
+  mutated: ac1 failing=1 (expected >0)
+  restored: ac1 failing=0 (expected 0)
+-- mutation: stray changed file (AC4)
+    FAIL AC4 changed files (docs/manager/MANAGER.md docs/manager/OPERATIONS.md docs/tasks/063-doctrine-log-entry-check.md docs/tasks/063-verify.sh) subset of scope (offenders='docs/manager/OPERATIONS.md')
+  mutated: ac4 failing=1 (expected >0)
+  restored: ac4 failing=0 (expected 0)
+result (mutations): ALL CAUGHT, ALL RESTORED
+OVERALL: GREEN
+```
+- 2026-10-15 manager: Ludwig approves the merge in session: "★ på alla" (his answer to the session-9 list "Godkänna merge (★ jag rekommenderar ja på alla)", covering platform #55, registry #10, registry #9 and platform #56).
