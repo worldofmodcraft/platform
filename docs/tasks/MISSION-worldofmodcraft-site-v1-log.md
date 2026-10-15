@@ -1925,3 +1925,20 @@ Token guard: suspended by Ludwig (2026-10-14), not checked.
    CI, normally Ludwig's under §7); it is not a precedent for other PRs.
 4. **Platform PR #43 (task 056 architecture note)** — merged, though it had been waiting for his read-through.
 Vault refreshed after the merges: written=9, id_conflicts=0.
+
+### For Ludwig (session 10; ★ = manager's lean)
+1. **Can a namespace owner remove their own published version?** (007b review round 1, finding F2.) ADR-0041 makes a
+   takedown a legal-grounds action by the platform, and `ownership.md` R11 authorises a *pure* takedown PR only from the
+   platform identity. But R11 also says a PR that sets `removed` **and** makes any other change "is not a takedown for this
+   rule's purposes and is judged in full by the ordinary rules" — under which the owner passes R3. So an owner can remove
+   their own published version by bundling it with, say, a new version. 007b implements the contract as written; nothing
+   else stops this today.
+   - A ★: any PR that sets any version to `removed` is a takedown, whatever else it contains: only the platform identity
+     may open it, and mixed PRs are always rejected. Needs a small contract amendment to `ownership.md` R11 (a task,
+     reviewed, your approval) and a one-line change in 007b's checker.
+   - B: owners may withdraw their own versions (author-initiated removal is a feature). Then ADR-0041's "legal grounds
+     only" needs a new ADR, and removal by owners should be allowed *without* the mixed-PR detour.
+   - C: keep the contract as written (the loophole stays; document it as a residual).
+   Rests on it: task 039 (registry CI going live) must not ship before this is answered; 007b merges either way.
+2. **R11 identity** (carried over from session 9, not blocking): which `pulls.user.id` the platform's takedown PRs carry.
+   ★B (a dedicated takedown-only account or App that only you control) when 039/008b go live.

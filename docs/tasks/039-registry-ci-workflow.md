@@ -46,3 +46,4 @@ offline. The seam is the reason for the split, recorded in `docs/tasks/007-regis
 
 ## Blocked by
 Task **007** (the checkers). Nothing else.
+- **Added 2026-10-15 (session 10, manager):** Ludwig's answer to the mixed-PR takedown question (mission log, session 10, "For Ludwig" item 1; 007b review F2). 039 does not go live before it is answered and, if option A, before the `ownership.md` R11 amendment and its checker change have merged.
