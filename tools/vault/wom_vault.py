@@ -57,10 +57,14 @@ AGGREGATE_NOTES = ("Status.md", "Tasks.md")
 DECISIONS_NOTE = "Decisions.md"
 DECISIONS_INDEX = "docs/decisions/INDEX.json"
 ADR_FILE_RE = re.compile(r"^docs/decisions/([0-9]{4}-[^/]+)\.md$")
+RUNBOOK_DIR = "docs/runbooks"
+RUNBOOK_FILE_RE = re.compile(r"^docs/runbooks/([^/]+\.md)$")
+RUNBOOK_STEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 JOURNAL_TZ = "Europe/Stockholm"
 PLANNED_TOP_LEVEL = frozenset(AGGREGATE_NOTES + tuple(n for n, _ in VERBATIM_NOTES) + (DECISIONS_NOTE,))
 PLANNED_TASK_NOTE_RE = re.compile(r"^Tasks/[0-9]{3}\.md$")
 PLANNED_ADR_NOTE_RE = re.compile(r"^ADR/[0-9]{4}-[^/]+\.md$")
+PLANNED_RUNBOOK_NOTE_RE = re.compile(r"^Runbooks/[A-Za-z0-9][A-Za-z0-9._-]*\.md$")
 PLANNED_JOURNAL_NOTE_RE = re.compile(r"^Journal/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$")
 TASK_NOTE_NAME_RE = re.compile(r"^Tasks/[0-9]{3}\.md$")
 
@@ -308,6 +312,12 @@ def render_main(repo, ref_name, sha):
             frontmatter(ref_name, repo, commit, [t.path])
             + "# Task %s: %s\n\n- Status: %s\n- Task file: `%s`\n" % (tid, t.title, t.status_text, t.path))
     notes.update(render_decisions(repo, ref_name, sha, counters))
+    runbooks = render_runbooks(repo, ref_name, sha)
+    if runbooks:  # AC6: no runbooks, no line
+        links = ", ".join("[[%s]]" % rel[:-len(".md")] for rel in sorted(runbooks))
+        notes["Status.md"] = notes["Status.md"].replace(
+            "\n\n## Open tasks\n\n", "\n\nRunbooks: %s\n\n## Open tasks\n\n" % links, 1)  # CHECK:status-runbooks
+    notes.update(runbooks)
     notes.update(render_journal(repo, ref_name, sha))
     return notes, skipped, counters
 
@@ -351,6 +361,30 @@ def render_decisions(repo, ref_name, sha, counters):
         notes["ADR/%s.md" % stem] = frontmatter(ref_name, repo, commit, [src]) + body
     commit = last_commit(repo, sha, [DECISIONS_INDEX])
     notes[DECISIONS_NOTE] = frontmatter(ref_name, repo, commit, [DECISIONS_INDEX]) + "# Decisions\n\n" + "\n".join(table) + "\n"
+    return notes
+
+
+def render_runbooks(repo, ref_name, sha):
+    """Runbooks/<stem>.md for every docs/runbooks/*.md on the ref (task 061).  Body verbatim under 051's frontmatter."""
+    raw = git(repo, "ls-tree", "-r", "-z", sha, "--", RUNBOOK_DIR).stdout.decode("utf-8", "strict")
+    notes = {}
+    for entry in sorted(e for e in raw.split("\0") if e):
+        meta, path = entry.split("\t", 1)
+        m = RUNBOOK_FILE_RE.match(path)
+        if not m:
+            continue  # other file types and nested directories are not runbooks
+        stem = m.group(1)[:-len(".md")]
+        if not RUNBOOK_STEM_RE.match(stem):
+            raise WomError("runbook %s has a name the vault projection does not accept" % path)
+        if unicodedata.normalize("NFC", stem + ".md").casefold() in FORBIDDEN_NAMES:
+            raise WomError("forbidden target name: runbook %s is a hand-written note's name" % path)
+        if meta.split()[0] not in ("100644", "100755"):
+            raise WomError("runbook %s is not a regular file in git (mode %s)" % (path, meta.split()[0]))
+        body = read_blob(repo, sha, path)
+        if body.lstrip("\ufeff").startswith("---"):  # CHECK:runbook-frontmatter
+            raise WomError("%s starts with '---'; a runbook with its own frontmatter would merge two blocks" % path)
+        commit = last_commit(repo, sha, [path])
+        notes["Runbooks/%s.md" % stem] = frontmatter(ref_name, repo, commit, [path]) + body
     return notes
 
 
@@ -423,7 +457,7 @@ def check_names(requested, mode):
             raise WomError("forbidden target name: %s is a hand-written note" % rel)
     for rel in requested:
         planned = (rel in PLANNED_TOP_LEVEL or TASK_NOTE_NAME_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
-                   or PLANNED_JOURNAL_NOTE_RE.match(rel))
+                   or PLANNED_RUNBOOK_NOTE_RE.match(rel) or PLANNED_JOURNAL_NOTE_RE.match(rel))
         if not planned:
             raise WomError("%s is not a note this tool writes" % rel)
         if mode == "task" and not TASK_NOTE_NAME_RE.match(rel):
@@ -576,7 +610,7 @@ def stat_tree(vault):
                     stack.append(rel)
                     continue
                 if (rel in PLANNED_TOP_LEVEL or PLANNED_TASK_NOTE_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
-                        or PLANNED_JOURNAL_NOTE_RE.match(rel)):
+                        or PLANNED_RUNBOOK_NOTE_RE.match(rel) or PLANNED_JOURNAL_NOTE_RE.match(rel)):
                     continue
                 st = e.stat(follow_symlinks=False)
                 entries[rel] = [st.st_size, st.st_mtime_ns]
