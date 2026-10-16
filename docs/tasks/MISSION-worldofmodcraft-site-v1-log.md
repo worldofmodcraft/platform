@@ -1954,3 +1954,4 @@ Vault refreshed after the merges: written=9, id_conflicts=0.
   which 007b edits in scope). Same defect class for the fourth time → **task 070**: audit every closed verify script for
   own-change checks measured against HEAD, re-pin them all, plus the ajv default for 067/069. 007b and 064 merge after it.
 - Ledger hygiene (move done task files) is renumbered **071**.
+- **070 review FAIL** (B1: pinning 062 AC6.* dropped the live "no closed check removed" guard on HEAD). 070 had used its 2-session budget → §8 stop-and-ask. Ludwig, 2026-10-16 (multiple choice, after first declining the prompt and then asking for the options again): **"Extend by 1 fix round"** — one extra session for 070 only; fix round dispatched (live id-superset guards beside the pins, F2/F3, red first).
