@@ -1955,3 +1955,6 @@ Vault refreshed after the merges: written=9, id_conflicts=0.
   own-change checks measured against HEAD, re-pin them all, plus the ajv default for 067/069. 007b and 064 merge after it.
 - Ledger hygiene (move done task files) is renumbered **071**.
 - **070 review FAIL** (B1: pinning 062 AC6.* dropped the live "no closed check removed" guard on HEAD). 070 had used its 2-session budget → §8 stop-and-ask. Ludwig, 2026-10-16 (multiple choice, after first declining the prompt and then asking for the options again): **"Extend by 1 fix round"** — one extra session for 070 only; fix round dispatched (live id-superset guards beside the pins, F2/F3, red first).
+- **070 merged** (registry #16, `fb76ee5`): delta review PASS; full gate green (007a, 008a, 032, 034, 057, 062, 066, 067, 069, 070). Merging required a rebase of one manager log commit made on a stale worktree base (resolved by taking the remote log and re-appending; no force).
+- **007b merged** (registry #12, `70cedca`): review FAIL (F1 recycled-username hijack) → PASS → PASS (N1 owner-field and disagreeing-owners fail-closed); full gate on the merge result green, 007b-verify included. Production `r11_identity = None`. F2 gates 039.
+- **064**: review PASS; pre-merge R1 (remove the 008a filter and 007a allowance from 064-verify.sh now that 069/070 landed) sent to its agent.
