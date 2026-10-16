@@ -312,3 +312,23 @@ Registry PR #9 (062) and PR #10 (007a) were each green on their own branch; merg
 change. **Before merging a registry PR, run every closed task's verify script against the merge result**, not only the
 branch: once 062 is on `main`, that is `docs/tasks/062-verify.sh /tmp/fc041/node_modules` (ajv path until task 066) on the
 PR branch rebased or merged onto current `main`, in a fresh clone. After a merge, run it again on `main`. Fixed by task 067.
+
+## What session 10 paid for (2026-10-15/16)
+
+### "062-verify.sh green" is not "every closed script green"
+062 does not run every closed script (it cannot run 067: 067 runs 062). Session 10 merged 066 on a 062-only gate and
+`main` was red on 067 until 069. **The merge gate is every closed task's verify script, one at a time, on the merge result
+in a fresh GitHub clone, after `npm ci --prefix tools/dev --userconfig /dev/null --ignore-scripts --no-audit --no-fund`.**
+Chaining them in one Bash call with `;` (no `$?`, no redirects, no variables) passes the worktree-isolation guard;
+parallel calls must never be used — they recreate the race below.
+
+### Verify scripts that measure against HEAD go red on the next task
+Five instances in two days (006/008a/032/057 → 062; 007a, 067 AC5.1 → 069; 067 AC2, 062 AC6 → 070; 007b → open). A check
+that describes the task's **own** change must measure its pinned PR range (`BASE..FINAL`, FINAL = `<merge commit>^2`);
+a check that protects a **live** property must read HEAD — and pinning a live guard silently deletes it (070's review B1).
+Every newly merged task becomes "closed" at that moment: review its verify script for HEAD-relative own-change checks
+**before** merging it, not after the next task trips over them.
+
+### Concurrent suites corrupt each other's verdicts
+`008a-verify.sh` counted `/tmp/wom008a-*` system-wide (fixed by 069: per-run TMPDIR). Other scripts may share the trait.
+Measure on a quiet machine: `ps aux | grep -E "verify.sh|unittest"` must be empty before every gate run.

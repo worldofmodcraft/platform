@@ -1958,3 +1958,45 @@ Vault refreshed after the merges: written=9, id_conflicts=0.
 - **070 merged** (registry #16, `fb76ee5`): delta review PASS; full gate green (007a, 008a, 032, 034, 057, 062, 066, 067, 069, 070). Merging required a rebase of one manager log commit made on a stale worktree base (resolved by taking the remote log and re-appending; no force).
 - **007b merged** (registry #12, `70cedca`): review FAIL (F1 recycled-username hijack) → PASS → PASS (N1 owner-field and disagreeing-owners fail-closed); full gate on the merge result green, 007b-verify included. Production `r11_identity = None`. F2 gates 039.
 - **064**: review PASS; pre-merge R1 (remove the 008a filter and 007a allowance from 064-verify.sh now that 069/070 landed) sent to its agent.
+
+## SESSION STATUS — 2026-10-16 (session 10), handover at 32 % context (past the 30 % soft threshold)
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Done
+- **Platform:** #57 (session 9 status), #58 (task **068** runbook markers M3/M5/M7/Q-H ☑), #43 (task 056 note) merged with
+  Ludwig's approval; vault refreshed.
+- **Registry merged** (each: independent review PASS, full closed-script gate green on the merge result):
+  **066** pinned ajv 8.20.0 in `tools/dev` (#14, `198dc98`); **069** 008a race fixed, 007a/067 AC5.1 pinned, 062 allowance for
+  064 (#15, `2347ffb`); **070** audit of all closed verify scripts: own-change checks pinned, live guards kept beside them,
+  ajv default everywhere (#16, `fb76ee5`); **007b** ownership checker (#12, `70cedca`) — review found and fixed a real
+  recycled-username hijack (F1) and a namespace-reassignment path (N1).
+- Specs: 064 (amendment 1: explicit ECMA translation, replacing the manager's `re.ASCII` defect), 065 (revised after spec
+  review round 1 FAIL; Ludwig approved its decisions), 066, 068, 069, 070 approved.
+- OPERATIONS.md: "What session 10 paid for" (three gotchas).
+
+### In progress
+- **064** (registry PR #13): review PASS; R1 done (`e42f5bc`); all closed scripts green **except `007b-verify.sh`** (exit 2),
+  whose scope and "007a modules unchanged" checks measure HEAD — 064 legitimately edits `tools/registry/schema.py`.
+- **065**: spec ready, independent spec review round 2 pending; dispatch after 064 merges.
+
+### For Ludwig (★ = manager's lean)
+1. **Mixed-PR takedown (007b review F2)** — can an owner remove their own published version by bundling it with another
+   change? A ★ any `removed` makes the PR a takedown (platform identity only, nothing else in the PR; small contract
+   amendment); B owners may withdraw (new ADR); C keep as is (documented residual). Gates task 039.
+2. **R11 identity** (carried): ★ a dedicated takedown-only account/App only Ludwig controls; answer when 039/008b go live.
+3. **Doctrine proposal (new):** add to REVIEW-CHECKLIST: "the task's verify script measures its own change on its pinned
+   range and its live guards on HEAD — checked before merge, because the task becomes closed at merge". A ★ add it (a
+   small doctrine task, your approval); B keep it as an OPERATIONS gotcha only. Five instances so far (OPERATIONS.md).
+
+### Next session starts here
+1. **Task 071** (new, small, qa-engineer): re-pin `007b-verify.sh`'s scope and "007a modules unchanged" checks to PR #12's
+   range (base = merge-base of `70cedca`, final = `70cedca^2`); add 007b to 070-verify's closed list; red first. Then
+   **064**: before merging, check 064-verify.sh's own AC5/scope checks for the same class (they are framed against
+   `70cedca`..HEAD); decide the pattern for a not-yet-merged task's own-change checks; full gate; merge (standing approval
+   covers 064).
+2. **065**: spec review round 2 → dispatch (registry, then site re-sync).
+3. **072** ledger hygiene (renumbered from 071): true statuses, move done task files to `docs/tasks/done/`, remove merged
+   worktrees (`~/wt/registry-task-{066,069,070,007b}`, `~/wt/task-068`).
+4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
+
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
