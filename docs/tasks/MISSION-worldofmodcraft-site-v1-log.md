@@ -2000,3 +2000,14 @@ Token guard: suspended by Ludwig (2026-10-14), not checked.
 4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
 
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig's answers, 2026-10-17 (verbatim)
+1. "I dont think owners should be able to remove their mods, once published that version is published for all future
+   since its hosted by my site? Brainstorm on this one, also in relation to my previous decisions in regard of this."
+   → Direction: no owner removal. Survey of prior decisions dispatched as task 073; the brainstorm follows in session.
+2. "Sounds good. This account should only be able to do take downs with my approval so it cannot go rogue."
+   → R11 identity: a dedicated takedown-only account or App that only Ludwig controls, and every takedown it files still
+   needs Ludwig's written approval before merge (MANAGER.md §7 already requires this per PR). Recorded for 039/008b.
+3. "Ok" → the REVIEW-CHECKLIST item (verify script pins own-change checks, live guards on HEAD, checked before merge) is
+   approved; booked as a small doctrine task next session.
+4. "Ok to merge." → platform PR #59 merged.
