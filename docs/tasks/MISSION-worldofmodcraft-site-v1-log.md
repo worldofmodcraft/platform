@@ -2039,3 +2039,6 @@ acceptance; **6.** `ownership.md` R11 amendment + 007b checker change (item 0), 
 (item 7) + the approved REVIEW-CHECKLIST item. Ludwig's R11 answer (dedicated takedown-only account under his control,
 each takedown still needing his written approval) goes into 039/008b's specs.
 Kickoff line unchanged: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig, 2026-10-17: continue in this session (verbatim)
+"Fortsätt i den här sessionen, är på resande fot och har inte tillgång till min terminal" — waives the §5 soft handover threshold (30 %) for this session; the 40 % hard threshold stays in force (context 35 % at this point). Agents are asked for short reports to conserve context.
