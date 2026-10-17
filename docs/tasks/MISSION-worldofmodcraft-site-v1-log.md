@@ -2011,3 +2011,31 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-1
 3. "Ok" → the REVIEW-CHECKLIST item (verify script pins own-change checks, live guards on HEAD, checked before merge) is
    approved; booked as a small doctrine task next session.
 4. "Ok to merge." → platform PR #59 merged.
+
+### Removal policy — brainstorm and Ludwig's decision, 2026-10-17
+Survey: task 073 (surveyor report, quotes with file:line). Ludwig's answer, verbatim: **"Option A for all"**.
+The manager's reading of that answer, per item (Ludwig may correct any line):
+0. **Owners cannot remove published versions** (Ludwig, same day) — this is ADR-0041:15 already; `ownership.md` R11's
+   "mixed PR is judged by the ordinary rules" contradicts it. Fix: contract amendment — any PR that sets a version to
+   `removed` is a takedown (platform identity only, nothing else in the PR) — plus the one-line 007b checker change.
+1. **Grounds:** a takedown may be for legal grounds (ADR-0041) **or** known malicious code / illegal content as ADR-0046
+   defines them narrowly. Wire ADR-0046 into the takedown mechanism.
+2. **Files of a removed version:** stop serving them publicly; keep the registry entry, hash, signature and reason forever.
+3. **Already-installed copies:** on its next registry update the launcher warns with the reason; for malware it also offers
+   to disable the mod. Never silent deletion (ADR-0037).
+4. **Appeals:** a successful appeal means a new version; a removal stays final (no un-remove).
+5. **Authors with a broken release:** a per-version "don't use this one" mark (still installable, warned) — later, not now.
+6. **Archive protection:** a protection rule on `worldofmodcraft/archive` so Releases cannot be deleted; a manual step for
+   Ludwig, with exact clicks written by the manager.
+7. **Doctrine housekeeping:** MANAGER.md §7's "legal grounds only" and "the single in-place change" corrected.
+Booked for next session: an ADR draft covering 1–4 (and 5 as a recorded intention) for Ludwig's acceptance; the
+`ownership.md` R11 amendment + 007b checker change (item 0; gates 039); the runbook step for 6; the §7 doctrine fix (7,
+together with the approved REVIEW-CHECKLIST item).
+
+### Next session starts here — addendum (2026-10-17)
+Add to session 10's list, after item 1 (071, then 064): **5.** ADR draft "removal policy" (items 1–5 above) for Ludwig's
+acceptance; **6.** `ownership.md` R11 amendment + 007b checker change (item 0), merge needs Ludwig (contract, takedown);
+**7.** runbook step: protect `worldofmodcraft/archive` Releases (item 6); **8.** doctrine task: MANAGER.md §7 wording
+(item 7) + the approved REVIEW-CHECKLIST item. Ludwig's R11 answer (dedicated takedown-only account under his control,
+each takedown still needing his written approval) goes into 039/008b's specs.
+Kickoff line unchanged: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
