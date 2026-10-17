@@ -1,6 +1,6 @@
 # Task 065: `entry.schema.json` enforces the `key_id` format that `signature-format.md` defines
 
-- **Mission:** SITE-V1 (D1/D2 contract consistency) — **Status:** spec-ready, pending independent spec review
+- **Mission:** SITE-V1 (D1/D2 contract consistency) — **Status:** spec-approved (independent spec review round 1 FAIL, round 2 PASS with three fixes folded in, 2026-10-17)
   (signing-adjacent contract; SPEC-CHECKLIST preamble) — written 2026-10-15, session 10. Not dispatchable before 064
   and 007b merge.
 - **Repos:** registry (contract), then site (re-sync). **Agent / model:** implementer / sonnet. **Budget:** small–medium
@@ -58,8 +58,9 @@ site `scripts/sync-schemas.mjs`, `schemas/README.md`; platform `docs/manager/MAN
    strict check, so a regression of task 064 shows red here.
 3. Fixture and example value changes are value substitutions only; the single assertion reversal is objective item 2b.
    No other assertion is removed, weakened or reversed (§3.5); the diff of each test file is shown in the log.
-4. Every registry verify script passes on HEAD: 007a, 007b, 032, 034, 057 (including its T1 pin, refreshed), 062 (which
-   runs the closed 006 checks over their pinned ranges), 064, and 066 if merged.
+4. Every closed verify script passes on the merge result of the PR branch and current `main` (one at a time, quiet
+   machine): 006 via 062, 007a, 007b, 008a, 032, 034, 057 (including its T1 pin, refreshed), 062, 064, 066, 067, 069, 070,
+   071 — whatever is closed on `main` at dispatch.
 5. Every JSON example embedded in `contracts/append-only.rules.md` that is meant to be a valid `entry.json` validates
    against the schema: if no such check exists, `065-verify.sh` adds one (extract, validate, count > 0 — a zero count fails).
 6. `--mutate`: the pattern removed; lowercase allowed; `{16}` loosened to `{16,}` — each reddens a criterion-1 test.
@@ -83,7 +84,8 @@ Site: `schemas/entry.schema.json` (via the sync script, no hand edit), `schemas/
 ## Forbidden here
 Changing `signature-format.md` or any rule text (in any contract) other than `key_id`'s shape in the schema; adding a
 `signature` pattern (objective item 4); hand-editing the site's schema copy; touching signing keys or secrets (CLAUDE.md
-rule 11); weakening any test; any assertion reversal other than item 2b.
+rule 11); weakening any test; any assertion reversal other than item 2b; renaming or deleting any check in a closed
+task's verify script (062's live id guards, task 070, would — rightly — turn red).
 
 ## Before dispatch (manager)
 Cut the registry branch from `origin/main` **after 064 and 007b have merged** (064 also edits `057-corpus.py`); fetch and
@@ -95,7 +97,7 @@ Registry PR: independent review, then **Ludwig's approval** (signature/key contr
 read conservatively). Site PR merges after the registry PR, with the manager's authority once its review passes.
 
 ## Dependencies
-After **064** (the trailing-newline case relies on ECMA `$` in the Python validators) and **007b** (its tests likely
+**Order (2026-10-17):** 007b merged (registry #12); dispatch after **064** merges. After **064** (the trailing-newline case relies on ECMA `$` in the Python validators) and **007b** (its tests likely
 reuse `tests/registry/support.py`, whose `key_id` value this task changes). Before merging: run `062-verify.sh` and
 007b's tests on the PR branch merged onto `main` (OPERATIONS.md, session 9).
 
@@ -109,3 +111,4 @@ reuse `tests/registry/support.py`, whose `key_id` value this task changes). Befo
   site-side Ajv negatives; explicit `\n` assertions on both validators; 006 coverage). All addressed in the spec: findings
   2 and 3 decided by the manager as recorded in objective items 2 and 2b; finding 7 answered — 006's checks run through
   `062-verify.sh` over their pinned ranges (task 062). Round 2 pending.
+- 2026-10-17 manager: independent spec review round 2 PASS; three fixes folded in (criterion 4 = every closed script on the merge result; Forbidden: no rename/delete of closed checks; status and order updated). spec-approved; dispatch after 064 merges.
