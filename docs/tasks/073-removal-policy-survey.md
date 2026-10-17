@@ -1,6 +1,6 @@
 # Task 073: survey of every prior decision on removing a published version (input for Ludwig's F2 brainstorm)
 
-- **Mission:** SITE-V1 — **Status:** spec-approved (manager, solo gate, 2026-10-17; read-only survey, no code)
+- **Mission:** SITE-V1 — **Status:** done (2026-10-17) (manager, solo gate; read-only survey, no code)
 - **Agent / model:** surveyor / per frontmatter. **Budget:** small. **Branch:** none (read-only; the report is returned to
   the manager and summarised in the mission log).
 - **Graph:** contract edges E4 (append-only rules) and the ownership edge (`ownership.md`); no change.
@@ -23,3 +23,4 @@ Criteria are human-checked (manager reads the report); no verify script — read
 # Task 073 log
 - 2026-10-17 manager: written and approved; dispatched to surveyor. Trigger: Ludwig's answer to "For Ludwig" item 1
   (session 10): owners must not be able to remove published versions; brainstorm against prior decisions.
+- 2026-10-17 manager: survey received (removal grounds, file fate, installed copies, appeals, author yank, archive protection, stale §7 wording). Ludwig decided "Option A for all"; recorded in the mission log with the manager's per-item reading. Task done.
