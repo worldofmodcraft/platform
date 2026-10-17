@@ -1907,3 +1907,107 @@ After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secre
 4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
 
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-15 (session 9) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 10 — 2026-10-15 (evening)
+Kickoff (Ludwig): "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-15 (session 9) i missionsloggen och fortsätt med 'Next session starts here'."
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Ludwig's approvals, 2026-10-15 (session 10, verbatim)
+"I approve all other decisions" — clarified in session by a multiple-choice question; Ludwig ticked all four options:
+1. **Merge platform #57 and #58** — done (#57 session 9 status; #58 task 068 runbook markers, manager fresh-clone verify
+   14 PASS, 12 mutations red). A first merge attempt of #58 and a reviewer launch for it had been refused by the auto-mode
+   classifier ("Merge Without Review") before this approval; neither was retried.
+2. **The manager's session-10 calls:** 064 amendment 1 (explicit ECMA escape translation replaces `re.ASCII`); 065's
+   decisions (update `append-only.rules.md`'s four example values and 057's pin; the one deliberate assertion reversal in
+   `test_hardening.py`); task 069 before 007b/064 merge.
+3. **Future merges in order, without asking again:** 066 → 069 → 007b → 064, each only after independent review PASS and
+   full verification on the merge result. This is a standing approval for these four PRs only (007b is security-relevant
+   CI, normally Ludwig's under §7); it is not a precedent for other PRs.
+4. **Platform PR #43 (task 056 architecture note)** — merged, though it had been waiting for his read-through.
+Vault refreshed after the merges: written=9, id_conflicts=0.
+
+### For Ludwig (session 10; ★ = manager's lean)
+1. **Can a namespace owner remove their own published version?** (007b review round 1, finding F2.) ADR-0041 makes a
+   takedown a legal-grounds action by the platform, and `ownership.md` R11 authorises a *pure* takedown PR only from the
+   platform identity. But R11 also says a PR that sets `removed` **and** makes any other change "is not a takedown for this
+   rule's purposes and is judged in full by the ordinary rules" — under which the owner passes R3. So an owner can remove
+   their own published version by bundling it with, say, a new version. 007b implements the contract as written; nothing
+   else stops this today.
+   - A ★: any PR that sets any version to `removed` is a takedown, whatever else it contains: only the platform identity
+     may open it, and mixed PRs are always rejected. Needs a small contract amendment to `ownership.md` R11 (a task,
+     reviewed, your approval) and a one-line change in 007b's checker.
+   - B: owners may withdraw their own versions (author-initiated removal is a feature). Then ADR-0041's "legal grounds
+     only" needs a new ADR, and removal by owners should be allowed *without* the mixed-PR detour.
+   - C: keep the contract as written (the loophole stays; document it as a residual).
+   Rests on it: task 039 (registry CI going live) must not ship before this is answered; 007b merges either way.
+2. **R11 identity** (carried over from session 9, not blocking): which `pulls.user.id` the platform's takedown PRs carry.
+   ★B (a dedicated takedown-only account or App that only you control) when 039/008b go live.
+
+### Merges and gates (session 10)
+- **066 merged** (registry #14, `198dc98`): review PASS; gate `062-verify.sh` ALL CHECKS PASSED on the merge result.
+  **Manager's gap:** that gate ran only 062, which does not run 067; 067 AC5.1 had been red on any later branch, so `main`
+  was red on 067 from `198dc98` until 069 fixed it. From then on every merge gate runs **every** closed verify script, one
+  at a time, on a quiet machine.
+- **069 merged** (registry #15, `2347ffb`): 008a temp-dir race fixed (per-run TMPDIR), 007a and 067 AC5.1 re-pinned to
+  their PR ranges, 062 AC6.034 allowance for 064. Review PASS; gate: 007a, 008a, 032, 034, 057, 062, 066, 067, 069 green.
+- **007b gate** on its merge result: all green except **067 AC2.4** (`git diff BASE HEAD` on `docs/contracts/README.md`,
+  which 007b edits in scope). Same defect class for the fourth time → **task 070**: audit every closed verify script for
+  own-change checks measured against HEAD, re-pin them all, plus the ajv default for 067/069. 007b and 064 merge after it.
+- Ledger hygiene (move done task files) is renumbered **071**.
+- **070 review FAIL** (B1: pinning 062 AC6.* dropped the live "no closed check removed" guard on HEAD). 070 had used its 2-session budget → §8 stop-and-ask. Ludwig, 2026-10-16 (multiple choice, after first declining the prompt and then asking for the options again): **"Extend by 1 fix round"** — one extra session for 070 only; fix round dispatched (live id-superset guards beside the pins, F2/F3, red first).
+- **070 merged** (registry #16, `fb76ee5`): delta review PASS; full gate green (007a, 008a, 032, 034, 057, 062, 066, 067, 069, 070). Merging required a rebase of one manager log commit made on a stale worktree base (resolved by taking the remote log and re-appending; no force).
+- **007b merged** (registry #12, `70cedca`): review FAIL (F1 recycled-username hijack) → PASS → PASS (N1 owner-field and disagreeing-owners fail-closed); full gate on the merge result green, 007b-verify included. Production `r11_identity = None`. F2 gates 039.
+- **064**: review PASS; pre-merge R1 (remove the 008a filter and 007a allowance from 064-verify.sh now that 069/070 landed) sent to its agent.
+
+## SESSION STATUS — 2026-10-16 (session 10), handover at 32 % context (past the 30 % soft threshold)
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Done
+- **Platform:** #57 (session 9 status), #58 (task **068** runbook markers M3/M5/M7/Q-H ☑), #43 (task 056 note) merged with
+  Ludwig's approval; vault refreshed.
+- **Registry merged** (each: independent review PASS, full closed-script gate green on the merge result):
+  **066** pinned ajv 8.20.0 in `tools/dev` (#14, `198dc98`); **069** 008a race fixed, 007a/067 AC5.1 pinned, 062 allowance for
+  064 (#15, `2347ffb`); **070** audit of all closed verify scripts: own-change checks pinned, live guards kept beside them,
+  ajv default everywhere (#16, `fb76ee5`); **007b** ownership checker (#12, `70cedca`) — review found and fixed a real
+  recycled-username hijack (F1) and a namespace-reassignment path (N1).
+- Specs: 064 (amendment 1: explicit ECMA translation, replacing the manager's `re.ASCII` defect), 065 (revised after spec
+  review round 1 FAIL; Ludwig approved its decisions), 066, 068, 069, 070 approved.
+- OPERATIONS.md: "What session 10 paid for" (three gotchas).
+
+### In progress
+- **064** (registry PR #13): review PASS; R1 done (`e42f5bc`); all closed scripts green **except `007b-verify.sh`** (exit 2),
+  whose scope and "007a modules unchanged" checks measure HEAD — 064 legitimately edits `tools/registry/schema.py`.
+- **065**: spec ready, independent spec review round 2 pending; dispatch after 064 merges.
+
+### For Ludwig (★ = manager's lean)
+1. **Mixed-PR takedown (007b review F2)** — can an owner remove their own published version by bundling it with another
+   change? A ★ any `removed` makes the PR a takedown (platform identity only, nothing else in the PR; small contract
+   amendment); B owners may withdraw (new ADR); C keep as is (documented residual). Gates task 039.
+2. **R11 identity** (carried): ★ a dedicated takedown-only account/App only Ludwig controls; answer when 039/008b go live.
+3. **Doctrine proposal (new):** add to REVIEW-CHECKLIST: "the task's verify script measures its own change on its pinned
+   range and its live guards on HEAD — checked before merge, because the task becomes closed at merge". A ★ add it (a
+   small doctrine task, your approval); B keep it as an OPERATIONS gotcha only. Five instances so far (OPERATIONS.md).
+
+### Next session starts here
+1. **Task 071** (new, small, qa-engineer): re-pin `007b-verify.sh`'s scope and "007a modules unchanged" checks to PR #12's
+   range (base = merge-base of `70cedca`, final = `70cedca^2`); add 007b to 070-verify's closed list; red first. Then
+   **064**: before merging, check 064-verify.sh's own AC5/scope checks for the same class (they are framed against
+   `70cedca`..HEAD); decide the pattern for a not-yet-merged task's own-change checks; full gate; merge (standing approval
+   covers 064).
+2. **065**: spec review round 2 → dispatch (registry, then site re-sync).
+3. **072** ledger hygiene (renumbered from 071): true statuses, move done task files to `docs/tasks/done/`, remove merged
+   worktrees (`~/wt/registry-task-{066,069,070,007b}`, `~/wt/task-068`).
+4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
+
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig's answers, 2026-10-17 (verbatim)
+1. "I dont think owners should be able to remove their mods, once published that version is published for all future
+   since its hosted by my site? Brainstorm on this one, also in relation to my previous decisions in regard of this."
+   → Direction: no owner removal. Survey of prior decisions dispatched as task 073; the brainstorm follows in session.
+2. "Sounds good. This account should only be able to do take downs with my approval so it cannot go rogue."
+   → R11 identity: a dedicated takedown-only account or App that only Ludwig controls, and every takedown it files still
+   needs Ludwig's written approval before merge (MANAGER.md §7 already requires this per PR). Recorded for 039/008b.
+3. "Ok" → the REVIEW-CHECKLIST item (verify script pins own-change checks, live guards on HEAD, checked before merge) is
+   approved; booked as a small doctrine task next session.
+4. "Ok to merge." → platform PR #59 merged.
