@@ -2042,3 +2042,33 @@ Kickoff line unchanged: "Kör din vanliga sessionsstart. Läs SESSION STATUS —
 
 ### Ludwig, 2026-10-17: continue in this session (verbatim)
 "Fortsätt i den här sessionen, är på resande fot och har inte tillgång till min terminal" — waives the §5 soft handover threshold (30 %) for this session; the 40 % hard threshold stays in force (context 35 % at this point). Agents are asked for short reports to conserve context.
+
+## SESSION STATUS — 2026-10-17 (session 10, continued), handover at ~38 % context (40 % hard limit)
+### Done since the 2026-10-16 status
+- Ludwig's answers 2026-10-17 recorded; platform #59 and #60 merged. Removal policy decided ("Option A for all").
+- **065** spec-approved (spec review round 2 PASS, three fixes folded in).
+- **071** merged (registry #17, `825da5e`): 007b-verify's own-change checks pinned to PR #12's range; review PASS; full gate
+  (12 scripts) green. This unblocks 064.
+- **074 / ADR-0122** drafted (platform PR #61, still the original Proposed draft). Ludwig answered its eight open questions
+  ("Stjärna på alla") and **accepted it ("Acceptera", 2026-10-17)**. The acceptance edits under `docs/decisions` (status
+  Accepted, index, "Amended by ADR-0122" in ADR-0041's header) were **refused by the permission classifier** ("Modify Shared
+  Resources") for the doc-writer; not retried; the manager declined to make the same edits itself (that would launder the
+  denial). The folded-in version (eight answers, Options considered, status Proposed) sits **uncommitted** in
+  `~/wt/task-074`; `build_index.py --check` fails there until ADR-0041 carries the "Amended by" line.
+
+### Blocked on Ludwig
+- **ADR-0122 acceptance edits:** A ★ allow edits under `docs/decisions/` for task 074 (permission rule) and say continue;
+  B Ludwig edits himself (manager writes exact steps); C leave Proposed for now (nothing urgent depends on it).
+
+### Next session starts here
+1. **064** (registry PR #13): merge `origin/main` (`825da5e`) into the branch; full closed-script gate on the merge result
+   (now including 071); merge under the standing approval.
+2. **065**: dispatch (registry, then site re-sync) — merge needs Ludwig (signature/key contract).
+3. **ADR-0122**: per Ludwig's A/B/C above.
+4. `ownership.md` R11 amendment + 007b checker change (removal policy item 0); merge needs Ludwig; gates 039.
+5. Runbook step: protect `worldofmodcraft/archive` Releases (item 6). Doctrine task: MANAGER §7 wording + approved
+   REVIEW-CHECKLIST item (doctrine edits may hit the same classifier wall — plan for Ludwig doing or allowing them).
+6. 072 ledger hygiene (statuses, `docs/tasks/done/`, remove merged worktrees incl. registry-task-{066,069,070,007b,071},
+   task-068); 070-verify header still says "ten closed scripts" (cosmetic).
+7. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-17 (session 10, continued) i missionsloggen och fortsätt med 'Next session starts here'."
