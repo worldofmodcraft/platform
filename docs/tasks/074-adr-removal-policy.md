@@ -31,3 +31,4 @@ ADR-0121, ADR-0116 (format and immutability); `docs/decisions/README.md`, `INDEX
 ---
 # Task 074 log
 - 2026-10-17 manager: written and approved (solo gate).
+- 2026-10-17 doc-writer: drafted docs/decisions/0122-removal-policy.md (Proposed; items 0-5; relations cited to ADR-0041:15, 0046:27, 0037:45, 0121:79,121-122; 8 open questions); README and INDEX.json updated via tools/adr/build_index.py (--check OK, json.tool OK); no existing ADR edited.
