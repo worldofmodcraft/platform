@@ -263,6 +263,7 @@ The closest protection is two settings that protect the *tag* and the *files* of
 - **Tag ruleset** with *Restrict deletions* and *Restrict updates*: only people on the ruleset's bypass list can delete or
   move tags matching the pattern. It does **not** touch the Release page itself.
 
+`archive` has no releases yet (checked 2026-10-18), so immutability will cover every release published from now on.
 Together they mean a published version's tag and files survive, but a Release entry can still be deleted by someone with
 permission. Whether the organisation owner can bypass immutable releases is not stated in the documentation
 (`[unverified]`); for the ruleset, only actors on the bypass list can, so leave that list empty.
@@ -275,15 +276,18 @@ permission. Whether the organisation owner can bypass immutable releases is not 
 4. Ruleset name: `archive-tags-permanent`. Enforcement status: **Active**.
 5. Leave the **Bypass list** empty (do not click Add bypass).
 6. Under **Target tags** click **Add a target** and choose to include all tags (pattern `*` if the screen asks for a
-   pattern; `[unverified]` which wording the screen uses).
+   pattern). The documentation page does not name the menu choices (`[unverified]`); if the screen differs from this,
+   stop and ask the manager.
 7. Under **Tag protections** tick **Restrict deletions** and **Restrict updates**. Do not tick anything else
    (creation must stay allowed: the pipeline creates the tags when it publishes a Release).
 8. Click **Create**.
 
 *You should see:* on `https://github.com/worldofmodcraft/archive/settings/rulesets` the ruleset `archive-tags-permanent`
 listed as Active; on the Settings page the **Enable release immutability** box ticked. These are screens you reach with
-your normal browser login; no token and no terminal. Do not delete a tag or Release to "test" it. If the Rulesets menu is
-missing or says the feature needs a paid plan, stop and tell the manager (the organisation's plan is `[unverified]`).
+your normal browser login; no token and no terminal. Do not delete a tag or Release to "test" it. The documentation says
+rulesets are available "for customers on GitHub Team and GitHub Enterprise plans" and does not mention the Free plan or
+public repositories (`[unverified]` whether they work on Free; `archive` is public, checked 2026-10-18). If the Rulesets
+menu is missing or says the feature needs a paid plan, stop and tell the manager.
 
 ---
 
