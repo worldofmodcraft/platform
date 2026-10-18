@@ -2086,3 +2086,13 @@ Token guard: suspended by Ludwig (2026-10-14), not checked. Context at start: 5 
 - **Item 1 (064):** implementer dispatched (log baseline 14): pin 064-verify.sh's own-change checks to the task's own
   range before merge, merge `origin/main` into the branch, full closed-script gate, push. Merge by the manager afterwards
   under the standing approval.
+- **075** (R11 amendment + 007b checker, removal policy item 0): spec written; independent spec review round 1 FAIL
+  (3 blocking, 2 minor: incomplete contract-passage list, under-specified detection, 032 T16/T17 pins), all folded in;
+  round 2 PASS; **spec-approved**. Dispatch after 064 merges (base must contain 064). Merge needs Ludwig.
+- **077** (runbook M8, archive protection, removal policy item 6): doc-writer, platform PR #63. Facts verified on
+  docs.github.com: tag rulesets ("Restrict deletions/updates") and "Enable release immutability" exist; **no GitHub
+  setting prevents deleting a Release** — M8 says so and names tag + file protection as the closest. Manager measured
+  (unauthenticated API): `archive` is public with 0 releases. Review round 1 FAIL (3 minor), fixed in `cc4da92`, delta
+  review PASS. Open: rulesets documented "for GitHub Team and Enterprise" only — Free/public marked [unverified]; M8
+  tells Ludwig to stop if the menu is missing. Task 076 is reserved for the doctrine task (§7 wording + approved
+  REVIEW-CHECKLIST item), to be specified after ADR-0122 is accepted (its grounds wording depends on it).
