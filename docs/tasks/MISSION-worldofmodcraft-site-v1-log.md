@@ -2075,3 +2075,14 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-1
 
 ### Ludwig, 2026-10-18 (verbatim): "1. OK att merga 62. 2. Kör Stjärna för ADR-0122"
 → #62 merged. ADR-0122: option **A** (★) — a narrow permission rule allowing edits under `docs/decisions/` for task 074, then the doc-writer finishes the acceptance edits (status Accepted, index, "Amended by ADR-0122" in ADR-0041) and PR #61 merges. Deferred to the start of the next session (manager at the 40 % hard context limit; permission changes done with full context). **Next session: this is item 0, before 064.** Ludwig's instruction is the authorisation; the rule is scoped to `docs/decisions/**` and recorded in this log.
+
+## Session 11 — 2026-10-18
+Token guard: suspended by Ludwig (2026-10-14), not checked. Context at start: 5 % (HUD cache).
+- **Item 0 (ADR-0122, option A):** the manager tried to write the narrow allow rule
+  (`Edit(//home/ludwig/wt/task-074/docs/decisions/**)` and the matching `Write(...)`) into `~/wom/.claude/settings.local.json`
+  (git-ignored, local only). **Refused by the auto-mode classifier ("Self-Modification").** Not retried by any other means:
+  a permission rule the classifier will not let the manager grant itself is Ludwig's to add. Exact steps go to Ludwig
+  under "For Ludwig" at session end. ADR-0122 stays Proposed until then; nothing urgent depends on it.
+- **Item 1 (064):** implementer dispatched (log baseline 14): pin 064-verify.sh's own-change checks to the task's own
+  range before merge, merge `origin/main` into the branch, full closed-script gate, push. Merge by the manager afterwards
+  under the standing approval.
