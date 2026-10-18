@@ -6,7 +6,7 @@ Nothing here is reversible-by-accident: no step deletes anything.
 
 Status key: ☑ done · ☐ waiting on you · ⏸ waiting on a decision first · `[unverified]` = no evidence
 found; check it yourself.
-**Last reviewed: 2026-10-15 (task 068).** Evidence for the markers as of task 060 is in
+**Last reviewed: 2026-10-15 (task 068).** M8 added 2026-10-18 (task 077). Evidence for the markers as of task 060 is in
 `docs/tasks/060-runbook-manual-steps.md`, section "Task 060 log". Markers M3, M5, M7 and Q-H were updated by task 068
 for Ludwig's manual steps of 2026-10-15; the new evidence is in `docs/tasks/068-runbook-markers-session9.md`, section
 "Task 068 log".
@@ -243,6 +243,47 @@ unauthenticated request answers HTTP 200 (2026-10-15).
 4. No `.gitignore`, no licence. Click **Create repository**.
 
 *You should see:* `https://github.com/worldofmodcraft/archive` with one commit and a README.
+
+---
+
+## ☐ M8 — Protect the archive's Releases and tags  (removal policy item 6, Ludwig 2026-10-17)
+**Why:** a published version stays published (ADR-0041, Archiving). If an author's repository is taken down, we stop
+serving it publicly but keep the record, so the copy in `archive` must not be deleted by accident. **When:** any time
+before the first real publish; the sooner the better. **Status:** not done. Every click-path below was taken from GitHub's
+documentation on 2026-10-18 (URLs in `docs/tasks/077-runbook-archive-protection.md`, log); if a screen differs from the
+text, follow the screen and tell the manager what differed.
+
+**What GitHub offers, and what it does not.** There is **no setting that stops a Release from being deleted.** GitHub's
+documentation describes deleting a release (trash icon, "Delete this release") and names no protection against it.
+The closest protection is two settings that protect the *tag* and the *files* of a release:
+- **Immutable releases** (repository setting): once a release is published, its tag cannot be moved or deleted while the
+  release exists, and its attached files cannot be changed or deleted. It does **not** stop someone deleting the release
+  itself; after that the tag can be deleted, but the same tag name can never be used again. It applies only to releases
+  published after you switch it on. Title and notes can still be edited.
+- **Tag ruleset** with *Restrict deletions* and *Restrict updates*: only people on the ruleset's bypass list can delete or
+  move tags matching the pattern. It does **not** touch the Release page itself.
+
+Together they mean a published version's tag and files survive, but a Release entry can still be deleted by someone with
+permission. Whether the organisation owner can bypass immutable releases is not stated in the documentation
+(`[unverified]`); for the ruleset, only actors on the bypass list can, so leave that list empty.
+
+1. Open `https://github.com/worldofmodcraft/archive` → **Settings** (if you cannot see it, click the **...** More menu,
+   then **Settings**).
+2. Scroll down to the **Releases** section and tick **Enable release immutability**.
+3. Left sidebar, under "Code, planning, and automation": click **Rulesets**, then **Rulesets** again, then **New ruleset**,
+   then **New tag ruleset**.
+4. Ruleset name: `archive-tags-permanent`. Enforcement status: **Active**.
+5. Leave the **Bypass list** empty (do not click Add bypass).
+6. Under **Target tags** click **Add a target** and choose to include all tags (pattern `*` if the screen asks for a
+   pattern; `[unverified]` which wording the screen uses).
+7. Under **Tag protections** tick **Restrict deletions** and **Restrict updates**. Do not tick anything else
+   (creation must stay allowed: the pipeline creates the tags when it publishes a Release).
+8. Click **Create**.
+
+*You should see:* on `https://github.com/worldofmodcraft/archive/settings/rulesets` the ruleset `archive-tags-permanent`
+listed as Active; on the Settings page the **Enable release immutability** box ticked. These are screens you reach with
+your normal browser login; no token and no terminal. Do not delete a tag or Release to "test" it. If the Rulesets menu is
+missing or says the feature needs a paid plan, stop and tell the manager (the organisation's plan is `[unverified]`).
 
 ---
 
