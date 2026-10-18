@@ -43,3 +43,18 @@ Making any change on GitHub (the step is Ludwig's); reading or using any token o
 ---
 # Task 077 log
 - 2026-10-18 manager (session 11): written and approved (solo gate).
+- 2026-10-18 doc-writer: M8 added to `docs/runbooks/site-v1-manual-steps.md` (before Q-H, after M7). Nothing changed on GitHub; no credential touched.
+  Verified (WebFetch, docs.github.com, 2026-10-18):
+  - Tag ruleset steps (Settings > Rulesets > Rulesets > New ruleset > New tag ruleset; name, enforcement Active, Bypass list, Target tags, Tag protections, Create): https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository
+  - Rules "Restrict deletions" ("only users with bypass permissions can delete branches or tags") and "Restrict updates": https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
+  - Bypass is configurable per actor; rulesets otherwise apply to all: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets
+  - Immutable releases, repo UI path (Settings > Releases > "Enable release immutability"), applies only to future releases: https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/preventing-changes-to-your-releases
+  - Immutable releases behaviour (tag locked while release exists; assets protected; after deleting the release the tag may be deleted but the name cannot be reused): https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases and https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+  - Release deletion (trash icon / "Delete this release"): the managing-releases page above. No page found describing any way to prevent it; the runbook says so.
+  Check: `bash docs/tasks/068-verify.sh` exit 0 (ALL PASS); the only verify script referencing the runbook. (First run failed because I had rewritten the "Last reviewed" stamp; restored it and added a separate M8 note.)
+  Questions for Ludwig/manager:
+  1. No way to prevent Release deletion exists in the docs. Accept tag + file protection as "closest"? (Alternative outside this task: few people hold delete rights on `archive`.)
+  2. Can an org owner bypass immutable releases, and who can delete an immutable release? Docs do not say; marked [unverified] in M8.
+  3. Rulesets are documented as available "for customers on GitHub Team and GitHub Enterprise plans"; fetched docs did not say about Free plan on public repos. The org's plan is unknown to us; M8 tells Ludwig to stop if Rulesets is missing.
+  4. Does `archive` already contain releases? Immutability would not cover them.
+  5. Pipeline creating tags is assumed unaffected (only deletion and update restricted); not tested.
