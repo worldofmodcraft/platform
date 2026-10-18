@@ -2075,3 +2075,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-1
 
 ### Ludwig, 2026-10-18 (verbatim): "1. OK att merga 62. 2. Kör Stjärna för ADR-0122"
 → #62 merged. ADR-0122: option **A** (★) — a narrow permission rule allowing edits under `docs/decisions/` for task 074, then the doc-writer finishes the acceptance edits (status Accepted, index, "Amended by ADR-0122" in ADR-0041) and PR #61 merges. Deferred to the start of the next session (manager at the 40 % hard context limit; permission changes done with full context). **Next session: this is item 0, before 064.** Ludwig's instruction is the authorisation; the rule is scoped to `docs/decisions/**` and recorded in this log.
+
+### Ludwig, 2026-10-18 (verbatim): "Fortsätt i den här sessionen"
+→ waives the §5 hard handover threshold (40 %) for this session as well; context ~40 % at this point. Mitigation: operational facts are re-read from disk, never taken from memory.
