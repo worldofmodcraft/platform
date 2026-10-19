@@ -2096,3 +2096,31 @@ Token guard: suspended by Ludwig (2026-10-14), not checked. Context at start: 5 
   review PASS. Open: rulesets documented "for GitHub Team and Enterprise" only — Free/public marked [unverified]; M8
   tells Ludwig to stop if the menu is missing. Task 076 is reserved for the doctrine task (§7 wording + approved
   REVIEW-CHECKLIST item), to be specified after ADR-0122 is accepted (its grounds wording depends on it).
+- **064**: implementer re-pinned 064-verify.sh's own-change checks (AC5.1-5.6, S1-S3) to MAINB..FINAL
+  (FINAL `69f74a1`, re-pin `e288c43`, red shown first), merged `origin/main` (`1f99708`, no conflicts), tip `5002b46`.
+  Delta review PASS; serial gate on a quiet machine: all 14 closed scripts exit 0 (064-verify ~40 min). Observed: 062/067
+  redden when two verify runs overlap — the known shared-suite class (task 043); serial runs are green.
+- **Merge of registry PR #13 refused by the auto-mode classifier ("Merge Without Review").** Not retried. Second
+  stop-and-ask in a row → session halts per MANAGER.md §8 until Ludwig answers.
+
+## SESSION STATUS — 2026-10-19 (session 11), halted on two classifier refusals (§8), context ~12 %
+### Done
+- 075 spec-approved (two independent spec-review rounds); 077 PR #63 reviewed PASS (not merged); 064 ready (review
+  PASS, gate green on `5002b46`).
+### For Ludwig (★ = manager's lean)
+1. **ADR-0122 permission rule** (your option A, 2026-10-18) — the classifier will not let the manager grant it.
+   ★A you add it: in the Claude Code prompt type `/permissions`, choose "Allow", add the rule
+   `Edit(//home/ludwig/wt/task-074/docs/decisions/**)` and save it to "Project settings (local)"; then say "fortsätt".
+   B you make the three edits yourself (manager writes the steps). C leave ADR-0122 Proposed.
+2. **Registry PR #13 (task 064)** — reviewed and green, merge refused by the classifier. ★A you click "Merge pull
+   request" at https://github.com/worldofmodcraft/registry/pull/13 (keeps the human gate visible to the classifier);
+   B write "OK att merga #13" and the manager tries once more with the plain merge command. 075 waits on this.
+3. **Platform PR #63 (task 077, runbook M8)** — reviewed PASS. A ★ "OK att merga 63"; B changes first.
+4. **Fact question for M8:** GitHub documents rulesets "for GitHub Team and GitHub Enterprise". Which plan is the org
+   on? See https://github.com/organizations/worldofmodcraft/settings/billing — the plan name is at the top.
+### Next session starts here
+1. After answer 2: 064 merged → cut 075 from registry main, dispatch implementer; merge needs Ludwig.
+2. After answer 1: doc-writer finishes ADR-0122 acceptance edits in `~/wt/task-074`; PR #61 merge (Ludwig).
+3. Then 076 doctrine task (§7 wording per ADR-0122 + approved REVIEW-CHECKLIST item); 072 ledger hygiene;
+   live checks 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-19 (session 11) i missionsloggen och fortsätt med 'Next session starts here'."
