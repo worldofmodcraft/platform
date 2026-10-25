@@ -2273,3 +2273,7 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   screenshot scan first). **Chosen A.** Reverse: a later task adds auto-merge after 040.
 - Booked (not a choice): R11 currently names the org id; Ludwig's dedicated takedown-only account needs an `ownership.md`
   amendment task later (039 U11).
+- **C3 reversed (2026-10-25 night):** dispatching the 058 live probe was **refused by the auto-mode classifier ("Create
+  Public Surface")** — creating a public repository in the org. Not retried. 058 criteria 3-6 wait for Ludwig's morning (he
+  creates `worldofmodcraft/pages-probe` per 058's manual step, or approves it in session). Consequence: 008c (needs the
+  archive URL shape) and through it 008b stay blocked overnight.
