@@ -2323,3 +2323,7 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   concentric rings on a teal-to-violet gradient), `gallery.png` (six gradient tiles with a diamond each), `spare.png` (diagonal
   orange/red stripes) — abstract, original, generator-made, nothing game- or Blizzard-like; clean at 1280×720. Ludwig may
   override in the morning.
+- **010a (platform PR #77):** review PASS-WITH-AMENDMENTS (mutations now need a FAIL reason, not just exit 1; C24 and criterion 8
+  recorded in the task log), fixed at `5a16864`; the manager re-ran `010a-verify.sh` there: ALL OK, 0 FAIL, worktree clean.
+  **Merge refused by the auto-mode classifier ("Merge Without Review")** — not retried. Overnight, task PRs are therefore
+  parked for Ludwig's morning OK even where §7 would let the manager merge; session-log PRs (docs only) continue.
