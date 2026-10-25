@@ -2309,3 +2309,7 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
 - **C22 — 082 finding 4 (HIGH): write-back PR flow under M9's "up to date" rule.** A★ PRs opened and merged one at a time, each
   from a `main` fetched after the previous merge; the App merges once `gate` is green; closed unmerged or not merged within
   30 min → the run fails and releases the group. B one PR per run (one version per run). **Chosen A.** Reverse: amend PT11/C13.
+- **C20 extended (082 review round 2, N1 HIGH):** the App key `PIPELINE_APP_PRIVATE_KEY` gets the same binding — a `write-back`
+  environment limited to `main` — and **M11 deletes the repo-level copies of both secrets** (an environment copy protects nothing
+  while a repo-level copy exists; a stolen App key could forge a T1 PR's hash and signature). Reverse: as C20. → 082
+  **spec-approved** after review rounds 1-2.

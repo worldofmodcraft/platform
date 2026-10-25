@@ -1,8 +1,8 @@
 # Task 082: The pipeline-trigger contract (E15) — `contracts/pipeline-trigger.md`
 
 - **Mission:** SITE-V1, deliverable **D2** (unblocks 008b; umbrella `docs/tasks/008-build-pipeline.md` finding F2) —
-  **Status:** draft (manager, 2026-10-25 night; drafted by a Plan agent; Q1-Q7 decided under Ludwig's standing ★ approval as
-  C11-C17; spec review round 1 FAIL, folded in, C20-C22 decided by the manager; **round 2 pending**). Decides when the signing
+  **Status:** spec-approved (manager, 2026-10-25 night; drafted by a Plan agent; Q1-Q7 decided under Ludwig's standing ★ approval as
+  C11-C17; spec review round 1 FAIL, folded in, C20-C22 decided by the manager; round 2 FAIL on N1 (both keys), fixed by the manager; **spec-approved**). Decides when the signing
   key can be reached → **independent spec review before dispatch.**
 - **Merge:** needs **Ludwig's written approval** (adds a contract, ADR-0117; fixes which runs reach `MINISIGN_SECRET_KEY`,
   MANAGER.md §7). The standing ★ approval does not cover this merge. Ludwig's manual step **M11** (C20) is separate and
@@ -64,7 +64,10 @@ ADRs cited (ADR-0116 layer 2): 0041, 0058 §1 (as amended), 0117, 0121. None is 
 - **C20 (manager, 2026-10-25) key binding:** the signing key is bound to `main` by a GitHub Actions **environment** named
   `signing` on the signing job, deployment branches limited to `main`, the key stored as that environment's secret. Ludwig's
   manual step, booked as runbook **M11** [unverified mechanics]. The ref condition (C14) protects only the unmodified workflow
-  file. Until M11 is done, the trust boundary of `MINISIGN_SECRET_KEY` is every account with write access to the registry.
+  file. **Extended (review round 2, N1):** the `signing` environment holds `MINISIGN_SECRET_KEY` and a `write-back` environment
+  holds `PIPELINE_APP_PRIVATE_KEY`, each limited to deployment branch `main`; **M11 deletes the repo-level copies of both
+  secrets** (an environment copy protects nothing while a repo-level copy exists). Until M11 is done, the trust boundary of both
+  keys is every account with write access to the registry. The dry-run job references neither environment.
   008b design 8 follow-up booked.
 - **C21 (manager, 2026-10-25) dry runs never use the production key:** a `dry_run=true` run signs with an ephemeral key generated
   inside the run and discarded; its artifacts say so. Amends 008b criterion 10 (booked follow-up). The dry run's source is only a
@@ -87,7 +90,9 @@ House header: "Contract for edge **E15** (`N2 -> N5`, registry-data (merge to ma
   does not match `/`; GitHub may run a path-filtered workflow anyway when it cannot compute the diff.
 - **PT3 Ref and key binding.** Signing and write-back jobs act only when `github.ref == 'refs/heads/main'`, for both triggers
   (C14). The ref condition protects only the unmodified file; the key is bound to `main` only by the `signing` environment
-  (C20). Until M11 is done, the trust boundary of `MINISIGN_SECRET_KEY` is every account with write access to the registry.
+  (C20) and the App key only by the `write-back` environment; M11 deletes both repo-level copies. Until M11 is done, the trust
+  boundary of `MINISIGN_SECRET_KEY` and `PIPELINE_APP_PRIVATE_KEY` is every account with write access to the registry. The dry-run
+  job references neither environment.
   `[unverified]`: a `workflow_dispatch` runs the workflow file of the ref selected at dispatch, so a modified file on another
   branch runs without the condition; the environment's deployment-branch limit is what stops it from reaching the key.
 - **PT4 Input snapshot.** The run reads `mods/*/entry.json` at `main`'s head fetched at plan time and logs that SHA; the push
@@ -129,7 +134,9 @@ House header: "Contract for edge **E15** (`N2 -> N5`, registry-data (merge to ma
   `gate` like any PR, no bypass, no lifted rule; opened with the GitHub App identity (Q-D), never `GITHUB_TOKEN`. PRs are opened
   and merged one at a time, each branched from a `main` head fetched after the previous merge; the GitHub App merges each once
   `gate` is green (C22). `gate` red, a PR closed unmerged, or a PR not merged within 30 minutes → the run fails and stops, and
-  the group is released (008b Forbidden; criterion 9). The signing/write-back job has `timeout-minutes`.
+  the group is released (008b Forbidden; criterion 9). Remaining pending versions wait for the next push or an empty-`version`
+  dispatch. The signing/write-back job's `timeout-minutes` is sized from the pending count (N × 30 minutes plus build time), or
+  the per-PR steps carry their own timeouts.
 - **PT12 Dry run.** `workflow_dispatch` with `dry_run=true` writes only workflow artifacts — no release, branch, PR, archive
   commit or comment (criterion 10). It never uses the production key: it signs with an ephemeral key generated inside the run
   and discarded, and its artifacts say so (C21). Its source is only a `pending` version on `main` or an input set 008b names and
@@ -155,8 +162,9 @@ names are named in PT5/PT12 prose, not in the block; 008b may add inputs, not re
 withholding; 008b criterion 8 tests live; PT1, PT3); two merges land while a run is in progress and the waiting run is
 cancelled or replaced by a dispatch run (PT4, PT5, PT6); a stale snapshot rebuilds a published version (PT4, PT8); a
 write-access user dispatches from a branch with a modified workflow that removes the ref condition — the ref condition does not
-stop this, since it lives in the modified file; only the `signing` environment's deployment-branch limit (C20, M11) keeps the key
-away from that run, and until M11 is done every account with write access to the registry is inside the key's trust boundary
+stop this, since it lives in the modified file; only the `signing` and `write-back` environments' deployment-branch limits, with
+the repo-level copies deleted (C20, M11), keep both keys away from that run (a stolen App key would forge a T1 PR's hash and
+signature as surely as a stolen signing key); until M11 is done every account with write access is inside both keys' trust boundary
 (PT3); a page-only push starves a pending version (liveness only; PT5); an author squats versions that never build (cost only;
 ADR-0121 Consequences; PT10 code 1); one faulting version stalls the others (PT5: it ends that version only); a crafted `version`
 dispatch input injects into a script (PT5: validated, `env:` only); a dry run signs with the production key (PT12: ephemeral key
@@ -183,7 +191,8 @@ Deterministic, offline, stdlib; exit code = number of failures; anything needing
    T3 PR → red.
 7. **Full-sentence pins:** every sentence of PT1-PT12 pinned by its full text (032 round-6 lesson); a tail-append mutation (one
    permissive sentence added to PT3) → red. Named mutations, each red: PT3 widen the ref (e.g. `refs/heads/main` →
-   `refs/heads/*`, or drop the `signing`-environment/write-access sentences); PT11 allow `GITHUB_TOKEN`; PT12 dry run uses the
+   `refs/heads/*`, or drop the `signing`-environment/write-access sentences; drop the `write-back` environment or the "repo-level copies deleted"
+   sentence); PT11 allow `GITHUB_TOKEN`; PT12 dry run uses the
    production key. Each AC3-AC7 mutation red then restored byte-identically; positive control passes.
 8. **Index:** `docs/contracts/README.md` has a row for `contracts/pipeline-trigger.md` naming E15; its "does not exist yet" bullet
    is gone (grep 0 at `FINAL`, ≥ 1 at `BASE`).
@@ -232,3 +241,4 @@ the normative block with `pipeline.yml` on parsed keys (PT block paragraph), not
   GitHub's waiting-run replacement [unverified] makes range-only planning lossy (C11). Q1-Q7 decided as C11-C17. Awaiting
   independent spec review. Merge needs Ludwig.
 - 2026-10-25 manager: spec review round 1 FAIL (4 HIGH, 3 MED, 2 LOW); folded in; C20-C22 decided; round 2 pending.
+- 2026-10-25 manager: spec review round 2 FAIL on N1 (HIGH: the App key needs the same binding; repo-level copies must be deleted), N2/N3 LOW — all three fixed by the manager (C20 extended). **spec-approved** (manager, 2026-10-25 night).
