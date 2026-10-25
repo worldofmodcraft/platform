@@ -51,8 +51,9 @@ python3 -m unittest discover -s tools/test-mod/tests -p 'test_*.py' >"$TMP/unit.
 tail -3 "$TMP/unit.out" | sed 's/^/  /'
 [ "$rc" = 0 ] && ok "unittest discover -> exit 0" || bad "unit tests -> exit $rc"
 
-echo "== criterion 11 mutations: each broken copy must make the checker exit 1 (a crash, exit 2, is not red enough)"
-# mut NAME ONLY CMD : copy the staging tree to $TMP/mNAME, apply CMD (cwd = the copy), confirm it changed something, expect exit 1
+echo "== criterion 11 mutations: each broken copy must make the checker exit 1 AND print a non-empty FAIL reason (a crash is not red)"
+# mut NAME ONLY CMD : copy the staging tree to $TMP/mNAME, apply CMD (cwd = the copy), confirm it changed something, expect
+# exit 1 AND a non-empty '  FAIL <reason>' line (an uncaught Python traceback also exits 1, and is not a verdict: it counts as FAIL here)
 n=0
 mut() {
   local name=$1 only=$2 cmd=$3 d rc
@@ -60,7 +61,9 @@ mut() {
   ( cd "$d/test-mod" && eval "$cmd" ) >/dev/null 2>&1
   if diff -rq "$STAGE" "$d/test-mod" >/dev/null 2>&1 && [ -z "${FILL_OVERRIDE:-}" ] && [ -z "${GEN_OVERRIDE:-}" ]; then bad "$name: the mutation changed nothing"; return; fi
   rc=$(check "$d/test-mod" "$only")
-  if [ "$rc" = 1 ]; then ok "$name -> exit 1 ($(grep -m1 '^  FAIL' "$TMP/out" | cut -c8-110))"; else bad "$name -> exit $rc, expected 1"; tail -3 "$TMP/out" | cut -c1-160; fi
+  reason=$(grep -m1 '^  FAIL ' "$TMP/out" | cut -c8-110)
+  if [ "$rc" = 1 ] && [ -n "${reason// /}" ] && ! grep -q 'Traceback' "$TMP/out"; then ok "$name -> exit 1 ($reason)"
+  else bad "$name -> exit $rc, reason '${reason}' (need exit 1, a FAIL reason line, no traceback)"; tail -3 "$TMP/out" | cut -c1-160; fi
 }
 H=hello-world; P=registry-pr
 echo " -- criterion 1"
@@ -73,6 +76,8 @@ mut "1 PNG truncated (no IEND at the end)" 1 "f=$H/assets/screenshots/welcome.pn
 mut "1 screenshot path escapes with .." 1 "sed -i 's|\"assets/screenshots/gallery.png\"|\"../gallery.png\"|' $H/mod.lua"
 mut "1 README loses its table"       1 "sed -i '/^| --- /d' $H/README.md"
 mut "1 README loses the canary words" 1 "sed -i 's/permanent pipeline canary/permanent thing/g' $H/README.md"
+mut "1 README.md removed"           1 "rm $H/README.md"
+mut "1 LICENSE removed"             1 "rm $H/LICENSE"
 mut "1 ai_assisted dropped"          1 "sed -i '/ai_assisted/d' $H/mod.lua"
 mut "1 build: scanner-rejected file in the commit" 1build "printf 'WDBC' > $H/planted.bin; head -c 60 /dev/zero >> $H/planted.bin"
 echo " -- criterion 2"

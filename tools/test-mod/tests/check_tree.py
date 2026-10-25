@@ -213,12 +213,19 @@ def crit1_static(c, hello, label):
             data = f.read()
         prob = png_problem(data)
         check(prob is None, f"{s}: PNG magic bytes, valid chunks, IEND at the end", f"{s}: {prob}")
-    with open(os.path.join(hello, "LICENSE"), encoding="utf-8") as f:
-        lic = f.read()
+    try:
+        with open(os.path.join(hello, "LICENSE"), encoding="utf-8") as f:
+            lic = f.read()
+    except OSError as exc:
+        lic = ""
+        bad(f"LICENSE unreadable: {exc}")
     check(lic.startswith("MIT License") and "Copyright (c) 2026 World of Modcraft contributors" in lic,
           'LICENSE is the MIT text with the copyright line "World of Modcraft contributors"', "LICENSE lacks the MIT header or the copyright line")
-    with open(os.path.join(hello, "README.md"), encoding="utf-8") as f:
-        readme_checks(f.read(), hello)
+    try:
+        with open(os.path.join(hello, "README.md"), encoding="utf-8") as f:
+            readme_checks(f.read(), hello)
+    except OSError as exc:
+        bad(f"README.md unreadable: {exc}")
     return mod
 
 

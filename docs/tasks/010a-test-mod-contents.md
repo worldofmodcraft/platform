@@ -22,7 +22,7 @@ This file; `docs/tasks/010-test-mod.md` (as above); mission D4; ADRs 0119, 0059 
 1. **Screenshot lists:** `mod.lua` `screenshots` = `welcome.png`, `gallery.png`; `page.json` `screenshots` = the same two (subset;
    equal allowed). `spare.png` is in the tree and in neither list.
 2. **Placeholders:** ship `tools/test-mod/fill_placeholders.py` with `mod --account A` (rewrites `mod.lua` `source`) and
-   `entry --commit H`. Unfilled tokens must pass the schemas: `https://github.com/OWNER-PLACEHOLDER/wom-test-hello-world` and
+   `entry --account A --commit H` (C24: the entry's `source_url` carries the same URL token). Unfilled tokens must pass the schemas: `https://github.com/OWNER-PLACEHOLDER/wom-test-hello-world` and
    forty `0` characters. `registry-pr/` lives outside the `hello-world/` tree (so the zero commit never enters the archive). The
    script refuses an all-zero or non-40-hex commit and asserts zero tokens remain.
 3. **Tool invocations:** `python3 scan_assets.py DIR` (not `-I`; it imports its sibling `magic`); import `read_manifest` (no
