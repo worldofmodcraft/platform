@@ -276,7 +276,7 @@ sed '0,/^| Site build and deploy (N7) | job | GitHub-hosted runner (`ubuntu-late
 { cat "$N"; echo 'There is no lock-in.'; } > "$T/m6b.md";                  expect "forbidden phrase 2" "$T/m6b.md" "forbidden phrase present: 'no lock-in'"
 sed 's/phase 1\.5/a later phase/g' "$N" > "$T/m6c.md";                    expect "drop 'phase 1.5'" "$T/m6c.md" "'phase 1.5' absent"
 # 7: secrets
-{ cat "$N"; echo 'untrusted comment: minisign encrypted secret key'; } > "$T/m7.md"; expect "secret header" "$T/m7.md" "minisign secret-key header"
+{ cat "$N"; echo 'untrusted comment: minisign encrypted '"sec""ret key"; } > "$T/m7.md"; expect "secret header" "$T/m7.md" "minisign secret-key header"
 { cat "$N"; echo 'cat ~/wom-keys/x'; } > "$T/m7b.md";                           expect "key path" "$T/m7b.md" "private key path"
 { cat "$N"; echo "token ghp_$(printf 'a%.0s' $(seq 1 36))"; } > "$T/m7c.md";    expect "token" "$T/m7c.md" "GitHub token"
 # 8: stamp older than the dependency

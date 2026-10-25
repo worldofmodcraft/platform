@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Task 048 verification artefact (MANAGER.md section 2c).
-#   docs/tasks/048-verify.sh            checks AC1-AC7 on the committed tree (HEAD) against BASE (default origin/main)
+#   docs/tasks/048-verify.sh            checks AC1-AC7: c1 (own change) on the task's PR range PIN_BASE..PIN_FINAL, c2-c7 on HEAD
 #   docs/tasks/048-verify.sh --mutate   additionally applies each mutation AC10 names to a temp copy and requires
 #                                       the matching check to go red (positive control first: the clean tree must be green)
 # AC8 and AC9 are live (tool name; nesting refused; maxTurns run) and AC11 is human: none of them is covered here.
@@ -10,10 +10,17 @@ export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
-BASE="${BASE:-origin/main}"
+# Task 078 re-pin. c1 ("nothing weakened") is an OWN-CHANGE check: it describes what task 048's PR did, so it measures the PR range
+# (PIN_BASE = merge-base(M^1, M^2), PIN_FINAL = M^2, M = c323460 "Merge pull request #50"), never HEAD. Fixed SHAs; no env override.
+# An unreachable pin FAILS (exit 2), never skips. c2-c7 and the c5 quotation source are live/historical and stay as they were.
+PIN_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"
+PIN_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"
+BASE="$PIN_BASE"
 MODE="${1:-}"
 case "$MODE" in ""|--mutate) ;; *) echo "usage: $0 [--mutate]"; exit 2;; esac
-git -C "$REPO" rev-parse --verify -q "$BASE^{commit}" >/dev/null || { echo "FAIL: base ref $BASE not found (run: git fetch)"; exit 2; }
+for pin in "$PIN_BASE" "$PIN_FINAL"; do
+  git -C "$REPO" rev-parse --verify -q "$pin^{commit}" >/dev/null || { echo "FAIL: pinned commit $pin not found (run: git fetch)"; exit 2; }
+done
 
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/wom048-XXXXXX")"
 trap 'rm -rf -- "$TMP"' EXIT
@@ -27,27 +34,27 @@ base_show() { git -C "$REPO" show "$BASE:$1"; }
 
 # run_checks TREE : prints "ok cN: ..." / "FAIL cN: ..." lines; exit status is the number of FAIL lines (capped).
 run_checks() {
-  local T="$1" f n=0
+  local T="$1" T1="${2:-$1}" f n=0   # T1 = the tree c1 measures (the pinned FINAL export); T = the live tree for c2-c7
   ok()  { printf 'ok   %s\n' "$*"; }
   bad() { printf 'FAIL %s\n' "$*"; }
 
   # ---- c1: nothing weakened -------------------------------------------------------------------------------
   local files="$DOCS" a
-  for a in "$T"/.claude/agents/*.md; do [ -e "$a" ] && files="$files .claude/agents/$(basename "$a")"; done
+  for a in "$T1"/.claude/agents/*.md; do [ -e "$a" ] && files="$files .claude/agents/$(basename "$a")"; done
   for f in $files; do
-    if [ ! -f "$T/$f" ]; then bad "c1: $f missing from tree"; continue; fi
+    if [ ! -f "$T1/$f" ]; then bad "c1: $f missing from tree"; continue; fi
     if ! base_show "$f" > "$TMP/base.txt" 2>/dev/null; then ok "c1: $f is new (no base to delete from)"; continue; fi
-    n=$(diff "$TMP/base.txt" "$T/$f" | grep -c '^<' || true)
+    n=$(diff "$TMP/base.txt" "$T1/$f" | grep -c '^<' || true)
     if [ "$n" = 0 ]; then ok "c1: $f has 0 deleted lines vs $BASE"; else bad "c1: $f has $n deleted/changed lines vs $BASE"; fi
   done
   # token-guard blocks byte-identical to base apart from the added marker line(s)
   blk_claude() { awk '/^0\. \*\*THE TOKEN GUARD/{p=1;print;next} p&&/^1\. /{exit} p{print}'; }
   blk_mgr()    { awk '/^- \*\*The token guard/{p=1;print;next} p&&/^  /{print;next} p{exit}'; }
   base_show CLAUDE.md | blk_claude > "$TMP/b1"
-  grep -v 'SUSPENDED by Ludwig 2026-10-14' "$T/CLAUDE.md" | blk_claude > "$TMP/t1"
+  grep -v 'SUSPENDED by Ludwig 2026-10-14' "$T1/CLAUDE.md" | blk_claude > "$TMP/t1"
   if [ -s "$TMP/b1" ] && cmp -s "$TMP/b1" "$TMP/t1"; then ok "c1: CLAUDE.md rule 0 block identical to base apart from the marker"; else bad "c1: CLAUDE.md rule 0 block differs from base (or not found)"; fi
   base_show docs/manager/MANAGER.md | blk_mgr > "$TMP/b2"
-  grep -v 'SUSPENDED by Ludwig 2026-10-14' "$T/docs/manager/MANAGER.md" | blk_mgr > "$TMP/t2"
+  grep -v 'SUSPENDED by Ludwig 2026-10-14' "$T1/docs/manager/MANAGER.md" | blk_mgr > "$TMP/t2"
   if [ -s "$TMP/b2" ] && cmp -s "$TMP/b2" "$TMP/t2"; then ok "c1: MANAGER.md token-guard bullet identical to base apart from the marker"; else bad "c1: MANAGER.md token-guard bullet differs from base (or not found)"; fi
 
   # ---- c2: settings.json ----------------------------------------------------------------------------------
@@ -146,11 +153,12 @@ PY
   return 0
 }
 
-fresh_tree() { local d="$TMP/tree-$1"; rm -rf "$d"; mkdir -p "$d"; git -C "$REPO" archive HEAD | tar -x -C "$d"; printf '%s' "$d"; }
+fresh_tree() { local d="$TMP/tree-$1"; rm -rf "$d"; mkdir -p "$d"; git -C "$REPO" archive "${2:-HEAD}" | tar -x -C "$d"; printf '%s' "$d"; }
 
-echo "== task 048 verify: HEAD $(git -C "$REPO" rev-parse --short HEAD) against $BASE ($(git -C "$REPO" rev-parse --short "$BASE"))"
+echo "== task 048 verify: c1 on PR range $(git -C "$REPO" rev-parse --short "$PIN_BASE")..$(git -C "$REPO" rev-parse --short "$PIN_FINAL"); c2-c7 on HEAD $(git -C "$REPO" rev-parse --short HEAD)"
 T0="$(fresh_tree clean)"
-run_checks "$T0" | tee "$TMP/clean.out"
+F0="$(fresh_tree finalclean "$PIN_FINAL")"
+run_checks "$T0" "$F0" | tee "$TMP/clean.out"
 CLEAN_FAILS=$(grep -c '^FAIL' "$TMP/clean.out" || true)
 echo "== clean tree: $CLEAN_FAILS failing check line(s)"
 rc=0; [ "$CLEAN_FAILS" = 0 ] || rc=1
@@ -162,9 +170,12 @@ MFAIL=0
 # mutate NAME EXPECTED_TAG 'shell snippet run with T set to the tree'
 mutate() {
   local name="$1" tag="$2" snippet="$3" T
-  T="$(fresh_tree m)"; ( cd "$T" && T="$T" eval "$snippet" ) 2>"$TMP/merr"
-  if diff -rq "$T0" "$T" >/dev/null 2>&1; then echo "FAIL mutation '$name': no-op, the tree did not change"; MFAIL=1; return; fi
-  run_checks "$T" > "$TMP/mut.out"
+  local clean1="$T0" T1
+  # a c1 mutation edits the pinned FINAL export (what c1 measures); every other mutation edits the HEAD tree
+  if [ "$tag" = c1 ]; then T="$(fresh_tree m "$PIN_FINAL")"; clean1="$F0"; else T="$(fresh_tree m)"; fi
+  ( cd "$T" && T="$T" eval "$snippet" ) 2>"$TMP/merr"
+  if diff -rq "$clean1" "$T" >/dev/null 2>&1; then echo "FAIL mutation '$name': no-op, the tree did not change"; MFAIL=1; return; fi
+  if [ "$tag" = c1 ]; then run_checks "$T0" "$T" > "$TMP/mut.out"; else run_checks "$T" "$F0" > "$TMP/mut.out"; fi
   local new; new=$(grep "^FAIL ${tag}" "$TMP/mut.out" | grep -vxFf <(grep '^FAIL' "$TMP/clean.out") | head -1 || true)
   if [ -n "$new" ]; then echo "ok   mutation '$name' -> red: ${new:0:150}"; else echo "FAIL mutation '$name' did NOT turn ${tag} red"; MFAIL=1; fi
 }
