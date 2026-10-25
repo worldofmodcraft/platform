@@ -278,8 +278,8 @@ of these failures has been rehearsed.
   4. The `source_archive` finding above: the contract stores a URL that cannot be rewritten.
 - **Pending, all `specified`, not built:** task 058 (archive URL probe), 008b (pipeline workflow, the
   Releases location, the App), 055 (site from the real registry, E12 sender), 010 (the canary mod
-  and runbook), and ADR-0121 (version lifecycle, a proposal on branch
-  `proposal/adr-0121-version-lifecycle`, see `proposal/adr-0121-version-lifecycle:docs/decisions/0121-version-lifecycle-pending.md`;
+  and runbook), and ADR-0121 (version lifecycle, a proposal, pending acceptance, see
+  `docs/decisions/0121-version-lifecycle-pending.md`;
   it would amend the append-only and entry statements above if accepted). Each flips rows from
   `specified` to `built` at the second pass.
 - **Observed 2026-10-15:** `curl -s -o /dev/null -w '%{http_code}' https://github.com/worldofmodcraft/archive`
