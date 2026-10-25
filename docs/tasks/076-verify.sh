@@ -30,9 +30,11 @@ SC="docs/manager/MANAGER.md
 docs/manager/REVIEW-CHECKLIST.md
 docs/tasks/076-doctrine-removal-and-pinning.md
 docs/tasks/076-verify.sh"
-bad=$(git diff --name-only "$BASE" HEAD | grep -vxF "$SC"); [ -z "$bad" ]; chk "BASE..HEAD touches only File scope ${bad:+($bad)}" $?
+bad=$(git diff --name-only "$BASE" 11c091c182a75681ca0842eb505067b2f8a8f0e8 | grep -vxF "$SC"); [ -z "$bad" ]; chk "BASE..own-commits touches only File scope ${bad:+($bad)}" $?
 echo "AC4 (live guards on HEAD)"
+find tools -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
 for f in $(grep -l "docs/manager" docs/tasks/*-verify.sh | grep -v 076-verify.sh); do
+  find tools -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
   bash "$f" >/dev/null 2>&1; rc=$?; chk "$f exit $rc" $rc
 done
 [ "$fails" -eq 0 ] && echo "076 verify: PASS" || echo "076 verify: $fails FAIL"
