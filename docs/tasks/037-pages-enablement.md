@@ -1,6 +1,6 @@
 # Task 037: Pages enablement — worldofmodcraft.com serves for the first time
 
-- **Mission:** SITE-V1 — **Status:** **spec-approved (Ludwig, in session, 2026-09-05: "Pages
+- **Mission:** SITE-V1 — **Status:** done (merged platform PR #27 `93844b8`) — was: **spec-approved (Ludwig, in session, 2026-09-05: "Pages
   enablement is GO — 025 closed, so my gate is met")**
 - **Agent / model:** manager (operations, not production code)
 - **Budget:** small
@@ -296,3 +296,4 @@ served site with a negative control that reddens.
 **Standing caveat:** the deployed site is built from this repository's **fixtures**, not from real
 published mods — the deploy workflow's registry checkout and archive staging are still commented
 out pending their contracts. The site is live and correct; its *content* is fixture content.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #27 (`93844b8`, on platform origin/main).

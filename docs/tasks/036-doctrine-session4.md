@@ -1,6 +1,6 @@
 # Task 036: Two doctrine rules and one interim rule, from session 4's findings
 
-- **Mission:** SITE-V1 (doctrine) — **Status:** spec-approved (Ludwig, in session, 2026-09-05)
+- **Mission:** SITE-V1 (doctrine) — **Status:** done (merged platform PR #26 `9bd4d7b`) — was: spec-approved (Ludwig, in session, 2026-09-05)
 - **Agent / model:** manager (doctrine text; no production code)
 - **Budget:** small
 - **Branch / worktree:** `task/036-doctrine-session4` (platform repo)
@@ -50,3 +50,4 @@ reading the diff.
 
 ## Status
 **done** — pending merge. The third rule stays booked for the session that closes task 023.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #26 (`9bd4d7b`, on platform origin/main).

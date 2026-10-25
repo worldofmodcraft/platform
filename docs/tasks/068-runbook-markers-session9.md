@@ -1,6 +1,6 @@
 # Task 068: the SITE-V1 runbook's markers show Ludwig's manual steps of 2026-10-15
 
-- **Mission:** SITE-V1 — **Status:** spec-approved (manager, solo gate, 2026-10-15, session 10; small documentation)
+- **Mission:** SITE-V1 — **Status:** done (merged platform PR #58 `9b86898`) — was: spec-approved (manager, solo gate, 2026-10-15, session 10; small documentation)
 - **Repo:** platform (`wom`). **Agent / model:** doc-writer / per agent frontmatter. **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/068-runbook-markers` / `~/wt/task-068`, cut from platform `origin/main`
 - **Graph:** documentation only; no node or edge.
@@ -74,3 +74,4 @@ which the runbook cites.
   The first --mutate run had one NO-OP (the M7 pattern was split across a line break); the pattern was fixed and the run above is the second.
 - 2026-10-15 doc-writer: gap, not papered over: the M3 evidence "2026-09-05, `gh secret list`" is the mission log's claim; this
   task could not re-check it (forbidden). The 2026-10-15 re-confirmation is Ludwig's own statement, as recorded in the log.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #58 (`9b86898`, on platform origin/main).

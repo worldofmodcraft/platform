@@ -1,6 +1,6 @@
 # Task 035: A contract's environmental claims carry their caveat inline
 
-- **Mission:** SITE-V1 (doctrine) — **Status:** spec-approved (Ludwig, in session, 2026-09-05)
+- **Mission:** SITE-V1 (doctrine) — **Status:** done (merged platform PR #24 `387b1b7`) — was: spec-approved (Ludwig, in session, 2026-09-05)
 - **Agent / model:** manager (doctrine text; no production code)
 - **Budget:** small
 - **Branch / worktree:** `task/035-verified-facts-rule` (platform repo, `~/wt/platform-task-035`)
@@ -50,3 +50,4 @@ Anything else = stop and report.
 
 ## Status
 **done** — pending merge.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #24 (`387b1b7`, on platform origin/main).

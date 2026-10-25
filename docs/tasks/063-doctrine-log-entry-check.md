@@ -1,6 +1,6 @@
 # Task 063: MANAGER.md §5 describes check-log-entry.sh as it exists, not as a future script
 
-- **Mission:** SITE-V1 (doctrine upkeep) — **Status:** review (awaiting Ludwig's merge approval); spec-approved by the manager 2026-10-15; **merge needs Ludwig's
+- **Mission:** SITE-V1 (doctrine upkeep) — **Status:** done (merged platform PR #55 `0a87b17`) — was: review (awaiting Ludwig's merge approval); spec-approved by the manager 2026-10-15; **merge needs Ludwig's
   written approval** (doctrine, MANAGER.md §7)
 - **Agent / model:** the manager writes the doctrine text in session with Ludwig, as for task 048 (the auto-mode
   classifier denied agent edits to doctrine on 2026-10-14; that denial is not worked around). Independent review:
@@ -107,3 +107,4 @@ result (mutations): ALL CAUGHT, ALL RESTORED
 OVERALL: GREEN
 ```
 - 2026-10-15 manager: Ludwig approves the merge in session: "★ på alla" (his answer to the session-9 list "Godkänna merge (★ jag rekommenderar ja på alla)", covering platform #55, registry #10, registry #9 and platform #56).
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #55 (`0a87b17`, on platform origin/main).

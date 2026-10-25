@@ -1,6 +1,6 @@
 # Task 046 — A transferable handover of how we develop, for another AI assistant
 
-- **Status:** spec-approved
+- **Status:** done (merged platform PR #36 `5d1a7f5`) — was: spec-approved
 - **Repo:** platform
 - **Date:** 2026-09-10
 - **Approved by:** Ludwig, in session, 2026-09-10
@@ -50,3 +50,4 @@ Recorded as an amendment rather than folded in silently, per MANAGER.md §3.3.
 judgement, most of which is in the manager's context rather than on disk, so a fresh agent would
 reconstruct it worse; (b) the session was in token-guard UNKNOWN at the time (a new day, no usage
 figure yet), which bars delegation but explicitly permits non-delegating writing.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #36 (`5d1a7f5`, on platform origin/main).

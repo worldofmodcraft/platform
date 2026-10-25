@@ -1,6 +1,6 @@
 # Task 069: closed tasks' verify scripts stay correct under concurrency and on later branches (008a, 007a, 062)
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-15, session 10;
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (merged registry PR #15 `2347ffb`) — was: spec-approved (manager, solo gate, 2026-10-15, session 10;
   test-artefact maintenance, the same shape as tasks 062 and 067)
 - **Repo:** registry. **Agent / model:** qa-engineer / sonnet (changing a closed task's verify script is a test change and
   its own reviewed task, MANAGER.md §3.5). **Budget:** small–medium (≤ 2 agent-sessions)
@@ -73,3 +73,4 @@ sequences 066 first if it is ready.
 - 2026-10-15 manager (session 10): written and approved (solo gate, SPEC-CHECKLIST 1–8). Sources: 007b's report (007a scope
   and size checks red on its branch; 062 008a reds), the static diagnosis of the 008a race (008a-verify.sh lines 36, 72–73),
   064's report Q2 (062 AC6.034) and its note that 008a passes when re-run alone.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #15 (`2347ffb`, on registry origin/main).

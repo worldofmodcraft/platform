@@ -1,6 +1,6 @@
 # Task 080: the architecture note cites ADR-0121 on main, not a local-only branch — 056/076/078 verify green in a fresh clone
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-25)
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (merged platform PR #69 `9a73990`) — was: spec-approved (manager, solo gate, 2026-10-25)
 - **Repo:** platform. **Agent / model:** doc-writer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/080-adr0121-cite` / `~/wt/task-080`, cut from platform `origin/main` (`29b3424` or later)
 - **Graph:** docs + verification tooling only.
@@ -43,3 +43,4 @@ Pushing or deleting the local `proposal/adr-0121-version-lifecycle` branch; chan
 - 2026-10-25 doc-writer (task 080): results. Fresh clone of PR head f173739 (GitHub, one script at a time, foreground-equivalent, PYTHONDONTWRITEBYTECODE=1): 056=0, 076=0, 078=0, 079=0 (AC2). Worktree: all 14 `docs/tasks/*-verify.sh` exit 0 (AC4; 061, 076, 078 exceed 110 s, first pass hit my timeout (124), rerun without timeout gave 0). 080-verify.sh exit 0, 0 branch:path cites remain, ADR-0121 path resolves (AC3).
 - 2026-10-25 doc-writer (task 080, review fix, REVIEW-CHECKLIST item 12): `080-verify.sh` own-change checks (ADR path, note cite, BASE had the branch cite, file scope) now read pinned SHAs BASE=29b3424fc97ba919f598531e9f4f154acc2a0619 and FINAL=f173739800707d44a32fe495e96a39022c0c84bb via `git show`/`git diff`; unreachable pin = fail. The ls-remote branch:path check stays live on HEAD. Control: with FINAL=BASE the script exits 1 ("FAIL note cite at FINAL"); live run exits 0. (The first control run passed wrongly because the old branch cite contains the path as a substring; the grep now rejects a path preceded by `:`.) The earlier fresh-clone results (056/076/078/079 = 0) were taken at f173739, the content commit; the PR head is now the later commits, and the final fresh-clone run is recorded below.
 - 2026-10-25 doc-writer (task 080): fresh clone of final PR head a36b758: 056=0, 076=0, 078=0, 079=0, 080=0.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #69 (`9a73990`, on platform origin/main).

@@ -1,6 +1,6 @@
 # Task 056: The D5 architecture note — what runs where, the server hosts nothing, and the way off GitHub
 
-- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** review (doc-writer, 2026-10-15; first version; second pass due after 058, 008b, 055, 010)
+- **Mission:** SITE-V1, deliverable **D5** (architecture note; the key-management note and the committed decision log, the other D5 items, are already done — see Context) — **Status:** done (merged platform PR #43 `9e91614`; first version only; second pass still due) — was: review (doc-writer, 2026-10-15; first version; second pass due after 058, 008b, 055, 010)
 - **Agent / model:** doc-writer / sonnet
 - **Budget:** small (≤ 1 agent-session) for the first version; a second small pass after 008b/055 land
 - **Branch / worktree:** `task/056-architecture-note` / `~/wt/task-056` — **platform** repo (`worldofmodcraft/platform`). The mission lets D5 live "in the site or registry repo as appropriate"; this note goes in the platform repo beside `docs/architecture/depgraph.md` and `key-management.md`, the other D5 documents, so the three are read together. If Ludwig wants it served on the site as well, that is a separate, later task.
@@ -270,3 +270,4 @@ FAIL [3] `built` item cites no observation (obs L<n>): N2
     Under §3.4 the author was stopped and ONE escalation was run: a fresh agent with an exact spec. Result 62ee3bf.
   - Manager fresh-clone re-run at 62ee3bf: `== 31 pass, 0 fail`. No `built` row claims protection any more.
   - Status: script criteria green. **Criterion 9 (Ludwig's read-through) is open.** The PR stays unmerged until Ludwig reads it.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #43 (`9e91614`, on platform origin/main). Caveat: first version only; second pass still due.
