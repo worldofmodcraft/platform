@@ -2260,3 +2260,16 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   `worldofmodcraft/pages-probe`, enables Pages, pushes the probe tree and records curl/wget observations; B wait for
   Ludwig. **Chosen A**; criterion 5 (DNS) is not done, criterion 6 (browser) and deleting the repository stay Ludwig's.
   Reverse: delete `worldofmodcraft/pages-probe` (Settings → General → Delete this repository) and discard the live rows.
+- **C4 — 039: where R11's identity is configured.** A★ committed `config/r11-identity.json` read at the merge-base (reviewed,
+  history in git); B a repository variable (any admin can change it silently). **Chosen A.** Reverse: a later task moves it.
+- **C5 — 039: who asks the org-membership question (R9).** A★ a new org App with only Members:read (runbook M10); B add
+  Members:read to the pipeline App (puts a write-capable key in a PR-triggered workflow). **Chosen A.** Reverse: amend 039's
+  §4 and M10 before M10 is done.
+- **C6 — 039: PRs touching nothing under `mods/`.** A★ green, labelled "human review required"; B green only for maintainer ids
+  in merge-base config. **Chosen A.** Reverse: a follow-up task adds the maintainer list.
+- **C7 — 039: size.** A★ one task (the YAML/composer seam is the risk); B split 039a composer / 039b workflow. **Chosen A**
+  (stop-and-split at 450 changed lines). Reverse: the manager splits at that point.
+- **C8 — 039: page.json-only merge on green.** A★ a human clicks merge in v1; B auto-merge (needs a write identity and 040's
+  screenshot scan first). **Chosen A.** Reverse: a later task adds auto-merge after 040.
+- Booked (not a choice): R11 currently names the org id; Ludwig's dedicated takedown-only account needs an `ownership.md`
+  amendment task later (039 U11).
