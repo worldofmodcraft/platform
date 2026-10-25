@@ -2280,3 +2280,14 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
 - **C9 — task 010 scope tonight.** A★ split: 010a (mod contents, generator, registry-side files, fill-in script) now; 010b
   (runbook `first-publish.md`, M4-M7 text, rehearsal) after 039/008b/055. B keep 010 whole and wait. **Chosen A.** Reverse:
   fold 010a's result back into 010 and drop 010b. 010a's spec review: PASS-WITH-AMENDMENTS (8, folded in).
+- **C10 — 039: how the membership step gets a token (review finding B4).** A★ the official `actions/create-github-app-token`
+  pinned to a 40-hex SHA, secrets only in that step, the minted token only in the membership step's `env:`; B a hand-written
+  JWT mint in one shell step. **Chosen A** (boring, predictable — ADR-0103). Reverse: rewrite 039 §4 before M10.
+- **C11-C17 — task 082 (E15 pipeline-trigger contract), Q1-Q7, all ★:** C11 a push run builds every `pending` version on `main`
+  (not only its push range; survives cancelled waiting runs) · C12 input = `main`'s head fetched at plan time, SHA logged ·
+  C13 a run holds the `pipeline` group until its PRs merge; pending versions with an existing `pipeline/` branch are skipped
+  and logged for manual recovery · C14 signing and write-back only when `github.ref == refs/heads/main` (008b Objective wording
+  corrected) · C15 an entry on `main` failing the schema is a pipeline fault (no build, no T3) · C16 text checks in 082 now,
+  the workflow comparison in 008b-verify · C17 closed trigger list (`push`, `workflow_dispatch`). Alternatives per 082's spec
+  (B: range-only / `github.sha` / no in-flight rule / protected Environment or unsigned dispatch / build anyway / dormant
+  check / forbid only three names). Reverse: amend 082 before its merge (Ludwig approves that merge anyway).

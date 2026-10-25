@@ -1,0 +1,169 @@
+# Task 082: The pipeline-trigger contract (E15) — `contracts/pipeline-trigger.md`
+
+- **Mission:** SITE-V1, deliverable **D2** (unblocks 008b; umbrella `docs/tasks/008-build-pipeline.md` finding F2) —
+  **Status:** draft (manager, 2026-10-25 night; drafted by a Plan agent; Q1-Q7 decided under Ludwig's standing ★ approval as
+  C11-C17). Decides when the signing key can be reached → **independent spec review before dispatch.**
+- **Merge:** needs **Ludwig's written approval** (adds a contract, ADR-0117; fixes which runs reach `MINISIGN_SECRET_KEY`,
+  MANAGER.md §7). The standing ★ approval does not cover this merge.
+- **Repo:** registry. This file lives in platform `docs/tasks/` and is copied to the registry branch's `docs/tasks/` as the log
+  (as 057 did).
+- **Agent / model:** doc-writer / sonnet — the deliverable is prose recording decisions already made (008b design 1-9,
+  ADR-0121, 039 §3, C11-C17); precedent 032 (E16 contract) was doc-writer; the verify artefact is contract-text checks only.
+- **Budget:** small (≤ 2 agent-sessions).
+- **Branch / worktree:** `task/082-pipeline-trigger-contract` / `~/wt/registry-task-082`, cut from registry `origin/main` (actual
+  cut SHA = `BASE` in the log and `082-verify.sh`).
+- **Graph:** edge **E15** (`N2 (merge to main) → N5`); nodes N2 `registry-data`, N5 `build-pipeline`. `depgraph.md` already
+  names `contracts/pipeline-trigger.md` for E15 (`depgraph.json` `"status": "to-write"`). No graph amendment needed first.
+
+## Objective
+`contracts/pipeline-trigger.md` exists on registry `main`; 008b's workflow can be written from it and checked against it. It
+states, as numbered rules each naming its source: the exact trigger set and path filter; which ref may reach the signing and
+write-back steps; which registry state a run reads and which versions it builds (pending only); the concurrency rule (two
+merges in a row; re-runs); why the push → write-back → push chain ends; what the pipeline may and may not assume about a merged
+entry; the outcome for each of 008a's exit codes including the T3 `pending → rejected` write-back; and one normative YAML block
+that 008b's verify script compares against `.github/workflows/pipeline.yml`. `docs/contracts/README.md` lists the file as the
+E15 contract. Every rule sentence is pinned by `docs/tasks/082-verify.sh`.
+
+## Context to load (reading list, 10)
+1. Platform `docs/tasks/008b-pipeline-workflow.md`: Objective, Environmental facts, Design 1-9, criteria 1, 6, 9, 10, 12, 17, 18.
+2. Platform `docs/tasks/008-build-pipeline.md`: F2, F5, Decisions Q-B, Q-D, Q-J.
+3. Platform `docs/decisions/0121-version-lifecycle-pending.md` (Decision, Q-J, Consequences).
+4. Platform `docs/architecture/depgraph.md`, row E15 and the Q4=A rationale.
+5. Platform `docs/tasks/039-registry-ci-workflow.md` (revised): §1 trust model, §3, Dependencies.
+6. Registry `contracts/rebuild-trigger.md` (E12): the style model.
+7. Registry `contracts/append-only.rules.md`: T1, T3, "Coexistence" only.
+8. Registry `contracts/ownership.md`: header, "How to read this document: rule ids", fail-closed status of T1/T3.
+9. Registry `contracts/artifact-naming.md`: "never overwrite an existing tag", "What this document does not cover".
+10. Registry `docs/contracts/README.md`; platform `docs/manager/OPERATIONS.md` ("Consequences of branch protection that bite
+    later").
+ADRs cited (ADR-0116 layer 2): 0041, 0058 §1 (as amended), 0117, 0121. None is edited.
+
+## Decisions (C11-C17, mission log; reversible there)
+- **Q1 (C11) scope of a push run:** every `pending` version on `main` (008b design 9: "Pushes to `main` still plan all pending
+  versions"; survives cancelled waiting runs). Cost accepted: a version that keeps faulting with exit 2 is retried on every push.
+- **Q2 (C12) input snapshot:** `main`'s head fetched at plan time, SHA logged (not the push's `github.sha`).
+- **Q3 (C13) in-flight versions:** a run holds the `pipeline` group until each PR it opened has merged or the run has failed;
+  the planner skips, and logs, any pending version with an existing `pipeline/<ns>.<name>-<version>` branch (manual recovery).
+- **Q4 (C14) which dispatches reach the key:** signing and write-back jobs run only when `github.ref == 'refs/heads/main'`; 008b's
+  Objective wording is corrected to "on `push` to `main`, or a `workflow_dispatch` on `main` by an account with write access
+  [unverified]; never from a fork".
+- **Q5 (C15) an entry on `main` failing the entry schema:** a pipeline fault — no build, no T3, the run fails naming the file.
+- **Q6 (C16) checking:** text checks now (this task); the workflow comparison lives in 008b-verify against the normative block.
+- **Q7 (C17) trigger list:** closed — exactly `push` and `workflow_dispatch`.
+
+## Approach (the contract's outline; everything is decided — quote sources, do not re-argue)
+House header: "Contract for edge **E15** (`N2 -> N5`, registry-data (merge to main) to build-pipeline) in
+`docs/architecture/depgraph.md`…". Scope separates E15 (same-repository `push` workflow that builds) from E12 (cross-repository
+`repository_dispatch` to the site). Rule ids `PT1`-`PT12`; each starts its own paragraph and ends with a `Source:` line.
+- **PT1 Trigger set (closed).** Exactly `push` to `main` with the PT2 filter, and `workflow_dispatch`. Never `pull_request`,
+  `pull_request_target`, `workflow_run`, `repository_dispatch`, `schedule` or any other event. Adding a trigger amends this
+  contract. Reason: secrets never reachable from a fork-triggered run.
+- **PT2 Path filter.** `paths: ['mods/*/entry.json']`; a push changing only `page.json`, or nothing under `mods/`, starts no run
+  (039 §3). The filter only saves cost; correctness never depends on it (PT4 reads state, not the diff). `[unverified]`: `*`
+  does not match `/`; GitHub may run a path-filtered workflow anyway when it cannot compute the diff.
+- **PT3 Ref.** Signing and write-back jobs act only when `github.ref == 'refs/heads/main'`, for both triggers (C14).
+- **PT4 Input snapshot.** The run reads `mods/*/entry.json` at `main`'s head fetched at plan time and logs that SHA; the push
+  payload's range is never the authority (008b design 2).
+- **PT5 What a run processes.** A push run builds every `pending` version on `main`; `published`, `removed`, `rejected` are never
+  built. A dispatch with `version=<namespace>.<name>@<semver>` builds only that version, only if `pending`; otherwise (or a
+  malformed id, or an absent entry) it refuses with exit 1 and writes nothing — not a T3 verdict (008b design 9, criterion 17).
+  Zero pending versions → success, nothing written (008b design 2, criterion 12).
+- **PT6 Concurrency.** `concurrency: { group: pipeline, cancel-in-progress: false }`, shared by push and dispatch runs; at most
+  one run builds at a time. GitHub's waiting-run replacement (a group keeps at most one waiting run; a newer one cancels it) is
+  stated `[unverified]` with its consequence (why PT4/PT5 read state). In-flight rule per C13.
+- **PT7 Termination.** A pipeline-caused push to `main` happens only when a T1 or T3 PR merges; each moves exactly one version
+  out of `pending`, and a pending version leaves that state only this way (PT9). The archive-repo log commit is in another
+  repository and does not trigger E15. N pending versions → at most N + 1 runs from pipeline-caused pushes.
+- **PT8 Re-runs and idempotency.** A published release with the tag exists → fail with `artifact-naming.md`'s never-overwrite
+  wording, nothing else written, the version stays `pending` (manual recovery, `docs/pipeline/build-pipeline.md`; 008b design 5,
+  criteria 6, 18). A draft release exists → delete and recreate. A version no longer `pending` is never rebuilt.
+- **PT9 What the pipeline may assume.** The entry is on `main`; its pending version's `version`, `commit`, `source_url` are frozen
+  (T1/T3 conditions); only the pipeline identity can move it out of `pending` (the E16 ownership carve-out, fail-closed until
+  then — so until that merges no T1/T3 PR can merge); passing `gate` (039; required only after M9) gives liveness, not safety —
+  008a re-validates everything; nothing about the author's repository still existing (a failed clone is exit 2); an entry
+  failing the schema → C15.
+- **PT10 Outcomes per 008a exit code** (008b design 7; ADR-0121 Q-J). **0:** one T1 PR. **1:** commit the build log to
+  `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`; comment the full `build.log` on the merged PR that
+  appended the version; open one T3 PR with `reason` (non-empty after trimming) and `build_log_url` (`https://`); never block or
+  revert a merge, never delete the version. **2:** the run fails — no comment, no T3 PR, no release, nothing written; the version
+  stays `pending` and is retried by dispatch (PT5).
+- **PT11 Write-back PRs.** One PR per version; its diff is exactly one T1 or one T3 transition (008b design 4); it goes through
+  `gate` like any PR, no bypass, no lifted rule; `gate` red → the run fails and stops (008b Forbidden; criterion 9); opened with
+  the GitHub App identity (Q-D), never `GITHUB_TOKEN`.
+- **PT12 Dry run.** `workflow_dispatch` with `dry_run=true` writes only workflow artifacts — no release, branch, PR, archive
+  commit or comment (criterion 10). Other dry-run inputs are 008b's.
+
+**Normative block** — exactly one fenced `yaml` block under the heading "Normative trigger block", byte-exact, checked by AC3:
+```yaml
+on:
+  push:
+    branches: [main]
+    paths: ['mods/*/entry.json']
+  workflow_dispatch:
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+```
+Input names (`dry_run`, `version`) are named in PT5/PT12 prose, not in the block; 008b may add inputs, not remove these two.
+
+**Attack attempts** (house style, each answered by a rule): a fork PR adds a `pull_request` trigger (`[unverified]` secret
+withholding; 008b criterion 8 tests live; PT1, PT3); two merges land while a run is in progress and the waiting run is
+cancelled (PT4, PT5); a stale snapshot rebuilds a published version (PT4, PT8); a write-access user dispatches from a branch
+with a modified workflow (PT3); a page-only push starves a pending version (liveness only; PT5); an author squats versions that
+never build (cost only; ADR-0121 Consequences; PT10 code 1).
+
+**Not covered:** job split and secret handling (008b design 8); naming (E7); transition shapes (E4); who may carry T1/T3 (E16
+carve-out); the site dispatch (E12, task 055); the CLIs; how the merged PR that appended a version is found (008b — if none is
+found: no comment, the T3 PR still opens, the log says so).
+
+## Acceptance criteria → `docs/tasks/082-verify.sh` (the log pastes its output)
+Deterministic, offline, stdlib; exit code = number of failures; anything needing the platform checkout is ADVISORY.
+1. **Exists, header right:** the file exists at `FINAL`; its first paragraph names `E15`, `N2 -> N5`, `docs/architecture/depgraph.md`.
+   Control: absent at `BASE` → red.
+2. **Rule ids:** `PT1`-`PT12` each start exactly one paragraph; no other `PT<n>`; each has a `Source:` line.
+3. **Normative block:** exactly one block after "Normative trigger block", byte-identical to the script's literal. Mutations red:
+   `paths` → `mods/**`; `cancel-in-progress: true`; `pull_request:` added; group renamed.
+4. **Forbidden triggers:** PT1 names the closed list and the forbidden names; mutation: delete that sentence → red.
+5. **Pending only and no-op:** PT5 has "`pending`", the zero-pending sentence, the dispatch-refusal sentence; PT7 the termination
+   argument. Mutations (drop "pending"; delete zero-pending) → red.
+6. **Failure semantics:** PT10 names exit codes 0, 1, 2 with the outcomes above incl. `reason`, `build_log_url`, `https://`,
+   "stays `pending`". Mutation: exit 2 opens a T3 PR → red.
+7. **Full-sentence pins:** every sentence of PT1-PT12 pinned by its full text (032 round-6 lesson); a tail-append mutation (one
+   permissive sentence added to PT3) → red. Each AC3-AC7 mutation red then restored byte-identically; positive control passes.
+8. **Index:** `docs/contracts/README.md` has a row for `contracts/pipeline-trigger.md` naming E15; its "does not exist yet" bullet
+   is gone (grep 0 at `FINAL`, ≥ 1 at `BASE`).
+9. **No other contract changes:** `git diff --name-only BASE FINAL -- contracts/` lists only the new file.
+10. **Pinned own-change scope** (REVIEW-CHECKLIST item 12): `BASE`/`FINAL` recorded; diff inside the file scope; control
+    `FINAL=BASE` → exit ≥ 1.
+11. **Unverified markers:** the five GitHub-behaviour statements (fork secret withholding; waiting-run replacement; `*` vs `/`;
+    diff fallback; who may dispatch) each carry `[unverified]` or a command.
+12. **ADVISORY:** with `--platform DIR`, prints 008b design 1 and 3 next to the normative block.
+13. **Fresh clone** (item 8) and every closed verify script green on HEAD, one at a time.
+
+## File scope
+Registry: `contracts/pipeline-trigger.md` (new); `docs/contracts/README.md` (one row, the "not here" bullet, the intro count);
+`docs/tasks/082-pipeline-trigger-contract.md` (log); `docs/tasks/082-verify.sh` (new). Platform: this spec file only.
+
+## Size
+0 source files; reading list 10; contract ~150-250 lines of prose.
+
+## Forbidden (beyond MANAGER.md §3.7)
+Changing anything 008b, ADR-0121 or 039 decided; deciding anything beyond C11-C17 by assumption (stop and ask); editing
+`rebuild-trigger.md` (its E15 wording slip is booked), `ownership.md`, `append-only.rules.md`, `artifact-naming.md`,
+`entry.schema.json`; writing or sketching `pipeline.yml` or any tool (008b); GitHub behaviour without a command or
+`[unverified]`; presenting `gate` as a safety precondition; any credential use (rule 11; unauthenticated docs reads allowed).
+
+## Dependencies / sequencing
+Upstream: none blocking (057 merged `e009ef0`, ADR-0121 accepted, E15 row exists). If 039's §1/§3 change in review, re-check
+PT2, PT9, PT11 before merge. File overlap: the E16 carve-out task and the `artifact-naming.md` URL amendment also edit
+`docs/contracts/README.md` — sequence the three. Downstream: 008b approval; 008b criterion 1 amended by the manager to compare
+the normative block with `pipeline.yml`. Follow-ups booked by the manager: platform `depgraph.json` E15 status;
+`system-overview.md` E15 row and State item 2; the `rebuild-trigger.md` wording slip; 008b's Objective wording (PT3).
+
+---
+# Task 082 log
+- 2026-10-25 manager (session 11 night): spec drafted by a Plan agent from 008, 008b, ADR-0121, depgraph E15 and 039 (revised).
+  Findings: `docs/contracts/README.md` says E15's contract "does not exist yet"; `rebuild-trigger.md` calls E15
+  "`repository_dispatch`-shaped" then says it is not (booked); 008b's Objective conflicts with its signing dispatch runs (C14);
+  GitHub's waiting-run replacement [unverified] makes range-only planning lossy (C11). Q1-Q7 decided as C11-C17. Awaiting
+  independent spec review. Merge needs Ludwig.
