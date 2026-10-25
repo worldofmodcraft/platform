@@ -1,6 +1,6 @@
 # Task 074: draft ADR — removal policy for published versions (Ludwig's decision 2026-10-17)
 
-- **Mission:** SITE-V1 — **Status:** spec-approved (manager, solo gate, 2026-10-17). The ADR itself takes effect only when
+- **Mission:** SITE-V1 — **Status:** done (merged platform PR #61 `0aac566`) — was: spec-approved (manager, solo gate, 2026-10-17). The ADR itself takes effect only when
   Ludwig accepts it (MANAGER.md §3.1); merge needs his explicit approval.
 - **Repo:** platform. **Agent / model:** doc-writer / per frontmatter. **Budget:** small
 - **Branch / worktree:** `task/074-adr-removal-policy` / `~/wt/task-074`, cut from platform `origin/main` (`73710d4`)
@@ -36,3 +36,4 @@ ADR-0121, ADR-0116 (format and immutability); `docs/decisions/README.md`, `INDEX
 - 2026-10-17 doc-writer: folded Ludwig's answers to the eight open questions into ADR-0122 (Q3, Q7 recorded as deferred; options considered added; ADR-0041 amendment stated for acceptance, not applied); status stays Proposed.
 - 2026-10-17 doc-writer: Ludwig's acceptance round (status Accepted, README/INDEX update, 'Amended by' line in ADR-0041) was DENIED by the permission classifier (Modify Shared Resources) on the combined edit command; not retried. State: ADR-0122 still Proposed with answers folded in (uncommitted); build_index --check fails (Amends header mismatch until ADR-0041 gains Amended by); nothing committed.
 - 2026-10-25 doc-writer: Ludwig accepted ADR-0122 on 2026-10-17 ("Acceptera"). ADR-0122 status set to Accepted (2026-10-17, accepted by Ludwig); ADR-0041 header gained ADR-0122 in its existing "Amended by" line; README row no longer says Proposed; INDEX.json regenerated with `python3 tools/adr/build_index.py --write` (exit 0). `--check` exit 0 ("CHECK OK"); `python3 -m json.tool docs/decisions/INDEX.json` exit 0. No docs/tasks/*-verify.sh references docs/decisions (grep found none), so none run.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #61 (`0aac566`, on platform origin/main).

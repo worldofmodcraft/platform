@@ -1,6 +1,6 @@
 # Task 033: Remove the two merged registry worktrees
 
-- **Mission:** SITE-V1 (housekeeping) — **Status:** spec-approved (Ludwig, in session, 2026-09-05)
+- **Mission:** SITE-V1 (housekeeping) — **Status:** done (merged platform PR #23 `a605ecb`) — was: spec-approved (Ludwig, in session, 2026-09-05)
 - **Agent / model:** manager (no production code; `git worktree` housekeeping only)
 - **Budget:** small
 - **Branch / worktree:** `chore/033-worktree-cleanup` (platform repo, `~/wt/platform-chore-033`)
@@ -93,3 +93,4 @@ hold without exception for housekeeping too, this row is the evidence for changi
 
 ## Status
 **done** — pending merge of this branch.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #23 (`a605ecb`, on platform origin/main).

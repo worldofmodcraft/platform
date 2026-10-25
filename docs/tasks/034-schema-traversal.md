@@ -1,6 +1,6 @@
 # Task 034: the merged schemas still accept `../` in `screenshots[]`
 
-- **Mission:** SITE-V1 — **Status:** **spec-approved (manager, 2026-09-05)**. Booked by Ludwig in
+- **Mission:** SITE-V1 — **Status:** done (merged registry PR #5 `b725b5d`) — was: **spec-approved (manager, 2026-09-05)**. Booked by Ludwig in
   session 4 as a consequence of task 009's proven exploit; re-created on disk here because the
   original scope note lived only in a session scratchpad.
 - **Agent / model:** implementer / sonnet
@@ -107,3 +107,4 @@ form and assert on the schema's verdict, not on whether a file was found.**
 - `docs/tasks/034-verify.sh` (new, executable — added by the 2026-09-06 correction above)
 
 Anything else = stop and report.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #5 (`b725b5d`, on registry origin/main).

@@ -1,6 +1,6 @@
 # Task 007b: Registry checkers, authority half — ownership by numeric id, reserved namespaces, R11, fail-closed T1/T3
 
-- **Mission:** SITE-V1, D1 — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–3: FAIL, FAIL,
+- **Mission:** SITE-V1, D1 — **Status:** done (merged registry PR #12 `70cedca`) — was: spec-approved (manager, 2026-10-15, after independent spec review rounds 1–3: FAIL, FAIL,
   PASS). Not dispatchable until 007a merges.
 - **Umbrella:** `docs/tasks/007-registry-ci-checkers.md` — read it in full, including the
   "Revision 2026-10-15" section, which overrides its older text.
@@ -138,3 +138,4 @@ After 007a (merged). Blocks 039. Task 008b later amends `ownership.md` and this 
 - 2026-10-15 manager: revised after spec review round 1 (FAIL, findings 1–3, 5, 7): inputs stated, fail-closed key
   made independent of 007a, R11 identity injected with `None` = nobody, mutation set per rule, Size section.
 - 2026-10-15 manager: spec review rounds 1-3 (FAIL, FAIL, PASS); spec-approved.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #12 (`70cedca`, on registry origin/main).

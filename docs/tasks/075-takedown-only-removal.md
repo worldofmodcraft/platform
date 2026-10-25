@@ -1,6 +1,6 @@
 # Task 075: any PR that removes a published version is a takedown — owners cannot remove (R11 amendment + 007b checker)
 
-- **Mission:** SITE-V1 (registry integrity) — **Status:** spec-approved (manager, 2026-10-18, after independent spec
+- **Mission:** SITE-V1 (registry integrity) — **Status:** done (merged registry PR #18 `4356583`) — was: spec-approved (manager, 2026-10-18, after independent spec
   review round 2 PASS — security-touching, MANAGER.md §2b)
 - **Repo:** registry. **Agent / model:** implementer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/075-takedown-only-removal` / `~/wt/registry-task-075`, cut from registry `origin/main`
@@ -99,3 +99,4 @@ ADR-0041:15 alone.
   ToolError and four extra test cases, 032 T16/T17 named and the table row edit made additive, the line reference fixed,
   a named mutation entry. Round 2 pending.
 - 2026-10-18 manager: spec review round 2 PASS; minors a ("all cases") and b (ToolError → R11 finding naming the path) folded in. spec-approved. Dispatch after 064 merges.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #18 (`4356583`, on registry origin/main).

@@ -1,6 +1,6 @@
 # Task 059: No Python bytecode in the platform repository
 
-- **Mission:** tooling (housekeeping) — **Status:** review (spec-approved 2026-10-15; implemented, see log)
+- **Mission:** tooling (housekeeping) — **Status:** done (merged platform PR #45 `672b44a`) — was: review (spec-approved 2026-10-15; implemented, see log)
 - **Agent / model:** scaffolder / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/059-pycache-hygiene / ~/wt/task-059
@@ -50,3 +50,4 @@ ok: mutant 're-added file' killed -> criterion 1 red
         tools/adr/__pycache__/build_index.cpython-314.pyc
 == 059-verify: ALL CHECKS PASSED
 ```
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #45 (`672b44a`, on platform origin/main).

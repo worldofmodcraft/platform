@@ -332,3 +332,40 @@ Every newly merged task becomes "closed" at that moment: review its verify scrip
 ### Concurrent suites corrupt each other's verdicts
 `008a-verify.sh` counted `/tmp/wom008a-*` system-wide (fixed by 069: per-run TMPDIR). Other scripts may share the trait.
 Measure on a quiet machine: `ps aux | grep -E "verify.sh|unittest"` must be empty before every gate run.
+
+## What session 11 paid for (2026-10-18/25)
+
+Source for every item: the mission log's session 11 entries. Last reviewed: 2026-10-25.
+
+### (a) EnterWorktree pins the session and its agents
+After the manager entered the session worktree, the isolation guard pinned the session and its agents to it. Task 075's
+first implementer could not run registry verify scripts from the registry worktree root and stopped without working
+around the guard. Do not use EnterWorktree when agents must work in other repositories' worktrees; create the
+session-log worktree by hand with `git worktree add` instead.
+
+### (b) Stale ignored `__pycache__` reddens 049
+A stale, git-ignored `__pycache__` made 049-verify.sh fail on an otherwise green tree (seen in task 078's review). Run
+verify scripts with `PYTHONDONTWRITEBYTECODE=1`, and clear stale `tools/**/__pycache__` before a gate run.
+
+### (c) add/add conflicts on task files
+When the session branch and a task PR both add the same task file, merging produces an add/add conflict. On the
+session-11 merges (076, 077, 078, 079, 080) main's copy was the superset (spec plus the task's log). Check that before
+taking it; do not take it blindly.
+
+### (d) Verify scripts must pass in a fresh clone from GitHub
+Worktrees see local-only branches and untracked state. The architecture note cited ADR-0121 on a local-only branch, so
+056, 076 and 078 verify were red in every fresh clone (found by task 079's review, fixed by task 080). Run each new
+verify script in a fresh clone of the pushed branch, not only in a worktree.
+
+### (e) A fresh registry worktree has no `tools/dev/node_modules`
+`062-verify.sh` needs ajv. In a new registry worktree set `WOM_NODE_MODULES` to an existing install, or run
+`npm ci --prefix tools/dev --userconfig /dev/null --ignore-scripts --no-audit --no-fund`.
+
+### (f) Run verify scripts one at a time
+Overlapping verify runs falsely redden 062 and 067 (the shared-suite class, task 043). Run them serially, in the
+foreground, on a quiet machine. 064-verify.sh alone took about 40 minutes.
+
+### (g) The permission classifier's refusals go to Ludwig
+The auto-mode classifier refused the manager's self-granted permission rule for `docs/decisions/**` ("Self-Modification")
+and a merge that looked unreviewed ("Merge Without Review"). Neither was retried or worked around; both were taken to
+Ludwig, who switched the session to Manual mode and approved each edit himself, and approved the merge himself.

@@ -1,6 +1,6 @@
 # Task 054: Write the missing SITE-V1 task specs
 
-- **Mission:** SITE-V1 — **Status:** in-progress (spec-approved by the manager, 2026-10-14; small, documentation only, §2b solo gate)
+- **Mission:** SITE-V1 — **Status:** done (merged platform PR #42 `96ed6b0`) — was: in-progress (spec-approved by the manager, 2026-10-14; small, documentation only, §2b solo gate)
 - **Agent / model:** doc-writer / per agent frontmatter
 - **Budget:** small
 - **Branch / worktree:** task/054-site-v1-remaining-specs / ~/wt/task-specs-site
@@ -25,3 +25,4 @@ No verify script: these criteria are documentary and checked by the manager's ga
 
 ## Forbidden here
 Code; credentials; edits to decisions, the mission spec or other task files.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #42 (`96ed6b0`, on platform origin/main).
