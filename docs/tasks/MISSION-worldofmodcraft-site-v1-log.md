@@ -2277,3 +2277,6 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   Public Surface")** — creating a public repository in the org. Not retried. 058 criteria 3-6 wait for Ludwig's morning (he
   creates `worldofmodcraft/pages-probe` per 058's manual step, or approves it in session). Consequence: 008c (needs the
   archive URL shape) and through it 008b stay blocked overnight.
+- **C9 — task 010 scope tonight.** A★ split: 010a (mod contents, generator, registry-side files, fill-in script) now; 010b
+  (runbook `first-publish.md`, M4-M7 text, rehearsal) after 039/008b/055. B keep 010 whole and wait. **Chosen A.** Reverse:
+  fold 010a's result back into 010 and drop 010b. 010a's spec review: PASS-WITH-AMENDMENTS (8, folded in).
