@@ -2316,3 +2316,10 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
 - **C23 — 039 size tripwire fired (composer alone 418 lines).** A★ apply the spec's split fallback: 039a (composer, own verify
   script and PR) now, 039b (workflow, AC7, docs, runbook) after 039a merges; B continue as one task past 450 lines. **Chosen A.**
   Reverse: merge 039b's scope back into one PR.
+- **C24 — 010a: `fill_placeholders.py entry` arguments.** A★ `entry --account A --commit H` (as built; the entry's `source_url`
+  carries the same account token, and criterion 4 needs zero tokens left); B `mod --account` also rewrites a sibling
+  `entry.json`. **Chosen A.** Reverse: change the CLI before 010b's runbook is written.
+- **010a criterion 8 (visual review), by the manager on Ludwig's behalf (2026-10-25 night):** `welcome.png` (a sun with
+  concentric rings on a teal-to-violet gradient), `gallery.png` (six gradient tiles with a diamond each), `spare.png` (diagonal
+  orange/red stripes) — abstract, original, generator-made, nothing game- or Blizzard-like; clean at 1280×720. Ludwig may
+  override in the morning.
