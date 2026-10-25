@@ -1,7 +1,7 @@
 # Task 039: The registry CI workflow — the 007a and 007b checkers wired onto real pull requests
 
 - **Mission:** SITE-V1, deliverable **D1** (the CI half); mission §7 criterion 1 (registry half). **Status:** spec-approved (2026-10-25 night, after spec review rounds 1-2); revised
-  (manager, 2026-10-25; replaces the 2026-09-06 placeholder; spec review round 1 folded, round 2 pending). **Security-touching → independent spec review before dispatch.**
+  (manager, 2026-10-25; replaces the 2026-09-06 placeholder; review rounds 1-2 done). **Security-touching → independent spec review before dispatch.**
 - **Merge:** needs **Ludwig's written approval** (CI security check, MANAGER.md §7).
 - **Repo:** registry; plus one docs-only change in the platform repo (runbook M9/M10, see File scope).
 - **Agent / model:** implementer (ROUTING.md). **Budget:** medium (≤ 3 agent-sessions).
