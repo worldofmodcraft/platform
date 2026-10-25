@@ -1,6 +1,6 @@
 # Task 078: closed verify scripts 048, 051/056 and 063 red on platform main — re-pin own-change checks, fix the 056 plant
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-25; the 070/071 shape)
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (merged platform PR #67 `8004828`) — was: spec-approved (manager, solo gate, 2026-10-25; the 070/071 shape)
 - **Repo:** platform. **Agent / model:** qa-engineer (§3.5). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/078-closed-verify-repin` / `~/wt/task-078`, cut from platform `origin/main`
 - **Graph:** verification tooling only.
@@ -84,3 +84,4 @@ pinning a live-property check; skips; touching CLAUDE.md or doctrine.
   - **Questions booked for Ludwig/manager**:
     - Q1: should rule 0's text (CLAUDE.md block, MANAGER.md token-guard bullet) have a live guard (e.g. a check in a doctrine script that the retained sentences and "Stop at 90 %" lines exist)? Options: A no (review catches it) / B small live check in an existing doctrine script (task) * lean B, since 048's pinned check no longer covers later edits.
     - Q2: add 048/056/063 to a closed-list in platform (a platform analogue of registry's 070 audit) or accept 078-verify.sh as the guard? * lean: a small platform task, or fold into 076.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #67 (`8004828`, on platform origin/main).

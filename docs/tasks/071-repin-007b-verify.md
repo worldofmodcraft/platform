@@ -1,6 +1,6 @@
 # Task 071: `007b-verify.sh` measures 007b's own change on its pinned range (it is a closed task now)
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-17; the 069/070 shape)
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (merged registry PR #17 `825da5e`) — was: spec-approved (manager, solo gate, 2026-10-17; the 069/070 shape)
 - **Repo:** registry. **Agent / model:** qa-engineer / sonnet (§3.5). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/071-repin-007b-verify` / `~/wt/registry-task-071`, cut from registry `origin/main` (`70cedca`)
 - **Graph:** verification tooling only.
@@ -31,3 +31,4 @@ Loosening any check beyond moving an own-change check to the pinned range; pinni
 ---
 # Task 071 log
 - 2026-10-17 manager: written and approved (solo gate). Source: 064's R1 report (007b-verify exit 2 on 064's branch).
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #17 (`825da5e`, on registry origin/main).

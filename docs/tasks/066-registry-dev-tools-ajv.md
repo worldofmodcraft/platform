@@ -1,6 +1,6 @@
 # Task 066: A pinned, reproducible ajv 8 for the registry's verify scripts
 
-- **Mission:** SITE-V1 (verification reproducibility) — **Status:** spec-approved (manager, solo gate, 2026-10-15, session 10;
+- **Mission:** SITE-V1 (verification reproducibility) — **Status:** done (merged registry PR #14 `198dc98`) — was: spec-approved (manager, solo gate, 2026-10-15, session 10;
   small task, not security-touching). Ludwig chose option A on 2026-10-15 (session 9).
 - **Repo:** registry. **Agent / model:** implementer / sonnet. **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/066-registry-dev-tools-ajv` / `~/wt/registry-task-066`, cut from registry `origin/main`
@@ -71,3 +71,4 @@ until then it takes `NODE_MODULES_DIR`. Before merging: run `062-verify.sh` on t
 - 2026-10-15 manager (session 10): spec completed and approved (solo gate; SPEC-CHECKLIST 1–8 checked: observable
   objective, criteria each scripted, scope declared, context incl. ADR-0067/0103, budget small, size within cap,
   traps under Forbidden, no file overlap with 007b/064, verify artefact named).
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #14 (`198dc98`, on registry origin/main).

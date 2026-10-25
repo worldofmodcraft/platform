@@ -2224,3 +2224,4 @@ fix (#69), session logs (#64, #65, #70).
    MANAGER.md (decide: finish or stop 043).
 5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, final) i missionsloggen och fortsätt med 'Next session starts here'."
+- Ludwig 2026-10-25: "Sådär, klart. Du kan bocka för det och merga PR71 o 72" → **072 merged `4de1218`**; **M8 done** (task 081: ruleset `archive-tags-permanent` verified active on all tags via the public API; immutability on Ludwig's word); session PR #72 merged with this entry. Open for Ludwig: move finished task files to `done/`? (A ★ leave in place).

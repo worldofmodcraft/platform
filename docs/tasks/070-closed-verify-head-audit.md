@@ -1,6 +1,6 @@
 # Task 070: no closed task's verify script measures its own change against `HEAD` (audit + re-pin), and every script finds the pinned ajv
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-16, session 10;
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (merged registry PR #16 `fb76ee5`) — was: spec-approved (manager, solo gate, 2026-10-16, session 10;
   test-artefact maintenance, the shape of tasks 062, 067, 069)
 - **Repo:** registry. **Agent / model:** qa-engineer / sonnet (§3.5: changing closed tasks' verify scripts is its own
   reviewed task). **Budget:** small–medium (≤ 2 agent-sessions)
@@ -67,3 +67,4 @@ After 069 (merged). Before 007b (PR #12) and 064 (PR #13) merge; both merge `mai
 - 2026-10-16 manager (session 10): written and approved (solo gate). Source: manager's merge gate on 007b's merge result
   (`8e0d57b`): 007b, 007a, 008a, 032, 034, 057, 062 green; `067-verify.sh` FAIL AC2.4 "docs/contracts/README.md was
   modified" (`067-verify.sh:76-78`, `git diff "$BASE" HEAD`). 067/069 needing ajv passed explicitly found in 069's gate.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #16 (`fb76ee5`, on registry origin/main).

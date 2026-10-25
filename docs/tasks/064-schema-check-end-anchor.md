@@ -1,6 +1,6 @@
 # Task 064: the registry's schema validators match `pattern` with ECMA-262 semantics (end of input, ASCII `\d`)
 
-- **Mission:** SITE-V1 (D1/D2 verification integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-15,
+- **Mission:** SITE-V1 (D1/D2 verification integrity) — **Status:** done (merged registry PR #13 `79d5377`) — was: spec-approved (manager, solo gate, 2026-10-15,
   session 10; small, test-validator change)
 - **Repo:** registry. **Agent / model:** qa-engineer / sonnet (a test-validator change is its own reviewed task, MANAGER.md §3.5)
 - **Budget:** small (≤ 1 agent-session)
@@ -80,3 +80,4 @@ and `007b`'s tests on the PR branch merged onto `main` (OPERATIONS.md, session 9
   `tests/validation/schema_check.py:73` has the same `re.search` (added to scope); `034-verify.sh` C3.3 text-pins the
   call and C3.4 forbids `re.fullmatch` (approach and criterion 5 written around both); 15 `"pattern"` keys in
   `contracts/*.json` at `ac22c8f`.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #13 (`79d5377`, on registry origin/main).

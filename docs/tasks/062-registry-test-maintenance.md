@@ -1,6 +1,6 @@
 # Task 062: Registry verify scripts stay green on later branches and stop pinning the superseded born-`removed` rule
 
-- **Mission:** SITE-V1 (keeps D1's verification trustworthy) — **Status:** spec-approved (manager, 2026-10-15, SPEC-CHECKLIST 1–8 verified solo; review by an independent reviewer)
+- **Mission:** SITE-V1 (keeps D1's verification trustworthy) — **Status:** done (merged registry PR #9 `eba11b7`) — was: spec-approved (manager, 2026-10-15, SPEC-CHECKLIST 1–8 verified solo; review by an independent reviewer)
 - **Repo:** registry (`worldofmodcraft/registry`); this file lives in the platform repository's `docs/tasks/` and is
   copied to the registry branch's `docs/tasks/` as that task's log.
 - **Agent / model:** qa-engineer / sonnet (frontmatter). Independent reviewer required: this changes existing
@@ -116,3 +116,4 @@ None at spec time.
 ---
 # Task 062 log
 - 2026-10-15 manager: spec drafted (session 9) from task 057's hand-back items 2–4.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #9 (`eba11b7`, on registry origin/main).

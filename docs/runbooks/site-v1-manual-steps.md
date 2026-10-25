@@ -246,10 +246,12 @@ unauthenticated request answers HTTP 200 (2026-10-15).
 
 ---
 
-## ☐ M8 — Protect the archive's Releases and tags  (removal policy item 6, Ludwig 2026-10-17)
+## ☑ M8 — Protect the archive's Releases and tags  (removal policy item 6, Ludwig 2026-10-17)
 **Why:** a published version stays published (ADR-0041, Archiving). If an author's repository is taken down, we stop
 serving it publicly but keep the record, so the copy in `archive` must not be deleted by accident. **When:** any time
-before the first real publish; the sooner the better. **Status:** not done. Every click-path below was taken from GitHub's
+before the first real publish; the sooner the better. **Status:** done 2026-10-25 by Ludwig (task 081): ruleset `archive-tags-permanent` active on
+all tags with Restrict deletions, Restrict updates and Block force pushes (GitHub's default, kept); release immutability
+ticked (Ludwig's word; not visible without login). Rulesets did work on the Free plan for this public repository. Every click-path below was taken from GitHub's
 documentation on 2026-10-18 (URLs in `docs/tasks/077-runbook-archive-protection.md`, log); if a screen differs from the
 text, follow the screen and tell the manager what differed.
 

@@ -1,6 +1,6 @@
 # Task 052: Keep the vault current automatically, and keep agents' file tools out of it
 
-- **Mission:** tooling (task 047, part C, step 3) — **Status:** review (spec approved by Ludwig 2026-10-14, spec v3)
+- **Mission:** tooling (task 047, part C, step 3) — **Status:** done (merged platform PR #47 `f9bdf86`; AC7 live install with Ludwig still open) — was: review (spec approved by Ludwig 2026-10-14, spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/052-vault-triggers / ~/wt/task-052
@@ -210,3 +210,4 @@ ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also w
   - Status: review complete. **Merge waits for Ludwig**, because the diff touches MANAGER.md §5 (doctrine, §7).
     AC7 (live install with Ludwig) follows the merge.
 - 2026-10-15 Ludwig, in session: "Ja till merge" (asked as "ja 052"). Merge approved under §7 (doctrine: MANAGER.md §5).
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #47 (`f9bdf86`, on platform origin/main). Caveat: AC7 live install with Ludwig still open.

@@ -1,6 +1,6 @@
 # Task 057: The version lifecycle contract — `pending → published` in `entry.schema.json` and `append-only.rules.md`
 
-- **Mission:** SITE-V1 (unblocks deliverables D1 and D2) — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 1–2: PASS) 
+- **Mission:** SITE-V1 (unblocks deliverables D1 and D2) — **Status:** done (merged registry PR #8 `e009ef0`) — was: spec-approved (manager, 2026-10-15, after independent spec review rounds 1–2: PASS) 
 - **Repo:** registry (`worldofmodcraft/registry`); this file is kept in the platform repository's `docs/tasks/` with the other 054 specs and copied to the registry branch's `docs/tasks/` as that task's log.
 - **Agent / model:** doc-writer / sonnet for the contract text; implementer / sonnet for the schema, the `oneOf` support in the test validator, and the verify artefact (one branch, sequenced). Independent reviewer required: this amends two accepted contracts.
 - **Budget:** medium (≤ 3 agent-sessions)
@@ -212,3 +212,4 @@ Graph: no new node or edge. E2 and E8 already name `contracts/entry.schema.json`
 # Task 057 log  (append-only, updated continuously by the executing agent)
 - 2026-10-14 spec written under task 054 from Ludwig's Q-B decision; nothing started; blocked on B1.
 - 2026-10-15 finalised: ADR-0121 accepted (Q-L, Q-J folded in as decided requirements: born `pending` only; T3 `pending → rejected` with `reason` and `build_log_url`; four-branch `oneOf`; append-only rules and mutation fixtures extended); B1 closed; sequencing re-checked against registry `a50daac` (032, 045, 008a merged). Spec-gate ready; awaiting Ludwig's spec-approval.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #8 (`e009ef0`, on registry origin/main).

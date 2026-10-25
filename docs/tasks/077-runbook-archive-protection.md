@@ -1,6 +1,6 @@
 # Task 077: runbook step M8 — protect `worldofmodcraft/archive` Releases and tags from deletion
 
-- **Mission:** SITE-V1 (removal policy, item 6) — **Status:** spec-approved (manager, solo gate, 2026-10-18)
+- **Mission:** SITE-V1 (removal policy, item 6) — **Status:** done (merged platform PR #63 `2562f88`) — was: spec-approved (manager, solo gate, 2026-10-18)
 - **Repo:** platform. **Agent / model:** doc-writer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/077-runbook-archive-protection` / `~/wt/task-077`, cut from platform `origin/main`
 - **Graph:** docs only (runbook); no edge changes.
@@ -59,3 +59,4 @@ Making any change on GitHub (the step is Ludwig's); reading or using any token o
   4. Does `archive` already contain releases? Immutability would not cover them.
   5. Pipeline creating tags is assumed unaffected (only deletion and update restricted); not tested.
 - 2026-10-18 doc-writer (review fixes, PR #63): (1) Re-fetched the about-rulesets and creating-rulesets-for-a-repository pages (URLs above): both say only "for customers on GitHub Team and GitHub Enterprise plans"; neither mentions Free or public repositories, so the "Free plan works" sentence was NOT written. M8 quotes the doc and marks Free/public [unverified]; Q3 stays open. (2) Q4 closed: `archive` has 0 releases (manager, unauthenticated API, 2026-10-18); M8 now says immutability covers every release from now on. (3) Neither page names an "All tags" option or the tag target menu choices; step 6 keeps the [unverified] flag and tells Ludwig to stop and ask if the screen differs.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #63 (`2562f88`, on platform origin/main).

@@ -1,6 +1,6 @@
 # Task 048: Write Ludwig's chosen Arcane practices into the doctrine
 
-- **Mission:** tooling (task 047, part A) — **Status:** spec-approved (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
+- **Mission:** tooling (task 047, part A) — **Status:** done (merged platform PR #50 `c323460`; AC9 live check with Ludwig still open) — was: spec-approved (manager, 2026-10-15, after independent spec review rounds 2–3; merge requires Ludwig, §7) 
 - **Agent / model:** doc-writer / per agent frontmatter (ROUTING.md)
 - **Budget:** medium (many small edits to about 20 files, one verify script; no single file is large)
 - **Branch / worktree:** task/048-doctrine-arcane / ~/wt/task-048
@@ -293,3 +293,4 @@ ok   mutation 'drop blind-review phrase (checklist)' -> red: FAIL c7: REVIEW-CHE
   - Non-blocking: the §2b grammar is fixed, and sources are added for the version facts.
   - Doctrine files still show 0 deleted lines vs main.
 - 2026-10-15 Ludwig, in session: "Ok", in reply to "Merga 048? ★ja" and "specfilerna i samma PR? ★OK". Doctrine merge approved under §7; the spec files are carried in the same PR. AC9 (live: nesting refused) and AC11 follow after merge.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #50 (`c323460`, on platform origin/main). Caveat: AC9 live check with Ludwig still open.
