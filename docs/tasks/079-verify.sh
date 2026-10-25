@@ -8,7 +8,7 @@ export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 PIN_BASE="8004828"
-PIN_FINAL="__FINAL__"
+PIN_FINAL="bd6d0a63b4999fd53f246a58754017b3d2de4bd3"
 SCOPE="docs/manager/rule0.reference.md tools/manager/check-rule0.sh docs/tasks/079-rule0-live-guard.md docs/tasks/079-verify.sh"
 CHK=tools/manager/check-rule0.sh
 fails=0
@@ -45,7 +45,7 @@ sed "${s}s/^0\. /0.  /" $C >"$TMP/c10"; want 2 "heading reworded so it no longer
 sed "$((s + 5))s/\$/ /" $C >"$TMP/c11"; want 1 "trailing space added (byte-exact, no normalising)" "$TMP/c11" $R
 
 echo "== AC4 own-change scope $PIN_BASE..$PIN_FINAL"
-if [ "$PIN_FINAL" = "__FINAL__" ]; then bad "PIN_FINAL not recorded"; else
+if [ "$PIN_FINAL" = "__FIN""AL__" ]; then bad "PIN_FINAL not recorded"; else
   extra=$(git diff --name-only "$PIN_BASE" "$PIN_FINAL" | grep -v -x -F -f <(printf '%s\n' $SCOPE))
   [ -z "$extra" ] && ok "only in-scope files changed" || bad "out-of-scope files: $extra"
   git diff --quiet "$PIN_BASE" "$PIN_FINAL" -- CLAUDE.md docs/manager/MANAGER.md && ok "CLAUDE.md and MANAGER.md untouched" || bad "CLAUDE.md or MANAGER.md changed"
