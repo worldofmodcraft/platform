@@ -2313,3 +2313,6 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   environment limited to `main` — and **M11 deletes the repo-level copies of both secrets** (an environment copy protects nothing
   while a repo-level copy exists; a stolen App key could forge a T1 PR's hash and signature). Reverse: as C20. → 082
   **spec-approved** after review rounds 1-2.
+- **C23 — 039 size tripwire fired (composer alone 418 lines).** A★ apply the spec's split fallback: 039a (composer, own verify
+  script and PR) now, 039b (workflow, AC7, docs, runbook) after 039a merges; B continue as one task past 450 lines. **Chosen A.**
+  Reverse: merge 039b's scope back into one PR.
