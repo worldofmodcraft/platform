@@ -1,10 +1,10 @@
 # ADR-0122: Removal policy for published versions — grounds, files, installed copies, appeals
 
-- **Status:** Proposed
+- **Status:** Accepted (2026-10-17, accepted by Ludwig)
 - **Date:** 2026-10-17 · **Area:** Registry / Legal / Launcher
 - **Touches:** registry, registry/takedown, launcher/resolution, launcher/update, site/content-rules
 - **Related:** ADR-0037, ADR-0041, ADR-0046, ADR-0121
-- **Amends:** — (none declared; see Open question Q1)
+- **Amends:** — (see "Amendment of ADR-0041 on acceptance")
 
 ## Context
 Four accepted decisions touch the removal of a published version, and read together they leave gaps:
@@ -27,9 +27,12 @@ produces. Task 073 surveyed the repository for this; its result is summarised in
 (items 0-5 below; Ludwig may correct any line).
 
 ## Options considered
-The survey's per-item options are recorded in the task 073 report and are not reproduced here. Ludwig chose Option A
-for every item; the alternatives are therefore not restated, and no reason for rejecting them was given in the log.
-(Open question Q8.)
+Ludwig chose Option A for every item (mission log, 2026-10-17). The alternatives, as summarised from task 073, with no
+further reasons given in the log:
+- Owners may remove their own versions. Not chosen; it conflicts with ADR-0041:15.
+- Delete the bytes of a removed version. Not chosen; item 2 keeps entry, hash, signature and reason, and stops serving.
+- Keep serving a removed version with a warning. Not chosen; item 2 stops serving.
+- Appeal restores the removed version (by Ludwig). Not chosen; item 4: a successful appeal means a new version.
 
 ## Decision
 This ADR decides items 0-5 of the mission log section named above, and nothing else.
@@ -62,25 +65,21 @@ This ADR decides items 0-5 of the mission log section named above, and nothing e
   installed mods; its current state was not verified for this ADR.
 - No un-remove means a mistaken takedown is repaired only by a new version.
 
-## Open questions (not decided here)
-- **Q1.** Does item 1 amend ADR-0041:15 ("Only legal grounds")? If yes, on acceptance this ADR needs an `Amends:
-  ADR-0041` header and `Amended by` metadata on ADR-0041 (README, ADR rules for amendment); the ADR-0041 file is not
-  edited by this draft.
-- **Q2.** Who confirms a malware ground ("confirmed by reproduction", ADR-0046:27), and who may initiate a takedown?
-  (Ludwig's R11 answer in the mission log mentions a takedown-only account under his control with his written
-  approval per takedown; that is a separate contract task, not decided here.)
-- **Q3.** How "stop serving" is done on GitHub Releases, where the archive lives (ADR-0041:14), including the
-  planned protection rule on `worldofmodcraft/archive`; and the effect on the Software Heritage copy
-  (ADR-0041:14), which this platform cannot remove.
-- **Q4.** What counts as "illegal content" in item 1 beyond the words of ADR-0046:27, and in which jurisdiction.
-- **Q5.** What is the appeal procedure, who decides, and within what time? (ADR-0046:27 says only "can be appealed".)
-- **Q6.** Dependants: what a resolver does when a dependency is `removed` (ADR-0041:15 says only that resolution "can
-  explain the failure").
-- **Q7.** How the launcher learns of a removal for a mod the user never updates, and what "disable" means for a mod in
-  a running server.
-- **Q8.** Whether Ludwig wants the rejected alternatives from the task 073 report recorded in "Options considered".
+## Answers recorded 2026-10-17
+Ludwig answered "Stjärna på alla" (the manager's lean on each question):
+- **Amendment of ADR-0041 on acceptance.** Item 1 widens the grounds clause of ADR-0041:15 ("Only legal grounds").
+  On acceptance, ADR-0041's header gains `Amended by: ADR-0122` for that clause; this draft does not edit ADR-0041.
+- **Who confirms a malware ground.** Ludwig decides each case; agents gather the evidence.
+- **Illegal content.** Swedish and EU law plus GitHub's terms.
+- **Appeal procedure.** By issue or email; Ludwig decides; no formal deadline.
+- **Dependants of a removed version.** Resolution fails with an explanation, as ADR-0041:15 provides.
+- **Deferred: how "stop serving" is done** on GitHub Releases / the archive (ADR-0041:14), including the Software
+  Heritage copy. To be decided in a later task once the pipeline tasks 008b/008c are live.
+- **Deferred: how the launcher learns of a removal** for a mod the user never updates, and what "disable" means on a
+  running server. Belongs to the launcher design.
+- **Options considered:** recorded above.
 
 ## Interacts with
-ADR-0037 (never automatic unpublishing; flags are warnings), ADR-0041 (takedown, statuses, archive; possibly
-amended, Q1), ADR-0046 (content rules, appeal), ADR-0121 (`published → removed` is its T2 transition, unchanged by
+ADR-0037 (never automatic unpublishing; flags are warnings), ADR-0041 (takedown, statuses, archive; its grounds
+clause is amended on acceptance), ADR-0046 (content rules, appeal), ADR-0121 (`published → removed` is its T2 transition, unchanged by
 this ADR).

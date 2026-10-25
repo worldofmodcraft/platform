@@ -94,7 +94,7 @@ ADR silently — propose a superseding ADR instead.
 - [0119](0119-reserved-namespaces.md) Reserved namespaces (`mc`, `test`) owned by the organisation
 - [0120](0120-content-whitelist-not-container-framing.md) Asset guarantee: content whitelisting, not container framing
 - [0121](0121-version-lifecycle-pending.md) Version lifecycle: `pending` state, one-time write-back, post-merge build
-- [0122](0122-removal-policy.md) Removal policy for published versions (Proposed)
+- [0122](0122-removal-policy.md) Removal policy for published versions
 
 ### Process & developer experience
 - [0050](0050-build-order-walking-skeleton.md) Build order: walking skeleton + vertical slice

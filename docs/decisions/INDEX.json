@@ -668,7 +668,8 @@
       ],
       "amends": [],
       "amended_by": [
-        121
+        121,
+        122
       ]
     },
     {
@@ -2035,7 +2036,7 @@
       "number": 122,
       "filename": "0122-removal-policy.md",
       "title": "Removal policy for published versions — grounds, files, installed copies, appeals",
-      "status": "Proposed",
+      "status": "Accepted (2026-10-17, accepted by Ludwig)",
       "date": "2026-10-17",
       "area": "Registry / Legal / Launcher",
       "touches": [
@@ -2051,7 +2052,9 @@
         46,
         121
       ],
-      "amends": [],
+      "amends": [
+        41
+      ],
       "amended_by": []
     }
   ]
