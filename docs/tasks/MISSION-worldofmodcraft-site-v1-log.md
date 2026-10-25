@@ -2130,3 +2130,40 @@ Read by the manager as approval for the three PRs listed under "For Ludwig" item
 not as an answer to item 1 (the ADR-0122 permission rule, still open) or item 4 (org plan, still open).
 → registry #13 (064) merged at reviewed head `5002b46` → `79d5377`; platform #63 (077) merged at `cc4da92` → `2562f88`;
 #64 merged after this entry. The §8 halt is lifted by the answer; 075 is unblocked (base = registry main `79d5377`).
+- **Session worktree pin (2026-10-25):** after the manager entered the session worktree (EnterWorktree), the isolation
+  guard pinned the session and its agents to it; 075's first implementer stopped before writing code (it could not run
+  registry verify scripts from the registry worktree root) and did not work around the guard. Ludwig: "lämna worktree"
+  → the manager left it (kept on disk); 075 relaunched. Lesson for OPERATIONS.md: the manager should not EnterWorktree
+  when agents must work in other repositories' worktrees; session-log edits go in a manually created worktree instead.
+- **075 (registry PR #18):** implementer: red `45c5be9` (17 tests red), fix `067a45d`. Independent review: owner removal
+  impossible in every probed PR shape; platform-only removals still authorised; CONDITIONAL PASS, one blocking finding
+  (the unreadable-entry R11 message falsely claimed a takedown). Fix: red `49a64f3`, fix `4509f57`, log `7d91a3d`; fresh
+  delta review PASS. All 15 closed scripts exit 0 (064 run without timeout), 273 tests OK. The author's two booked
+  questions answered by the manager from the spec (a strengthened assertion; fail-closed R11 for unreadable entries).
+  Ludwig 2026-10-25: "ok att merga" → **merged `4356583`**.
+- **ADR-0122 (task 074):** Ludwig could not add a permission rule from the mobile app (`/permissions` shows only the mode
+  picker); he switched the session to Manual mode and approved each edit himself. Doc-writer: status Accepted
+  (2026-10-17, by Ludwig), ADR-0041 "Amended by" line, README/INDEX.json regenerated, `build_index.py --check` OK
+  (`3405ab7`, merge `f905136`). Ludwig: "Ok att merge 61" → **platform PR #61 merged `0aac566`. ADR-0122 is Accepted.**
+
+## SESSION STATUS — 2026-10-25 (session 11, end)
+### Done this session
+064 (#13), 077 runbook M8 (#63), 075 owner-removal fix (registry #18), ADR-0122 Accepted (#61), session logs (#64, this PR).
+### For Ludwig (★ = manager's lean)
+1. **Org plan (for M8):** GitHub documents rulesets "for GitHub Team and GitHub Enterprise". Which plan is the org on?
+   https://github.com/organizations/worldofmodcraft/settings/billing — the plan name is at the top. Then do M8 in the
+   runbook (`docs/runbooks/site-v1-manual-steps.md`); stop and tell the manager if the Rulesets menu is missing.
+2. Switch the session back to Auto (`/permissions` → "Auto").
+### Next session starts here
+1. **076** doctrine task: MANAGER.md §7 wording per ADR-0122 (grounds: legal + ADR-0046 malware/illegal content; "the
+   single in-place change" corrected) + the approved REVIEW-CHECKLIST item (verify scripts pin own-change checks, live
+   guards on HEAD, checked before merge). Doctrine edits may need Manual mode (classifier wall).
+2. ADR-0122 follow-ups: specs for launcher warning on removed versions (item 3) and stopping public serving of removed
+   files (item 2), as the mission graph allows. R11 identity (dedicated takedown-only account, each takedown needing
+   Ludwig's written approval) goes into 039/008b's specs; 039 is now unblocked by 075.
+3. 072 ledger hygiene: statuses, `docs/tasks/done/`, remove merged worktrees (registry-task-{064,066,069,070,071,007b,075},
+   task-068, task-074, task-077, `.claude/worktrees/session-11`, session-11b after merge).
+4. OPERATIONS.md gotchas: the EnterWorktree pin (above); verify scripts must run from the repo root and one at a time;
+   a fresh registry worktree has no `tools/dev/node_modules` (062 needs WOM_NODE_MODULES or `npm ci`).
+5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, end) i missionsloggen och fortsätt med 'Next session starts here'."

@@ -1,0 +1,62 @@
+# Task 076: doctrine — MANAGER.md §7 takedown wording per ADR-0122; REVIEW-CHECKLIST item on verify-script pinning
+
+- **Mission:** SITE-V1 (doctrine housekeeping) — **Status:** spec-approved (manager, solo gate, 2026-10-25)
+- **Repo:** platform. **Agent / model:** doc-writer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
+- **Branch / worktree:** `task/076-doctrine-removal-and-pinning` / `~/wt/task-076`, cut from platform `origin/main`
+  (`0aac566` or later, which contains ADR-0122 Accepted)
+- **Graph:** doctrine only; no component edges.
+- **Merge:** Ludwig's written approval (doctrine, §7). Edits under `docs/manager/` may be refused by the auto-mode
+  classifier; a refusal is an answer — stop and report, never work around it.
+
+## Sources
+- Ludwig, 2026-10-17, removal policy "Option A for all", item 7 (mission log, "Removal policy — brainstorm and Ludwig's
+  decision"): correct MANAGER.md §7's "legal grounds only" and "the single in-place change".
+- ADR-0122 (Accepted 2026-10-17): takedown grounds are legal grounds (ADR-0041) **or** known malicious code / illegal
+  content as ADR-0046 defines them narrowly; owners cannot remove published versions (also enforced by registry
+  `contracts/ownership.md` R11 since task 075, registry `4356583`).
+- Ludwig, 2026-10-17, answer 3 ("Ok"): add to REVIEW-CHECKLIST — the task's verify script measures its own change on its
+  pinned range and its live guards on HEAD, checked before merge, because the task becomes closed at merge.
+
+## Objective
+1. **MANAGER.md §7, the takedown paragraph** ("Takedowns are never merged on the manager's own authority"): replace the
+   clause that calls a takedown "the single in-place change `contracts/append-only.rules.md` permits, mandated by
+   ADR-0041 for legal grounds only" with wording that (a) names the grounds per ADR-0122 (legal grounds per ADR-0041, or
+   known malicious code / illegal content as ADR-0046 defines them narrowly), (b) describes the takedown as one of the
+   in-place mutations `append-only.rules.md` permits — verify the exact list in the registry's
+   `contracts/append-only.rules.md` ("The permitted in-place mutations"; ADR-0121 added the pipeline write-back) and
+   phrase it accurately rather than guessing, (c) says owners cannot remove a published version (ADR-0041:15,
+   ADR-0122 item 0, enforced by `ownership.md` R11). The rest of the paragraph (the `womcraft` account problem, Ludwig's
+   written approval per takedown PR, the absolute stop condition, the phase-3 replacement) stays unchanged in meaning.
+2. **Other doctrine mentions:** grep `docs/manager/` and `CLAUDE.md` for "legal grounds only", "single in-place change"
+   and equivalents; fix any in `docs/manager/` the same way. `CLAUDE.md` is out of scope: list any hit there as a
+   Question, do not edit it.
+3. **REVIEW-CHECKLIST.md:** add item 12, matching the existing items' style, approximately: "**Verify-script pinning
+   (closed at merge):** the task's `NNN-verify.sh` measures the task's *own* change (file scope, red-commit ancestry,
+   own-file diffs) on a fixed commit range recorded in the script — never `HEAD` or `origin/main` — and its *live*
+   guards (tests green, other closed scripts green) on `HEAD`. Checked before merge, because the task becomes a closed
+   task at merge and a moving frame then reddens it the first time a later task touches the same files (OPERATIONS.md,
+   'What session 10 paid for')." Cite the source (Ludwig, 2026-10-17) the way the file cites others, if it does.
+
+## Acceptance criteria — `docs/tasks/076-verify.sh`, whose output the log pastes
+1. MANAGER.md §7 no longer contains "legal grounds only" nor "the single in-place change"; it names ADR-0122 and
+   ADR-0046; it still contains "Ludwig's explicit written approval" (or the paragraph's existing equivalent) and the
+   absolute-stop sentence unchanged.
+2. REVIEW-CHECKLIST.md has item 12 containing "fixed commit range" (or the final wording's equivalent key phrase) and
+   "HEAD"; items 1-11 unchanged (diff shows only an addition).
+3. `git diff --stat origin/main...HEAD` lists only the files in File scope.
+4. Every existing `docs/tasks/*-verify.sh` that reads `docs/manager/` (grep for it) exits 0, run one at a time from the
+   worktree root; exit codes in the log. Own-change checks in 076-verify.sh use fixed SHAs (the new item 12 applied to
+   itself).
+
+## File scope
+`docs/manager/MANAGER.md` (§7 paragraph, plus any same-wording hit from Objective 2 inside `docs/manager/`),
+`docs/manager/REVIEW-CHECKLIST.md`, `docs/tasks/076-doctrine-removal-and-pinning.md` (log), `docs/tasks/076-verify.sh`.
+
+## Forbidden
+Changing the meaning of anything else in MANAGER.md (merge authority, stop conditions, waivers); editing CLAUDE.md or
+ADRs; working around a refused edit.
+
+---
+# Task 076 log
+- 2026-10-25 manager (session 11): written and approved (solo gate). Booked since 2026-10-17; waited for ADR-0122's
+  acceptance, which landed today (platform `0aac566`).
