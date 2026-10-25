@@ -15,3 +15,4 @@ A single "no" blocks the merge. The reviewer is never the author.
 9. **No secrets** in diff, logs or command output.
 10. **English throughout.**
 11. **Cleanup ready:** branch merges cleanly onto current main; worktree removable.
+12. **Verify-script pinning (closed at merge; Ludwig, 2026-10-17):** the task's `NNN-verify.sh` measures the task's *own* change (file scope, red-commit ancestry, own-file diffs) on a fixed commit range recorded in the script — never `HEAD` or `origin/main` — and its *live* guards (tests green, other closed scripts green) on `HEAD`. Checked before merge, because the task becomes a closed task at merge and a moving frame then reddens it the first time a later task touches the same files (OPERATIONS.md, 'What session 10 paid for').
