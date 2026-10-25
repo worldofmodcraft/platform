@@ -180,8 +180,11 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
 
 **Takedowns are never merged on the manager's own authority** (Ludwig, 2026-09-03). A takedown is
 the one registry mutation that *removes* value — a published version's `status` becoming `removed`
-with a reason, the single in-place change `contracts/append-only.rules.md` permits, mandated by
-ADR-0041 for legal grounds only. Its authorisation is the merge gate; but the merge gate is the
+with a reason. That is transition T2, one of the three in-place mutations `contracts/append-only.rules.md`
+permits (the other two are the pipeline write-backs T1 `pending -> published` and T3 `pending -> rejected`).
+The permitted grounds are set by ADR-0122: legal grounds (ADR-0041), or known malicious code / illegal content
+as ADR-0046 defines them narrowly. Owners cannot remove a published version (ADR-0041, ADR-0122 item 0;
+enforced by registry `contracts/ownership.md` R11). Its authorisation is the merge gate; but the merge gate is the
 **`womcraft` account**, which the manager session also acts as, so "a human decided this" is not
 something the gate can currently prove. Therefore, **regardless of technical ability**: a takedown
 PR requires Ludwig's explicit written approval, given in session, referenced in the PR, *before*
