@@ -12,7 +12,7 @@ export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 PIN_BASE="2b2872c382c1728b500b9684757f99162b407464"
-PIN_FINAL="__FINAL__"
+PIN_FINAL="1ea5ba4ee3db687a19b412b267b1b96fd0d4bb8f"
 fails=0
 ok()  { echo "  ok   $*"; }
 bad() { echo "  FAIL $*"; fails=$((fails + 1)); }
