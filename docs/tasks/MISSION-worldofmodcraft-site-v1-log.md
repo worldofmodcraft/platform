@@ -2167,3 +2167,28 @@ not as an answer to item 1 (the ADR-0122 permission rule, still open) or item 4 
    a fresh registry worktree has no `tools/dev/node_modules` (062 needs WOM_NODE_MODULES or `npm ci`).
 5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, end) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Session 11 continued — 2026-10-25 (Ludwig: "Fortsätt i den här sessionen")
+- **076** (doctrine, platform PR #66): §7 takedown wording per ADR-0122 (grounds; T2 is one of three permitted in-place
+  mutations T1/T2/T3; owners cannot remove, enforced by R11) + REVIEW-CHECKLIST item 12 (verify-script pinning). Not
+  refused by the classifier. Its AC4 was blocked by three closed scripts already red on main → task 078 first. Review
+  PASS. Ludwig: "Ok merga 66" → **merged `bf4710d`**.
+- **078** (platform PR #67): 048 c1 pinned to PR #50's range, 063 to PR #55's; 056-verify's planted minisign header text
+  built at runtime (051's secret scan hit was **not a secret** — manager checked with masked output). Q2 (070-verify is
+  registry-only) was the manager's spec defect; 078-verify carries the later-branch checks instead. Review PASS (049 red
+  only on stale ignored `__pycache__`; cleared, 049 exit 0). Ludwig: "Go wit star" → **merged `8004828`**.
+- **Ludwig 2026-10-25:** answer 2 "Go with star" (live guard on rule 0) → task 079; answer 3 "i have GitHub pro", then
+  "Worldofmodcraft is on a free plan" — the org is on **GitHub Free**. Docs (fetched 2026-10-25) name rulesets only for
+  Team/Enterprise and say nothing about public repos; unverified — Ludwig checks
+  https://github.com/worldofmodcraft/archive/settings/rules for a "New ruleset" button before doing M8.
+- **079** (platform PR #68): `docs/manager/rule0.reference.md` + `tools/manager/check-rule0.sh` (byte-exact, 0/1/2,
+  never skip); 11 mutations as specified. Review PASS incl. merged-with-main clone. Ludwig: "Ok att merga 68" →
+  **merged `29b3424`**.
+- **080** (platform PR #69): 079's review found 056/076/078 verify red in **every fresh clone** — the architecture note
+  cited ADR-0121 on a local-only branch. Cite moved to the main path; fresh-clone runs green after, red before. Review
+  pending.
+- Gotchas for OPERATIONS.md (booked, 072/hygiene): stale ignored `__pycache__` reddens 049 (run with
+  PYTHONDONTWRITEBYTECODE=1); add/add conflicts on task files between session branch and task PR — main's copy is the
+  superset; verify scripts must be checked in a fresh clone (item 8), not only in worktrees.
+- Booked, non-blocking: 048 c3 asserts exactly 10 agent files (reddens on an 11th); 056 has no later-branch case in 078.
+- **080** update: review PASS, then an item-12 finding (own-change check read HEAD) fixed in `a36b758` (pins BASE `29b3424`, FINAL `f173739`; control FINAL=BASE exits 1); delta review PASS; PR #69 head `fe050ab` awaits Ludwig's OK.
