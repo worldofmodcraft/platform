@@ -1,6 +1,6 @@
 # Task 072: ledger hygiene — true statuses, OPERATIONS.md gotchas from session 11, merged worktrees removed
 
-- **Mission:** SITE-V1 (ledger integrity) — **Status:** spec-approved (manager, solo gate, 2026-10-25)
+- **Mission:** SITE-V1 (ledger integrity) — **Status:** review (spec-approved by the manager, solo gate, 2026-10-25; implemented, PR pending merge)
 - **Repo:** platform (ledger + OPERATIONS.md); local worktree cleanup for platform and registry.
   **Agent / model:** doc-writer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/072-ledger-hygiene` / `~/wt/task-072`, cut from platform `origin/main` (`d9d48de` or later)
@@ -59,3 +59,7 @@ done without a nameable merge.
 ---
 # Task 072 log
 - 2026-10-25 manager (session 11): written and approved (solo gate). Narrowed from session 10's plan: no file moves.
+- 2026-10-25 doc-writer (task 072): Objective 1 done. 34 task files set to `done`, each with a merged PR/commit named in its own log line and checked on the matching origin/main by `072-verify.sh` AC1 (registry via `git -C /home/ludwig/registry`). Caveats kept in the status line: 048 (AC9 live check open), 052 (AC7 live check open), 056 (first version only, second pass due).
+- 2026-10-25 doc-writer (task 072): left unchanged, not mergeable on the evidence: 007 (umbrella), 008, 008b, 008c, 010, 039, 040, 055 (draft/spec-approved, no merge); 031, 043 (043's rule is not in MANAGER.md on main; 031 blocked); 047 (umbrella, draft; split into 048-053, mission log does not say stopped); 058 (task/058 unmerged); 065 (not dispatched); 041 (done in the **site** repository per the mission log, "site PR #2", which this task's evidence rules do not cover: uncertain); 049, 060, 061, 073 already `done`. `stopped` applied to none (mission log stops none).
+- 2026-10-25 doc-writer (task 072): Objective 2 done: OPERATIONS.md section "What session 11 paid for" with (a)-(g), one contiguous addition, no line changed.
+- 2026-10-25 doc-writer (task 072): `072-verify.sh` (pinned BASE `d9d48de`, FINAL `7df8a50979cc834918871ba948aa9ed7e9eb4352`): ALL CHECKS PASSED, exit 0; with FINAL=BASE it exits 1 (control). AC4, run serially, foreground, `PYTHONDONTWRITEBYTECODE=1`, from the worktree root, no other verify running: 048 049 051 052 053 056 059 061 063 068 072 076 078 079 080 all `exit=0` (15 scripts).
