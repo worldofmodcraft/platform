@@ -1,6 +1,6 @@
 # Task 072: ledger hygiene — true statuses, OPERATIONS.md gotchas from session 11, merged worktrees removed
 
-- **Mission:** SITE-V1 (ledger integrity) — **Status:** review (spec-approved by the manager, solo gate, 2026-10-25; implemented, PR pending merge)
+- **Mission:** SITE-V1 (ledger integrity) — **Status:** done (merged as platform PR #71, `4de1218`, 2026-10-25)
 - **Repo:** platform (ledger + OPERATIONS.md); local worktree cleanup for platform and registry.
   **Agent / model:** doc-writer (ROUTING.md). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/072-ledger-hygiene` / `~/wt/task-072`, cut from platform `origin/main` (`d9d48de` or later)
@@ -82,3 +82,4 @@ done without a nameable merge.
   - removed /home/ludwig/wt/registry-task-070 (DETACHED @ 0228006): i empty, ii ancestor, iii merged PR #n/a(detached)
   - registry-task-070 was a detached HEAD: (iii) checked by PR instead: registry PR #16 (task/070-closed-verify-head-audit) is MERGED and its head 0228006 equals the worktree tip.
   - kept: ~/wt/task-058 (branch task/058-archive-url-probe @ c5340aa not an ancestor of origin/main, no merged PR; spec says leave if unmerged); ~/wt/session-11b (session/11b @ 750ced9 not an ancestor of origin/main; holds unmerged manager commits; told to keep). Not touched: task-023, .claude/worktrees/session-10, session-9-specs, task-072 (this task).
+- 2026-10-25 manager: status corrected to done after Ludwig's "merga PR71" (platform PR #71, `4de1218`).
