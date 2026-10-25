@@ -60,3 +60,35 @@ ADRs; working around a refused edit.
 # Task 076 log
 - 2026-10-25 manager (session 11): written and approved (solo gate). Booked since 2026-10-17; waited for ADR-0122's
   acceptance, which landed today (platform `0aac566`).
+- 2026-10-25 doc-writer: implemented. Content commit a2419ba (MANAGER.md §7 takedown paragraph; REVIEW-CHECKLIST item 12); no edit under docs/manager/ was refused.
+  - §7 now: T2 is "one of the three in-place mutations append-only.rules.md permits" (T1 pending->published, T3 pending->rejected, per the registry's "The permitted in-place mutations"); grounds per ADR-0122 (ADR-0041 legal, or ADR-0046 malicious code / illegal content, narrowly); owners cannot remove a published version (ADR-0041, ADR-0122 item 0, ownership.md R11). Rest unchanged.
+  - Objective 2: grep of docs/manager/ and CLAUDE.md for "legal grounds only" / "single in-place" found only the MANAGER.md §7 hit (fixed). CLAUDE.md: no hit.
+  - 076-verify.sh output (AC1-AC3 all PASS; AC4 FAIL):
+```
+AC1
+  PASS section 7 takedown paragraph located
+  PASS no 'legal grounds only'
+  PASS no 'single in-place change'
+  PASS names ADR-0122
+  PASS names ADR-0046
+  PASS names ownership.md R11
+  PASS written approval kept
+  PASS absolute-stop sentence kept
+AC2
+  PASS item 12 has 'fixed commit range'
+  PASS item 12 has HEAD
+  PASS checklist diff has no removed lines
+  PASS checklist diff adds exactly one line
+AC3
+  PASS BASE..HEAD touches only File scope 
+AC4 (live guards on HEAD)
+  FAIL docs/tasks/048-verify.sh exit 1
+  PASS docs/tasks/049-verify.sh exit 0
+  FAIL docs/tasks/051-verify.sh exit 1
+  PASS docs/tasks/052-verify.sh exit 0
+  FAIL docs/tasks/063-verify.sh exit 1
+076 verify: 3 FAIL
+```
+  - AC4 is NOT met, and is not met for a reason outside this task: 048, 051 and 063 are already red on unchanged origin/main 0aac566 (checked in a detached worktree: 048 c1 "CLAUDE.md rule 0 block differs from base"; 063 AC1/AC2/AC4 measure their own change against a moving base; 051 AC4 "secret-shaped string committed" via docs/tasks/056-verify.sh). Also, with this change: 048 c1 flags 2 changed lines in MANAGER.md and 063 AC1 flags a hunk outside its bullet - the moving-frame defect item 12 describes. 049 and 052 exit 0. No script was edited or weakened. See Questions.
+  - Questions for the manager/Ludwig: (1) AC4 as written cannot be met; repair 048/051/063 (pin their frames) in a separate task, or accept AC4 as "no new failure class beyond the moving frame"? (2) 051's secret-shaped-string failure points at 056-verify.sh and may be a real finding; needs a look.
+- 2026-10-25 doc-writer (after task 078, main 80048281): merged origin/main into the branch (merge 8c5614e; add/add conflict on this file resolved by keeping the branch copy, which is the spec plus log). Stale tools/**/__pycache__ removed. All scripts run one at a time, foreground, from the worktree root, PYTHONDONTWRITEBYTECODE=1: 048, 049, 051, 052, 053, 056, 059, 061, 063, 068, 078 all exit 0. 076-verify.sh first exited 1 for two reasons of its own: (a) AC3 diffed BASE..HEAD, which after the merge includes 078's files - repinned to the fixed own-commit range BASE..11c091c (item 12 applied to itself); (b) 051 leaves __pycache__ that reddens 049 - the script now clears tools/**/__pycache__ before each live guard. Re-run: exit 0, AC1-AC4 PASS. This supersedes the AC4 FAIL and the Questions above (Q1 answered by manager: AC4 stands; Q2 was planted header text in 056-verify.sh, fixed by 078).
