@@ -2236,3 +2236,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   forks, Lua, launcher are §2 out of scope (a later mission); ~9-10 open tasks remain here plus Ludwig's §7 walkthrough.
 - Overnight plan: 039 (registry CI workflow) spec revision (Plan agent drafts; manager gates after an independent spec
   review — security-touching), then implementation; merge parked for Ludwig.
+- **Ludwig, 2026-10-25 evening (verbatim): "Du kan ignorera hårda gränsen på 40% under kvällens körning också, godkänner det."**
+  → §5's 40 % hard threshold is also waived for tonight's run only (not a precedent; §5 text unchanged and in force
+  afterwards). §5.5 still applies: after any auto-compaction the session is untrusted for operational detail and
+  verifies against disk before acting. The manager still writes resumable state to disk after every report-back.
