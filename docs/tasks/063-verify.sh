@@ -2,13 +2,19 @@
 # Task 063 verification (MANAGER.md §2c). Deterministic, no network.
 #   docs/tasks/063-verify.sh            run AC1-AC4 against the current tree
 #   docs/tasks/063-verify.sh --mutate   also run the AC5 mutations in a temporary clone (never in this tree)
-# Base = merge-base(HEAD, origin/main): the task is open, so origin/main is the correct comparison.
+# Task 078 re-pin: AC1 and AC4 (and the AC2 base-blob positive control) are OWN-CHANGE checks. They measure the task's merged PR range,
+# BASE = merge-base(M^1, M^2) and FINAL = M^2 with M = 0a87b17 "Merge pull request #55", never HEAD or the working tree.
+# AC2 (phrases absent now) and AC3 (the quoted commands run) are LIVE properties and stay on the current tree.
+# Fixed SHAs, no env override; an unreachable pin fails (exit 2), never skips.
 # Exit 0 only if every check passes (and, with --mutate, every mutation is caught and every restore is green).
 set -u
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$HERE" || exit 2
-BASE=${TASK063_BASE:-$(git merge-base HEAD origin/main 2>/dev/null)}
-[ -n "$BASE" ] || { echo "verify: cannot determine base (no origin/main / merge-base)" >&2; exit 2; }
+BASE="ac407bf311995c11adf1a845c639b0c3fc886852"
+FINAL="052b5078c53f8d02cb6d6707d365f8f62351d2b6"
+for pin in "$BASE" "$FINAL"; do
+  git rev-parse --verify -q "$pin^{commit}" >/dev/null || { echo "verify: pinned commit $pin not found (git fetch?)" >&2; exit 2; }
+done
 DOC=docs/manager/MANAGER.md
 TASK=docs/tasks/063-doctrine-log-entry-check.md
 SCRIPT=tools/manager/check-log-entry.sh
@@ -32,9 +38,13 @@ bullet_range() {
   [ -n "$s" ] && [ -n "$e" ] && [ "$s" -lt "$e" ] && echo "$s $((e - 1))"
 }
 
-ac1() { # root
+own_diff() { # root holding $DOC as of FINAL: the task's own change to the doctrine file, BASE blob vs that file
+  diff -U0 <(git show "$BASE:$DOC") "$1/$DOC"
+}
+
+ac1() { # root holding $DOC as of FINAL (never HEAD)
   local r=$1 hunks rng s e bad=0 l
-  hunks=$(git -C "$r" diff -U0 "$BASE" -- "$DOC" | grep -c '^@@')
+  hunks=$(own_diff "$r" | grep -c '^@@')
   res "AC1 exactly one hunk" $([ "$hunks" -eq 1 ] && echo 0 || echo 1) "hunks=$hunks, expected 1"
   rng=$(bullet_range "$r/$DOC")
   res "AC1 bullet located in §5 (before '## 6.')" $([ -n "$rng" ] && echo 0 || echo 1) "range='${rng:-none}'"
@@ -48,7 +58,7 @@ ac1() { # root
     st=${l%%,*}; len=1; case "$l" in *,*) len=${l#*,};; esac
     [ "$len" -eq 0 ] && len=1
     if [ "$st" -lt "$s" ] || [ $((st + len - 1)) -gt "$e" ]; then bad=1; fi
-  done < <(git -C "$r" diff -U0 "$BASE" -- "$DOC" | sed -n 's/^@@ [^ ]* +\([0-9,]*\) @@.*/\1/p')
+  done < <(own_diff "$r" | sed -n 's/^@@ [^ ]* +\([0-9,]*\) @@.*/\1/p')
   res "AC1 hunk lies inside bullet lines $s-$e" $([ "$n" -ge 1 ] && [ "$bad" -eq 0 ] && echo 0 || echo 1) "hunks seen=$n outside=$bad"
 }
 
@@ -98,9 +108,9 @@ subset_ok() { # stdin: changed paths; prints offenders; returns 1 if none listed
   done
   [ "$any" -eq 1 ] && [ "$off" -eq 0 ]
 }
-ac4() { # root
-  local r=$1 files off rc
-  files=$( { git -C "$r" diff --name-only "$BASE"; git -C "$r" ls-files --others --exclude-standard; } | sort -u)
+ac4() { # root, ref (default FINAL): the files the task's PR changed, BASE..ref
+  local r=$1 ref=${2:-$FINAL} files off rc
+  files=$(git -C "$r" diff --name-only "$BASE" "$ref" | sort -u)
   off=$(printf '%s\n' "$files" | subset_ok); rc=$?
   res "AC4 changed files ($(echo $files)) subset of scope" $rc "offenders='$(echo $off)'"
   # self-test: the subset check must reject a stray path and an empty set
@@ -110,10 +120,14 @@ ac4() { # root
   res "AC4 control: empty change set rejected" $([ "$rc" -ne 0 ] && echo 0 || echo 1) "rc=$rc"
 }
 
-run_all() { fails=0; ac1 "$1"; ac2 "$1"; ac3 "$1"; ac4 "$1"; return $fails; }
+# FINROOT: the doctrine file exactly as the task's PR left it (FINAL), for the own-change AC1.
+FINROOT=$(mktemp -d "${TMPDIR:-/tmp}/063-final.XXXXXX") || exit 2
+mkdir -p "$FINROOT/$(dirname "$DOC")"; git show "$FINAL:$DOC" > "$FINROOT/$DOC" || { echo "verify: cannot read $DOC at FINAL" >&2; exit 2; }
+trap 'rm -rf "$FINROOT" "${TMP:-}"' EXIT
+run_all() { fails=0; ac1 "$FINROOT"; ac2 "$1"; ac3 "$1"; ac4 "$1"; return $fails; }
 
-echo "base: $BASE ($(git log -1 --format=%s "$BASE"))"
-echo "== AC1-AC4 on $HERE =="
+echo "base: $BASE ($(git log -1 --format=%s "$BASE")); final: $FINAL"
+echo "== AC1/AC4 on the PR range, AC2/AC3 on $HERE =="
 run_all "$HERE"; main_fails=$?
 echo "result: $([ $main_fails -eq 0 ] && echo GREEN || echo "RED ($main_fails failing)")"
 total=$main_fails
@@ -121,24 +135,25 @@ total=$main_fails
 if [ "${1:-}" = "--mutate" ]; then
   echo "== AC5 mutations (temporary clone, this tree untouched) =="
   TMP=$(mktemp -d "${TMPDIR:-/tmp}/063-mutate.XXXXXX") || exit 2
-  trap 'rm -rf "$TMP"' EXIT
+  trap 'rm -rf "$FINROOT" "$TMP"' EXIT
   git clone -q --no-hardlinks "$HERE" "$TMP/c" && git -C "$TMP/c" checkout -q --detach "$(git rev-parse HEAD)" || { echo "clone failed" >&2; exit 2; }
   C=$TMP/c
   # a committed clone of HEAD may lack uncommitted edits; carry the current working files over so we mutate what is verified
   for f in $DOC $TASK docs/tasks/063-verify.sh; do cp "$HERE/$f" "$C/$f"; done
   # mutation <name> <check fn> <sed expr applied to DOC> -- baseline green, mutated red in the targeted check, restored green
   mutation() {
-    local name=$1 fn=$2 expr=$3 out fl
+    local name=$1 fn=$2 expr=$3 out fl src="$HERE/$DOC"
+    [ "$fn" = ac1 ] && src="$FINROOT/$DOC"   # AC1 is an own-change check: it mutates and measures the doctrine file as of FINAL
     echo "-- mutation: $name"
-    cp "$HERE/$DOC" "$C/$DOC"
+    cp "$src" "$C/$DOC"
     fails=0; $fn "$C" >/dev/null; fl=$fails
     echo "  before: $fn failing=$fl (expected 0)"; [ "$fl" -eq 0 ] || total=$((total + 1))
     sed -i "$expr" "$C/$DOC"
-    cmp -s "$HERE/$DOC" "$C/$DOC" && { echo "  FAIL mutation changed nothing"; total=$((total + 1)); return; }
+    cmp -s "$src" "$C/$DOC" && { echo "  FAIL mutation changed nothing"; total=$((total + 1)); return; }
     fails=0; $fn "$C" > "$TMP/out"; fl=$fails; out=$(cat "$TMP/out")
     echo "$out" | grep FAIL | sed 's/^/  /'
     echo "  mutated: $fn failing=$fl (expected >0)"; [ "$fl" -gt 0 ] || { echo "  FAIL mutation not detected"; total=$((total + 1)); }
-    cp "$HERE/$DOC" "$C/$DOC"
+    cp "$src" "$C/$DOC"
     fails=0; $fn "$C" >/dev/null; fl=$fails
     echo "  restored: $fn failing=$fl (expected 0)"; [ "$fl" -eq 0 ] || total=$((total + 1))
   }
@@ -150,11 +165,16 @@ if [ "${1:-}" = "--mutate" ]; then
   mutation "edit outside the bullet (AC1)" ac1 's/^## 6\. Worktree isolation (anti-derailment rule #2)$/## 6. Worktree isolation (anti-derailment rule #2) x/'
   # extra: stray file in the change set; AC4 must go red
   echo "-- mutation: stray changed file (AC4)"
-  echo x >> "$C/docs/manager/OPERATIONS.md"
-  fails=0; ac4 "$C" > "$TMP/out"; fl=$fails; out=$(cat "$TMP/out"); echo "$out" | grep FAIL | sed 's/^/  /'
+  # a synthetic commit on top of FINAL (plumbing only, no checkout) that also touches an out-of-scope file
+  export GIT_INDEX_FILE="$TMP/idx"
+  git -C "$C" read-tree "$FINAL"
+  blob=$(git -C "$C" show "$FINAL:docs/manager/OPERATIONS.md" | { cat; echo x; } | git -C "$C" hash-object -w --stdin)
+  git -C "$C" update-index --cacheinfo "100644,$blob,docs/manager/OPERATIONS.md"
+  stray=$(git -C "$C" -c user.name=t -c user.email=t@t commit-tree -p "$FINAL" -m stray "$(git -C "$C" write-tree)")
+  unset GIT_INDEX_FILE
+  fails=0; ac4 "$C" "$stray" > "$TMP/out"; fl=$fails; out=$(cat "$TMP/out"); echo "$out" | grep FAIL | sed 's/^/  /'
   echo "  mutated: ac4 failing=$fl (expected >0)"; [ "$fl" -gt 0 ] || { echo "  FAIL mutation not detected"; total=$((total + 1)); }
-  git -C "$C" checkout -q -- docs/manager/OPERATIONS.md
-  fails=0; ac4 "$C" >/dev/null; echo "  restored: ac4 failing=$fails (expected 0)"; [ "$fails" -eq 0 ] || total=$((total + 1))
+  fails=0; ac4 "$C" "$FINAL" >/dev/null; echo "  restored: ac4 failing=$fails (expected 0)"; [ "$fails" -eq 0 ] || total=$((total + 1))
   echo "result (mutations): $([ $total -eq $main_fails ] && echo "ALL CAUGHT, ALL RESTORED" || echo "PROBLEM")"
 fi
 
