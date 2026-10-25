@@ -1,7 +1,7 @@
 # Task 039: The registry CI workflow — the 007a and 007b checkers wired onto real pull requests
 
 - **Mission:** SITE-V1, deliverable **D1** (the CI half); mission §7 criterion 1 (registry half). **Status:** draft, revised
-  (manager, 2026-10-25; replaces the 2026-09-06 placeholder). **Security-touching → independent spec review before dispatch.**
+  (manager, 2026-10-25; replaces the 2026-09-06 placeholder; spec review round 1 folded, round 2 pending). **Security-touching → independent spec review before dispatch.**
 - **Merge:** needs **Ludwig's written approval** (CI security check, MANAGER.md §7).
 - **Repo:** registry; plus one docs-only change in the platform repo (runbook M9/M10, see File scope).
 - **Agent / model:** implementer (ROUTING.md). **Budget:** medium (≤ 3 agent-sessions).
@@ -9,8 +9,9 @@
   (`4356583` on 2026-10-25, or later; the actual cut SHA is `BASE` in the log and in `039-verify.sh`). Platform docs:
   `task/039-runbook-m9` / `~/wt/task-039-runbook`.
 - **Graph:** completes node **N3 `registry-ci`**; realises edge **E16** (`author (forge identity) → N3`, read per
-  `ownership.md` I1). No new edges. [unverified] the R11 configuration file is an input to N3, not a new node — the manager
-  confirms against `docs/architecture/depgraph.md` before approval.
+  `ownership.md` I1); E16 also covers the membership call (§4) and the PR-object read (§2 step 1). No new edges. The manager
+  does the `INDEX.json` lookup before approval. [unverified] the R11 configuration file is an input to N3, not a new node — the
+  manager confirms against `docs/architecture/depgraph.md` before approval.
 
 ## What changed since the 2026-09-06 draft
 - "Task 007" now means **007a** (shape checkers: `tools/registry/cli.py classify|schema|append-only`, registry PR #10) **and**
@@ -55,72 +56,114 @@ ADRs the diff may touch (ADR-0116 layer 2): 0039, 0041, 0058, 0059, 0099, 0119, 
   base-branch checkers from a separate directory). [unverified U1]
 - M1.4's "require approval for first-time contributors" gates `pull_request` fork runs, **not** `pull_request_target`
   [unverified U1]; safety rests on "PR content is data only", not on that setting.
-- **Tokens:** M1.4 set the repository default to read and write, so the workflow declares top-level `permissions: {}` and each
-  job its minimum. Job **`gate`** (the required check): `contents: read`, `pull-requests: read`; one secret, in one step only
-  (membership, §4); produces `verdict.json` + `comment.md` as an artifact. Job **`comment`** (`needs: gate`, `if: always()`):
-  `pull-requests: write` only, **no checkout**, runs no repository code; downloads the artifact and posts `comment.md` as data
-  (`gh api … -F body=@comment.md`, [unverified U8]); with no artifact it posts a fixed "registry CI could not decide; see the
-  run log". Its result never changes `gate`.
+- **Tokens:** M1.4 set the repository default to read and write, so the workflow declares top-level `permissions: {}`, each
+  job its minimum, and a `timeout-minutes` on each job. Job **`gate`** (the required check): `contents: read`,
+  `pull-requests: read`; its only secrets are the M10 App id and key, used in the token-mint step alone (§4); produces
+  `verdict.json` + `comment.md` as an artifact. Job **`comment`** (`needs: gate`, `if: always()`): `pull-requests: write` only,
+  **no checkout**, runs no repository code; downloads the artifact and creates-or-updates **one** comment, found by a fixed
+  hidden marker (`<!-- registry-ci-gate -->`) **and** author `github-actions[bot]` (none found → create), posting `comment.md`
+  as data (`gh api … -F body=@comment.md`, [unverified U8]); with no artifact it posts a fixed "registry CI could not decide;
+  see the run log". Its result never changes `gate`.
 - **Checkout:** `actions/checkout` pinned to a 40-hex SHA, `fetch-depth: 0`, `persist-credentials: false`, **no `ref:`**. The PR
-  head is fetched as objects only (`git fetch origin +refs/pull/<N>/head:refs/wom/pr-head`); the fetched SHA must equal the
-  event's `pull_request.head.sha` or the run exits 2. [unverified U5]
-- **No `${{ github.event.* }}` or `${{ github.head_ref }}` inside any `run:`** (script injection); event data reaches scripts as
-  files (`$GITHUB_EVENT_PATH`) or env vars.
+  number (`^[0-9]+$`) and head sha (40-hex) are validated in the step's shell, both passed via `env:`, **before** the PR head is
+  fetched as objects only (`git fetch origin +refs/pull/<N>/head:refs/wom/pr-head`); the fetched SHA must equal the event's
+  `pull_request.head.sha` or the run exits 2. [unverified U5]
+- **Injection rule (outputs and environment):** no `run:` block contains `${{` at all; event, API and step values reach scripts
+  only through `env:` or files. Anything written to `$GITHUB_OUTPUT` matches a strict form: class ∈ the classify enum,
+  membership status `^[0-9]{3}$|none`, PR number `^[0-9]+$`, shas 40-hex — never PR free text (title, login, body, branch, path).
+  The composer is the only producer of such values (`OUT/outputs`, one validated `key=value` per line, appended to
+  `$GITHUB_OUTPUT` by the workflow). `$GITHUB_ENV` and `$GITHUB_PATH` are never written. The `comment` job takes `gate`
+  outputs through `env:`, never `${{ needs.gate.outputs.* }}` inside a `run:`.
+- **`gate` cannot go green by accident:** the `ci_gate.py` step has no `if:`; its `run:` has no pipe (or the step sets
+  `shell: bash` with `pipefail`); the steps after it are `actions/upload-artifact` only, so nothing later in `gate` can turn the
+  job green. The job result is the composer's exit status.
 
 ### 2. The composer: `tools/registry/ci_gate.py` (new, offline, stdlib only)
-`python3 -I tools/registry/ci_gate.py --repo DIR --event EVENT.json --pr PR.json --membership-status (INT|none) --out DIR`
-→ exit 0 accepted / 1 rejected / 2 could not decide; writes `OUT/verdict.json`, `OUT/comment.md`, `OUT/class`.
+`python3 -I tools/registry/ci_gate.py --repo DIR --event EVENT.json --pr PR.json --membership-status (^[0-9]{3}$|none) --out DIR`
+→ exit 0 accepted / 1 rejected / 2 could not decide; writes `OUT/verdict.json`, `OUT/comment.md`, `OUT/class`, `OUT/outputs`.
+**No `--tools-dir` flag:** the checker directory is a parameter of the library entry point that tests call directly (stub
+checkers); the CLI always uses the base checkout's `tools/registry/`. `main` is wrapped: any exception, including
+`subprocess.TimeoutExpired`, exits 2 (never Python's default traceback exit 1, which would read as a rejection).
 1. **Identity (I1):** author = `PR.json.user.id` / `.user.login`; `PR.json` is the `GET /repos/{repo}/pulls/{n}` response the
    workflow fetched with the read-only token. Exit 2 unless event and API object agree on number, `user.id`, `head.sha`,
    `base.ref == "main"` and base repository. Never reads `GITHUB_ACTOR(_ID)`, commit authors or trailers.
-2. **Merge-base:** `git merge-base --all <base.sha> <head.sha>`; exactly one result, else exit 2.
-3. **Changed paths:** `git diff --no-renames --name-only -z <mb> <head>` (a rename is a deletion plus a creation, per 007a).
-4. **Routing (no workflow path filter):** a non-empty diff with **no path under `mods/`** is an *infra PR*: exit 0, comment
-   "not a registry content PR; registry CI does not judge it; human review required (MANAGER.md §7)". Every other PR —
-   including an empty diff and any mix of `mods/` with other paths — goes through the full gate (classify rejects mixes as
-   `other`). Reasons: a `paths:` filter would leave the required check pending on skipped PRs [unverified U3]; 007a rejects
-   every path outside `mods/` by design and its Questions(A) left routing to this task.
+2. **Merge-base:** `git merge-base --all HEAD <head.sha>` (HEAD = the checked-out base-branch tip); exactly one result, else exit
+   2. The API `base.sha` must be an ancestor of HEAD (`git merge-base --is-ancestor`), else exit 2.
+3. **Changed paths:** `git diff --no-renames --name-only -z <mb> <head>` (a rename is a deletion plus a creation, per 007a). A
+   list that does not parse (no trailing NUL, an empty entry) → exit 2. **Empty diff → exit 1:** the composer builds the
+   classify-shaped rejection ("empty diff") itself and runs none of the other three checkers.
+4. **Routing (no workflow path filter):** an *infra PR* is a non-empty diff in which **no path equals `mods` or starts with
+   `mods/`**: exit 0, comment "not a registry content PR; registry CI does not judge it" listing the touched paths, saying
+   **green does not mean safe** and that this relies on human review before merge (M9, MANAGER.md §7). Every other PR —
+   including any mix of `mods/` with other paths — goes through the full gate (classify rejects mixes as `other`). Reasons: a
+   `paths:` filter would leave the required check pending on skipped PRs [unverified U3] (so ADR-0099's path-filtered CI does
+   not apply: this check must always report); 007a rejects every path outside `mods/` by design and its Questions(A) left
+   routing to this task.
 5. **Materialisation (no checkout of PR trees):** via `git ls-tree -r -z` + `git cat-file blob`, write **old-root** = the
    merge-base tree's `mods/`, `reserved-namespaces.json` and `config/r11-identity.json`, and **new-root** = the head tree's
-   `mods/`, into fresh temp dirs. Mode 100644/100755 → regular file; 120000 → a symlink with its literal target, never
-   followed (the checkers reject it as `symlink`); any other mode (gitlink 160000, …) on a changed path → rejection (fail
-   closed).
-6. **Run all four checkers, always, from the base checkout** (`sys.executable -I tools/registry/…`): `cli.py classify
-   --reserved-file OLD/reserved-namespaces.json`; `cli.py schema --root NEW`; `cli.py append-only --old-root OLD --new-root
-   NEW`; `ownership_cli.py --author-provider github --author-id ID --author-login LOGIN --old-root OLD --new-root NEW
-   --reserved-file OLD/reserved-namespaces.json [--membership-status N] [--r11-identity github:ID]`. All four run even after a
-   rejection, so the author gets the full log.
+   `mods/`, into fresh `mkdtemp` dirs (0700). Mode 100644/100755 → regular file; 120000 → a symlink with its literal target,
+   written **after** all regular files, never followed (the checkers reject it as `symlink`); any other mode (gitlink 160000, …)
+   on a changed path → rejection (fail closed). Files are created with `O_EXCL` and never through a symlink. Any of these →
+   **exit 2**, nothing further written: a tree path with a `.`, `..`, empty or `.git` component or a NUL; a duplicate path or a
+   directory/file conflict (blob or symlink `x` with tree `x/…`); a realpath outside the temp root; a blob over the byte cap or
+   more entries than the entry cap (caps chosen by the implementer, recorded in the log, tested); any `git` call over its
+   timeout.
+6. **Run all four checkers, always (except on an empty diff), from the base checkout** (`sys.executable -I tools/registry/…`;
+   argv lists; a timeout on each; every checker that takes PATH arguments gets them as **argv after `--`**, never via
+   `--paths-file`): `cli.py classify --reserved-file OLD/reserved-namespaces.json -- PATH...`; `cli.py schema --root NEW`;
+   `cli.py append-only --old-root OLD --new-root NEW`; `ownership_cli.py --author-provider github --author-id ID --author-login
+   LOGIN --old-root OLD --new-root NEW --reserved-file OLD/reserved-namespaces.json [--membership-status N] [--r11-identity
+   github:ID] -- PATH...`. A changed path named like a flag (`--membership-status=204`) is thus an unrecognised path, never a
+   checker option. All four run even after a rejection, so the author gets the full log. Every subprocess (git included) runs
+   with a scrubbed env built from literals: no `GITHUB_*`, `PATH=/usr/bin:/bin` [unverified U7], `GIT_CONFIG_NOSYSTEM=1`,
+   `GIT_CONFIG_GLOBAL=/dev/null`.
 7. **Composition (fail closed):** accepted iff all four exit 0 **and** each JSON verdict says `accepted`. A checker exit 2, any
-   other exit code, unparsable JSON, or an exit code disagreeing with its verdict → composed exit 2, reported as "could not
-   decide (not a rejection)", never green. The ownership verdict's `merge_signal: false` (I8) is restated: green means "the
-   checks pass", never "approved".
+   other exit code, unparsable JSON, a timeout, or an exit code disagreeing with its verdict → composed exit 2, reported as
+   "could not decide (not a rejection)", never green. **Precedence: if any checker is exit 2 the composed result is 2, even when
+   another checker rejects.** The ownership verdict's `merge_signal: false` (I8) is restated: green means "the checks pass",
+   never "approved".
 8. **R11 identity:** read from `OLD/config/r11-identity.json` (merge-base, I4), never from the PR head or an env var. File:
    `{"schema_version": "1.0.0", "r11_identity": null}` or `{"provider": "github", "id": <int>}` in that slot. `null` or absent
    → no `--r11-identity` (R11 authorises nobody); malformed → exit 2. **This task commits it as `null` and forbids setting it.**
-9. **Comment:** on rejection or exit 2, the full checker output inside a code fence longer than any backtick run in it (it
-   contains PR-controlled strings), truncated below GitHub's limit [unverified U12] with a link to the run log. On a PR that
-   first publishes a non-reserved namespace, ADR-0058 §3 verbatim: *"This creates the namespace `X:` permanently bound to your
-   GitHub account (id N). Namespaces are never reassigned."* (X = namespace, N = `pulls.user.id`). For a reserved-namespace
-   first publish it says instead that the namespace is bound to the organisation in the merge-base reserved list (ADR-0119).
-   Page-only PRs: "page.json-only: no build runs" (`OUT/class` = `page-only`).
-10. **Process discipline:** `subprocess` only with argv[0] `git` or `sys.executable`; no network modules; no environment reads
-    beyond what the arguments name.
+9. **Comment (`comment.md`):**
+   - Rejection or exit 2: the full checker output inside a code fence longer than any backtick run in it (it contains
+     PR-controlled strings), truncated below GitHub's limit [unverified U12] with a link to the run log.
+   - The ADR-0058 §3 notice appears **only on the accepted path**, for a PR that first publishes a non-reserved namespace,
+     verbatim: *"This creates the namespace `X:` permanently bound to your GitHub account (id N). Namespaces are never
+     reassigned."* (X = the namespace from the path that passed R1, N = `pulls.user.id`). A rejected or undecided PR never
+     carries it. For a reserved-namespace first publish it says instead that the namespace is bound to the organisation in the
+     merge-base reserved list (ADR-0119).
+   - Infra PRs: as step 4. Page-only PRs (`OUT/class` = `page-only`): "page.json-only: no build runs", and that the screenshot
+     scan (ADR-0059 §3, task 040) is not yet running.
+10. **Process discipline:** `subprocess` only with argv[0] `git` or `sys.executable`, no `shell=True`; no network modules; no
+    `os.environ`/`getenv` read; no `eval`/`exec`/`__import__`.
 
 ### 3. page.json-only PRs skip the build
 008b's pipeline triggers on `push` to `main` with `paths: ['mods/*/entry.json']` (008b design 1), so a page-only merge starts no
 build without wiring here. This task exposes the class (`OUT/class`, job output, comment) and tests it; it does not edit 008b.
-**Merge stays a human action in v1** (C8). The screenshot scan ADR-0059 §3 requires is **task 040** (extends `ci_gate.py`).
+**Merge stays a human action in v1** (C8); this workflow never merges (008b design 4 has the App merging write-back PRs, which
+is a different workflow). The screenshot scan ADR-0059 §3 requires is **task 040** (extends `ci_gate.py`); until it exists the
+page-only comment says so.
 
 ### 4. Membership oracle (R9/I5)
 - Asked only when the class is `reserved-namespace` (a first `--classify-only` pass of the same script), or always with the
   answer ignored otherwise — the implementer picks one, records it, tests it.
 - The org is the single organisation named by every merge-base reserved entry; more than one → exit 2. The step validates the
-  login against `^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$`, calls `GET /orgs/{org}/members/{login}` with `curl` **without `-L`**,
-  and outputs only the integer status.
-- **Credential:** a separate org App with only *Organization → Members: read* (C5), stored as a secret visible to that step only,
-  booked as runbook **M10**. **`PIPELINE_APP_PRIVATE_KEY` is never used here.** Until M10, no secret → status `none` → every
-  reserved-namespace PR is rejected by R9: accepted for this merge; must be lifted before task 010 (`test:hello-world`).
-  [unverified U6]
+  login against `^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$` (passed via `env:`).
+- **Token mint (choice C10, decided):** a step using the official `actions/create-github-app-token` pinned to a 40-hex SHA, with
+  the M10 App id and private key from secrets, scoped to the org, Members:read only [unverified U14]; it runs only when the
+  secret is non-empty — **choice C18:** a preceding **presence step** receives the key only via its `env:` and writes only
+  `present=true|false` to `$GITHUB_OUTPUT` (never the value); the mint step has `if: steps.<presence>.outputs.present ==
+  'true'`; absent secret → mint skipped → status `none`. AC7's secret rule: `secrets.` appears in exactly these two steps (presence
+  and mint); the minted token appears only in the membership step's `env:`; the presence step's `run:` prints nothing derived
+  from the secret. The minted token is passed via `env:` to the membership step only.
+- **Membership step:** `GET /orgs/{org}/members/{login}` with `curl`; argv has no short-flag cluster containing `L`, no
+  `--location*`, no `--proto-redir`, and does have `-o /dev/null`, `-w '%{http_code}'`, `--max-time`. It checks the result
+  against `^[0-9]{3}$`; empty or anything else (curl failure, timeout) → `none`. It writes only `status=<value>` to
+  `$GITHUB_OUTPUT`.
+- **Credential:** a separate org App with only *Organization → Members: read* (C5), booked as runbook **M10**.
+  **`PIPELINE_APP_PRIVATE_KEY` is never used here.** Until M10, no secret → status `none` → every reserved-namespace PR is
+  rejected by R9: accepted for this merge; must be lifted before task 010 (`test:hello-world`). [unverified U6]
 
 ### 5. Required status check (Ludwig's manual step)
 Branch protection changes only by Ludwig, by hand: runbook **M9** (platform repo): registry → Settings → Branches → rule for
@@ -144,12 +187,17 @@ HOME="$(mktemp -d)" LANG=C.UTF-8`. **No credential of any kind, no `gh` call, no
    equals** the owner's `name_at_registration` (R3 — ids, not usernames); (c) an existing version's `commit` changed by its own
    owner (append-only rule 1).
 2. **Positive controls (exit 0):** first publish of `alice:demo` by `alice` (comment contains the ADR-0058 §3 sentence with
-   `alice:` and alice's id, byte-exact); the owner adding a version; the owner's page-only PR (class `page-only`, "no build
-   runs"); an infra PR touching only `README.md`. A suite that rejects everything fails this criterion.
-3. **Fail-closed matrix (each exit 2, never 0, never reported as a plain rejection):** event/API disagree on `user.id`; on
-   `head.sha`; `PR.json` missing or unparsable; no merge-base; two merge-bases; a checker exiting 2; a stub checker exiting 3
-   and one printing non-JSON (test-only `--tools-dir`, asserted unused in the workflow); malformed `config/r11-identity.json`;
-   a reserved list naming two organisations.
+   `alice:` and alice's id, byte-exact; the same sentence is **absent** from every rejected and exit-2 fixture); the owner adding
+   a version; the owner's page-only PR (class `page-only`, "no build runs", names the not-yet-running screenshot scan); an infra
+   PR touching only `README.md` (comment lists `README.md` and says green does not mean safe). A suite that rejects everything
+   fails this criterion.
+3. **Fail-closed matrix (each exit 2, never 0 or 1, never reported as a plain rejection):** event/API disagree on `user.id`; on
+   `head.sha`; `PR.json` missing or unparsable; no merge-base; two merge-bases; API `base.sha` not an ancestor of base HEAD; an
+   unparsable `-z` path list; a checker exiting 2; a stub checker exiting 3 and one printing non-JSON (stubs via the library's
+   checker-directory parameter; asserted absent from the CLI and the workflow); a checker over its timeout
+   (`subprocess.TimeoutExpired`); any other injected exception in `main`; **precedence:** one checker exits 2 while another
+   rejects → composed 2; malformed `config/r11-identity.json`; a reserved list naming two organisations. **Empty diff → exit 1**
+   (a rejection, not 2): `comment.md` carries the classify rejection and recording stubs show the other three checkers never ran.
 4. **Identity source:** with `GITHUB_ACTOR`/`GITHUB_ACTOR_ID` set to the owner and the head commit's author/committer set to the
    owner, a stranger's PR is still rejected R3.
 5. **Merge-base reads:** a PR removing `test` from `reserved-namespaces.json` and adding `mods/test.x/entry.json` is still judged
@@ -157,20 +205,40 @@ HOME="$(mktemp -d)" LANG=C.UTF-8`. **No credential of any kind, no `gh` call, no
    **test-only** merge-base config naming `github:555`, a takedown-only PR by 555 passes ownership, the same PR plus another
    change is rejected (R11, 075); a PR setting the config to its own author in the same diff gains nothing. Membership:
    `none`, `302`, `500` → R9 rejection; `204` passes R7; `404` → R7 rejection.
-6. **Tree handling:** an `entry.json` rename → rejected as deletion; a symlinked `entry.json` → `symlink`; a gitlink under
-   `mods/` → rejected; a path containing a newline handled via `-z` without crashing.
+6. **Tree handling and argv safety:** an `entry.json` rename → rejected as deletion; a symlinked `entry.json` → `symlink`; a
+   gitlink under `mods/` → rejected; a path containing a newline handled via `-z` without crashing. **Materialisation — each
+   exit 2, and a before/after listing of a sentinel parent dir shows nothing written outside the temp dir:** crafted trees
+   (built with `git hash-object --literally` / `git mktree`) with symlink `x` plus tree `x`; blob `x` plus tree `x`; a `..`, a
+   `.`, an empty and a `.git` component; a duplicate entry; a symlink whose target escapes the root; a blob over the byte cap;
+   more entries than the cap. **Argv injection:** each of the files `--membership-status=204`, `--root=x`,
+   `--paths-file=README.md`, `-h`, added to an otherwise valid reserved-namespace publish, gives exit 1 (unrecognised path,
+   class `other`) with the R9 rejection still reported at status `none`/`302` — no checker flag overridden; the same file alone
+   in a PR takes the infra route (exit 0, no checker invoked).
 7. **Workflow structure — a live guard on HEAD.** PyYAML parses `.github/workflows/registry-ci.yml` (missing PyYAML → exit 2,
-   never skip). Asserts: triggers exactly `pull_request_target` with the four types, no `paths`/`paths-ignore`; top-level
-   `permissions: {}`; `gate` exactly `contents: read, pull-requests: read`; `comment` exactly `pull-requests: write`, no
-   `actions/checkout`, no step running repository code; `secrets.` only in the membership step; `PIPELINE_APP_PRIVATE_KEY` and
-   `MINISIGN_SECRET_KEY` nowhere; no `run:` with `${{ github.event` or `${{ github.head_ref`; every `uses:` pinned to 40 hex;
-   checkout `persist-credentials: false` and no `ref:`; no `continue-on-error`, `|| true` or `set +e` in `gate`; the membership
-   `curl` has no `-L`/`--location`. **Fails on zero matches** (must find `gate` and its `ci_gate.py` step). **Mutations**, each
-   red then restored byte-identically: add a `pull_request` trigger; `gate` permissions `write-all`; checkout `ref: ${{
-   github.event.pull_request.head.sha }}`; `${{ github.event.pull_request.title }}` in a `run:`; `-L`; `continue-on-error:
-   true`; unpin one `uses:`; a `paths:` filter. Positive control: the unmodified file passes.
-8. **No network, no credential in the composer:** an AST scan of `ci_gate.py` finds no import of `socket`, `urllib`, `http`,
-   `ssl`, `requests`; every `subprocess` argv[0] is literal `"git"` or `sys.executable`. Mutation: `import urllib.request` → red.
+   never skip; PyYAML reads the key `on` as boolean `True`, the test handles both). Asserts:
+   - triggers exactly `pull_request_target` with the four types, no `paths`/`paths-ignore`; top-level `permissions: {}`; `gate`
+     exactly `contents: read, pull-requests: read`; `comment` exactly `pull-requests: write`, no `actions/checkout`, no step
+     running repository code; `timeout-minutes` on every job.
+   - **no `run:` block contains `${{`** (values arrive via `env:`); `$GITHUB_ENV` and `$GITHUB_PATH` appear nowhere;
+     `$GITHUB_OUTPUT` appears only in the membership step (whose `run:` checks `^[0-9]{3}$` before writing) and the
+     `ci_gate.py` step (appending `OUT/outputs`).
+   - `secrets.` appears only in the token-mint step (`actions/create-github-app-token`, pinned, with its `if:`); the minted
+     token appears only in the membership step's `env:`; `PIPELINE_APP_PRIVATE_KEY` and `MINISIGN_SECRET_KEY` nowhere.
+   - every `uses:` pinned to 40 hex; checkout `persist-credentials: false` and no `ref:`.
+   - membership `curl` argv, tokenised: no short-flag cluster containing `L`, no `--location*`, no `--proto-redir`; has
+     `-o /dev/null`, `-w '%{http_code}'`, `--max-time`; the step maps empty/non-3-digit to `none`.
+   - in `gate`: no `continue-on-error`, `|| true` or `set +e`; the `ci_gate.py` step has no `if:`, its `run:` has no pipe (or
+     `shell: bash` with `pipefail`), and every later step is `actions/upload-artifact`.
+   **Fails on zero matches** (must find `gate`, the mint, membership and `ci_gate.py` steps). **Mutations**, each red then
+   restored byte-identically: add a `pull_request` trigger; `gate` permissions `write-all`; checkout `ref: ${{
+   github.event.pull_request.head.sha }}`; `${{ github.event.pull_request.title }}` in a `run:`; `${{ needs.gate.outputs.x }}` in
+   a `run:`; `-L`; `-sSL`; drop `-o /dev/null`; `continue-on-error: true`; an `if:` on the `ci_gate.py` step; a pipe in its
+   `run:`; `secrets.` in the membership step; a `$GITHUB_ENV` write; drop a `timeout-minutes`; unpin one `uses:`; a `paths:`
+   filter. Positive control: the unmodified file passes.
+8. **No network, no environment, no shell in the composer:** an AST scan of `ci_gate.py` finds no import of `socket`, `urllib`,
+   `http`, `ssl`, `requests`; no `os.environ`/`getenv`, `shell=True`, `os.system`, `os.popen`, `eval`, `exec`, `__import__`;
+   every `subprocess` argv[0] is literal `"git"` or `sys.executable`; no `--tools-dir` option. Mutations, each red:
+   `import urllib.request`; `os.environ["X"]`; `shell=True`.
 9. **Production R11 unconfigured:** `config/r11-identity.json` at `FINAL` parses with `"r11_identity": null`.
 10. **Docs:** `CONTRIBUTING.md` contains the ADR-0058 §3 sentence verbatim (placeholders explained) and "never reassigned";
     `README.md` no longer says CONTRIBUTING "will" exist.
@@ -194,21 +262,29 @@ Platform (`task/039-runbook-m9`, docs only; the reviewer reads it): `docs/runboo
 (required check), **M10** (membership-read App), and a ⏸ note on the R11 takedown-only identity awaiting its own task.
 
 ## Size (SPEC-CHECKLIST 5b)
-Source files 3 (workflow, composer, config); reading list 10. **Changed lines estimated 330-400 (over 300).** Justification: the
-risk is the seam between the YAML and the composer (which input comes from the event, the API, the merge-base; which job holds
-which token). Split, the composer's input contract would be reviewed without its only caller and the workflow without the code
-it trusts — `pull_request_target` defects live in that gap; AC7 and AC1-AC6 mean something only together (C7). Diff over 450
-lines → stop and report; the manager splits.
+Source files 3 (workflow, composer, config); reading list 10. **Changed lines estimated 400-500 (over 300; likely above 400
+after the materialisation guards, caps, precedence and wrapped `main`).** Justification: the risk is the seam between the YAML
+and the composer (which input comes from the event, the API, the merge-base; which job holds which token). Split, the
+composer's input contract would be reviewed without its only caller and the workflow without the code it trusts —
+`pull_request_target` defects live in that gap; AC7 and AC1-AC6 mean something only together (C7). **Diff over 450 lines → stop
+and report.** Split fallback if it fires: **039a** = `ci_gate.py` + `config/r11-identity.json` + `test_ci_gate.py` + fixtures
+(AC1-AC6, AC8, AC9, AC11-AC12 for its part); **039b** = workflow + `test_ci_workflow.py` (AC7) + CONTRIBUTING/README (AC10) +
+runbook M9/M10, reviewed against the merged 039a composer.
 
 ## Forbidden (beyond MANAGER.md §3.7)
-- Any trigger but `pull_request_target`; any `paths` filter; `workflow_run`; auto-merge of any PR.
+- Any trigger but `pull_request_target`; any `paths` filter; `workflow_run`; auto-merge of any PR by this workflow.
 - Checking out, executing, importing, installing or sourcing anything from the PR head; `actions/checkout` with a head `ref`.
-- `${{ github.event.* }}` / `${{ github.head_ref }}` inside `run:`.
+- `${{` anywhere inside a `run:` (including `github.event.*`, `github.head_ref`, `needs.*.outputs.*`); writing `$GITHUB_ENV` or
+  `$GITHUB_PATH`; PR free text in `$GITHUB_OUTPUT`.
 - Identity from anything but the API PR object cross-checked with the event (I1); `GITHUB_ACTOR(_ID)`, commit metadata.
 - Reading the reserved list, owners or R11 config from the PR head or base tip instead of the merge-base (I4).
 - `r11_identity` other than `null` in a committed file; any `pipeline_app_id` carve-out (008b's amendment).
-- `continue-on-error`, `|| true`, exit 2 treated as green, skipping later checkers after an earlier rejection.
-- Following redirects in the membership call, or reading 302 as 404 (I5/R9).
+- `continue-on-error`, `|| true`, exit 2 treated as green, skipping later checkers after an earlier rejection (the empty-diff
+  case excepted, §2 step 3).
+- Passing PR paths to a checker other than as argv after `--` (`--paths-file` included); a `--tools-dir` CLI flag; `shell=True`,
+  `os.system`/`popen`, `eval`/`exec`/`__import__`, `os.environ`/`getenv` in the composer.
+- Following redirects in the membership call (`-L`, `--location*`, `--proto-redir`), or reading 302 as 404 (I5/R9); `secrets.`
+  anywhere but the token-mint step.
 - `PIPELINE_APP_PRIVATE_KEY` or `MINISIGN_SECRET_KEY` in this workflow.
 - Editing `tools/registry/{cli,ownership_cli,ownership,append_only,schema,classify,report}.py` or any `contracts/*` — if one
   seems needed, stop and report (a contract task with Ludwig's approval).
@@ -220,7 +296,8 @@ lines → stop and report; the manager splits.
 ## Dependencies / sequencing
 - Done: 007a (PR #10), 007b (PR #12, `70cedca`), 075 (PR #18, `4356583`), M1, M5.
 - **Before 008b goes live:** its write-back PRs must pass `gate` (T1/T3 stay rejected until 008b amends `ownership.md`).
-- **Then 040** (extends `ci_gate.py`; sequenced after this task). **Before 010 / criterion 2:** M10 and M6.
+- **Then 040** (extends `ci_gate.py`; sequenced after this task). **Before 010 / criterion 2:** M10 and M6. **M10 is sequenced
+  after live checks L1 and L3 pass** (no secret exists until then; the gate is proven first at status `none`).
 - **Later task, not this one:** create the takedown-only identity (Ludwig, runbook), amend `ownership.md` R11 to name it (U11 —
   R11 currently names the org id `324218296`), set `config/r11-identity.json`; merge needs Ludwig.
 
@@ -234,7 +311,9 @@ with org Members:read answers 204/404 (no 302) for private members — after M10
 has Python ≥ 3.10 and git — L1. U8 `gh api -F body=@file` reads the file — `gh api --help` locally. U9 PyYAML present where the
 verify script runs; missing → exit 2. U10 required checks available on Free for a public repo — the M9 screen. U11 R11 names the
 org id while Ludwig chose a dedicated account — a follow-up `ownership.md` amendment task. U12 PR comment limit (≈65 536) —
-docs, and a truncation test.
+docs, and a truncation test. U13 a step-level `if:` cannot read the `secrets` context (docs "Contexts: context availability") — resolved by C18 (presence
+step); the implementer verifies that docs page and that `steps.<id>.outputs` is readable in a step `if:`. U14 `actions/create-github-app-token` input names (app id, private key, owner,
+permission scope) — its README at the pinned SHA.
 
 ---
 # Task 039 log
@@ -244,3 +323,4 @@ docs, and a truncation test.
 - 2026-10-25 manager (session 11 night): spec revised (draft by a Plan agent, gated by the manager): trust model, identity
   source, merge-base reads, R11 unconfigured, M9/M10 runbook steps, offline §7 criterion-1 demonstration, size justification.
   Open questions decided under Ludwig's standing ★ approval as C4-C8 (mission log). Awaiting independent spec review.
+- 2026-10-25 manager: spec review round 1 FAIL (B1-B5 blocking, N1-N6); all folded in; C10 decided; round 2 pending.

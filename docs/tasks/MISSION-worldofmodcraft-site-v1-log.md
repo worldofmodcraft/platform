@@ -2291,3 +2291,7 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   the workflow comparison in 008b-verify · C17 closed trigger list (`push`, `workflow_dispatch`). Alternatives per 082's spec
   (B: range-only / `github.sha` / no in-flight rule / protected Environment or unsigned dispatch / build anyway / dormant
   check / forbid only three names). Reverse: amend 082 before its merge (Ludwig approves that merge anyway).
+- **C18 — 039: how "mint only when the M10 secret exists" is expressed (a step `if:` cannot read `secrets`).** A★ a presence
+  step receives the key via `env:` and outputs only `present=true|false`; the mint step's `if:` reads that output; `secrets.`
+  allowed in exactly the presence and mint steps. B always mint and let a failed mint fail the job (would keep `gate` red for
+  every PR until M10). **Chosen A.** Reverse: amend 039 §4/AC7 before implementation.
