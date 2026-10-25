@@ -1,5 +1,5 @@
 {
-  "count": 121,
+  "count": 122,
   "adrs": [
     {
       "number": 1,
@@ -668,7 +668,8 @@
       ],
       "amends": [],
       "amended_by": [
-        121
+        121,
+        122
       ]
     },
     {
@@ -2028,6 +2029,31 @@
       "amends": [
         41,
         58
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 122,
+      "filename": "0122-removal-policy.md",
+      "title": "Removal policy for published versions — grounds, files, installed copies, appeals",
+      "status": "Accepted (2026-10-17, accepted by Ludwig)",
+      "date": "2026-10-17",
+      "area": "Registry / Legal / Launcher",
+      "touches": [
+        "registry",
+        "registry/takedown",
+        "launcher/resolution",
+        "launcher/update",
+        "site/content-rules"
+      ],
+      "related": [
+        37,
+        41,
+        46,
+        121
+      ],
+      "amends": [
+        41
       ],
       "amended_by": []
     }
