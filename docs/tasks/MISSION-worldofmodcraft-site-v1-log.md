@@ -2250,3 +2250,13 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 
 ## Choices made under Ludwig's standing ★ approval — 2026-10-25 night (reversible; one entry each)
 Format: **C<n> — <question>** · options · **chosen** · why · how to reverse.
+- **C1 — 010 Q2: name/visibility of the test mod's repository (M4).** Options: A★ `<account>/wom-test-hello-world`;
+  B `<account>/hello-world`. **Chosen A** (010's own lean: avoids a generic name; the mod id lives in `mod.lua`). Reverse:
+  before M4, edit 010's Q2 line and the runbook text; after M4, rename the repository in GitHub settings.
+- **C2 — 010 Q3: LICENSE holder and `ai_assisted`.** Options: A★ "World of Modcraft contributors", `ai_assisted = true`;
+  B Ludwig's name, field omitted. **Chosen A** (honest: screenshots are script-generated and the README agent-written,
+  ADR-0061-compatible). Reverse: change the LICENSE line and the field in the test mod before M4 (a new version after).
+- **C3 — who performs 058's live probe (criteria 3-4).** Options: A★ an agent creates a throwaway public repository
+  `worldofmodcraft/pages-probe`, enables Pages, pushes the probe tree and records curl/wget observations; B wait for
+  Ludwig. **Chosen A**; criterion 5 (DNS) is not done, criterion 6 (browser) and deleting the repository stay Ludwig's.
+  Reverse: delete `worldofmodcraft/pages-probe` (Settings → General → Delete this repository) and discard the live rows.
