@@ -2192,3 +2192,35 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   superset; verify scripts must be checked in a fresh clone (item 8), not only in worktrees.
 - Booked, non-blocking: 048 c3 asserts exactly 10 agent files (reddens on an 11th); 056 has no later-branch case in 078.
 - **080** update: review PASS, then an item-12 finding (own-change check read HEAD) fixed in `a36b758` (pins BASE `29b3424`, FINAL `f173739`; control FINAL=BASE exits 1); delta review PASS; PR #69 head `fe050ab` awaits Ludwig's OK.
+- Ludwig: "Ok att merga 69 70" → **080 merged `9a73990`**, session log **#70 merged `d9d48de`**.
+- **072** (ledger hygiene, platform PR #71): 34 task files set to `done` with a named merge each; 13 left (no merge
+  evidence: 007, 008, 008b, 008c, 010, 031, 039, 040, 043, 047, 055, 058, 065); **041 uncertain** (merged as site PR #2,
+  outside the evidence rules). OPERATIONS.md "What session 11 paid for" (a)-(g). 16 merged worktrees removed (three
+  checks each, no --force, no branch deleted); kept: task-023, task-058 (unmerged), session-10, session-9-specs,
+  session-11b, task-072. Review pending at handover.
+
+## SESSION STATUS — 2026-10-25 (session 11, final), handover at ~25 % context
+### Done this session (all reviewed; merges with Ludwig's written OK where §7 requires it)
+064 (registry #13), 075 owner-removal fix (registry #18), 077 runbook M8 (#63), ADR-0122 Accepted (#61), 076 doctrine
+§7 + REVIEW-CHECKLIST item 12 (#66), 078 closed-verify repins (#67), 079 rule-0 live guard (#68), 080 fresh-clone cite
+fix (#69), session logs (#64, #65, #70).
+### In progress
+- **072** (PR #71): independent review running at handover; merge needs Ludwig's OK (ledger + OPERATIONS.md).
+### For Ludwig (★ = manager's lean)
+1. **Move finished task files to `docs/tasks/done/`?** Verify scripts cite task files by path. A ★ leave them in place
+   (the status line is the truth); B move them and update every citing script (a larger task).
+2. **M8 (archive protection):** org is on GitHub Free; rulesets availability on Free/public is unverified. Open
+   https://github.com/worldofmodcraft/archive/settings/rules — if a "New ruleset" button exists, follow M8 in
+   `docs/runbooks/site-v1-manual-steps.md`; if not, tell the manager.
+3. **PR #71 (072):** OK to merge once its review is PASS.
+### Next session starts here
+1. 072: review result → merge with Ludwig's OK (resolve the expected add/add conflict on the session branch: main's copy
+   is the superset). Remove `~/wt/task-072` and `~/wt/session-11b` after their merges (three checks, no --force).
+2. 041's status: check site PR #2 and correct it (or leave with the reason).
+3. ADR-0122 follow-up specs: stop public serving of removed files (item 2), launcher warning on removed versions
+   (item 3); 039 (registry CI workflow) is unblocked by 075 — its spec gets Ludwig's R11 identity answer (dedicated
+   takedown-only account under his control; each takedown still needs his written approval).
+4. Booked, small: 048 c3 hard-codes 10 agent files; 056 lacks a later-branch case in 078; 043's rule never reached
+   MANAGER.md (decide: finish or stop 043).
+5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, final) i missionsloggen och fortsätt med 'Next session starts here'."
