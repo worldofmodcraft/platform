@@ -2124,3 +2124,9 @@ Token guard: suspended by Ludwig (2026-10-14), not checked. Context at start: 5 
 3. Then 076 doctrine task (§7 wording per ADR-0122 + approved REVIEW-CHECKLIST item); 072 ledger hygiene;
    live checks 052 AC7, 048 AC9, 049 AC9.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-19 (session 11) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig, 2026-10-25 (verbatim): "merge"
+Read by the manager as approval for the three PRs listed under "For Ludwig" items 2-3 (registry #13, platform #63, #64);
+not as an answer to item 1 (the ADR-0122 permission rule, still open) or item 4 (org plan, still open).
+→ registry #13 (064) merged at reviewed head `5002b46` → `79d5377`; platform #63 (077) merged at `cc4da92` → `2562f88`;
+#64 merged after this entry. The §8 halt is lifted by the answer; 075 is unblocked (base = registry main `79d5377`).
