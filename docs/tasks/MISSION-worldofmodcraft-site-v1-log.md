@@ -2240,3 +2240,13 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   → §5's 40 % hard threshold is also waived for tonight's run only (not a precedent; §5 text unchanged and in force
   afterwards). §5.5 still applies: after any auto-compaction the session is untrusted for operational detail and
   verifies against disk before acting. The manager still writes resumable state to disk after every report-back.
+- **Ludwig, 2026-10-25 evening (verbatim): "Jag godkänner A Stjärna på alla val som kommer också, litar på dig. Men skriv
+  valen till vault trots detta vill kunna backtracka dem"** → standing approval for tonight: every question the manager
+  would put to Ludwig as options gets the manager's ★ option, applied immediately and recorded below with the options,
+  the choice and how to reverse it. **Not covered** (approvals, not choices): merges §7 reserves for Ludwig (decisions,
+  doctrine, mission specs, CI security checks, signing/keys, takedowns) — parked for the morning; no ADR is accepted on
+  this authority (drafts only). The vault shows this log as `Mission Log.md`; the manager merges session-log PRs tonight
+  (docs only) and runs `tools/vault/refresh-main.sh` after each, so the choices reach the vault.
+
+## Choices made under Ludwig's standing ★ approval — 2026-10-25 night (reversible; one entry each)
+Format: **C<n> — <question>** · options · **chosen** · why · how to reverse.
