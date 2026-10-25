@@ -2191,3 +2191,4 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   PYTHONDONTWRITEBYTECODE=1); add/add conflicts on task files between session branch and task PR — main's copy is the
   superset; verify scripts must be checked in a fresh clone (item 8), not only in worktrees.
 - Booked, non-blocking: 048 c3 asserts exactly 10 agent files (reddens on an 11th); 056 has no later-branch case in 078.
+- **080** update: review PASS, then an item-12 finding (own-change check read HEAD) fixed in `a36b758` (pins BASE `29b3424`, FINAL `f173739`; control FINAL=BASE exits 1); delta review PASS; PR #69 head `fe050ab` awaits Ludwig's OK.
