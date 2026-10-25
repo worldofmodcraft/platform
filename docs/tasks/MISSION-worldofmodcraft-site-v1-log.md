@@ -2260,3 +2260,34 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   `worldofmodcraft/pages-probe`, enables Pages, pushes the probe tree and records curl/wget observations; B wait for
   Ludwig. **Chosen A**; criterion 5 (DNS) is not done, criterion 6 (browser) and deleting the repository stay Ludwig's.
   Reverse: delete `worldofmodcraft/pages-probe` (Settings → General → Delete this repository) and discard the live rows.
+- **C4 — 039: where R11's identity is configured.** A★ committed `config/r11-identity.json` read at the merge-base (reviewed,
+  history in git); B a repository variable (any admin can change it silently). **Chosen A.** Reverse: a later task moves it.
+- **C5 — 039: who asks the org-membership question (R9).** A★ a new org App with only Members:read (runbook M10); B add
+  Members:read to the pipeline App (puts a write-capable key in a PR-triggered workflow). **Chosen A.** Reverse: amend 039's
+  §4 and M10 before M10 is done.
+- **C6 — 039: PRs touching nothing under `mods/`.** A★ green, labelled "human review required"; B green only for maintainer ids
+  in merge-base config. **Chosen A.** Reverse: a follow-up task adds the maintainer list.
+- **C7 — 039: size.** A★ one task (the YAML/composer seam is the risk); B split 039a composer / 039b workflow. **Chosen A**
+  (stop-and-split at 450 changed lines). Reverse: the manager splits at that point.
+- **C8 — 039: page.json-only merge on green.** A★ a human clicks merge in v1; B auto-merge (needs a write identity and 040's
+  screenshot scan first). **Chosen A.** Reverse: a later task adds auto-merge after 040.
+- Booked (not a choice): R11 currently names the org id; Ludwig's dedicated takedown-only account needs an `ownership.md`
+  amendment task later (039 U11).
+- **C3 reversed (2026-10-25 night):** dispatching the 058 live probe was **refused by the auto-mode classifier ("Create
+  Public Surface")** — creating a public repository in the org. Not retried. 058 criteria 3-6 wait for Ludwig's morning (he
+  creates `worldofmodcraft/pages-probe` per 058's manual step, or approves it in session). Consequence: 008c (needs the
+  archive URL shape) and through it 008b stay blocked overnight.
+- **C9 — task 010 scope tonight.** A★ split: 010a (mod contents, generator, registry-side files, fill-in script) now; 010b
+  (runbook `first-publish.md`, M4-M7 text, rehearsal) after 039/008b/055. B keep 010 whole and wait. **Chosen A.** Reverse:
+  fold 010a's result back into 010 and drop 010b. 010a's spec review: PASS-WITH-AMENDMENTS (8, folded in).
+- **C10 — 039: how the membership step gets a token (review finding B4).** A★ the official `actions/create-github-app-token`
+  pinned to a 40-hex SHA, secrets only in that step, the minted token only in the membership step's `env:`; B a hand-written
+  JWT mint in one shell step. **Chosen A** (boring, predictable — ADR-0103). Reverse: rewrite 039 §4 before M10.
+- **C11-C17 — task 082 (E15 pipeline-trigger contract), Q1-Q7, all ★:** C11 a push run builds every `pending` version on `main`
+  (not only its push range; survives cancelled waiting runs) · C12 input = `main`'s head fetched at plan time, SHA logged ·
+  C13 a run holds the `pipeline` group until its PRs merge; pending versions with an existing `pipeline/` branch are skipped
+  and logged for manual recovery · C14 signing and write-back only when `github.ref == refs/heads/main` (008b Objective wording
+  corrected) · C15 an entry on `main` failing the schema is a pipeline fault (no build, no T3) · C16 text checks in 082 now,
+  the workflow comparison in 008b-verify · C17 closed trigger list (`push`, `workflow_dispatch`). Alternatives per 082's spec
+  (B: range-only / `github.sha` / no in-flight rule / protected Environment or unsigned dispatch / build anyway / dormant
+  check / forbid only three names). Reverse: amend 082 before its merge (Ludwig approves that merge anyway).
