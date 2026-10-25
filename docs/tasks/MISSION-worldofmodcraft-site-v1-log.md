@@ -2225,3 +2225,14 @@ fix (#69), session logs (#64, #65, #70).
 5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, final) i missionsloggen och fortsätt med 'Next session starts here'."
 - Ludwig 2026-10-25: "Sådär, klart. Du kan bocka för det och merga PR71 o 72" → **072 merged `4de1218`**; **M8 done** (task 081: ruleset `archive-tags-permanent` verified active on all tags via the public API; immutability on Ludwig's word); session PR #72 merged with this entry. Open for Ludwig: move finished task files to `done/`? (A ★ leave in place).
+
+### Ludwig, 2026-10-25 evening (verbatim): "Fortsätt i den här sessionen hela natten. Frågan om färdiga uppgiftsfiler gå på A stjärna"
+- **Task files:** option A — finished task files stay in `docs/tasks/`; the status line is the truth. No move to `done/`.
+- **Overnight:** the manager reads this as waiving the §5 soft handover threshold (30 %) for tonight, as on 2026-10-17; the
+  40 % hard threshold stays. Overnight merges only where §7 lets the manager merge on its own authority (review PASS,
+  verification green); anything touching `docs/decisions/`, doctrine, mission specs, CI security checks, signing/keys or
+  takedowns is parked for Ludwig's morning. Context at this point: ~28 %.
+- Ludwig asked how far the game is: answered from the mission spec — SITE-V1 builds the publishing platform only; kernel,
+  forks, Lua, launcher are §2 out of scope (a later mission); ~9-10 open tasks remain here plus Ludwig's §7 walkthrough.
+- Overnight plan: 039 (registry CI workflow) spec revision (Plan agent drafts; manager gates after an independent spec
+  review — security-touching), then implementation; merge parked for Ludwig.
