@@ -2295,3 +2295,17 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   step receives the key via `env:` and outputs only `present=true|false`; the mint step's `if:` reads that output; `secrets.`
   allowed in exactly the presence and mint steps. B always mint and let a failed mint fail the job (would keep `gate` red for
   every PR until M10). **Chosen A.** Reverse: amend 039 §4/AC7 before implementation.
+- **C19 — 039 size (400-500 estimated against a 450 stop line).** A★ one branch and one PR, implemented in two sessions
+  (composer first, then workflow + AC7 + docs); B split into tasks 039a/039b up front. **Chosen A** (keeps the seam reviewed
+  as one PR). Reverse: split at the stop line as the spec's fallback says. → 039 **spec-approved** after review rounds 1-2.
+- **C20 — 082 finding 1 (HIGH): the signing key is not bound to `main` by the workflow's `if:`** (a write-access account can run
+  a modified workflow from any branch, and repo secrets reach it). A★ bind the key to `main` with an Actions environment
+  `signing` (deployment branches = `main`, key as environment secret) — Ludwig's manual step, booked as runbook **M11**; until
+  then the key's trust boundary is every account with write access to the registry. B accept the repo-secret boundary.
+  **Chosen A.** Reverse: drop M11 and restate PT3. (Nothing uses the key yet; no exposure.)
+- **C21 — 082 finding 2 (HIGH): dry runs.** A★ a dry run signs only with an ephemeral key generated in the run and discarded
+  (amends 008b criterion 10); B dry runs use the production key, source restricted to pending versions on `main`. **Chosen A.**
+  Reverse: amend PT12 and 008b criterion 10 back.
+- **C22 — 082 finding 4 (HIGH): write-back PR flow under M9's "up to date" rule.** A★ PRs opened and merged one at a time, each
+  from a `main` fetched after the previous merge; the App merges once `gate` is green; closed unmerged or not merged within
+  30 min → the run fails and releases the group. B one PR per run (one version per run). **Chosen A.** Reverse: amend PT11/C13.

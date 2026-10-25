@@ -1,6 +1,6 @@
 # Task 039: The registry CI workflow — the 007a and 007b checkers wired onto real pull requests
 
-- **Mission:** SITE-V1, deliverable **D1** (the CI half); mission §7 criterion 1 (registry half). **Status:** draft, revised
+- **Mission:** SITE-V1, deliverable **D1** (the CI half); mission §7 criterion 1 (registry half). **Status:** spec-approved (2026-10-25 night, after spec review rounds 1-2); revised
   (manager, 2026-10-25; replaces the 2026-09-06 placeholder; spec review round 1 folded, round 2 pending). **Security-touching → independent spec review before dispatch.**
 - **Merge:** needs **Ludwig's written approval** (CI security check, MANAGER.md §7).
 - **Repo:** registry; plus one docs-only change in the platform repo (runbook M9/M10, see File scope).
@@ -70,9 +70,11 @@ ADRs the diff may touch (ADR-0116 layer 2): 0039, 0041, 0058, 0059, 0099, 0119, 
   `pull_request.head.sha` or the run exits 2. [unverified U5]
 - **Injection rule (outputs and environment):** no `run:` block contains `${{` at all; event, API and step values reach scripts
   only through `env:` or files. Anything written to `$GITHUB_OUTPUT` matches a strict form: class ∈ the classify enum,
-  membership status `^[0-9]{3}$|none`, PR number `^[0-9]+$`, shas 40-hex — never PR free text (title, login, body, branch, path).
-  The composer is the only producer of such values (`OUT/outputs`, one validated `key=value` per line, appended to
-  `$GITHUB_OUTPUT` by the workflow). `$GITHUB_ENV` and `$GITHUB_PATH` are never written. The `comment` job takes `gate`
+  membership status `^[0-9]{3}$|none`, PR number `^[0-9]+$`, shas 40-hex, `present` ∈ {`true`,`false`}, `org` and `login`
+  matching `^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$` — never other PR free text (title, body, branch, path).
+  Writers of `$GITHUB_OUTPUT` are exactly four steps (R2): the presence step (`present=`), the `--classify-only` pre-pass
+  (`class=`, `org=`, `login=`, via its validated `OUT/outputs`), the membership step (`status=`), and the `ci_gate.py` step
+  (`OUT/outputs`, one validated `key=value` per line). The composer refuses (exit 2) to write any line not in a strict form. `$GITHUB_ENV` and `$GITHUB_PATH` are never written. The `comment` job takes `gate`
   outputs through `env:`, never `${{ needs.gate.outputs.* }}` inside a `run:`.
 - **`gate` cannot go green by accident:** the `ci_gate.py` step has no `if:`; its `run:` has no pipe (or the step sets
   `shell: bash` with `pipefail`); the steps after it are `actions/upload-artifact` only, so nothing later in `gate` can turn the
@@ -93,7 +95,8 @@ checkers); the CLI always uses the base checkout's `tools/registry/`. `main` is 
    list that does not parse (no trailing NUL, an empty entry) → exit 2. **Empty diff → exit 1:** the composer builds the
    classify-shaped rejection ("empty diff") itself and runs none of the other three checkers.
 4. **Routing (no workflow path filter):** an *infra PR* is a non-empty diff in which **no path equals `mods` or starts with
-   `mods/`**: exit 0, comment "not a registry content PR; registry CI does not judge it" listing the touched paths, saying
+   `mods/`**: exit 0, comment "not a registry content PR; registry CI does not judge it" listing the touched paths **inside the same fence rule as §2.9** (a fence longer than any backtick run; capped at 50
+   paths and 4 KiB, with a count of the rest), saying
    **green does not mean safe** and that this relies on human review before merge (M9, MANAGER.md §7). Every other PR —
    including any mix of `mods/` with other paths — goes through the full gate (classify rejects mixes as `other`). Reasons: a
    `paths:` filter would leave the required check pending on skipped PRs [unverified U3] (so ADR-0099's path-filtered CI does
@@ -146,8 +149,9 @@ is a different workflow). The screenshot scan ADR-0059 §3 requires is **task 04
 page-only comment says so.
 
 ### 4. Membership oracle (R9/I5)
-- Asked only when the class is `reserved-namespace` (a first `--classify-only` pass of the same script), or always with the
-  answer ignored otherwise — the implementer picks one, records it, tests it.
+- **Pre-pass:** `ci_gate.py --classify-only --repo DIR --event EVENT.json --pr PR.json --out DIR` (no `--membership-status`)
+  runs steps 1-5 and classify only, and emits `class=`, and for class `reserved-namespace` `org=` and `login=` in strict form
+  (exit 2 on anything else). The membership question is asked only when `class=reserved-namespace`.
 - The org is the single organisation named by every merge-base reserved entry; more than one → exit 2. The step validates the
   login against `^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$` (passed via `env:`).
 - **Token mint (choice C10, decided):** a step using the official `actions/create-github-app-token` pinned to a 40-hex SHA, with
@@ -159,7 +163,8 @@ page-only comment says so.
   from the secret. The minted token is passed via `env:` to the membership step only.
 - **Membership step:** `GET /orgs/{org}/members/{login}` with `curl`; argv has no short-flag cluster containing `L`, no
   `--location*`, no `--proto-redir`, and does have `-o /dev/null`, `-w '%{http_code}'`, `--max-time`. It checks the result
-  against `^[0-9]{3}$`; empty or anything else (curl failure, timeout) → `none`. It writes only `status=<value>` to
+  against `^[0-9]{3}$`; empty or anything else (curl failure, timeout) → `none`; an empty minted token (mint skipped) →
+  `none` without calling curl. It writes only `status=<value>` to
   `$GITHUB_OUTPUT`.
 - **Credential:** a separate org App with only *Organization → Members: read* (C5), booked as runbook **M10**.
   **`PIPELINE_APP_PRIVATE_KEY` is never used here.** Until M10, no secret → status `none` → every reserved-namespace PR is
@@ -186,6 +191,10 @@ HOME="$(mktemp -d)" LANG=C.UTF-8`. **No credential of any kind, no `gh` call, no
    string (schema); (b) a new version on a namespace owned by `github:100200300`, opened by `github:900800700` whose **login
    equals** the owner's `name_at_registration` (R3 — ids, not usernames); (c) an existing version's `commit` changed by its own
    owner (append-only rule 1).
+2a. **Hostile strings (R3):** an infra PR touching files named `@org/team`, one containing a backtick and one with a newline →
+   exit 0, the names appear only inside the fence, the comment stays below the limit; `OUT/outputs` built from hostile login,
+   namespace and path strings contains only strict-form lines, or the run exits 2. The comment job lists comments with
+   `--paginate` when finding its marker.
 2. **Positive controls (exit 0):** first publish of `alice:demo` by `alice` (comment contains the ADR-0058 §3 sentence with
    `alice:` and alice's id, byte-exact; the same sentence is **absent** from every rejected and exit-2 fixture); the owner adding
    a version; the owner's page-only PR (class `page-only`, "no build runs", names the not-yet-running screenshot scan); an infra
@@ -220,9 +229,9 @@ HOME="$(mktemp -d)" LANG=C.UTF-8`. **No credential of any kind, no `gh` call, no
      exactly `contents: read, pull-requests: read`; `comment` exactly `pull-requests: write`, no `actions/checkout`, no step
      running repository code; `timeout-minutes` on every job.
    - **no `run:` block contains `${{`** (values arrive via `env:`); `$GITHUB_ENV` and `$GITHUB_PATH` appear nowhere;
-     `$GITHUB_OUTPUT` appears only in the membership step (whose `run:` checks `^[0-9]{3}$` before writing) and the
-     `ci_gate.py` step (appending `OUT/outputs`).
-   - `secrets.` appears only in the token-mint step (`actions/create-github-app-token`, pinned, with its `if:`); the minted
+     `$GITHUB_OUTPUT` appears only in the four writer steps of §1 (presence, pre-pass, membership, `ci_gate.py`).
+   - `secrets.` appears in exactly two steps: the presence step (`env:` only; writes only `present=`) and the token-mint step
+     (`actions/create-github-app-token`, pinned, with its `if:`); mutations: `secrets.` in a third step → red; the minted
      token appears only in the membership step's `env:`; `PIPELINE_APP_PRIVATE_KEY` and `MINISIGN_SECRET_KEY` nowhere.
    - every `uses:` pinned to 40 hex; checkout `persist-credentials: false` and no `ref:`.
    - membership `curl` argv, tokenised: no short-flag cluster containing `L`, no `--location*`, no `--proto-redir`; has
@@ -266,7 +275,8 @@ Source files 3 (workflow, composer, config); reading list 10. **Changed lines es
 after the materialisation guards, caps, precedence and wrapped `main`).** Justification: the risk is the seam between the YAML
 and the composer (which input comes from the event, the API, the merge-base; which job holds which token). Split, the
 composer's input contract would be reviewed without its only caller and the workflow without the code it trusts —
-`pull_request_target` defects live in that gap; AC7 and AC1-AC6 mean something only together (C7). **Diff over 450 lines → stop
+`pull_request_target` defects live in that gap; AC7 and AC1-AC6 mean something only together (C7). **C19: implemented in two sessions on one branch, one PR** — session 1 the composer (`ci_gate.py`, config, tests, AC1-AC6,
+AC8-AC9), session 2 the workflow, AC7, docs, runbook and AC10-AC12. **Diff over 450 lines → stop
 and report.** Split fallback if it fires: **039a** = `ci_gate.py` + `config/r11-identity.json` + `test_ci_gate.py` + fixtures
 (AC1-AC6, AC8, AC9, AC11-AC12 for its part); **039b** = workflow + `test_ci_workflow.py` (AC7) + CONTRIBUTING/README (AC10) +
 runbook M9/M10, reviewed against the merged 039a composer.
@@ -284,7 +294,7 @@ runbook M9/M10, reviewed against the merged 039a composer.
 - Passing PR paths to a checker other than as argv after `--` (`--paths-file` included); a `--tools-dir` CLI flag; `shell=True`,
   `os.system`/`popen`, `eval`/`exec`/`__import__`, `os.environ`/`getenv` in the composer.
 - Following redirects in the membership call (`-L`, `--location*`, `--proto-redir`), or reading 302 as 404 (I5/R9); `secrets.`
-  anywhere but the token-mint step.
+  anywhere but the presence step and the token-mint step (C18).
 - `PIPELINE_APP_PRIVATE_KEY` or `MINISIGN_SECRET_KEY` in this workflow.
 - Editing `tools/registry/{cli,ownership_cli,ownership,append_only,schema,classify,report}.py` or any `contracts/*` — if one
   seems needed, stop and report (a contract task with Ludwig's approval).
@@ -324,3 +334,4 @@ permission scope) — its README at the pinned SHA.
   source, merge-base reads, R11 unconfigured, M9/M10 runbook steps, offline §7 criterion-1 demonstration, size justification.
   Open questions decided under Ludwig's standing ★ approval as C4-C8 (mission log). Awaiting independent spec review.
 - 2026-10-25 manager: spec review round 1 FAIL (B1-B5 blocking, N1-N6); all folded in; C10 decided; round 2 pending.
+- 2026-10-25 manager: spec review round 2 FAIL narrowly (R1-R3 text contradictions/regression); fixed by the manager (secret rule = presence + mint steps; all $GITHUB_OUTPUT writers enumerated with strict forms incl. present/org/login; pre-pass interface; empty token → none; infra-comment paths fenced and capped; AC2a hostile strings). Reviewer: 'the manager can accept without a full third review'. C19 decided. **spec-approved** (manager, 2026-10-25 night).
