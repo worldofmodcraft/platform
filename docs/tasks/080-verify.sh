@@ -16,7 +16,15 @@ while IFS=: read -r file line rest; do
   done
 done < <(grep -rnE '[A-Za-z0-9_./-]+:docs/[A-Za-z0-9_./-]+' docs/architecture)
 echo "branch:path cites checked: $n"
-# the formerly cited ADR must resolve by path
-[ -f docs/decisions/0121-version-lifecycle-pending.md ] && echo "PASS ADR-0121 path resolves" || { echo "FAIL ADR-0121 path"; fail=1; }
-grep -q 'docs/decisions/0121-version-lifecycle-pending.md' docs/architecture/system-overview.md && echo "PASS note cites main path" || { echo "FAIL note cite"; fail=1; }
+# Own-change checks pinned to fixed SHAs (REVIEW-CHECKLIST item 12). Unreachable pin = fail.
+BASE=${T080_BASE:-29b3424fc97ba919f598531e9f4f154acc2a0619}
+FINAL=${T080_FINAL:-f173739800707d44a32fe495e96a39022c0c84bb}
+for c in "$BASE" "$FINAL"; do git cat-file -e "$c^{commit}" 2>/dev/null || { echo "FAIL pin $c unreachable"; fail=1; }; done
+if [ "$fail" = 0 ]; then
+  git show "$FINAL:docs/decisions/0121-version-lifecycle-pending.md" >/dev/null 2>&1 && echo "PASS ADR-0121 path exists at FINAL" || { echo "FAIL ADR-0121 path at FINAL"; fail=1; }
+  git show "$FINAL:docs/architecture/system-overview.md" | grep -qE '(^|[^:A-Za-z0-9_./-])docs/decisions/0121-version-lifecycle-pending.md' && echo "PASS note cites main path at FINAL" || { echo "FAIL note cite at FINAL"; fail=1; }
+  git show "$BASE:docs/architecture/system-overview.md" | grep -q 'proposal/adr-0121-version-lifecycle:' && echo "PASS BASE had the branch cite" || { echo "FAIL BASE lacks branch cite"; fail=1; }
+  extra=$(git diff --name-only "$BASE" "$FINAL" | grep -vxE 'docs/architecture/system-overview.md|docs/tasks/080-adr0121-cite-fresh-clone.md|docs/tasks/080-verify.sh' || true)
+  [ -z "$extra" ] && echo "PASS file scope BASE..FINAL" || { echo "FAIL out-of-scope files: $extra"; fail=1; }
+fi
 echo "exit=$fail"; exit $fail
