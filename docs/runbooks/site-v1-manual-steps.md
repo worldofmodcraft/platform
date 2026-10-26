@@ -295,6 +295,96 @@ menu is missing or says the feature needs a paid plan, stop and tell the manager
 
 ---
 
+## ☑ M12 — Archive download address (Cloudflare redirect)  (decision C, Ludwig 2026-10-26; task 091)
+**Why:** the registry stores one download URL per published version, and that record is append-only. A URL on a domain we
+control can be pointed somewhere else later; a `github.com` URL cannot (task 058, option C). So `archive.worldofmodcraft.com`
+answers every request with an HTTP redirect to the matching file in the `archive` repository's Releases.
+**When:** before the first real publish (task 008a's URL function writes this address). **Status:** done 2026-10-26 by Ludwig; manager's curl checks passed (see mission log). Last reviewed:
+2026-10-26 (task 091). Every Cloudflare fact below was read on 2026-10-26 from developers.cloudflare.com (URLs in
+`docs/tasks/091-runbook-m12-archive-redirect.md`, log); a statement marked `[unverified]` was not found there. If a screen
+differs from the text, follow the screen and tell the manager what differed. No terminal, no token; you are in the Cloudflare
+dashboard with your normal login.
+
+**What this does.** A request for `https://archive.worldofmodcraft.com/<tag>/<file>` gets a redirect response from Cloudflare
+with `Location: https://github.com/worldofmodcraft/archive/releases/download/<tag>/<file>`. Cloudflare answers by itself; the
+hostname has no server behind it. Cloudflare's documentation says redirects "require that you proxy the DNS records of your
+domain (or subdomain) through Cloudflare", so the DNS record below is **proxied (orange cloud)**. This is a different record
+from the grey-cloud records in M2 and does not change them: `worldofmodcraft.com` and `www` stay DNS only.
+Plan: Cloudflare states Single Redirects are available on all plans, and the Free plan allows 10 Single Redirects rules per
+zone; this uses one. Wildcard matching, which `wildcard_replace` below is part of, is available on all plans (regular expressions are not on Free; not used here).
+
+**Status code: 302.** A 301 is stored as permanent by browsers and other clients, so repointing the address later (the
+reason for this step) would not reach clients that already saw it; a 302 is re-checked each time.
+
+### Step 1 — the DNS record (proxied)
+1. Cloudflare dashboard → select **worldofmodcraft.com** → **DNS → Records** → **Add record**.
+2. Type **AAAA**; Name `archive`; IPv6 address `100::`; **Proxy status: Proxied** (orange cloud); TTL stays Auto
+   (Cloudflare fixes proxied records at 300 seconds). Click **Save**.
+   `100::` is a reserved address that routes nowhere: Cloudflare's documentation names `100::` (IPv6) and `192.0.2.0` (IPv4) as
+   the placeholder for a hostname that only redirects, usable with Redirect Rules. Nothing is ever fetched from it.
+   (The Name/address field labels are not spelled out in the documentation, `[unverified]`; the screen will show them.)
+3. Skip this step if, in Step 2, the dashboard offers to create the proxied record for `archive.worldofmodcraft.com` itself
+   and you accept it; the result must be the same: a proxied record named `archive`.
+
+### Step 2 — the redirect rule
+Use **Custom filter expression**, not **Wildcard pattern**: Cloudflare's wildcard Request URL is matched against the full
+address including the query, so its `${2}` would carry `?x=1` along. The expression below works on the path only, so the
+query is dropped deterministically.
+1. Cloudflare dashboard → **worldofmodcraft.com** → the **Rules** **Overview** page → **Create rule** → **Redirect Rule**.
+   (Optional template screen: ignore it.)
+2. **Rule name:** `archive-to-github-releases`.
+3. Under **When incoming requests match…** choose **Custom filter expression**. Click **Edit expression** (next to the
+   Expression Preview) to open the Expression Editor, delete what is there, and enter exactly:
+   `http.host eq "archive.worldofmodcraft.com"`
+   (You can build the same thing with the drop-downs, field Hostname, operator equals; the Editor text avoids depending on
+   the label, which Cloudflare's pages do not spell out, `[unverified]`.)
+4. Under **Then…**:
+   - **Type:** `Dynamic`
+   - **Expression:** `wildcard_replace(http.request.uri.path, "/*", "https://github.com/worldofmodcraft/archive/releases/download/${1}")`
+   - **Status code:** `302`
+   - **Preserve query string:** leave it **off** (Cloudflare's default is disabled).
+5. Click **Deploy** (or **Save as Draft** to stop before it is live).
+
+What the expression does: `http.request.uri.path` is the path only (`/v0/test`), with no query. `wildcard_replace` matches
+that whole path against `/*`; `${1}` is the text the `*` matched, `v0/test`, and the result
+`https://github.com/worldofmodcraft/archive/releases/download/v0/test` becomes the `Location` header. Because the query is
+not part of the source and **Preserve query string** is off, `?x=1` is not carried over. The same call form is in
+Cloudflare's own examples (`wildcard_replace(http.request.uri.path, "/*", "/apps/${1}")` on `/calendar` gives
+`/apps/calendar`). `http.host eq` matches both `http://` and `https://` requests, so plain HTTP redirects too.
+`[unverified]`: the Type/Expression field names in the **Then** box are those of Cloudflare's example pages (Type: Dynamic,
+Expression), not of a screenshot of the Free-plan screen.
+GitHub tag and asset URLs are case-sensitive (`v0/Test` and `v0/test` are different files). Cloudflare's `wildcard` matching
+ignores case, and the documentation does not show whether the text captured by `${1}` keeps the letters exactly as sent.
+**Observed 2026-10-26 (manager's curl, unauthenticated):** the rule keeps the case of the request (`RC.1`, `Test` came
+through unchanged), keeps `+` in the path, and drops a `?x=1` query; `http://` answers 302 to the `https://` GitHub
+`Location`; the root `archive.worldofmodcraft.com` answers `HTTP/2 302` with `server: cloudflare`; the certificate is valid
+(plain `curl`, no `-k`). The check below is kept as the repeatable test.
+
+*You should see:* open `https://archive.worldofmodcraft.com/v0/test` in a browser. The address bar changes to
+`https://github.com/worldofmodcraft/archive/releases/download/v0/test` and GitHub shows its "Not Found" page (the tag `v0`
+does not exist yet; GitHub answers 404 for that address, checked 2026-10-26). Landing on that GitHub address proves the
+redirect works; a Cloudflare error page or a browser "site can't be reached" means a step above is missing.
+Allow a few minutes after Step 1: Cloudflare's documentation says its free certificates are issued automatically for proxied
+hostnames and covers first-level subdomains such as this one, but gives no time, `[unverified]`.
+
+**The manager checks** (unauthenticated, after you say M12 is done; nothing here needs a login):
+```
+curl -sI https://archive.worldofmodcraft.com/v0/test
+curl -sI "https://archive.worldofmodcraft.com/v0/Test?x=1"
+curl -sI http://archive.worldofmodcraft.com/v0/test
+```
+Expected, each: status line `HTTP/2 302` (the third may be `HTTP/1.1 302`), and
+`location: https://github.com/worldofmodcraft/archive/releases/download/v0/test` for the first and third;
+`location: https://github.com/worldofmodcraft/archive/releases/download/v0/Test` for the second: capital T kept and the
+`?x=1` **absent**. If the second shows `v0/test` (case lost) or still carries `?x=1`, the rule is wrong: report it, do not
+accept it. The response header `server: cloudflare` shows Cloudflare answered, not GitHub. A 404 from `server: GitHub.com`,
+a certificate error, or a `521`/`522` means the record is not proxied or not saved.
+
+**Undo:** delete the rule (Rules → Overview → the rule → delete) and the `archive` DNS record. Nothing else depends on them
+until the first publish.
+
+---
+
 ## ☑ Q-H — Does the `MINISIGN_SECRET_KEY` secret exist?  (open fact question)
 **Answered (Ludwig, 2026-10-15):** "MINISIGN_SECRET_KEY finns" — he looked; nothing was copied. Whether the offline
 backup exists was not answered.
