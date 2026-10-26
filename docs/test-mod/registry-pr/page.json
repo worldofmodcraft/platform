@@ -1,0 +1,14 @@
+{
+  "description": "The permanent pipeline canary: a mod with no code whose only job is to prove that publishing works end to end, from a git tag to a signed archive and this page.",
+  "screenshots": [
+    "assets/screenshots/welcome.png",
+    "assets/screenshots/gallery.png"
+  ],
+  "tags": [
+    "test",
+    "canary",
+    "example"
+  ],
+  "links": [],
+  "deprecated": false
+}
