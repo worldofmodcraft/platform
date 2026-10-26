@@ -1,9 +1,62 @@
 # Task 008b: Pipeline workflow — post-merge run, release upload, protected write-back
 
-- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** amended 2026-10-26 (re-gate findings folded in); re-gate round 2 pending. Not dispatchable until round 2 passes; also blocked by 082 and 092 merging and by 008c
-- **Agent / model:** implementer / sonnet
-- **Budget:** large (≤ 6 agent-sessions)
-- **Branch / worktree:** `task/008b-pipeline-workflow` / `~/wt/registry-task-008b` — **registry** repo
+- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** umbrella — split into 008b-1, 008b-2 and 008b-3 at the spec gate 2026-10-26 (manager decision; MANAGER.md §2b: splitting is the default). **No agent is dispatched on this file.** It keeps the decisions, design, environmental facts, manual steps and history; each part has its own task file and spec review
+- **Agent / model:** none (umbrella)
+- **Budget:** n/a — see the parts: 008b-1 medium, 008b-2 medium, 008b-3 large
+- **Branch / worktree:** none; parts use `task/008b1-pipeline-plan`, `task/008b2-pipeline-build-sign`, `task/008b3-pipeline-write-back` — **registry** repo
+
+## Split (manager decision, spec gate 2026-10-26)
+The re-gate's size count (7 source files, about 800 changed lines, 28 reading items) was over every cap, and even a 2-way split left parts of about 400 lines. The manager split it three ways. Sequence: **008c -> 008b-1 -> 008b-2 -> 008b-3**, with tasks 082 (registry #20, blocked on 087) and 092 (registry #25) merged first.
+- **008b-1** `docs/tasks/008b1-pipeline-plan.md` — the planner (`plan_pending.py`: C11-C13, C15, PT5, the `+` classification of 092 Q10, the dry-run input set of PT12).
+- **008b-2** `docs/tasks/008b2-pipeline-build-sign.md` — the workflow file with the plan, build, sign and dry-run jobs, `--no-sign`, `sign_built.py`, environment `signing`.
+- **008b-3** `docs/tasks/008b3-pipeline-write-back.md` — the write-back job, `write_back_job.py`, `release.sh`, the ownership carve-out, environment `write-back`.
+
+### Mapping: acceptance criteria (every original criterion, or clause of one, lands in exactly one part)
+| Umbrella criterion | Part | Note |
+|---|---|---|
+| 1 E15 contract and trigger-block comparison | 008b-2 | needs 082 on `main` |
+| 2 secrets referenced exactly once each | 008b-3 | evaluated on the combined workflow; 008b-2's 14(d) covers the signing key meanwhile |
+| 3 naming and URL helpers | 008b-1 | |
+| 4 write-back is exactly T1 / T3 | 008b-3 | |
+| 5 ownership carve-out narrow | 008b-3 | |
+| 6 [live] release upload, front fetch | 008b-3 | |
+| 7 [live] runner assumptions | 008b-2 | |
+| 8 [live] fork safety | 008b-2 | |
+| 9 [live] App-token behaviour | 008b-3 | |
+| 10 [live] dry run | 008b-2 | |
+| 11 [live] failure path (dry run) | 008b-2 | the T3 PR is shown by 008b-3 criteria 4, 5, 21 |
+| 12 idempotence of the no-op | 008b-1 | |
+| 13 verify script, mutation-tested | each part | restated per part for that part's criteria; no original criterion is dropped |
+| 14 clone job has no secret | 008b-2: clauses (a)-(d), signing and dry-run half of (f) · 008b-3: clause (e), write-back half of (f) | |
+| 15 test-only flags absent | 008b-2 | |
+| 16 `--no-sign` and the sign step | 008b-2 | |
+| 17 retry path and planner tests | 008b-1: planner clauses and (a)-(d) · 008b-2: the `env:`-only clause | |
+| 18 docs move with code | split by section: each part owns the sections its criterion 18 names | |
+| 19 write-back loop, fake clock | 008b-3 | |
+| 20 `timeout-minutes` sizing | 008b-3 | |
+| 21 `+` version refused with a T3 | 008b-3 | the planner classification is 008b-1's 17(d) |
+| 22 pre-T1 `source_archive` check | 008b-3 | |
+| 23 [live] environments bind keys to `main` | 008b-3 | covers both environments |
+| 24 append-only log and release | 008b-3 | |
+
+### Mapping: designs, decisions, files, manual steps
+| Item | Part |
+|---|---|
+| Design 1 trigger; dry-run input set (PT12; Q-M) | 008b-2 declares the workflow inputs; 008b-1 owns their names and validation |
+| Design 2 (pending listing, C11, C12, C15, `+` classification) | 008b-1 |
+| Design 3 concurrency: group declared | 008b-2; planner branch skip (C13) 008b-1; group held until PRs terminal 008b-3 |
+| Design 4 write-back sequencing (C22, PT11) | 008b-3 |
+| Design 5 release, pre-T1 check (092 Q5/Q9), append-only log (PT8) | 008b-3 |
+| Design 6 key use in one step | 008b-2 |
+| Design 7 exit-1 T3, `+` T3 (Q10, Q-L), build-log location, comment | 008b-3; exit-2 faults and PT5 behaviour: 008b-1 (driver tests) and 008b-2 (wiring) |
+| Design 8 SSRF split, `--no-sign`, sign step, `signing` environment, dry-run job | 008b-2; `write-back` environment and job 008b-3 |
+| Design 9 retry/dispatch | 008b-1 (validation, planner), 008b-2 (`env:` only) |
+| Decisions Q-B, C11, C12, C15, Q-M | 008b-1 |
+| Decisions SSRF split, C14 (signing), C16, C17, C21, Q-H, C20 (signing) | 008b-2 |
+| Decisions Q-D, Q-E, Q-G, Q-J, build-log location, C13 (hold), C14 (write-back), C20 extended (write-back), C22, C23, 092 Q5/Q9/Q10, Q-K, Q-L, Q-N | 008b-3 |
+| Files: `plan_pending.py` | 008b-1 · `pipeline.yml` (all but write-back job), `sign_built.py`, `build_version.py` flag: 008b-2 · `pipeline.yml` write-back job, `write_back_job.py`, `release.sh`, `ownership.py`: 008b-3 |
+| `docs/pipeline/build-pipeline.md` | shared by section: 008b-1 plan document; 008b-2 plan/build/sign/dry-run jobs; 008b-3 write-back, recovery, "what Ludwig must do" |
+| Manual steps M5, M6, M7 (this file's section) | 008b-3 · M11: 008b-2 (`signing`) and 008b-3 (`write-back`) · M3 / Q-H: 008b-2 |
 
 ## Amendment 2026-10-25 (session 11 night)
 Sources: platform `docs/tasks/082-pipeline-trigger-contract.md` (the E15 contract, spec-approved 2026-10-25 night; its merge needs
@@ -52,18 +105,8 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 - Depends on 008a's tool, **merged**: `tools/pipeline/build_version.py` (CLI `--entry --version --workdir --key --pubkey --out`; exit 0 built, 1 rejected, 2 pipeline fault; outputs `<tag>.tar.gz`, `<tag>.tar.gz.minisig`, `result.json`, `build.log`), `tools/pipeline/naming.py` (`release_tag`, `asset_names`, `release_asset_url`), `signing.py`, `reference_verify.py`, `archive.py` — read from `git -C /home/ludwig/registry show origin/main:<path>` on 2026-10-15 (head `a50daac`). The test-only flags (`--allow-local-source`, `--clone-timeout`, `--max-*`, `--scanner`) must never appear in the workflow (008a booked finding 1). And on 008c's `tools/pipeline/write_back.py` (`apply_write_back`, `source_archive_url`, `write_back_values`).
 - Graph: nodes **N5**, **N6**, **N2**, **N3**; edges **E7**, **E8**, **E15**, **E16**.
 
-## Size (5b)
-**Counts refreshed 2026-10-26 (estimates from the file scope and designs below; nothing is built yet, so these are not `git diff --numstat` figures).** All three numbers are over the soft cap (MANAGER.md §2b: at most 5 source files, 300 changed lines, 10 reading-list files).
-- **Source files: 7** (cap 5): `.github/workflows/pipeline.yml`, `tools/pipeline/plan_pending.py`, `tools/pipeline/sign_built.py`, `tools/pipeline/build_version.py` (the `--no-sign` flag only), `tools/pipeline/release.sh`, `tools/pipeline/write_back_job.py` (new, see Question Q-K), `tools/registry/ownership.py` (narrow carve-out only). Tests, `docs/tasks/008b-verify.sh` and `docs/pipeline/build-pipeline.md` are excluded.
-- **Changed lines: about 800** (cap 300), estimated per file: workflow 200 (build, signing, write-back and dry-run jobs, environments), `plan_pending.py` 130, `sign_built.py` 110, `build_version.py` 40, `release.sh` 60, `write_back_job.py` 200, `ownership.py` 60.
-- **Reading list: 28 listed items** (cap 10): 10 ADRs, 8 contracts (including `pipeline-trigger.md` and 092's section of `artifact-naming.md`), 4 platform documents, 5 modules of 008a plus 008c's `write_back.py`. About 18 of them are read for one fact each and are cited above by path; the earlier figure of "about 12" was stale.
-
-**Justification for keeping it one task.** (1) The workflow, the planner, the sign step, the release script and the `--no-sign` change are one security argument: the criterion-14 structure check and the sign step's re-verification only mean something together, and the split between the build job (no secret), the signing job (key only) and the write-back job (App key only) is the argument itself. (2) The write-back loop, the environments and the ownership carve-out gate each other: the carve-out is only safe to merge while the loop opens exactly one T1/T3 PR at a time. (3) A split costs a second spec gate, a second review and a workflow file edited by two tasks in sequence. **Split trigger (unchanged):** if after session 3 the `--no-sign` change and its tests (design 8, criterion 16) are not green, they become task 008d, a small offline task on 008a's tool, and 008b waits for it. Live criteria (6-11, 23) need Ludwig's M5-M7 and M11 and are expected to dominate calendar time, not agent time.
-
-**Split alternative (manager decides at the gate).** Splitting is the default answer in MANAGER.md §2b, so this is laid out for choice. It differs from "release in part 1" because the release upload needs the App token, which only the write-back job holds (design 8), so the release belongs with the write-back loop.
-- **008b-1 — plan, build, sign (no secret except the signing key; writes nothing to any repository).** Contains: `plan_pending.py` (pending listing, `version` input, C13 branch skip, C15 schema fault, PT5 per-version fault handling, the `+` refusal of Q10 as a plan output), the `--no-sign` flag and `sign_built.py` (design 8), the workflow with the build job, signing job and dry-run job and the `environment: signing` declaration, the E15 trigger block. Criteria: 1 (parsed-key comparison), 2 (signing-key half), 3, 10, 11, 12, 14 (a-d, f for signing and dry-run), 15, 16, 17, and the signing half of 23. Source files: 4 (`pipeline.yml`, `plan_pending.py`, `sign_built.py`, `build_version.py`); about 400 lines. Dependencies: 082 and 092 merged, 008a merged, 039b (`gate`) not needed. Ends with workflow artifacts only; the dry run is its live proof.
-- **008b-2 — write-back (the App key).** Contains: the write-back job in `pipeline.yml` (App token, `environment: write-back`), `write_back_job.py` (the C22 loop, the archive log commit with the PT8 append-only rule, the release upload, the pre-T1 `source_archive` check of 092 Q5/Q9, the T3 for a `+` version), `release.sh`, the `ownership.py` carve-out, `docs/pipeline/build-pipeline.md`. Criteria: 2 (App-key half), 4, 5, 6, 7, 8, 9, 14 (e, f for write-back), 18, 19, 20, 21, 22, 23 (write-back half), 24. Source files: 4 (`pipeline.yml`, `write_back_job.py`, `release.sh`, `ownership.py`); about 430 lines. Dependencies: 008b-1 merged, 008c, 039b with M9, M5, M7, M11, M12 (done), and 007 for the ownership module.
-- Both parts are still over the 300-line figure; each needs its own `Size` justification. The cost of splitting is the second workflow-file edit and a second gate.
+## Size (5b) — superseded by the split
+**Counts refreshed 2026-10-26 for the undivided task (estimates; nothing built):** 7 source files (cap 5), about 800 changed lines (cap 300), 28 reading-list items (cap 10) — over every cap. The justification for keeping one task (one security argument across workflow, planner, sign step and write-back) was weighed at the gate and **not accepted**: the manager split the task three ways (see "Split" above). Real estimates per part are in each part's own Size section: 008b-1 about 130 lines, 1 file, 9 reading items; 008b-2 about 270 lines, 3 files, 10 items; 008b-3 about 400 lines, 4 files, 11 items (justified there). The 008d trigger (if the `--no-sign` change is not green after session 3 it becomes its own task) moved to 008b-2.
 
 ## Environmental facts (what is verified, what is not)
 - **Verified 2026-10-15 (against registry `origin/main` `a50daac`):** `build_version.py` is one process that clones, archives, scans, hashes **and signs**, taking `--key` and `--pubkey`: `git show origin/main:tools/pipeline/build_version.py | grep -n 'gitops.clone\|signing.sign'` finds both inside `execute()`. It has **no mode without a key** (`--key` and `--pubkey` are `required=True` in `parse_args`). The SSRF job split (design 8) therefore requires the `--no-sign` change that design 8 puts in this task's scope. `PyYAML` 6.0.3 imports in this session (`python3 -c 'import yaml; print(yaml.__version__)'`); whether it is on the CI runner is unverified.
@@ -150,81 +193,7 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 9. **Retry after a pipeline fault.** A build that ends in exit 2 leaves the version `pending` on `main` (design 7); every push run also retries it (PT5). It can be rebuilt on demand by a non-dry-run `workflow_dispatch` with the input `version=<namespace>.<name>@<semver>`; the planner then builds only that version (and only if it is still `pending`). A dry run (`dry_run=true`) never takes this path. Pushes to `main` still plan all pending versions. A non-dry-run dispatch with an **empty `version`** plans all pending versions, exactly like a push (C11; 082 PT5, PT6) — so a waiting push run replaced by a waiting dispatch run [unverified GitHub behaviour] loses nothing. The `version` input is validated against the entry-id and semver patterns before use, and reaches scripts only through `env:` (never `${{ inputs.version }}` inside a `run:`); a dry run's `version` is validated and passed the same way (082 PT12). Concurrency group `pipeline` applies, so a dispatch queues behind a running build.
 
 ## Acceptance criteria
-Script = `docs/tasks/008b-verify.sh`; live = a real run, recorded with run URLs, **not**
-script-verified.
-1. [script] **The E15 contract exists first:** `contracts/pipeline-trigger.md` (task 082, registry PR #20, blocked on 087) is present on `main`
-   (landed by the contract task; this criterion cannot be run until 082 has merged) and the workflow matches its normative trigger block **on parsed keys, not bytes**: the verify
-   script parses `.github/workflows/pipeline.yml` and asserts the `on` keys are exactly {`push`, `workflow_dispatch`} (PyYAML
-   reads the key `on` as boolean `True`; the comparer handles both), `push` and `concurrency` equal the block's, and the
-   `workflow_dispatch` inputs are a superset of {`dry_run`, `version`}. It **fails on zero matches** (no `push.branches` `main`
-   found, or the block absent from the contract), and asserts the absence of `pull_request_target`, `pull_request:` and
-   `workflow_run` in the signing workflow file.
-2. [script] **The secrets are referenced exactly once each**: `secrets.MINISIGN_SECRET_KEY` in the signing step's `env:`, `secrets.PIPELINE_APP_PRIVATE_KEY` in the token-minting step; the verify
-   script counts occurrences of `secrets.MINISIGN_SECRET_KEY` across `.github/` and asserts the
-   count of each is 1 and that no `run:` block contains `echo`, `printf` or `cat` of either variable name,
-   and no `set -x`/`-o xtrace` appears in the workflow. Mutation: add each forbidden pattern to a
-   copy of the workflow and show the check redden.
-3. [script] **Naming:** a unit test feeds `(namespace, name, version)` triples through the
-   workflow's naming/URL helpers (008a's `release_asset_url`, 008c's `source_archive_url`) and asserts tag, both asset names and both URLs equal the `artifact-naming.md` examples (`mc.hello-world-1.0.0`,
-   `.tar.gz`, `.tar.gz.minisig`), The expected strings are 092's worked examples in `artifact-naming.md` ("The archived-source URL"), typed literally into the test, not derived by the code under test: example 1 (`mc`, `hello-world`, `1.0.0`) for tag, assets and URLs, and example 2 (`a`, `b`, `1.0.0-rc.1+build.5`, tag `a.b-1.0.0-rc.1+build.5`) as a pure helper unit test **labelled "derivation only, never published"** — a `+` version is refused by design 2 and 7 (Q10) and no run ever uploads it. The expectations come from the 092 contract, not from task 058's report. Mutation: change one character of a helper's output and show the test red.
-4. [script] **The write-back is exactly a permitted transition (T1; and T3 for the rejection PR):** a test builds the PR diff for a
-   fixture entry (using 008c's `apply_write_back`) and runs it through task 007's append-only,
-   schema and ownership checkers (with the App's bot user id as PR author, per the carve-out; the id is read after M5, see umbrella F4):
-   accepted (the T3 diff likewise, built by the same helper); the same diff with any extra changed field, a second version touched, or a different
-   author id → rejected, each shown.
-5. [script] **The carve-out is narrow and tested both ways:** the ownership gate accepts the
-   pipeline identity's id *only* for a PR whose changes are exactly the transition in criterion 4 and
-   rejects it for: a first publish, a new version, a `page.json` edit, a takedown, a mixed T1 and T3 PR, a T3 whose `reason` is blank or whose `build_log_url` is not `https://`, any change under
-   `contracts/` or `.github/`. The hostile fixture from task 007 (id differs, username matches) still
-   rejects. Positive control: an owner's ordinary PR still accepts. [Needs Ludwig's approval: CI
-   security check.]
-6. [live] **Release upload:** for one real accepted version, the Release exists in `worldofmodcraft/archive` with the two assets;
-   `sha256sum` of the downloaded tarball equals the entry's `source_sha256`; the downloaded
-   `.minisig` equals the entry's `signature` byte for byte; `minisign -V` with the published public key
-   (`6E5B30596A7A8CC4`) succeeds on a machine that has none of our code. The entry's `source_archive` (the project-owned URL, decision Q-G; contract: 092) is fetched through the front with `curl -L`: the bytes equal the downloaded tarball (`cmp`), hop 1 (fetched without `-L`) is exactly the 301/302/307/308 with the derived `Location` (092 Q9), and every hop is `https`. This clause is [live] and depends on runbook M12 (done) and on the front answering for this tag. Re-running the workflow
-   for the same version fails with the never-overwrite message and leaves the release unchanged
-   (asset checksums before/after).
-7. [live] **Runner assumptions:** the run log shows the minisign version and the pinned download's
-   checksum verification; if apt or a different install path was used instead, the log and this
-   file say so.
-8. [live] **Fork safety:** a fork pull request (opened by a non-member account, created for the
-   test; credentials for it follow CLAUDE.md rule 11 — the permitted mechanism is a *fork created
-   by Ludwig himself, in session*, not any stored token) that modifies the signing workflow to print
-   the secret does not receive the secret: the run either does not start (approval required — M1.4
-   default) or the variable is empty. Recorded with the run. The test PR is closed unmerged.
-9. [live] **App-token behaviour (umbrella F5):** with the App identity (Q-D, M5 done), the
-   write-back PR receives its required checks (`gate`, task 039), merges under branch protection **without bypass or
-   a lifted rule**, and the merge's `push` event runs the workflows that should run. If the App
-   token's events do *not* trigger the workflows, this criterion documents the failure and the task stops (§3.4) rather
-   than papering over it.
-10. [live] **Dry run:** `workflow_dispatch` with `dry_run=true` against the M4 repository's commit
-    (needs task 010's M4 repo to exist, **not** a registry entry) builds, signs and uploads to
-    *workflow artifacts only*: no release, no branch, no PR. **It signs only with an ephemeral key generated inside the run and
-    discarded (C21; 082 PT12), never the production key**, and its artifacts say so; the dry-run job references neither the
-    `signing` nor the `write-back` environment. The log contains none of the ephemeral key's characters beyond its public key id
-    (check: `grep -c` the 16-hex `key_id` of `result.json` ≥ 1, the key text 0), and the `result.json` `key_id` is not the production
-    key id `6E5B30596A7A8CC4` (public). This is the only live signing run before task 010's real publish.
-11. [live] **Failure path:** a dry run against a deliberately bad commit (a public throwaway repo
-    containing a `.png` with DBC magic bytes) fails with exit 1 semantics: the log is attached where
-    specified in design 7(a), and no release or PR is created (a dry run opens no T3 PR). The T3 PR itself is shown by [script] criterion 4 (fixture) and, live, by task 010's deliberately bad publish if the manager schedules one; until then T3 live is unproven and the log says so.
-12. [script] **Idempotence of the no-op:** run the planning step against `main` after a write-back
-    merge: zero pending versions, no build, success.
-13. `docs/tasks/008b-verify.sh` exists, is executable, mutation-tested (criteria 1-5, 14-17 and the script criteria 19-22 and 24, each with the mutations it names), run in a
-    fresh clone, output pasted in the log; the log separates [script] from [live] results.
-14. [script] **The clone job has no access to the signing secret — a workflow-level check.** The verify script parses `.github/workflows/pipeline.yml` (PyYAML, or a stdlib parser if the CI runner lacks it; runner availability unverified) and asserts, for the job that runs `build_version.py`: (a) the job's whole subtree contains no `secrets.` token, no `secrets: inherit`, and no `uses:` of a reusable workflow; (b) neither the workflow-level nor the job-level `env`/`permissions` references a secret, and the job's `permissions` is exactly `contents: read`; (c) the job has no step with `MINISIGN_SECRET_KEY` or `PIPELINE_APP_PRIVATE_KEY` as a name; and, for the signing job: (d) it contains `secrets.MINISIGN_SECRET_KEY` exactly once, `needs:` the build job, and has no `git clone`, no `build_version.py`, no `source_url` and no `actions/checkout` of anything but this repository's own tools at the pinned `main` sha; and the write-back job: (e) is the only job containing `secrets.PIPELINE_APP_PRIVATE_KEY`; and, for all jobs (design 8, C20): (f) the signing job declares `environment: signing` and the write-back job `environment: write-back`, both jobs carry the `github.ref == 'refs/heads/main'` condition, and the dry-run job declares no `environment` and references neither secret (mutations: drop the `environment:` of the signing job; add `environment: signing` to the dry-run job). The check **fails on zero matches** of the build job (it must find the job by its `build_version.py` step, never pass vacuously). **Mutations**, each shown red then restored byte-identically: add `${{ secrets.MINISIGN_SECRET_KEY }}` to the build job's `env`; add `secrets: inherit`; move the signing step into the build job; add `build_version.py` to the signing job; widen the build job's `permissions` to `contents: write`. Positive control: the unmodified workflow passes. This criterion proves the *structure*; that GitHub withholds a job's secrets from other jobs is documented behaviour, not observed here (`[unverified]`), and the live fork-safety criterion 8 covers only forks. No command in this task prints, tests for, or lists the secret.
-15. [script] **Test-only flags absent:** the workflow contains none of `--allow-local-source`, `--clone-timeout`, `--max-clone-bytes`, `--max-compressed-bytes`, `--max-uncompressed-bytes`, `--max-entries`, `--scanner` (grep, with a mutation that adds one and shows red).
-16. [script] **`--no-sign` and the sign step** satisfy tests (a)-(d) of design 8, each shown red by a mutation (let `--no-sign` accept `--key`; skip the sha re-check; skip the size re-check; skip `reference_verify`) and restored byte-identically; 008a's suite is run unchanged and passes.
-17. [script] **Retry path** (design 9): `plan_pending.py` with a `version` input builds only that version and refuses (exit 1) a version that is not `pending`, a malformed id, or one whose entry is absent; with no input (a push, or a dispatch with an empty `version`) it builds every `pending` version. The workflow passes `version` (and, design 1, `dry_run_source_url` and `dry_run_commit`) only through `env:` (no `${{ inputs.* }}` inside any `run:`; design 9). **Planner-level tests (no network, fixture repository state), each with a mutation:** (a) **C13 skip:** a pending version whose `pipeline/<ns>.<name>-<version>` branch exists is not in the build list, is reported as skipped with the version named, and the planner's result is non-green; mutation: remove the branch check. (b) **C15:** a `mods/*/entry.json` failing the schema yields no build and no T3 for any of its versions, and a fault naming the file; mutation: treat the entry as valid. (c) **PT5:** with three pending versions and fake outcomes (ok, fault, ok), the driver processes all three and ends non-green naming exactly the faulted one; mutation: stop at the first fault. (d) **Q10 refusal:** a pending `1.0.0+build.5` is in the refusal list, not the build list, while `1.0.0-rc.1` is in the build list. Mutations for the first three tests: ignore the `version` input; accept a `published` version; put `${{ inputs.version }}` in a `run:`.
-18. **Docs move with code:** `docs/pipeline/build-pipeline.md` gains the workflow, the failure
-    modes, the manual recovery for a half-finished release, and a "what Ludwig must do" section;
-    `docs/architecture/key-management.md` is **not** edited here (D5 key note is Ludwig's task 056
-    domain) except for a one-line pointer if needed.
-19. [script] **The write-back loop (C22; 082 PT11), run against a fake clock and a fake GitHub API** (`write_back_job.py` takes both as injected objects; no network): (a) green path: two pending versions, `gate` goes green, each PR is merged by the App and the second branch is cut from the head fetched **after** the first merge (the test asserts the second PR's base sha equals the fake `main` head after merge 1); (b) `gate` red: the run fails, the group is released, the second version is not started; (c) a PR closed unmerged: same; (d) deadline: with the fake clock the PR is still waited on at 29:59 and the run fails at 30:00, naming the PR; (e) one at a time: the fake API records that at most one pipeline PR is open at any moment; (f) the merge call is never made before `gate` reports success. **Mutations, each shown red then restored byte-identically:** remove the deadline; merge without waiting for `gate`; branch from the head fetched before the previous merge; open the second PR before the first is terminal. Positive control: the unmodified code passes (a).
-20. [script] **`timeout-minutes` sizing (PT11):** the verify script parses the workflow and asserts the write-back job has `timeout-minutes`, or that every PR-wait step has its own; and a unit test of the sizing function asserts N x 30 minutes plus the build allowance for N = 1, 3 and 5. The log states which mechanism was chosen and what limit GitHub documents for it, marked [unverified] until observed (Question Q-N). Mutations: delete the `timeout-minutes`; size it as a constant 30 for N = 5.
-21. [script] **A `+` version is refused with a T3, not published (092 Q10):** a fixture entry with a pending `1.0.0+build.5` goes through the planner and the write-back helper with fake build, sign and release functions; the resulting T3 diff (built by `apply_write_back`) is **accepted** by task 007's checkers with the App's bot id, carries `reason` byte-equal to "versions with build metadata (+) are not yet published — pending proof that GitHub resolves them (task 010)" (if 008c's length cap truncates it, stop and report), and the fake build, sign and release functions record **zero calls** (no release, no signing, no clone). Control: `1.0.0-rc.1` in the same fixture does reach the fake build. Mutations: remove the `+` check (the build function is called, red); change one character of the reason (red).
-22. [script] **Pre-T1 `source_archive` check (092 Q5, Q9), against a fake HTTP client:** pass when hop 1 is 301 with the derived `Location` and the final bytes hash to `source_sha256` over https hops; each of these exits 2 naming the URL, opens no T1 and no T3: hop 1 answers 200; hop 1 `Location` differs by one byte; a later hop is `http://`; more than 5 hops; the sha differs. The fake records call order and the test asserts release publish -> hop-1 request -> final fetch -> T1 open. Mutations: skip the sha comparison; accept an `http://` hop; open the T1 before the fetch.
-23. [live] **Environments bind the keys to `main` (C20; 082 PT3), after M11:** a `workflow_dispatch` of the workflow from a non-`main` branch (a test branch pushed by the manager's account, deleted afterwards) whose signing and write-back jobs declare `environment: signing` and `environment: write-back` does not get those jobs started or does not receive the environment's secrets: the run shows the deployment to the environment rejected by its branch policy. The test branch's workflow does not reference, echo or test either secret (CLAUDE.md rule 11; no `gh secret` command); the evidence is the run URL and the rejected-deployment message. **Until M11 is done and this criterion is recorded, environment binding is unproven, the trust boundary of both keys is every account with write access, and live criteria 6 and 9 wait for it.**
-24. [script] **Append-only log and release (PT8), against a fake archive API:** when `logs/<ns>.<name>/<version>.log` already exists, that version fails naming the path and the file is not written, while another pending version in the same run is still processed and the run ends non-green; the same for a published release with the tag. Mutation: overwrite an existing log.
+**Moved to the parts.** The full text of criteria 1-24 now lives in the part files named in the mapping table under "Split" (criteria 14 and 17 are divided by clause; 13 and 18 are restated per part). Criterion numbers are kept in the parts so this table can be checked. The numbering history: criteria 1-18 were written 2026-10-14/15; 19-24 were added at the 2026-10-26 re-gate (write-back loop, timeout sizing, `+` T3, pre-T1 check, environments live test, append-only log). No agent is dispatched on this umbrella.
 
 ## Explicitly OUT of scope
 - 008a's tool; E12 (site rebuild dispatch, task 055); `page.json` screenshot scan (task 040);
@@ -232,7 +201,7 @@ script-verified.
 - Writing the contract amendments (a separate task precedes this one).
 
 ## File scope (declared; anything else = stop and report)
-In the **registry** repo:
+**Superseded by the parts' own File scope sections (mapping table above); retained as the union.** In the **registry** repo:
 - `.github/workflows/pipeline.yml` (new)
 - `tools/pipeline/plan_pending.py` (new — lists pending versions; the unit-testable half of the workflow), `tools/pipeline/sign_built.py` (new — re-verifies a built tarball and signs it; design 8), `tools/pipeline/build_version.py` (**in scope: the `--no-sign` flag only**, design 8; no other behaviour changes) and its tests in `tests/pipeline/`, `tools/pipeline/release.sh` (new — thin, `set -euo pipefail`, no logging of env), `tools/pipeline/write_back_job.py` (new — the write-back loop of design 4, the pre-T1 check and the archive log rule of design 5, the `+` T3 of design 7; takes the clock and the GitHub and HTTP clients as injected objects so criteria 19, 21, 22, 24 run offline; see Question Q-K)
 - `tools/registry/ownership.py` (narrow carve-out only; the file is task 007's — sequence after it merges)
@@ -360,10 +329,10 @@ Workflow + helpers + tests + docs + verify script + this file's log section curr
   I did not and may not check — `gh secret` commands are forbidden.) Not covered by Ludwig's 2026-10-14
   answers.
 - **Branch-protection required checks: closed 2026-10-26** — superseded by the required check `gate` (task 039b) and runbook M9; design 4 and criterion 9 name `gate`.
-- **Q-K (open, scope, for the manager):** the write-back loop, pre-T1 check and archive-log rule are code that criteria 19, 21, 22 and 24 must test offline with a fake clock and fake APIs, so they need a module. Options: A new `tools/pipeline/write_back_job.py` (adds one source file; 7 in total); B put them in `release.sh` (not testable with a fake clock; criteria 19-24 could not be demonstrated); C put them in 008c's `write_back.py` (outside this task's file scope). **Conservative assumption: A**, already in the file scope above.
-- **Q-L (open, decision, for Ludwig):** a T3 needs a non-empty `reason` and an `https://` `build_log_url`; a `+` version has no build log. 092 fixes the reason text but not the URL. Options: A commit a one-line log file `logs/<ns>.<name>/<version>.log` in `archive` containing the refusal text, before the T3 PR, as design 7 does for a rejection (uniform; the append-only rule applies); B point `build_log_url` at 092's contract section (a URL that is not a log); C amend the T3 rule so `build_log_url` may be absent for this cause (changes 057's contract). **Conservative assumption: A.**
-- **Q-M (open, naming, for the manager):** design 1 names the dry-run source inputs `dry_run_source_url` and `dry_run_commit` and a synthetic in-run entry. 082 PT12 leaves the names to 008b "and this contract reviews". Options: A these names (assumed); B a single `dry_run_source` string `<url>@<commit>`; C drop the pair and dry-run only `pending` versions on `main`, which would leave criterion 10 without the M4 repository as source. **Conservative assumption: A**, and 082's reviewer confirms it at 082's next touch.
-- **Q-N (open, fact, for the manager):** whether GitHub accepts an expression for `timeout-minutes` and what the maximum job time is for hosted runners; both [unverified] here, so N x 30 minutes may be impossible for a large N. Options: A per-PR deadline enforced in `write_back_job.py` (criterion 19) plus a fixed `timeout-minutes` at the documented limit; the run fails at the limit and the rest wait for the next push; B compute the value per run; C per-step timeouts only. **Conservative assumption: A.**
+- **Q-K (CLOSED 2026-10-26, decided by the manager: option A, starred; Ludwig's overnight instruction "Ta stjärna på alla beslut"; goes to 008b-3):** the write-back loop, pre-T1 check and archive-log rule are code that criteria 19, 21, 22 and 24 must test offline with a fake clock and fake APIs, so they need a module. Options: A new `tools/pipeline/write_back_job.py` (adds one source file; 7 in total); B put them in `release.sh` (not testable with a fake clock; criteria 19-24 could not be demonstrated); C put them in 008c's `write_back.py` (outside this task's file scope). **Conservative assumption: A**, already in the file scope above.
+- **Q-L (CLOSED 2026-10-26, decided by the manager: option A, starred, consistent with the 2026-10-15 build-log decision; goes to 008b-3):** a T3 needs a non-empty `reason` and an `https://` `build_log_url`; a `+` version has no build log. 092 fixes the reason text but not the URL. Options: A commit a one-line log file `logs/<ns>.<name>/<version>.log` in `archive` containing the refusal text, before the T3 PR, as design 7 does for a rejection (uniform; the append-only rule applies); B point `build_log_url` at 092's contract section (a URL that is not a log); C amend the T3 rule so `build_log_url` may be absent for this cause (changes 057's contract). **Conservative assumption: A.**
+- **Q-M (CLOSED 2026-10-26, decided by the manager: option A, starred; 008b owns the naming per PT12; goes to 008b-1 and 008b-2; 082's reviewer still confirms the names):** design 1 names the dry-run source inputs `dry_run_source_url` and `dry_run_commit` and a synthetic in-run entry. 082 PT12 leaves the names to 008b "and this contract reviews". Options: A these names (assumed); B a single `dry_run_source` string `<url>@<commit>`; C drop the pair and dry-run only `pending` versions on `main`, which would leave criterion 10 without the M4 repository as source. **Conservative assumption: A**, and 082's reviewer confirms it at 082's next touch.
+- **Q-N (CLOSED 2026-10-26, decided by the manager: option A, starred; goes to 008b-3):** whether GitHub accepts an expression for `timeout-minutes` and what the maximum job time is for hosted runners; both [unverified] here, so N x 30 minutes may be impossible for a large N. Options: A per-PR deadline enforced in `write_back_job.py` (criterion 19) plus a fixed `timeout-minutes` at the documented limit; the run fails at the limit and the rest wait for the next push; B compute the value per run; C per-step timeouts only. **Conservative assumption: A.**
 - **Q-J: closed** by ADR-0121 (Ludwig, 2026-10-15): `pending → rejected` with `reason` and `build_log_url`; design 7 follows it.
 - **Build log location: closed** (Ludwig 2026-10-15, option A): `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`. Needs M7.
 - **SSRF split mechanism: closed** (coordinator 2026-10-15): `--no-sign` in `build_version.py` plus a sign step; design 8.
@@ -396,3 +365,4 @@ unpublished). The Actions run log is not used as the permanent reference (retent
   9. Criterion 13 mutation list extended to 1-5, 14-17, 19-22, 24; criterion 1 notes 082 must be on `main`; Dependencies: 082 (registry #20, blocked on 087) and 092 (registry #25) must merge first; File scope gains `write_back_job.py` (Q-K).
   10. Status line and amendment preamble corrected.
   Not measured: nothing here was executed; size figures are estimates. Re-gate round 2 pending.
+- 2026-10-26 split (doc-writer, branch `task/008b-spec-regate`, on the manager's gate decision): the umbrella is now a decisions record; criteria 1-24, the designs, decisions, files and manual steps are mapped to 008b-1 (`008b1-pipeline-plan.md`), 008b-2 (`008b2-pipeline-build-sign.md`) and 008b-3 (`008b3-pipeline-write-back.md`) in the "Split" tables above; criteria 13 and 18 are restated per part and 14 and 17 are divided by clause. Q-K, Q-L, Q-M, Q-N closed as decided by the manager (option A, starred). Sequence 008c -> 008b-1 -> 008b-2 -> 008b-3, with 082 and 092 merged first. Interface assumption for the reviewer: the plan document (lists `build`, `refuse`, `skip`, `fault`, head SHA) between 008b-1 and 008b-2/3 is internal to node N5 and adds no graph edge. Nothing was executed; part sizes are estimates. Independent spec review of each part pending.
