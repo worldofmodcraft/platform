@@ -2361,3 +2361,9 @@ platform **#77** (010a) `6971f38`; registry **#22** (084) `77a4653`; registry **
 main in a fresh clone (clean; 075-verify ALL CHECKS PASSED on the result); site **#4** (065 re-sync) `35f331a` after its
 `check-schemas` re-run passed against the new registry main. **#21 (039a) and #20 (082)** are covered by the same OK but merge
 only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone; 082: AC13 `--full`); the manager reports each.
+- **M6 (Ludwig, 2026-10-26: "Ja det är klart"):** `mbmludric` invited and joined; Base permissions = **Read** (his screenshot).
+  Not externally verified (public-members API 403, rate limit). Ticking M6 needs 068-verify's marker checks re-pinned first
+  (they assert "M6 stays ☐" at HEAD — the item-12 class) → task 085.
+- **058 live probe:** the push of the probe tree to `pages-probe` was refused by the classifier ("Auto-Mode Bypass"); not
+  retried. Baseline observed: only a trailing-slash 301; `worldofmodcraft.com/pages-probe/` 404. Ludwig to push with
+  `! git -C /home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe push origin probe-tree:main` (or from his terminal). PR #79 open.
