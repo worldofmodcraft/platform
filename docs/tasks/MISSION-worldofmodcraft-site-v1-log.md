@@ -2344,3 +2344,13 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   284 + 32 tests green; the three mutations caught (run by hand; `--mutate` not run — machine busy); site schema byte-identical,
   Ajv rejects all bad values. Booked (non-blocking): add an uppercase non-hex 16-char value (e.g. `E7A1B2C3D4E5F60G`) to `BAD`
   and the corpus in the stale-contract-text follow-up. **Merge order (Ludwig): 084 → registry #19 → site #4.**
+- **084 (registry PR #22):** 075-verify's scope check pinned to PR #18's range (BASE `79d5377`, FINAL `7d91a3d`); 075 added to
+  070's CLOSED list; red-first shown (the old script fails on a later branch; one extra red was the author's own assertion
+  bug, disclosed and fixed); all closed scripts green on HEAD, 075 green on a merge with 065's branch. **Review PASS.**
+  Booked nit: 070-verify's header still says "ten closed scripts". Temp dirs under /tmp left by the rm guard.
+- **039a (registry PR #21):** composer done (77/77, suite 350 green, all closed scripts but 075 green); **security review PASS**
+  (22 hostile tree shapes, argv-named files, crash/NaN/recursion inputs all fail closed; 10/10 code mutations caught). LOW fix
+  in progress (write `verdict.json` last). Booked for 039b: bot logins rejected (fail-closed, accepted); M9 must keep
+  "Require branches to be up to date"; the run-log link comes from the workflow, not the composer.
+- **Merge order for Ludwig (registry):** 084 #22 → 065 #19 → site #4 → 039a #21 → 082 #20. The final full runs of 039a and
+  082 (AC12/AC13) need 084 in place; the manager runs them overnight on local merges with 084's branch as evidence.
