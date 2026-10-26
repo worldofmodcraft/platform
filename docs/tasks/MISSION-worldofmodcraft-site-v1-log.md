@@ -2340,3 +2340,7 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   `/tmp/red065dir` left (rm guard) — harmless, Ludwig may delete.
 - **C25 — how to fix `075-verify.sh`'s moving frame.** A★ a separate re-pin task 084 (the 071 pattern) before 065 merges; B
   extend 065's scope by that one script. **Chosen A** (keeps 065's scope clean). Reverse: fold 084 into 065.
+- **065 review: PASS** (registry #19, site #4): pattern `^[0-9A-F]{16}$` matches `signature-format.md`; red `3b53628` tests-only;
+  284 + 32 tests green; the three mutations caught (run by hand; `--mutate` not run — machine busy); site schema byte-identical,
+  Ajv rejects all bad values. Booked (non-blocking): add an uppercase non-hex 16-char value (e.g. `E7A1B2C3D4E5F60G`) to `BAD`
+  and the corpus in the stale-contract-text follow-up. **Merge order (Ludwig): 084 → registry #19 → site #4.**
