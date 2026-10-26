@@ -2410,3 +2410,10 @@ future target" locking only the cheap choices; B store the report only. Awaiting
 - **Ludwig, 2026-10-26 (verbatim): "A star on the above one"** → one sweep of all closed verify scripts (both repos) instead of
   one-at-a-time fixes: task 088 (read-only inventory, now), then 089 (registry) / 090 (platform) fix tasks after 087, 039b and
   085 merge. 087's scope extended by the manager to 070-verify AC4.m1 (same class; keeps the PR coherent).
+- **088 inventory done** (34 closed scripts; 14 unfixed own-change checks: 13 registry, 1 platform; side findings incl. a
+  silent skip in 069 AC5.3 and env-overridable pins in platform 072/080). Recorded in `docs/research/closed-verify-sweep-088.md`.
+  089 (registry) and 090 (platform) to be specced from it after 087, 039b and 085 merge.
+- **058 probe done** (PR #79): Pages emits no redirect to a chosen target (only trailing-slash 301s); meta-refresh/JS work only in
+  browsers — `curl -L`, wget, urllib, Node fetch never reach the target; `_redirects` ignored; the custom domain does not front
+  project repos. Options C (Cloudflare redirect on a project-owned host, ★) and E (store the github.com Release URL) put to
+  Ludwig, plus his browser check (criterion 6) and deleting `pages-probe`.
