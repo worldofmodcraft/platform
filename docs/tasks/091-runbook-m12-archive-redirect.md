@@ -1,6 +1,6 @@
 # Task 091: runbook step M12 — a Cloudflare redirect from archive.worldofmodcraft.com to the archive's Release assets
 
-- **Mission:** SITE-V1 (D2 archive URL, decision C) — **Status:** spec-approved (manager, solo gate, 2026-10-26)
+- **Mission:** SITE-V1 (D2 archive URL, decision C) — **Status:** done (merged 2026-10-26, session 12; spec-approved by the manager, solo gate, 2026-10-26)
 - **Repo:** platform. **Agent / model:** doc-writer. **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/091-runbook-m12` / `~/wt/task-091`, cut from platform `origin/main`
 
@@ -116,3 +116,9 @@ Changing Cloudflare or DNS; credentials; editing other runbook sections.
   not run the curls myself). Left [unverified]: certificate issuance time, DNS form labels, Hostname drop-down label, the Free-plan
   "Then" box field names, `http.request.uri.path` excluding the query in the docs' words (behaviour observed, wording not).
   068-verify.sh: PENDING, other verify.sh scripts were running at the time of this edit; manager to re-run (M12 is not among its markers; M4/M6 must stay ☐, untouched).
+- 2026-10-26 manager (session 12): the PENDING runs are closed. On a quiet machine at 46f3a20: `068-verify.sh` 15/15 ALL PASS. After merging
+  platform main (85's M6 tick; conflict only in this file, branch copy a superset) at d83d0b4: `068-verify.sh` ALL PASS, `085-verify.sh` ALL CHECKS
+  PASSED. The live front was re-checked by the manager's `092-verify.sh --live` (2026-10-26T19:56Z) and agrees with the "Observed" text, including
+  http:// -> 302 straight to the https GitHub URL. **Independent review (read-only): PASS-WITH-AMENDMENTS**, both LOW: (1) this status/log
+  closing line — done here; (2) Cloudflare doc-sourced facts at runbook ~313-319 (Free plan 10 rules, no regex on Free, proxied TTL 300 s) carry no
+  "(per Cloudflare docs, not observed)" marker — booked as a follow-up. Merged under Ludwig's overnight approval (mission log, session 12).
