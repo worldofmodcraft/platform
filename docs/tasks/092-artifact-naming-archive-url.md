@@ -1,9 +1,8 @@
 # Task 092: `artifact-naming.md` fixes the archived-source URL as `https://archive.worldofmodcraft.com/<tag>/<asset>` (decision C)
 
 - **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008-build-pipeline.md`, Dependencies (c): "the `artifact-naming.md`
-  amendment for the project-owned `source_archive` URL, after 058"). **Status:** draft (drafted by a Plan agent, 2026-10-26;
-  Q1-Q8 decided by Ludwig "Stjärna på allt", Q9-Q10 "Kör A stjärna", 2026-10-26). Contract amendment → **independent spec
-  review before dispatch** (round 1 FAIL folded in; round 2 pending).
+  amendment for the project-owned `source_archive` URL, after 058"). **Status:** spec-approved (manager, 2026-10-26, after spec review rounds 1-2; drafted by a Plan agent, 2026-10-26;
+  Q1-Q8 decided by Ludwig "Stjärna på allt", Q9-Q10 "Kör A stjärna", 2026-10-26). Contract amendment; independent spec review done (round 1 FAIL folded in, round 2 PASS with four LOW fixes folded in).
 - **Merge:** needs **Ludwig's written approval** (contract, ADR-0117; MANAGER.md §7). It fixes a value written once into an
   append-only record.
 - **Repo:** registry (this file is copied to the registry branch's `docs/tasks/` as the log, as 057/082 did); platform: this file
@@ -51,6 +50,11 @@
   amendment), not consumers. Reason: an auto-following client (`curl -L`, a browser fetch) cannot see hop 1.
 - **Q10 = A:** 008b does **not** publish versions with build metadata (`+`) until a live Release proves GitHub resolves `+` in
   `releases/download` (task 010). Stated in the producer obligations; the derivation still defines their URL.
+  **Outcome (manager decision, round 2):** such a version gets a T3 `rejected` with reason "versions with build metadata (+) are
+  not yet published — pending proof that GitHub resolves them (task 010)" — not left `pending`.
+- **Size cap (manager decision, round 2):** 52,428,800 bytes (50 MiB) = `tools/pipeline/archive.py:28` `MAX_COMPRESSED_BYTES` and
+  the site downloader ceiling (`docs/pipeline/build-pipeline.md` ~100). Consumers abort the download at the cap. Raising 008a's
+  compressed-size limit above this requires amending this contract.
 
 ## Objective
 `contracts/artifact-naming.md` gains one deterministic function `(namespace, name, version) → archived-source URL` and the
@@ -63,9 +67,9 @@ obligations of every producer and consumer of it:
 3. **Consumer rules (normative; site 055, 008b's checks, task 010's runbook check, any later launcher/installer):** compare
    `source_archive` by exact string equality with the URL derived from the entry's own `id` and `version` (never parse and accept
    "close enough"); request the front with **no query string** (this applies to the request to the front only); follow later
-   hops (GitHub, then its signed asset host) **unchanged, including their query**, only over https (TLS verified), within **at
-   most 5 hops in total**; those hosts are not an allowlist or trust anchor; accept the final 2xx bytes only within the size cap
-   (50 MiB = 52,428,800 bytes, 008a's compressed-size limit; see Approach 3) and only after `source_sha256` and the signature
+   hops (any 301/302/307/308: GitHub, then its signed asset host) **unchanged, including their query**, only over https (TLS
+   verified), within **at most 5 hops in total**; those hosts are not an allowlist or trust anchor; accept the final 2xx bytes only within the size cap
+   (52,428,800 bytes, 50 MiB; consumers abort the download at the cap; see Approach 3) and only after `source_sha256` and the signature
    (all of `signature-format.md`'s rejection rules 1-11) verify, **before any use**; never execute or parse HTML. Consumers do
    **not** enforce hop 1's target (Q9).
 4. **Fail closed (normative).** Two lists.
@@ -114,9 +118,10 @@ New section **"## The archived-source URL (`source_archive`)"** after "The namin
    (platform) — path-only, status 302 chosen in 091; nobody may depend on which 3xx. Hop 1 target = the
    `worldofmodcraft/archive` Release asset (Q-E); hop 2 is GitHub's redirect to a signed, expiring asset host
    (`release-assets.githubusercontent.com`, observed in 058), never stored. Hops 2+ are followed unchanged, including their
-   query, over https only, **at most 5 hops in total**. **Size cap:** 50 MiB (52,428,800 bytes) = the compressed-size limit of
-   008a (an assumed constant of 008a, recorded in `docs/pipeline/build-pipeline.md`; `archive-layout.md` states no cap —
-   grepped 2026-10-26); [unverified] as a contract number, proposed here for the reviewer. M12 is the source of truth for the
+   query, over https only, **at most 5 hops in total**. **Size cap:** 52,428,800 bytes (50 MiB) = `tools/pipeline/archive.py:28`
+   `MAX_COMPRESSED_BYTES` and the site downloader ceiling (`docs/pipeline/build-pipeline.md` ~100); a stated decision (see
+   Decisions); consumers abort the download at the cap; raising 008a's compressed-size limit above this requires amending this
+   contract (`archive-layout.md` states no cap — grepped 2026-10-26). M12 is the source of truth for the
    rule's syntax. **Q9:** the producer and the manager check hop 1 exactly; consumers do not, so a repoint of the front changes
    M12 and this section's redirect-target sentence only. [unverified], one sentence each: case preservation of the captured
    path (matters for uppercase prerelease identifiers); whether GitHub resolves a tag containing `+` in `releases/download`;
@@ -128,7 +133,8 @@ New section **"## The archived-source URL (`source_archive`)"** after "The namin
    fetches the URL through the full chain under the consumer rules and requires the SHA-256 of the received bytes to equal its
    computed `source_sha256`; any failure = pipeline fault (082 PT10 exit 2: no T3, stays `pending`, the run fails naming the
    URL) — the only point where a non-resolving URL can be stopped before it becomes permanent. **Q10:** 008b publishes no
-   version with build metadata (`+`) until a live Release proves GitHub resolves `+` in `releases/download` (task 010).
+   version with build metadata (`+`) until a live Release proves GitHub resolves `+` in `releases/download` (task 010); such a
+   version gets a T3 `rejected` with the reason in Decisions (Q10), not left `pending`.
 5. **Consumer obligations:** Objective 3, one sentence each, each pinned by full text; one sentence states that consumers do not
    enforce hop 1's target and why (Q9).
 6. **Fail closed:** Objective 4's two lists, spelling out "M12 not done yet: the name does not resolve", "the host answers 200
@@ -144,7 +150,7 @@ New section **"## The archived-source URL (`source_archive`)"** after "The namin
 8. **"What this document does not cover", updated:** the "which repository hosts these Releases" bullet → "decided:
    `worldofmodcraft/archive` (Q-E, 008 umbrella F6)"; added: the Cloudflare rule's exact configuration (M12); `build_log_url` (a
    repository file at `logs/<ns>.<nm>/<version>.log`, not a Release asset — not served by this front; out of scope); enforcing
-   equality in registry CI (Q2, booked). "Questions" → "(none open; task 092's Q1-Q8 decided by Ludwig on 2026-10-26)".
+   equality in registry CI (Q2, booked). "Questions" → "(none open; task 092's Q1-Q10 decided by Ludwig on 2026-10-26)".
 9. **`docs/contracts/README.md`:** in the `artifact-naming.md` row only, one clause naming the archived-source URL
    `https://archive.worldofmodcraft.com/<tag>/<asset>` (Cloudflare redirect to `worldofmodcraft/archive` Releases) and its
    fail-closed consumer rules. No other sentence changes.
@@ -165,7 +171,7 @@ literals, which stay true as the redirect target. A schema hostname pin would re
 
 **Downstream sentences 092 does not edit** (the manager books them at merge): 008c design 2 / criterion 5 → this function;
 008b criterion 3; criterion 6's "blocked until 058" → "fetched with `curl -L` through the front, bytes equal"; 008b gains the
-pre-T1 check (Q5); 055 design 3 (shape fixed), Q3 allowlist `archive.worldofmodcraft.com` → `github.com` → GitHub's asset host,
+pre-T1 check (Q5) and the Q10 refusal (T3 `rejected` for a `+` version, reason as in Decisions); 055 design 3 (shape fixed), Q3 allowlist `archive.worldofmodcraft.com` → `github.com` → GitHub's asset host,
 the "if 058 finds HTML" clause struck, `localArchivePathFor` follows the new path; 010 ~96 ("resolves" = `curl -sL` + `sha256sum`
 equals `source_sha256`); 056 second pass (Q8); 008 umbrella criterion 3 and Dependencies (c) done; the Q2 follow-up.
 
@@ -186,9 +192,10 @@ never modified.
    prerelease and build versions, adversarial splits such as `x-1`/`2.3.4`): no collisions; no `%`, `..`, `//` after the authority,
    `?` or `#`; every URL matches `^https://archive\.worldofmodcraft\.com/[0-9A-Za-z._+-]+/[0-9A-Za-z._+-]+\.tar\.gz$`;
    reserved-device-name namespaces stay excluded (quote the unchanged rule).
-5. **Normative sentences pinned by full text** (032 round-6 lesson), each exactly once: exact-string equality; https/TLS;
+5. **Normative sentences pinned by full text** (032 round-6 lesson), each exactly once (the writer states each — hop bound,
+   size cap, hop-1 ownership, etc. — once in the contract and refers to it elsewhere; the script counts occurrences): exact-string equality; https/TLS;
    hop 1 exactness checked by producer and manager only, consumers do not enforce it (Q9); later hops followed unchanged
-   over https only, at most 5 hops in total; the size cap number; no `+` versions published until proven (Q10); never parse
+   over https only, at most 5 hops in total; the size cap number; no `+` versions published until proven, and their T3 `rejected` with the reason (Q10); never parse
    HTML; never send a query; hash and signature (rules 1-11) before any use; host never
    trusted; no fallback; producer computes from `id`/`version` only; the pre-T1 fetch-and-hash check (pipeline fault, stays
    `pending`); each fail-closed case; attack attempts 3 and 4; the four [unverified] markers of Approach 3 (incl. the `+` asset filename).
@@ -231,7 +238,8 @@ only). Anything else = stop and report.
 
 ## Size
 0 source files; ~100-170 lines of contract prose, 1 README row, ≤ 14 example files changed by value only, a verify script of
-~300-420 lines (adds hop-1/`--live` handling and clones at `BASE`/`FINAL`); reading list 9 groups + the INDEX.json record.
+~300-420 lines (adds hop-1/`--live` handling and clones at `BASE`/`FINAL`); reading list 9 groups + the INDEX.json record. The reading list is ~25 files in 9 groups, over the
+10-file cap: one contract amendment has nine inbound documents to cross-check; splitting would hide the cross-doc agreement.
 
 ## Forbidden (beyond MANAGER.md §3.7)
 Any byte change to `entry.schema.json`, `append-only.rules.md`, `signature-format.md`, `archive-layout.md`; editing any closed
@@ -256,3 +264,4 @@ the 008 umbrella; the Q2 follow-up.
 - 2026-10-26 manager: Q1-Q8 decided by Ludwig ("Stjärna på allt"); M12's final form (path-only expression) folded into Approach 3
   and AC11(c). Awaiting independent spec review.
 - 2026-10-26 manager: spec review round 1 FAIL (2 HIGH, 4 MED, 2 LOW) folded in; Q9 = A, Q10 = A decided by Ludwig ('Kör A stjärna'); round 2 pending.
+- 2026-10-26 manager: spec review round 2 PASS with four LOW fixes folded in (reading-list justification, Q10 outcome T3 `rejected`, each normative sentence stated once, later hops any 301/302/307/308; size cap now a stated decision). Status: spec-approved (manager, 2026-10-26, after spec review rounds 1-2).
