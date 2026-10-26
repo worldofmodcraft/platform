@@ -2423,3 +2423,6 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   "Repository not found"). Follow-ups: **091** runbook step M12 (Cloudflare redirect rule; clicks verified against Cloudflare's
   docs; an agent verifies with curl after Ludwig configures it) and **092** `contracts/artifact-naming.md` amendment (the URL
   shape; contract → Ludwig approves the merge) — 092 unblocks 008c, then 008b.
+- **Ludwig, 2026-10-26: "1. OK att merga. 2. Stjärna på allt"** → platform **#79 (058) merged `313e804`**; task 092's Q1-Q8 all ★
+  (no schema change; CI equality booked; examples updated; no fallback; pre-T1 fetch-and-hash; depgraph N6 text; live capture
+  gates the merge; overview in 056's second pass). 092 spec written; independent spec review next.
