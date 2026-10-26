@@ -1,6 +1,6 @@
 # Task 008c: Pipeline write-back — `apply_write_back`, the `source_archive` URL, and the write-back view of the result
 
-- **Mission:** SITE-V1, deliverable **D2** (the part of 008a that depends on contracts not yet written; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft — updated 2026-10-26 (session 12) for task 092's URL contract; independent spec review next. (Split out of 008a on spec review, 2026-10-14, task 054.) 057, 058 and 008a are merged; **not dispatchable until task 092 (registry PR #25, the `artifact-naming.md` amendment) has merged.** Touches the shape of the registry's append-only record; independent review required.
+- **Mission:** SITE-V1, deliverable **D2** (the part of 008a that depends on contracts not yet written; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** draft — updated 2026-10-26 (session 12) for task 092's URL contract; spec review round 1 PASS-WITH-AMENDMENTS folded in; round 2 next. (Split out of 008a on spec review, 2026-10-14, task 054.) 057, 058 and 008a are merged; **not dispatchable until task 092 (registry PR #25, the `artifact-naming.md` amendment) has merged.** Touches the shape of the registry's append-only record; independent review required.
 - **Agent / model:** implementer / sonnet
 - **Budget:** small (≤ 2 agent-sessions)
 - **Branch / worktree:** `task/008c-pipeline-write-back` / `~/wt/registry-task-008c` — **registry** repo
@@ -12,46 +12,49 @@
 Given 008a's `result.json` and an `entry.json` containing a `pending` version, pure functions produce (a) the five write-back values `source_archive`, `source_sha256`, `signature`, `key_id`, `published_at`, (b) the project-owned `source_archive` URL, and (c) the new `entry.json` in which that version has gone `pending → published` — changing **exactly** what task 057's contract permits and nothing else — and each function is demonstrated against 057's fixture corpus.
 
 ## Context to load (exhaustive)
-- Task 057 (`docs/tasks/057-version-lifecycle-contract.md`) **as merged**: `contracts/entry.schema.json` and `contracts/append-only.rules.md` (T1: `pending → published`, the exact key sets), and `docs/tasks/057-transition-fixtures.json` — the shared corpus.
-- `contracts/artifact-naming.md` section "The archived-source URL (`source_archive`)" **as merged by task 092**: the formula, the host constant, the two worked examples, path safety and injectivity, and the consumer rules (which bind 008b, not this task). Background only: task 058's report `docs/research/archive-url-probe.md` (platform repo).
-- 008a as merged: `result.json` (`artifact.{source_sha256, signature, key_id}`, `built_at`, `tag`, `assets`), `release_asset_url`.
-- `contracts/artifact-naming.md` (tag and asset names), `contracts/signature-format.md` ("What `entry.json`'s `signature` field holds").
-- ADRs: 0041, 0058 §1-§2 (and whichever ADR resolves 057's blocker B1), 0103. Doctrine: MANAGER.md §2c, §3.6b, §3.6c, §3.7; CLAUDE.md rules 5, 11.
+- Task 057 as merged: `contracts/entry.schema.json`, `contracts/append-only.rules.md` (T1: `pending → published`, the exact key sets), `docs/tasks/057-transition-fixtures.json` (the shared corpus) and `docs/tasks/057-oracle.py` (the reference oracle used by criterion 1(c)).
+- `contracts/artifact-naming.md` section "The archived-source URL (`source_archive`)" **as merged by task 092**: the formula, the host constant, the two worked examples, path safety and injectivity, and the consumer rules (which bind 008b, not this task).
+- 008a as merged: `tools/pipeline/naming.py` (`release_tag`, `check_namespace`, `split_id`) and `tools/pipeline/build_version.py` (the `result.json` shape: `id`, `version`, `artifact.{source_sha256, signature, key_id}`, `built_at`, `tag`, `assets`; the id and semver patterns).
+- `contracts/signature-format.md` ("What `entry.json`'s `signature` field holds").
+- ADRs: 0041 (integrity chain), 0121 (version lifecycle: `pending`, T1, T3 `rejected` terminal). Doctrine: MANAGER.md §2c, §3.6b, §3.6c, §3.7; CLAUDE.md rules 5, 11.
 - Graph: nodes **N5**, **N2**; edge **E8** (the write-back fields). No new edge.
 
 ## Design (decisions made in this spec)
-1. `write_back_values(result, source_archive)` → `{source_archive, source_sha256, signature, key_id, published_at}`; `published_at` is `result.built_at` (RFC 3339 UTC; the pipeline's own clock, recorded once).
+1. `write_back_values(result, source_archive)` → `{source_archive, source_sha256, signature, key_id, published_at}`; `published_at` is `result.built_at` (RFC 3339 UTC; the pipeline's own clock, recorded once). `source_archive` is checked for shape only (`^https://\S+$` via the schema); **equality with the derived URL is not checked here** (092 decision Q2, a separate CI task).
 2. `source_archive_url(namespace, name, version)` → the project-owned URL (decision Q-G; shape fixed by task 092):
    `"https://archive.worldofmodcraft.com/" + tag + "/" + tag + ".tar.gz"`, where `tag` is 008a's naming-scheme tag (`ns.nm-v`,
    computed by 008a's `naming` module, imported, never re-implemented). The host is one named constant whose value is taken from
-   the contract; no percent-encoding (`+` is written literally; `%2B` is a different string); invalid triples are refused by the
-   same 008a naming checks (including the reserved-device-name rule). A version with build metadata (`+`) still yields its URL
+   the contract; no percent-encoding (`+` is written literally; `%2B` is a different string); invalid triples are refused before any string is built, by exactly
+   these checks: the `id` pattern and the semver `version` pattern of `contracts/entry.schema.json` (the same patterns 008a's
+   `build_version` applies), and `naming.check_namespace` (reserved device names). A version with build metadata (`+`) still yields its URL
    here — holding such versions back from publication is 008b's (092 decision Q10), not this function's. The redirect target
    and every consumer rule (hops, cap, hash-and-signature-before-use) are out of scope here.
-3. `apply_write_back(entry, version, values)` is pure: it returns a new entry and never mutates its input; it refuses (raises a named error) when the target version is absent, is `published` or `removed`, when `values` has a missing or extra key, when a value fails its `entry.schema.json` pattern, or when `values` belong to a different mod or version (the `result.json` carries `id` and `version`; they are compared, not assumed).
+3. `apply_write_back(entry, result, source_archive)` is pure (decision, manager ★ at spec review round 1, 2026-10-26: one entry point, so the mod/version comparison has the data it needs): it computes the values with `write_back_values(result, source_archive)`, returns a new entry and never mutates its inputs. It refuses (raises a named error) when `result.id` differs from the entry's `id`, when no version equals `result.version`, when more than one does, when that version's status is not `pending` (`published`, `removed` or `rejected`; ADR-0121), when the computed values have a missing or extra key, or when a value fails its `entry.schema.json` pattern.
 4. Authority is not decided here: this task changes no workflow and no ownership rule. Who may *commit* the output is 008b plus the ownership carve-out.
 
 ## Acceptance criteria
 All command-based; demonstrated by `docs/tasks/008c-verify.sh`.
 1. **Exactly the permitted transition.** For a fixture entry with one `pending` version, `apply_write_back` returns an entry that (a) validates against `entry.schema.json` as merged by 057, (b) differs from the input in precisely the five added keys and the `status` change — shown by a field-level diff the test computes independently (a generic recursive diff, not the function's own logic), and (c) is classified **accept** by 057's reference oracle when run as `(old=input, new=output)`.
-2. **Refusals.** Each named refusal of design 3 is a separate fixture and each raises the specific error: absent version, `published`, `removed`, missing key, extra key, bad `source_sha256` length, `http://` `source_archive`, `published_at` not RFC 3339, values from another mod, values from another version. The input object is byte-identical after every call (no mutation).
-3. **Shared corpus.** Every `accept` row of 057's `057-transition-fixtures.json` that is a T1 is reproduced by `apply_write_back` from its `old` plus the values; and for every T1 `reject` row that is constructible through the API (for example extra changed field) the function either cannot produce it or refuses — the test asserts which. A fixture file that has changed since this task started is re-read, not cached.
-4. **Mutation.** Make `apply_write_back` also copy `commit` from the values, drop the status change, mutate its input, accept a `published` target, skip the mod/version comparison: each reddens a named check. Restored byte-identically.
+2. **Refusals.** Each named refusal of design 3 is a separate fixture and each raises the specific error: absent version, duplicate matching version, `published`, `removed`, `rejected`, missing key, extra key, bad `source_sha256` length, `http://` `source_archive`, `published_at` not RFC 3339, `result` from another mod, `result` for another version; and for `source_archive_url`: a bad version, a bad name, a reserved namespace. The input object is byte-identical after every call (no mutation).
+3. **Shared corpus.** Every `accept` row of 057's `057-transition-fixtures.json` that is a T1 is reproduced by `apply_write_back` from its `old` plus the values; and for every T1 `reject` row whose `old` contains a `pending` version (the selection rule; the verify script enumerates these rows and asserts their count is above zero, so the test cannot go vacuous) the function either cannot produce it or refuses — the test asserts which. A fixture file that has changed since this task started is re-read, not cached.
+4. **Mutation.** Make `apply_write_back` also copy `commit` from the values, drop the status change, mutate its input, accept a `published` target, accept a `rejected` target, skip the mod/version comparison: each reddens a named check. Restored byte-identically.
 5. **`source_archive_url`**: output equals, byte for byte, the contract's two worked examples, typed literally in the test
    (`https://archive.worldofmodcraft.com/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz` for `mc`, `hello-world`, `1.0.0`;
    `https://archive.worldofmodcraft.com/a.b-1.0.0-rc.1+build.5/a.b-1.0.0-rc.1+build.5.tar.gz` for `a`, `b`, `1.0.0-rc.1+build.5`);
    every generated URL matches `^https://archive\.worldofmodcraft\.com/[0-9A-Za-z._+-]+/[0-9A-Za-z._+-]+\.tar\.gz$` and contains
    no `%`, `..`, `//` after the scheme, `?` or `#`; two different `(namespace, name, version)` triples never produce the same URL
    (property test over a generated set, including the Windows-reserved-name rejections inherited from 008a); the hostname comes
-   from one named constant, and a test asserts no other module under `tools/` hard-codes it. The test cites the contract section
-   with task 092's merge commit.
+   from one named constant, and a grep asserts no other module under `tools/` hard-codes it (with a positive control file that
+   does, which must be found). `008c-verify.sh` greps the merged `contracts/artifact-naming.md` for the host and both worked-example
+   strings and compares them with the constant and the test's typed literals (a contract change reddens it).
 6. **No secret, no network:** the module imports neither `subprocess` nor a network library (grep, with a positive control file); the canary test of 008a criterion 11 is extended to `write_back_values`'s output.
-7. `docs/tasks/008c-verify.sh` exists, is executable, mutation-tested (criteria 1, 2, 4), run in a fresh clone; output pasted in the log. `docs/pipeline/build-pipeline.md` gains the write-back section (what is computed, what is refused); the file also records, as `[unverified]`, that nothing here checks a hash against a tarball (that is the E9 verifiers').
+7. `docs/tasks/008c-verify.sh` exists, is executable, mutation-tested (criteria 1, 2, 4, 5; for 5: host changed, `+` encoded as `%2B`, tag not repeated as the asset stem, a trailing slash added, the reserved-name check dropped — each reddens a named check), run in a fresh clone; output pasted in the log. `docs/pipeline/build-pipeline.md` gains the write-back section (what is computed, what is refused); the file also records, as `[unverified]`, that nothing here checks a hash against a tarball (that is the E9 verifiers').
 
 ## Explicitly OUT of scope
 - Opening, committing or merging the write-back PR; the workflow; the ownership carve-out (008b and sibling contract work).
 - Changing any contract, `entry.json`, or 057's fixtures (a needed change is a stop-and-report to 057).
 - The archive tool itself (008a).
+- Checking `source_archive` for equality with the derived URL in CI (092 decision Q2, booked as its own task); `apply_write_back` checks its shape only.
 
 ## File scope (declared; anything else = stop and report)
 In the **registry** repo: `tools/pipeline/write_back.py` (new), `tests/pipeline/test_write_back.py` and fixtures (new), `docs/pipeline/build-pipeline.md` (the write-back section only), `docs/tasks/008c-pipeline-write-back.md` (log), `docs/tasks/008c-verify.sh` (new, executable). 008a's files are read-only here, except importing them.
@@ -61,6 +64,10 @@ In the **registry** repo: `tools/pipeline/write_back.py` (new), `tests/pipeline/
 - Deriving the test's expected output from the function under test (the project's recurring signature failure).
 - Weakening a 057 fixture, or skipping the shared corpus because it is inconvenient.
 - Any real key, token or `gh` credential command (CLAUDE.md rule 11).
+
+## Size
+Source files: 1 (`tools/pipeline/write_back.py`), estimated ≤ 250 changed lines. Reading list: 10 files (the four 057 files, the
+092 contract, `naming.py`, `build_version.py`, `signature-format.md`, ADR-0041, ADR-0121). Within the §2b soft cap.
 
 ## Dependencies and sequencing
 `032` → `045` → `057` merged; `058` merged (platform #79); `008a` merged; **`092` merged (registry #25)** → **008c** → 008b (the workflow calls these functions). 007's append-only checker, when merged, must also accept the output; criterion 1(c) uses the 057 oracle until then. File overlap with 008a: none (`write_back.py` is new; 008a is read-only here).
@@ -86,3 +93,9 @@ unpublished). The Actions run log is not used as the permanent reference (retent
 - 2026-10-26 manager (session 12): spec updated for task 092 (URL formula, host constant from the contract, AC5 pinned to the
   contract's two worked examples, dependencies 057/058/008a merged, 092 must merge first, Q10 noted as 008b's). Out of scope and
   booked elsewhere: CI equality of `source_archive` against the derived URL (092 decision Q2). Next: independent spec review.
+- 2026-10-26 manager (session 12): independent spec review round 1 **PASS-WITH-AMENDMENTS**, all folded in: (1 HIGH) `rejected` refused
+  (design 3, AC2 fixture, AC4 mutation; ADR-0121); (2 HIGH) the values-vs-mod/version contradiction resolved by one entry point
+  `apply_write_back(entry, result, source_archive)` (manager ★); (3 HIGH) reading list cut to 10 and a Size section added; (4 MED) the
+  naming checks named exactly; (5 MED) oracle listed, ADR-0121 named; (6 MED) AC5 mutations + a command-checkable contract citation +
+  positive control; (7 LOW) CI equality stated out of scope; (8 LOW) AC3 selection rule with a non-zero count, duplicate versions
+  refused; (9 LOW) status line. Next: spec review round 2.
