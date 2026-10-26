@@ -68,3 +68,9 @@ and the Base permissions value. Nothing else in the runbook changes (068-verify 
   **Status: the changed script is syntax-checked (`bash -n`) but its full run is PENDING.** `ps` showed another agent's verify chain
   (039a/064/065/066/062/007a) running for the whole 30 min wait, and the instruction was to run verify scripts only on a clear machine.
   Run `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/085-verify.sh` (and 068) on a quiet machine before merge.
+- 2026-10-26 manager (session 12): **full run done on a quiet machine** (queue log: 0 other verify processes at start), at b0479b5:
+  `bash docs/tasks/085-verify.sh` -> "085-verify: ALL CHECKS PASSED" (incl. `pinunr -> exit 1 (red, as required)`, "unreachable FINAL named
+  as such"); `bash docs/tasks/068-verify.sh` -> 16/16 PASS, "ALL PASS". The PENDING item above is closed.
+  **Delta review (reviewer, read-only): PASS.** Non-blocking LOW, booked as a follow-up: the nested control (~line 118) asserts the M4 tick
+  applied but not that the "Last reviewed" sed matched; add an assertion that `Last reviewed: 2026-11-01` is present in the clone.
+  Merged under Ludwig's overnight approval (mission log, session 12, 2026-10-26 ~22:00).
