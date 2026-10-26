@@ -2439,3 +2439,37 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   root `/` → `HTTP/2 302`, `location: …/releases/download/`, `server: cloudflare`; certificate valid (plain curl, no -k).
   → 091's [unverified] case-preservation and query-drop items are now observed facts; 092 AC11 to be re-run with `--live` once
   092-verify.sh exists. Still unproven: GitHub resolving a `+` tag (Q10 holds `+` versions back until task 010).
+
+## SESSION STATUS — 2026-10-26 (session 11, handover) — context far past 40 %; tonight's waiver has expired (§5 back in force)
+### Merged this session (night + day; all reviewed; Ludwig's OK where §7 requires)
+platform #77 (010a), #79 (058 probe), session logs #73-#78; registry #22 (084), #19 (065), #21 (039a); site #4 (065 re-sync).
+Ludwig's runbook steps done: M6 (mbmludric member; Base permissions Read), M8 earlier, **M12** (Cloudflare redirect; manager's
+live checks pass, see above). pages-probe created, used and deleted.
+### Open PRs (state at handover)
+- **registry #20 (082, E15 contract)** — reviewed PASS; blocked on **087** (its README edit reddens closed 032/067); then AC13 run.
+- **registry #24 (087)** — re-pins 032/067 README checks + 070 AC4.m1; full closed-script run and `070 --mutate` PENDING (quiet
+  machine). Merge before #20.
+- **registry #23 / platform #81 (039b)** — workflow YAML, AC7, CONTRIBUTING, runbook M9/M10/M11 + R11 note. Agent was still
+  running at handover; on report: independent security review, then Ludwig's OK. After merge: Ludwig does M9 (required check
+  `gate`, only after a first live run), M10 (membership-read App), M11 (environments `signing`/`write-back`, delete repo-level
+  copies of both keys).
+- **platform #80 (085)** — 068 re-pin + M6 tick; fix `b0479b5` (085-verify reads FINAL); full run PENDING (quiet machine); then
+  delta review and Ludwig's OK.
+- **platform #82 (091, runbook M12)** — reviewed after fix; M12 ticked (`46f3a20`); 068-verify PENDING (quiet machine); Ludwig's OK.
+- **092 (artifact-naming URL contract)** — spec-approved (2 rounds; Q1-Q10 ★ by Ludwig); phase 1 done (registry
+  `task/092-artifact-naming-archive-url`, FINAL `41776d7`; platform `task/092-depgraph` `1da5751`); **phase 2 (092-verify.sh +
+  PRs) agent was still running at handover.** Then: run `092-verify.sh --live` (AC11; M12 is live), independent review, Ludwig.
+### Next session starts here
+1. **Quiet-machine queue** (one agent, strictly one script at a time, nothing else running): 085 (068 + 085-verify), 087
+   (all closed scripts + `070 --mutate`), 091 (068-verify), then 082 `--full` (AC13) on a merge with 087. Several runs failed or
+   were cut short tonight because chains overlapped (039a/039b verify chains run 4-5 h).
+2. Pick up the reports of the 039b and 092-phase-2 agents from their branches/logs (they wrote to disk); review; Ludwig's OK.
+3. Merge order: 087 → 082; 085, 091 (platform); 039b (both repos); 092 (both repos) after `--live`.
+4. Then **008c** (unblocked by 092), then **008b** (re-gate of its 2026-10-25 amendment first), then 040, 055, 010b.
+5. **089/090**: fix the 14 own-change findings in `docs/research/closed-verify-sweep-088.md` after the open PRs merge.
+6. Booked follow-ups: Q2 of 092 (CI equality for `source_archive`); stale contract texts from 065 Q2 (+ uppercase non-hex BAD value);
+   R11 takedown-only identity task (ownership.md amendment + config); 070-verify header "ten closed scripts"; OPERATIONS.md still
+   calls mbmludric a non-member; temp dirs left in /tmp by the rm guard; 008b re-gate.
+7. Ludwig's direction recorded: no web client; minigame instancing = option A (several world processes on a local server) as a
+   later ADR (after SITE-V1).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-26 (session 11, handover) i missionsloggen och fortsätt med 'Next session starts here'."
