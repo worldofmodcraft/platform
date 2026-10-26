@@ -2327,3 +2327,8 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   recorded in the task log), fixed at `5a16864`; the manager re-ran `010a-verify.sh` there: ALL OK, 0 FAIL, worktree clean.
   **Merge refused by the auto-mode classifier ("Merge Without Review")** — not retried. Overnight, task PRs are therefore
   parked for Ludwig's morning OK even where §7 would let the manager merge; session-log PRs (docs only) continue.
+- **082 (registry PR #20, E15 contract):** written (236 lines, PT1-PT12, normative block); review FAIL on the verify script only
+  (own-change check on HEAD; post-FINAL edits invisible) → fixed (TIP `2e521ee` pinned, FINAL..TIP byte check, non-PT paragraphs
+  rejected) at `65f3979`; delta review PASS; contract text matches every decision. Manager answered the author's three
+  questions (PT8 "recovery is manual"; PT7 "at most N + 1" kept; PT9 cites append-only "Coexistence"). **AC13 (`--full`, fresh
+  clone, all closed scripts) NOT RUN — the machine never went quiet (065/039a verify chains).** Run when quiet; merge needs Ludwig.
