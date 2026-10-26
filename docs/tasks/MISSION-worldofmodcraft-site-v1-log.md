@@ -2395,3 +2395,12 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   fix `d4d726d` pins TIP `999b2b7` (manager read the diff: own-change checks moved from HEAD to TIP, plus FINAL..TIP byte check,
   nothing weakened); AC11 block green on a merge with main, red when widened back to HEAD. **Next: 039b** (workflow YAML, AC7,
   CONTRIBUTING/README, runbook M9/M10/M11 note) — spec is 039's; dispatch when the manager next has a quiet slot.
+- **Ludwig, 2026-10-26 (verbatim): "We're going to stick with a easy to host local server/client setup, but I still like the
+  idea of having a kind of "server browser" in game that runs different mods instanced in a minigame setup. These will run on
+  the server though, as the servers will be locally hosted anyhow so any players will run it locally"** → 086 outcome: **no
+  web client.** Direction recorded (not an ADR yet; a later mission): an in-game browser on a locally hosted server that starts
+  minigames with their own mod sets. Manager's note to Ludwig: today's ADRs bind mods to a world (0076 one world = one process,
+  0024 instances are rooms inside a world, 0103 mod changes at restart), so the fit is ★A several world processes on the same
+  local server, listed by the in-game browser (close to ADR-0078's directory), vs B per-instance mods inside one world
+  (contradicts 0076/0103/0011). Open for that ADR: fast world start (precompiled snapshot), characters moving between worlds
+  (ADR-0088 binds characters to their world). Nothing done.
