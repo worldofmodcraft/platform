@@ -1,84 +1,68 @@
 # Task 008b: Pipeline workflow — post-merge run, release upload, protected write-back
 
-- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** umbrella — split into 008b-1, 008b-2 and 008b-3 at the spec gate 2026-10-26 (manager decision; MANAGER.md §2b: splitting is the default). **No agent is dispatched on this file.** It keeps the decisions, design, environmental facts, manual steps and history; each part has its own task file and spec review
+- **Mission:** SITE-V1, deliverable **D2** (second half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** umbrella — split into 008b-1, 008b-2, 008b-3a and 008b-3b at the spec gate 2026-10-26 (manager decision; MANAGER.md §2b: splitting is the default). **No agent is dispatched on this file.** It keeps the decisions, design, environmental facts, manual steps and history; each part has its own task file and spec review
 - **Agent / model:** none (umbrella)
-- **Budget:** n/a — see the parts: 008b-1 medium, 008b-2 medium, 008b-3 large
-- **Branch / worktree:** none; parts use `task/008b1-pipeline-plan`, `task/008b2-pipeline-build-sign`, `task/008b3-pipeline-write-back` — **registry** repo
+- **Budget:** n/a — see the parts: 008b-1 medium, 008b-2 medium, 008b-3a small, 008b-3b large
+- **Branch / worktree:** none; parts use `task/008b1-pipeline-plan`, `task/008b2-pipeline-build-sign`, `task/008b3a-ownership-carve-out`, `task/008b3b-pipeline-write-back` — **registry** repo
 
-## Split (manager decision, spec gate 2026-10-26)
-The re-gate's size count (7 source files, about 800 changed lines, 28 reading items) was over every cap, and even a 2-way split left parts of about 400 lines. The manager split it three ways. Sequence: **008c -> 008b-1 -> 008b-2 -> 008b-3**, with tasks 082 (registry #20, blocked on 087) and 092 (registry #25) merged first.
-- **008b-1** `docs/tasks/008b1-pipeline-plan.md` — the planner (`plan_pending.py`: C11-C13, C15, PT5, the `+` classification of 092 Q10, the dry-run input set of PT12).
-- **008b-2** `docs/tasks/008b2-pipeline-build-sign.md` — the workflow file with the plan, build, sign and dry-run jobs, `--no-sign`, `sign_built.py`, environment `signing`.
-- **008b-3** `docs/tasks/008b3-pipeline-write-back.md` — the write-back job, `write_back_job.py`, `release.sh`, the ownership carve-out, environment `write-back`.
+## Split (manager decision, spec gate 2026-10-26; refined after the split's independent review, manager ★, session 12)
+The re-gate's size count (7 source files, about 800 changed lines, 28 reading items) was over every cap. The manager split it into four task files. Sequence: **008c -> 008b-1 -> 008b-2 -> 008b-3b**, with **008b-3a** (ownership carve-out; needs Ludwig's approval, CI security check) merged before 008b-3b and free to run in parallel with 008b-1/2, and tasks 082 (registry #20, blocked on 087) and 092 (registry #25) merged first. **No agent is dispatched on this umbrella.** The old file `008b3-pipeline-write-back.md` is removed (`git rm`/rename): its content is in 3a and 3b.
+- **008b-1** `docs/tasks/008b1-pipeline-plan.md` — the planner (`plan_pending.py`: C11-C13, C15, PT5 via `summarize_outcomes()`, the `+` classification of 092 Q10, refusal-log recovery, the dry-run input set of PT12, the pinned plan-document schema and exit codes). About 190 lines, 1 source file, 9 reading items.
+- **008b-2** `docs/tasks/008b2-pipeline-build-sign.md` — the workflow file with the plan, build, sign, dry-run and summary jobs, the push gate, the **build-result handoff** (owner), `--no-sign`, `sign_built.py`, `handoff.py`, environment `signing`. About 340 lines (over by 40, justified there), 4 source files, 10 reading items.
+- **008b-3a** `docs/tasks/008b3a-ownership-carve-out.md` — `ownership.py` carve-out only. About 60 lines, 1 file, 7 reading items.
+- **008b-3b** `docs/tasks/008b3b-pipeline-write-back.md` — the write-back job, `write_back_job.py` (loop, pre-T1 check, archive log rule, T3 builder `build_t3()`), `release.sh`, gate removal, environment `write-back`. About 400 lines (justified there), 3 source files, 9 reading items.
 
 ### Mapping: acceptance criteria (every original criterion, or clause of one, lands in exactly one part)
 | Umbrella criterion | Part | Note |
 |---|---|---|
-| 1 E15 contract and trigger-block comparison | 008b-2 | needs 082 on `main` |
-| 2 secrets referenced exactly once each | 008b-3 | evaluated on the combined workflow; 008b-2's 14(d) covers the signing key meanwhile |
-| 3 naming and URL helpers | 008b-1 | |
-| 4 write-back is exactly T1 / T3 | 008b-3 | |
-| 5 ownership carve-out narrow | 008b-3 | |
-| 6 [live] release upload, front fetch | 008b-3 | |
+| 1 E15 contract and trigger-block comparison | 008b-2 | needs 082 on `main`; asserts all four dispatch inputs |
+| 2 secrets referenced exactly once each | 008b-3b | evaluated on the combined workflow; 008b-2's 14(d) covers the signing key meanwhile |
+| 3 naming and URL helpers | 008b-1 | `+` example is derivation only |
+| 4 write-back is exactly T1 / T3 | 008b-3b: the T1/T3 diffs built by `apply_write_back` and `build_t3()` pass the append-only and schema checkers · 008b-3a: the ownership checker accepts the permitted diffs for the App's id and rejects another id | |
+| 5 ownership carve-out narrow | 008b-3a | needs Ludwig's approval |
+| 6 [live] release upload, front fetch | 008b-3b | |
 | 7 [live] runner assumptions | 008b-2 | |
 | 8 [live] fork safety | 008b-2 | |
-| 9 [live] App-token behaviour | 008b-3 | |
+| 9 [live] App-token behaviour | 008b-3b | |
 | 10 [live] dry run | 008b-2 | |
-| 11 [live] failure path (dry run) | 008b-2 | the T3 PR is shown by 008b-3 criteria 4, 5, 21 |
-| 12 idempotence of the no-op | 008b-1 | |
+| 11 [live] failure path (dry run) | 008b-2 | failure log is a workflow artifact (PT12); T3 shown by 008b-3b criteria 4, 21, 28, 29 |
+| 12 idempotence of the no-op | 008b-1 | live half also in 008b-3b criterion 27 |
 | 13 verify script, mutation-tested | each part | restated per part for that part's criteria; no original criterion is dropped |
-| 14 clone job has no secret | 008b-2: clauses (a)-(d), signing and dry-run half of (f) · 008b-3: clause (e), write-back half of (f) | |
+| 14 clone job has no secret | 008b-2: clauses (a)-(d), signing and dry-run half of (f) · 008b-3b: clause (e), write-back half of (f), and a re-run of all of 008b-2's verify script on the combined workflow | |
 | 15 test-only flags absent | 008b-2 | |
 | 16 `--no-sign` and the sign step | 008b-2 | |
-| 17 retry path and planner tests | 008b-1: planner clauses and (a)-(d) · 008b-2: the `env:`-only clause | |
-| 18 docs move with code | split by section: each part owns the sections its criterion 18 names | |
-| 19 write-back loop, fake clock | 008b-3 | |
-| 20 `timeout-minutes` sizing | 008b-3 | |
-| 21 `+` version refused with a T3 | 008b-3 | the planner classification is 008b-1's 17(d) |
-| 22 pre-T1 `source_archive` check | 008b-3 | |
-| 23 [live] environments bind keys to `main` | 008b-3 | covers both environments |
-| 24 append-only log and release | 008b-3 | |
+| 17 retry path and planner tests | 008b-1: planner clauses and (a)-(g) · 008b-2: the `env:`-only clause | |
+| 18 docs move with code | split by section: 008b-1 plan document; 008b-2 plan/build/sign/dry-run jobs; 008b-3b write-back, recoveries (incl. killed run), "what Ludwig must do"; 008b-3a none | |
+| 19 write-back loop, fake clock | 008b-3b | |
+| 20 `timeout-minutes` sizing | 008b-3b | N x 30 + margin, capped |
+| 21 `+` version refused with a T3 | 008b-3b | planner classification is 008b-1's 17(d) |
+| 22 pre-T1 `source_archive` check | 008b-3b | |
+| 23 [live] environments bind keys to `main` | 008b-3b | covers both environments |
+| 24 append-only log and release | 008b-3b | |
+| 25 push gate (added at the split review) | 008b-2 | |
+| 26 handoff layout (added) | 008b-2 | |
+| 27 gate removed, trigger live (added) | 008b-3b | |
+| 28 PT10 order and PR comment (added) | 008b-3b | |
+| 29 refusal-log recovery (added) | 008b-3b | planner side is 008b-1's 17(e) |
 
 ### Mapping: designs, decisions, files, manual steps
 | Item | Part |
 |---|---|
 | Design 1 trigger; dry-run input set (PT12; Q-M) | 008b-2 declares the workflow inputs; 008b-1 owns their names and validation |
 | Design 2 (pending listing, C11, C12, C15, `+` classification) | 008b-1 |
-| Design 3 concurrency: group declared | 008b-2; planner branch skip (C13) 008b-1; group held until PRs terminal 008b-3 |
-| Design 4 write-back sequencing (C22, PT11) | 008b-3 |
-| Design 5 release, pre-T1 check (092 Q5/Q9), append-only log (PT8) | 008b-3 |
+| Design 3 concurrency: group declared | 008b-2; planner branch skip (C13) 008b-1; group held until PRs terminal 008b-3b |
+| Design 4 write-back sequencing (C22, PT11) | 008b-3b |
+| Design 5 release, pre-T1 check (092 Q5/Q9), append-only log (PT8) | 008b-3b |
 | Design 6 key use in one step | 008b-2 |
-| Design 7 exit-1 T3, `+` T3 (Q10, Q-L), build-log location, comment | 008b-3; exit-2 faults and PT5 behaviour: 008b-1 (driver tests) and 008b-2 (wiring) |
-| Design 8 SSRF split, `--no-sign`, sign step, `signing` environment, dry-run job | 008b-2; `write-back` environment and job 008b-3 |
+| Design 7 exit-1 T3, `+` T3 (Q10, Q-L), build-log location, comment | 008b-3b; exit-2 faults and PT5 behaviour: 008b-1 (`summarize_outcomes`) and 008b-2 (matrix, summary job, handoff) |
+| Design 8 SSRF split, `--no-sign`, sign step, `signing` environment, dry-run job | 008b-2; `write-back` environment and job 008b-3b |
 | Design 9 retry/dispatch | 008b-1 (validation, planner), 008b-2 (`env:` only) |
 | Decisions Q-B, C11, C12, C15, Q-M | 008b-1 |
-| Decisions SSRF split, C14 (signing), C16, C17, C21, Q-H, C20 (signing) | 008b-2 |
-| Decisions Q-D, Q-E, Q-G, Q-J, build-log location, C13 (hold), C14 (write-back), C20 extended (write-back), C22, C23, 092 Q5/Q9/Q10, Q-K, Q-L, Q-N | 008b-3 |
-| Files: `plan_pending.py` | 008b-1 · `pipeline.yml` (all but write-back job), `sign_built.py`, `build_version.py` flag: 008b-2 · `pipeline.yml` write-back job, `write_back_job.py`, `release.sh`, `ownership.py`: 008b-3 |
-| `docs/pipeline/build-pipeline.md` | shared by section: 008b-1 plan document; 008b-2 plan/build/sign/dry-run jobs; 008b-3 write-back, recovery, "what Ludwig must do" |
-| Manual steps M5, M6, M7 (this file's section) | 008b-3 · M11: 008b-2 (`signing`) and 008b-3 (`write-back`) · M3 / Q-H: 008b-2 |
-
-## Amendment 2026-10-25 (session 11 night)
-Sources: platform `docs/tasks/082-pipeline-trigger-contract.md` (the E15 contract, spec-approved 2026-10-25 night; its merge needs
-Ludwig; its "Dependencies / sequencing" follow-up list is the checklist for this amendment), `docs/tasks/039-registry-ci-workflow.md`
-(§1, §3, log note C23) and the mission log choices C10-C23. This amendment takes no decision of its own: it folds in decisions already recorded by Ludwig (mission log C11-C23, and 092's Q5, Q9, Q10).
-Each amendment is applied in place below; the tag in brackets names where.
-1. **Objective, key reachability** (C14, C20; 082 PT3) — the key is reachable on `push` to `main` or a `workflow_dispatch` on `main`, never from a fork, and bound to `main` by environments, not by the workflow's `if:`. [Objective]
-2. **Design 2, first sentence** (C12, C11; 082 PT4, PT5) — the run reads the state at `main`'s head fetched at plan time, not the pushed range. [Design 2]
-3. **Design 4, write-back sequencing** (C22; 082 PT11) — one PR at a time, App merges once `gate` is green, 30-minute deadline, closed or deadline fails the run, `timeout-minutes` sized from the pending count. [Design 4]
-4. **Design 8, environments** (C20 extended by review round 2; C14; C21; 082 PT3, PT12) — environments `signing` and `write-back` limited to `main`; the repo-level copies of both secrets are deleted in runbook M11; until then the trust boundary is every account with write access; the dry-run job references neither. [Design 8; Design 6 gets a one-line pointer]
-5. **Design 9, dispatch** (C11; 082 PT5, PT6, PT12) — empty `version` plans all pending versions like a push; `version` is validated and passed via `env:`. [Design 9]
-6. **Criterion 1** (C16, C17; 082 normative block) — the workflow is compared with 082's normative block on parsed keys. [Criterion 1]
-7. **Criterion 10** (C21; 082 PT12) — dry runs sign only with an ephemeral in-run key. [Criterion 10]
-8. **Consequential wording, derived from items 3-5, for the re-gate to check:** criterion 9 names `gate` (039) as the required check; criterion 14 gains clause (f) (the `environment:` declarations of design 8, so the structure check cannot pass a workflow without them); criterion 17 gains the `env:`-only check for `version`. [Criteria 9, 14, 17]
-9. **Dependencies and status** — 082 (E15 contract), 039a (composer) / 039b (workflow, `gate`) per the C23 split, M11 (Ludwig). [Dependencies; header status]
-
-**Noted at the 2026-10-25 amendment; status after the 2026-10-26 re-gate fold-in (see the log entry of that date for the finding-by-finding map):**
-- 082 PT5: a fault or refusal ends that version only and the run continues with the other pending versions, failing at the end naming each. **Folded in 2026-10-26** (design 7, design 9, criterion 17).
-- 082 C13/PT8: the planner skips a pending version whose `pipeline/<ns>.<name>-<version>` branch already exists (run non-green, version named); an existing `logs/<ns>.<name>/<version>.log` in `archive` fails that version (append-only). **Folded in 2026-10-26** (design 3, design 5, criteria 17 and 24).
-- Once the App key lives only in the `write-back` environment (M11), every job that uses the App token, including task 055's site-dispatch sender (design 4), must declare `environment: write-back`; 008b criterion 14(e) already places the key in one job.
-- 082 PT12 says a dry run's source is a `pending` version on `main` or an input set that 008b names and 082 reviews. **Folded in 2026-10-26:** design 1 names the input set (open detail: Question Q-M); 082's reviewer must still confirm it.
-- 082 PT11 sizes the job timeout as N x 30 minutes plus build time; whether GitHub caps a job's `timeout-minutes` below that for a large N is [unverified] here. **Handled 2026-10-26** by criterion 20 and Question Q-N.
+| Decisions SSRF split, C14 (signing), C16, C17, C21, Q-H, C20 (signing), push gate, handoff | 008b-2 |
+| Decisions Q-D, Q-E, Q-G, Q-J, build-log location, C13 (hold), C14 (write-back), C20 extended (write-back), C22, C23, 092 Q5/Q9/Q10, Q-K, Q-L, Q-N | 008b-3b (Q-D's identity for the carve-out also in 008b-3a) |
+| Files: `plan_pending.py` | 008b-1 · `pipeline.yml` (all but write-back job), `sign_built.py`, `handoff.py`, `build_version.py` flag: 008b-2 · `ownership.py`: 008b-3a · `pipeline.yml` write-back job and gate removal, `write_back_job.py`, `release.sh`: 008b-3b |
+| `docs/pipeline/build-pipeline.md` | shared by section: 008b-1 plan document; 008b-2 jobs; 008b-3b write-back, recoveries, "what Ludwig must do" |
+| Manual steps M5, M7 (this file's section) | 008b-3b · M6: 008b-3a · M11: 008b-2 (`signing`) and 008b-3b (`write-back`) · M3 / Q-H: 008b-2 |
 
 ## Objective
 A merged pull request that adds a version to `worldofmodcraft/registry` causes, within minutes
@@ -106,7 +90,7 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 - Graph: nodes **N5**, **N6**, **N2**, **N3**; edges **E7**, **E8**, **E15**, **E16**.
 
 ## Size (5b) — superseded by the split
-**Counts refreshed 2026-10-26 for the undivided task (estimates; nothing built):** 7 source files (cap 5), about 800 changed lines (cap 300), 28 reading-list items (cap 10) — over every cap. The justification for keeping one task (one security argument across workflow, planner, sign step and write-back) was weighed at the gate and **not accepted**: the manager split the task three ways (see "Split" above). Real estimates per part are in each part's own Size section: 008b-1 about 130 lines, 1 file, 9 reading items; 008b-2 about 270 lines, 3 files, 10 items; 008b-3 about 400 lines, 4 files, 11 items (justified there). The 008d trigger (if the `--no-sign` change is not green after session 3 it becomes its own task) moved to 008b-2.
+**Counts refreshed 2026-10-26 for the undivided task (estimates; nothing built):** 7 source files (cap 5), about 800 changed lines (cap 300), 28 reading-list items (cap 10) — over every cap. The justification for keeping one task (one security argument across workflow, planner, sign step and write-back) was weighed at the gate and **not accepted**: the manager split the task three ways (see "Split" above). Real estimates per part are in each part's own Size section: 008b-1 about 190 lines, 1 file, 9 items; 008b-2 about 340 lines, 4 files, 10 items (justified there); 008b-3a about 60 lines, 1 file, 7 items; 008b-3b about 400 lines, 3 files, 9 items (justified there). The 008d trigger (if the `--no-sign` change is not green after session 3 it becomes its own task) moved to 008b-2.
 
 ## Environmental facts (what is verified, what is not)
 - **Verified 2026-10-15 (against registry `origin/main` `a50daac`):** `build_version.py` is one process that clones, archives, scans, hashes **and signs**, taking `--key` and `--pubkey`: `git show origin/main:tools/pipeline/build_version.py | grep -n 'gitops.clone\|signing.sign'` finds both inside `execute()`. It has **no mode without a key** (`--key` and `--pubkey` are `required=True` in `parse_args`). The SSRF job split (design 8) therefore requires the `--no-sign` change that design 8 puts in this task's scope. `PyYAML` 6.0.3 imports in this session (`python3 -c 'import yaml; print(yaml.__version__)'`); whether it is on the CI runner is unverified.
@@ -193,7 +177,7 @@ log where the author will see it. The contract for the trigger (E15) exists firs
 9. **Retry after a pipeline fault.** A build that ends in exit 2 leaves the version `pending` on `main` (design 7); every push run also retries it (PT5). It can be rebuilt on demand by a non-dry-run `workflow_dispatch` with the input `version=<namespace>.<name>@<semver>`; the planner then builds only that version (and only if it is still `pending`). A dry run (`dry_run=true`) never takes this path. Pushes to `main` still plan all pending versions. A non-dry-run dispatch with an **empty `version`** plans all pending versions, exactly like a push (C11; 082 PT5, PT6) — so a waiting push run replaced by a waiting dispatch run [unverified GitHub behaviour] loses nothing. The `version` input is validated against the entry-id and semver patterns before use, and reaches scripts only through `env:` (never `${{ inputs.version }}` inside a `run:`); a dry run's `version` is validated and passed the same way (082 PT12). Concurrency group `pipeline` applies, so a dispatch queues behind a running build.
 
 ## Acceptance criteria
-**Moved to the parts.** The full text of criteria 1-24 now lives in the part files named in the mapping table under "Split" (criteria 14 and 17 are divided by clause; 13 and 18 are restated per part). Criterion numbers are kept in the parts so this table can be checked. The numbering history: criteria 1-18 were written 2026-10-14/15; 19-24 were added at the 2026-10-26 re-gate (write-back loop, timeout sizing, `+` T3, pre-T1 check, environments live test, append-only log). No agent is dispatched on this umbrella.
+**Moved to the parts.** The full text of criteria 1-29 now lives in the part files named in the mapping table under "Split" (criteria 14 and 17 are divided by clause; 13 and 18 are restated per part). Criterion numbers are kept in the parts so this table can be checked. The numbering history: criteria 1-18 were written 2026-10-14/15; 19-24 were added at the 2026-10-26 re-gate (write-back loop, timeout sizing, `+` T3, pre-T1 check, environments live test, append-only log); 25-29 at the review of the split (push gate, handoff layout, gate removal and live trigger, PT10 order and PR comment, refusal-log recovery). No agent is dispatched on this umbrella.
 
 ## Explicitly OUT of scope
 - 008a's tool; E12 (site rebuild dispatch, task 055); `page.json` screenshot scan (task 040);
@@ -329,10 +313,10 @@ Workflow + helpers + tests + docs + verify script + this file's log section curr
   I did not and may not check — `gh secret` commands are forbidden.) Not covered by Ludwig's 2026-10-14
   answers.
 - **Branch-protection required checks: closed 2026-10-26** — superseded by the required check `gate` (task 039b) and runbook M9; design 4 and criterion 9 name `gate`.
-- **Q-K (CLOSED 2026-10-26, decided by the manager: option A, starred; Ludwig's overnight instruction "Ta stjärna på alla beslut"; goes to 008b-3):** the write-back loop, pre-T1 check and archive-log rule are code that criteria 19, 21, 22 and 24 must test offline with a fake clock and fake APIs, so they need a module. Options: A new `tools/pipeline/write_back_job.py` (adds one source file; 7 in total); B put them in `release.sh` (not testable with a fake clock; criteria 19-24 could not be demonstrated); C put them in 008c's `write_back.py` (outside this task's file scope). **Conservative assumption: A**, already in the file scope above.
-- **Q-L (CLOSED 2026-10-26, decided by the manager: option A, starred, consistent with the 2026-10-15 build-log decision; goes to 008b-3):** a T3 needs a non-empty `reason` and an `https://` `build_log_url`; a `+` version has no build log. 092 fixes the reason text but not the URL. Options: A commit a one-line log file `logs/<ns>.<name>/<version>.log` in `archive` containing the refusal text, before the T3 PR, as design 7 does for a rejection (uniform; the append-only rule applies); B point `build_log_url` at 092's contract section (a URL that is not a log); C amend the T3 rule so `build_log_url` may be absent for this cause (changes 057's contract). **Conservative assumption: A.**
+- **Q-K (CLOSED 2026-10-26, decided by the manager: option A, starred; Ludwig's overnight instruction "Ta stjärna på alla beslut"; goes to 008b-3b):** the write-back loop, pre-T1 check and archive-log rule are code that criteria 19, 21, 22 and 24 must test offline with a fake clock and fake APIs, so they need a module. Options: A new `tools/pipeline/write_back_job.py` (adds one source file; 7 in total); B put them in `release.sh` (not testable with a fake clock; criteria 19-24 could not be demonstrated); C put them in 008c's `write_back.py` (outside this task's file scope). **Conservative assumption: A**, already in the file scope above.
+- **Q-L (CLOSED 2026-10-26, decided by the manager: option A, starred, consistent with the 2026-10-15 build-log decision; goes to 008b-3b; ★ closure, Ludwig may overrule — the manager lists it For Ludwig; recovery rule added manager ★, session 12):** a T3 needs a non-empty `reason` and an `https://` `build_log_url`; a `+` version has no build log. 092 fixes the reason text but not the URL. Options: A commit a one-line log file `logs/<ns>.<name>/<version>.log` in `archive` containing the refusal text, before the T3 PR, as design 7 does for a rejection (uniform; the append-only rule applies); B point `build_log_url` at 092's contract section (a URL that is not a log); C amend the T3 rule so `build_log_url` may be absent for this cause (changes 057's contract). **Conservative assumption: A.**
 - **Q-M (CLOSED 2026-10-26, decided by the manager: option A, starred; 008b owns the naming per PT12; goes to 008b-1 and 008b-2; 082's reviewer still confirms the names):** design 1 names the dry-run source inputs `dry_run_source_url` and `dry_run_commit` and a synthetic in-run entry. 082 PT12 leaves the names to 008b "and this contract reviews". Options: A these names (assumed); B a single `dry_run_source` string `<url>@<commit>`; C drop the pair and dry-run only `pending` versions on `main`, which would leave criterion 10 without the M4 repository as source. **Conservative assumption: A**, and 082's reviewer confirms it at 082's next touch.
-- **Q-N (CLOSED 2026-10-26, decided by the manager: option A, starred; goes to 008b-3):** whether GitHub accepts an expression for `timeout-minutes` and what the maximum job time is for hosted runners; both [unverified] here, so N x 30 minutes may be impossible for a large N. Options: A per-PR deadline enforced in `write_back_job.py` (criterion 19) plus a fixed `timeout-minutes` at the documented limit; the run fails at the limit and the rest wait for the next push; B compute the value per run; C per-step timeouts only. **Conservative assumption: A.**
+- **Q-N (CLOSED 2026-10-26, decided by the manager: option A, starred; revised manager ★, session 12: job `timeout-minutes` = N x 30 + margin capped at the documented limit; goes to 008b-3b):** whether GitHub accepts an expression for `timeout-minutes` and what the maximum job time is for hosted runners; both [unverified] here, so N x 30 minutes may be impossible for a large N. Options: A per-PR deadline enforced in `write_back_job.py` (criterion 19) plus a fixed `timeout-minutes` at the documented limit; the run fails at the limit and the rest wait for the next push; B compute the value per run; C per-step timeouts only. **Conservative assumption: A.**
 - **Q-J: closed** by ADR-0121 (Ludwig, 2026-10-15): `pending → rejected` with `reason` and `build_log_url`; design 7 follows it.
 - **Build log location: closed** (Ludwig 2026-10-15, option A): `worldofmodcraft/archive` at `logs/<namespace>.<name>/<version>.log`. Needs M7.
 - **SSRF split mechanism: closed** (coordinator 2026-10-15): `--no-sign` in `build_version.py` plus a sign step; design 8.
@@ -366,3 +350,17 @@ unpublished). The Actions run log is not used as the permanent reference (retent
   10. Status line and amendment preamble corrected.
   Not measured: nothing here was executed; size figures are estimates. Re-gate round 2 pending.
 - 2026-10-26 split (doc-writer, branch `task/008b-spec-regate`, on the manager's gate decision): the umbrella is now a decisions record; criteria 1-24, the designs, decisions, files and manual steps are mapped to 008b-1 (`008b1-pipeline-plan.md`), 008b-2 (`008b2-pipeline-build-sign.md`) and 008b-3 (`008b3-pipeline-write-back.md`) in the "Split" tables above; criteria 13 and 18 are restated per part and 14 and 17 are divided by clause. Q-K, Q-L, Q-M, Q-N closed as decided by the manager (option A, starred). Sequence 008c -> 008b-1 -> 008b-2 -> 008b-3, with 082 and 092 merged first. Interface assumption for the reviewer: the plan document (lists `build`, `refuse`, `skip`, `fault`, head SHA) between 008b-1 and 008b-2/3 is internal to node N5 and adds no graph edge. Nothing was executed; part sizes are estimates. Independent spec review of each part pending.
+- 2026-10-26 split review fold-in (doc-writer; independent review of head 05f105c returned PASS-WITH-AMENDMENTS on all parts; choices marked "manager ★, session 12"). Where each finding landed:
+  1. (HIGH) 008c's `apply_write_back` builds T1 only -> pure `build_t3()` added to `write_back_job.py` and scope; criteria 4 and 21 reworded; the cap clause replaced by a check against the schema's `reason` rule (008b-3b).
+  2. (HIGH) 2->3 interface -> new section "Build-result handoff" in 008b-2 (matrix with `fail-fast: false`, artifacts `plan`, `build-<tag>`, `signed-<tag>`, `outcome.json` fields, exit 0/1/2, how refuse/rejected/fault pass through, the write-back job's `always()` condition), `handoff.py` added to 008b-2's scope, criterion 26; 008b-3b cites it. Scope addition `handoff.py` is mine, needed to make the layout testable; the manager may overrule.
+  3. (MED) push gate: every job `if: github.event_name != 'push'` in 008b-2 (criterion 25); removed and proven live in 008b-3b (criterion 27).
+  4. (MED) planner exit codes pinned (exit 0 with document even with skip/refuse/fault; exit 1 only for bad inputs, no document), the final `summary` job makes the run non-green, 17(a) reworded (008b-1; 008b-2).
+  5. (MED) `summarize_outcomes()` in `plan_pending.py` owned and tested by 008b-1 (17(c)); plan-document field schema pinned (17(g)).
+  6. (MED) 008b-2 criterion 11: a dry run's failure log is the workflow artifact `build.log`.
+  7. (MED) 008b-3b criterion 28: log commit precedes the T3 PR; full `build.log` commented on the merged PR; lookup method named (`git log --reverse -S`, then the commit-associated-PRs endpoint [unverified]).
+  8. (MED) 008b-3 split into 008b-3a (`ownership.py`, criterion 5 and the ownership clause of 4, M6) and 008b-3b (the rest); old file renamed to 3b; mapping tables regenerated; sizes re-estimated (3a about 60 lines, 3b about 400 lines with justification, reading lists 7 and 9).
+  9. (LOW/MED) Q-L recovery: 008b-1 planner `log_exists` on `refuse` entries (17(e)), 008b-3b re-opens only the T3 PR (criterion 29); Q-L marked "★ closure, Ludwig may overrule", for the manager's For-Ludwig list.
+  10. (LOW) `timeout-minutes` = N x 30 + margin capped at the documented limit (criterion 20, Q-N revised); killed-run recovery steps in criterion 18 (008b-3b).
+  11. (LOW) 008b-2 criterion 1 asserts all four dispatch inputs; edge labels corrected against `depgraph.md` (E7 = N5 -> N6 naming, E8 = N5 -> N2 write-back, E15 = N2 -> N5 trigger): 008b-1 E15 + E7, 008b-2 E15 + E7, 008b-3b E7 + E8 + E15, 008b-3a E16.
+  12. (LOW) 008b-3b criterion 14 re-runs all of 008b-2's verify script on the combined workflow (the push-gate check is replaced by criterion 27).
+  Nothing executed; sizes are estimates. Independent spec reviews of 3a and 3b pending.
