@@ -264,3 +264,108 @@ temp `WOM_VAULT` (test mode ignores `~/.config/wom/vault-path`); the tool never 
 a hidden `.NAME.pid.ns.wom-tmp` to remove by hand; `strace` is not installed on this machine, so "never opened
 a file" is proven with a Python audit hook (`tools/vault/tests/audit_run.py`). Self-test:
 `docs/tasks/051-verify.sh [--mutate]`.
+
+### Vault refresh after a merge: run `tools/vault/refresh-main.sh` (task 052)
+`git fetch origin main:main` fires no `post-merge` hook (verified in a temp repo), and `gh pr merge` never runs one
+locally, so after each `gh pr merge` (as its own bare command) and at handover the manager runs
+`tools/vault/refresh-main.sh`. It pulls main (`--ff-only` in the worktree that has main checked out, otherwise
+`git fetch origin main:main`), re-pins the tool copy and runs `write --ref main`. The hooks and this script run a
+**pinned copy** of `wom_vault.py` in the git common dir; if a hook prints `pinned copy is stale; run refresh-main.sh`,
+run it. Details: `docs/tools/vault-projection.md`, "Triggers and guard".
+
+### git-guard.log and check-log-entry.sh (task 049)
+`.claude/hooks/git-guard.sh` (contract: `docs/tools/git-guard.md`) refuses force pushes, `git reset --hard`, `rm -rf`,
+commits on main, an agent's `git branch -D`, and an agent's Bash command that mentions the vault. **Reading its log:**
+`~/.config/wom/git-guard.log` holds `TIMESTAMP RULE DECISION AGENT` lines. `grep ' block ' ~/.config/wom/git-guard.log |
+tail` shows the recent refusals and who triggered them (`main` or an `agent_type`); `grep -c ' allow '` counts allows;
+`vault-unconfigured` lines mean rule 6 was skipped because no vault is configured. If Bash is unusable, the recovery
+commands are in `docs/tools/git-guard.md`, "Recovery".
+
+**After every subagent run** the manager checks that the task log gained a dated entry (Q6, no handover file):
+`tools/manager/check-log-entry.sh count docs/tasks/NNN-slug.md` before delegating (write the number in the task log),
+then `tools/manager/check-log-entry.sh check docs/tasks/NNN-slug.md BASELINE` after the report-back. Exit 0 = a new
+entry with a valid, not-future date; 1 = no new dated entry (the run is not accepted); 2 = usage error, unreadable file
+or no log section. A dated entry is a line `- YYYY-MM-DD ...` after the `# Task NNN log` heading.
+
+## Four things session 8 paid for (2026-10-14/15)
+
+### A verify paste taken before the last commit is not evidence
+Task 052's fix round pasted a green `--mutate` tail, but HEAD was red: the round's last commit added a `.pyc`.
+The manager's fresh-clone re-run caught it. Briefs now say: run in a fresh clone at the FINAL HEAD, after the last commit.
+
+### The auto-mode classifier denies agents' edits to doctrine files
+Agent batches editing CLAUDE.md, MANAGER.md and the checklists were denied as "Instruction Poisoning" (task 048).
+The denial is an answer: no retry, no workaround, no permission change. Doctrine text is written by the manager in an
+interactive session with Ludwig present, and agents write the verify scripts.
+
+### `git fetch origin main:main` fires no post-merge hook
+Proved in a temp repo (task 050/052). `git pull` does. After `gh pr merge`, the manager's `tools/vault/refresh-main.sh`
+is the trigger that updates the vault. Fetching into a branch checked out in some worktree is refused.
+
+### `~/wom` was left on a task branch, so new sessions read stale doctrine
+Until session 8's handover, the main checkout sat on `task/046-start-here`, so a fresh session loaded old CLAUDE.md and
+`.claude/`. Keep `~/wom` on `main` (untracked inbox files are harmless) and do task work in worktrees.
+
+### Two green registry PRs can make main red together (session 9, 2026-10-15)
+Registry PR #9 (062) and PR #10 (007a) were each green on their own branch; merged one after the other, `main` failed
+`032-verify.sh` N5b, a text pin on a README sentence that 007a was required to rewrite. Neither branch ran the other's
+change. **Before merging a registry PR, run every closed task's verify script against the merge result**, not only the
+branch: once 062 is on `main`, that is `docs/tasks/062-verify.sh /tmp/fc041/node_modules` (ajv path until task 066) on the
+PR branch rebased or merged onto current `main`, in a fresh clone. After a merge, run it again on `main`. Fixed by task 067.
+
+## What session 10 paid for (2026-10-15/16)
+
+### "062-verify.sh green" is not "every closed script green"
+062 does not run every closed script (it cannot run 067: 067 runs 062). Session 10 merged 066 on a 062-only gate and
+`main` was red on 067 until 069. **The merge gate is every closed task's verify script, one at a time, on the merge result
+in a fresh GitHub clone, after `npm ci --prefix tools/dev --userconfig /dev/null --ignore-scripts --no-audit --no-fund`.**
+Chaining them in one Bash call with `;` (no `$?`, no redirects, no variables) passes the worktree-isolation guard;
+parallel calls must never be used — they recreate the race below.
+
+### Verify scripts that measure against HEAD go red on the next task
+Five instances in two days (006/008a/032/057 → 062; 007a, 067 AC5.1 → 069; 067 AC2, 062 AC6 → 070; 007b → open). A check
+that describes the task's **own** change must measure its pinned PR range (`BASE..FINAL`, FINAL = `<merge commit>^2`);
+a check that protects a **live** property must read HEAD — and pinning a live guard silently deletes it (070's review B1).
+Every newly merged task becomes "closed" at that moment: review its verify script for HEAD-relative own-change checks
+**before** merging it, not after the next task trips over them.
+
+### Concurrent suites corrupt each other's verdicts
+`008a-verify.sh` counted `/tmp/wom008a-*` system-wide (fixed by 069: per-run TMPDIR). Other scripts may share the trait.
+Measure on a quiet machine: `ps aux | grep -E "verify.sh|unittest"` must be empty before every gate run.
+
+## What session 11 paid for (2026-10-18/25)
+
+Source for every item: the mission log's session 11 entries. Last reviewed: 2026-10-25.
+
+### (a) EnterWorktree pins the session and its agents
+After the manager entered the session worktree, the isolation guard pinned the session and its agents to it. Task 075's
+first implementer could not run registry verify scripts from the registry worktree root and stopped without working
+around the guard. Do not use EnterWorktree when agents must work in other repositories' worktrees; create the
+session-log worktree by hand with `git worktree add` instead.
+
+### (b) Stale ignored `__pycache__` reddens 049
+A stale, git-ignored `__pycache__` made 049-verify.sh fail on an otherwise green tree (seen in task 078's review). Run
+verify scripts with `PYTHONDONTWRITEBYTECODE=1`, and clear stale `tools/**/__pycache__` before a gate run.
+
+### (c) add/add conflicts on task files
+When the session branch and a task PR both add the same task file, merging produces an add/add conflict. On the
+session-11 merges (076, 077, 078, 079, 080) main's copy was the superset (spec plus the task's log). Check that before
+taking it; do not take it blindly.
+
+### (d) Verify scripts must pass in a fresh clone from GitHub
+Worktrees see local-only branches and untracked state. The architecture note cited ADR-0121 on a local-only branch, so
+056, 076 and 078 verify were red in every fresh clone (found by task 079's review, fixed by task 080). Run each new
+verify script in a fresh clone of the pushed branch, not only in a worktree.
+
+### (e) A fresh registry worktree has no `tools/dev/node_modules`
+`062-verify.sh` needs ajv. In a new registry worktree set `WOM_NODE_MODULES` to an existing install, or run
+`npm ci --prefix tools/dev --userconfig /dev/null --ignore-scripts --no-audit --no-fund`.
+
+### (f) Run verify scripts one at a time
+Overlapping verify runs falsely redden 062 and 067 (the shared-suite class, task 043). Run them serially, in the
+foreground, on a quiet machine. 064-verify.sh alone took about 40 minutes.
+
+### (g) The permission classifier's refusals go to Ludwig
+The auto-mode classifier refused the manager's self-granted permission rule for `docs/decisions/**` ("Self-Modification")
+and a merge that looked unreviewed ("Merge Without Review"). Neither was retried or worked around; both were taken to
+Ludwig, who switched the session to Manual mode and approved each edit himself, and approved the merge himself.

@@ -4,6 +4,7 @@
 - **Date:** 2026-09-01
 - **Area:** Registry / Security
 - **Related:** ADR-0006, ADR-0039, ADR-0040
+- **Amended by:** ADR-0121 (adds `pending` and `rejected` statuses; one pipeline write-back per version); ADR-0122 (widens the grounds clause: files may stop being served on defined grounds; entry, hash, signature and reason remain)
 
 ## Decision
 - **Hash in registry:** SHA-256 of every artefact is written into the registry entry by the pipeline; the launcher verifies after download. Versions are immutable; existing hashes can never be updated, only new versions added (enforced by a CI check on registry PRs).

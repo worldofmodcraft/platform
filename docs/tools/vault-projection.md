@@ -41,6 +41,7 @@ updated: <committer date of source_commit, ISO 8601>
 | `Tasks/NNN.md` | only for ids owned by main: id, title, status word, task file path |
 | `Decisions.md` | `docs/decisions/INDEX.json`: one row per ADR with id, title and a `[[ADR/<file stem>]]` link; `source_commit` is the last commit touching INDEX.json |
 | `ADR/<file>.md` | `docs/decisions/NNNN-*.md`, body verbatim under the generated frontmatter; `source_commit` is the last commit touching that file |
+| `Runbooks/<stem>.md` | every `docs/runbooks/<stem>.md` on the ref (top level only, stem `[A-Za-z0-9][A-Za-z0-9._-]*`), body verbatim under the generated frontmatter; `source_commit` is the last commit touching that file; `Status.md` gains one `Runbooks: [[Runbooks/<stem>]], ...` line before its open-tasks table |
 | `Journal/YYYY-MM-DD.md` | every commit reachable from the ref, merges included, grouped by committer date in `Europe/Stockholm` (`zoneinfo`); one line per commit, newest first: 7-character sha, subject; `source_commit` is the newest commit of that day |
 
 **Decisions and journal (task 053).** ADRs carry no YAML frontmatter. An ADR whose text starts with `---`
@@ -52,6 +53,13 @@ INDEX.json are an error. Each Journal day is re-rendered on every run and writte
 new commit rewrites only its own day. The first live run writes about 130 notes in one LiveSync burst (accepted
 as a one-off); later runs write only what changed. Commit subjects and ADR text go through the secret scan like
 every other note.
+
+**Runbooks (task 061).** Task 053's rules A1-A3 apply unchanged. Like an ADR, a runbook whose text starts with `---`
+(after an optional BOM) fails validation (nothing written), a runbook that is not a regular file in git, has an
+unaccepted name or carries a forbidden hand-written note's name is an error, and the secret scan covers the notes.
+A ref with no `docs/runbooks/` writes no `Runbooks/` notes, creates no `Runbooks/` folder and `Status.md` has no
+`Runbooks:` line. Non-`.md` files and subdirectories of `docs/runbooks/` are not runbooks. `check` ignores
+`Runbooks/<stem>.md` like the other planned names. Verified by `docs/tasks/061-verify.sh [--mutate]`.
 
 Headings inside code fences are not section boundaries. A missing source file, or a mission log with no
 `## SESSION` heading, is an error (nothing written), never an empty note.
@@ -108,7 +116,7 @@ on a branch already merged into main, or with `--note` naming any other note: no
 ### Subcommand `check` (stat only)
 `check --save-baseline FILE` records (size, `mtime_ns`) via `stat` for every file under `WOM_VAULT` whose
 path is not a planned generated name (`Status.md`, `Tasks.md`, `Gotchas.md`, `Commands.md`, `Mission
-Log.md`, `Tasks/NNN.md`, `Decisions.md`, `ADR/NNNN-*.md`, `Journal/YYYY-MM-DD.md`). `check --baseline FILE` reports every changed, added or removed entry and exits
+Log.md`, `Tasks/NNN.md`, `Decisions.md`, `ADR/NNNN-*.md`, `Runbooks/<stem>.md`, `Journal/YYYY-MM-DD.md`). `check --baseline FILE` reports every changed, added or removed entry and exits
 non-zero on a difference. It never opens a file in the vault. Note: `.obsidian/` is included, and
 Obsidian rewrites files there while it runs; see the open question in task 051.
 
@@ -126,8 +134,76 @@ python3 -I tools/vault/wom_vault.py check --baseline "$HOME/wom-vault-baseline.j
 python3 -I tools/vault/wom_vault.py write --ref HEAD      # inside a task/NNN-* worktree
 docs/tasks/051-verify.sh [--mutate]                       # self-test, temp dirs only
 docs/tasks/053-verify.sh [--mutate]                       # 053 additions, A1-A3; re-runs 051-verify.sh
+docs/tasks/061-verify.sh [--mutate]                       # runbook notes; re-runs 051, 053 and 052 verifiers
 ```
 Exit status 0 means success; 1 means a refusal (reason on stderr, nothing written); 2 is a usage error.
+
+## Triggers and guard (task 052)
+
+Built by task 052 (`docs/tasks/052-vault-triggers-and-guard.md`); verified by `docs/tasks/052-verify.sh [--mutate]`
+(temp repos, temp remote, temp vault and temp HOME only).
+
+### Triggers
+| Event | What refreshes | How |
+|---|---|---|
+| a commit in a worktree on `task/NNN-*` | `Tasks/NNN.md` | `post-commit` hook, mode `task` (`write --ref HEAD`); any other branch: the hook does nothing |
+| `git pull` that merges on `main` | main's notes | `post-merge` hook, mode `main` (`write --ref main`) |
+| the manager's step after each `gh pr merge`, and at handover | main's notes | `tools/vault/refresh-main.sh` |
+
+`git fetch origin main:main` fires **no** `post-merge` (verified), which is why the manager step exists.
+`refresh-main.sh` runs `git -C <worktree of main> pull --ff-only origin main` when main is checked out in any
+worktree (`git worktree list --porcelain`), otherwise `git fetch origin main:main` (a plain fetch into a checked-out
+main is refused). Then it re-pins the tool and runs `write --ref main`. Any failure exits non-zero.
+
+**Install** (once per repository; hooks live in the git common dir, so every worktree shares them):
+`tools/vault/install-git-hooks.sh [--repo PATH]`. It writes only `hooks/post-commit`, `hooks/post-merge` and
+`wom-vault/` under `$(git rev-parse --git-common-dir)`, refuses an existing hook that is not a WoM hook (first line
+after the shebang starts `# wom-vault-hook v1`), refuses when `core.hooksPath` is set, and is idempotent. With
+`WOM_VAULT_TEST=1` it refuses any git dir not under `realpath(${TMPDIR:-/tmp})`. Installing into the real
+repository is a manual step done with Ludwig (task 052 AC7), never by a test.
+
+**Pinned copy.** The installer writes `git show main:tools/vault/wom_vault.py` (the ref, never a working tree)
+to `wom-vault/wom_vault.py` in the common dir and records `git log -1 --format=%H main -- tools/vault/` as
+`wom-vault/pinned_commit`. The hooks and the manager step run only that copy, so a half-edited working tree or an
+unmerged task branch can never change what writes into the vault. Each hook run prints `wom-vault: pinned_commit=<sha>`;
+when main has a newer commit touching `tools/vault/` it also prints `wom-vault: pinned copy is stale; run refresh-main.sh`
+on stderr (the copy is never replaced silently).
+
+**Failure semantics.** Vault not configured (no `WOM_VAULT`, no config file; in test mode: no `WOM_VAULT`): the hook
+prints `wom-vault: not configured, skipped`, appends a line with the reason to `wom-vault/skips.log` and exits 0.
+Configured but failing: the error is on stderr and the hook exits non-zero. A hook can never block a commit (git
+ignores `post-commit`'s status). The 30 s lock cap of the tool applies, so a commit waits at most 30 s.
+
+### Guard: `vault-guard` (Claude Code PreToolUse)
+`.claude/settings.json` has one PreToolUse entry, matcher `Write|Edit|MultiEdit|NotebookEdit`, command
+`"$CLAUDE_PROJECT_DIR"/.claude/hooks/vault-guard.sh` (a wrapper around `vault_guard.py`). Exit 2 blocks the call;
+settings-file hooks also fire for subagents' tool calls. It checks `tool_input.file_path` and `tool_input.notebook_path`:
+a relative path is joined to the call's `cwd`; `D:\...` and `d:/...` map to the WSL drive mount (the lowercase drive letter under `/mnt`); the result goes through
+`realpath` and is compared case-folded (drvfs is case-insensitive) with the vault. The vault is every value found in
+`WOM_VAULT` and in `~/.config/wom/vault-path`; a path inside either blocks.
+- Vault not configured: allow, and count the skip in `~/.config/wom/guard-skips.log` (a fresh clone is not bricked).
+- Configured but unresolvable (for example D: not mounted): block only paths whose normalised text lies under the
+  configured path string (lexical, case-folded); allow everything else so repo editing never stops.
+- Config file present but unreadable, not UTF-8, empty or not exactly one line: that is "configured but broken", not
+  "not configured". The vault location is unknown, so **every** file-tool call is blocked with a message and the recovery
+  line below (an unreadable file is a damaged setup, and guessing "allow" would let a write into the vault through).
+- Only exit 2 blocks in Claude Code, so the wrapper does not `exec`: it checks `command -v python3`, runs the python half,
+  and maps any status other than 0 and 2 to 2; the python half has a catch-all that returns 2.
+- Invalid JSON, or a Write/Edit/MultiEdit/NotebookEdit call without a path: block. A missing `vault_guard.py` blocks
+  too (the wrapper checks), because Claude Code treats a missing hook *script* as a non-blocking error.
+
+**Recovery (disable the guard).** The guard is inert when no vault is configured. To disable it, Ludwig runs, in WSL:
+`rm -f ~/.config/wom/vault-path` and, if set in the shell that starts Claude Code, `unset WOM_VAULT`. (This also
+unconfigures the projection tool until the file is written again.)
+
+**Known gaps (documented, not fixed here).** `\\wsl$`, `//?/` and UNC prefixes, and Windows' trailing-dot/space
+stripping, are not normalised (agents in WSL do not produce them; mixed-slash `d:/` and `D:\` forms are covered).
+Agents' **Bash** writes into the vault are not covered by this guard; that is in task 049's scope. Whether the
+hook process inherits `WOM_VAULT` from the session is unverified (AC7); the design does not depend on it because of
+the config-file read.
+
+Test-only knob: with `WOM_VAULT_TEST=1`, `WOM_GUARD_MNT_ROOT` (a directory under `TMPDIR`) replaces `/mnt` in the
+drive-letter mapping, so the tests never look at a real drive mount. Without test mode it is ignored.
 
 ## Why these claims hold (Obsidian and LiveSync)
 Task 050's log (`docs/tasks/050-vault-sync-probe.md`, "Task 050 log") records the observations the design

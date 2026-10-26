@@ -1,0 +1,16 @@
+{
+  "id": "test:hello-world",
+  "owner": {
+    "provider": "github",
+    "id": 324218296,
+    "name_at_registration": "worldofmodcraft"
+  },
+  "versions": [
+    {
+      "version": "1.0.0",
+      "commit": "0000000000000000000000000000000000000000",
+      "source_url": "https://github.com/OWNER-PLACEHOLDER/wom-test-hello-world",
+      "status": "pending"
+    }
+  ]
+}

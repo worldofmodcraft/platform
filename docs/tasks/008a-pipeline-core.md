@@ -1,6 +1,6 @@
 # Task 008a: Pipeline core — clone, validate, scan, archive, hash, sign (offline)
 
-- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
+- **Mission:** SITE-V1, deliverable **D2** (first half; umbrella `docs/tasks/008-build-pipeline.md`) — **Status:** done (merged registry PR #7 `a50daac`) — was: spec-approved (manager, 2026-10-14, after independent spec review round 2: PASS) 
 - **Agent / model:** implementer / sonnet (the signing and verifier parts get an independent reviewer at the same tier or higher with full tools — OPERATIONS.md, "The reviewer agent cannot run this project's verify artefacts")
 - **Budget:** large (≤ 6 agent-sessions)
 - **Branch / worktree:** `task/008a-pipeline-core` / `~/wt/registry-task-008a` — **registry** repo (`worldofmodcraft/registry`)
@@ -287,3 +287,4 @@ Code + tests + docs + verify script + this file's log section current.
   duplicate entry names, and for setuid/setgid modes. Add a documented note on https URLs aimed at internal addresses
   (SSRF). The runner context decides whether it is in scope, and the spec records the answer.
 - Merge authority: signing is involved, so **Ludwig approves the merge** (§7). The overnight waiver does not cover signing.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #7 (`a50daac`, on registry origin/main).

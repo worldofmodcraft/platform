@@ -21,3 +21,21 @@ Rules:
    scaffold is always a spec problem); core-surgeon's escalation is stop-and-ask-Ludwig.
    The -strong variants are never routed to directly for fresh tasks.
 5. Cost visibility: HUD/statusline per-agent token counts; `/usage` for session totals. Anomalies (an agent burning far beyond its task size) are a stop-and-look signal, not background noise.
+
+## Turn caps and nesting (task 048; Ludwig's decisions Q2 and Q5, 2026-10-14)
+Nesting is configured off (live proof: task 048 AC9): `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` in `.claude/settings.json` and `disallowedTools: Agent`
+in every agent definition. Each agent has a `maxTurns` cap; reaching it is a budget stop (MANAGER.md §8).
+The numbers are estimates, not measurements; revise them from observed runs.
+
+| Agent | maxTurns | Reason |
+|---|---|---|
+| scaffolder | 30 | mechanical generation from a template; needing more means the spec is ambiguous |
+| doc-writer | 50 | reads sources, writes several files, updates the log |
+| surveyor | 60 | bulk reading; read-only, so a high cap carries little risk |
+| debugger | 60 | reproduce, isolate, report; no edits |
+| debugger-strong | 80 | escalation tier; re-tests the prior investigation's assumptions first |
+| reviewer | 80 | re-reads and judges verify scripts and mutation tests |
+| qa-engineer | 80 | writes many fixtures and runs them |
+| implementer | 100 | the largest ordinary task: code, tests, docs, verify script, log |
+| implementer-strong | 120 | escalation tier: the same work plus the failure history |
+| core-surgeon | 120 | fork internals; an early stop is cheapest to recover from here |

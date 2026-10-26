@@ -1,5 +1,5 @@
 {
-  "count": 120,
+  "count": 122,
   "adrs": [
     {
       "number": 1,
@@ -667,7 +667,10 @@
         40
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        121,
+        122
+      ]
     },
     {
       "number": 42,
@@ -954,7 +957,9 @@
         30,
         39
       ],
-      "amended_by": []
+      "amended_by": [
+        121
+      ]
     },
     {
       "number": 59,
@@ -1998,6 +2003,57 @@
       ],
       "amends": [
         4
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 121,
+      "filename": "0121-version-lifecycle-pending.md",
+      "title": "Version lifecycle — a `pending` state, a one-time pipeline write-back, and a post-merge build",
+      "status": "Accepted (Ludwig, in session, 2026-10-15: \"Stjärna på allt\")",
+      "date": "2026-10-14",
+      "area": "Registry / Build pipeline",
+      "touches": [
+        "registry",
+        "registry/ci",
+        "build-pipeline",
+        "launcher/resolution"
+      ],
+      "related": [
+        39,
+        40,
+        41,
+        58,
+        119
+      ],
+      "amends": [
+        41,
+        58
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 122,
+      "filename": "0122-removal-policy.md",
+      "title": "Removal policy for published versions — grounds, files, installed copies, appeals",
+      "status": "Accepted (2026-10-17, accepted by Ludwig)",
+      "date": "2026-10-17",
+      "area": "Registry / Legal / Launcher",
+      "touches": [
+        "registry",
+        "registry/takedown",
+        "launcher/resolution",
+        "launcher/update",
+        "site/content-rules"
+      ],
+      "related": [
+        37,
+        41,
+        46,
+        121
+      ],
+      "amends": [
+        41
       ],
       "amended_by": []
     }

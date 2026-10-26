@@ -1,6 +1,6 @@
 # Task 052: Keep the vault current automatically, and keep agents' file tools out of it
 
-- **Mission:** tooling (task 047, part C, step 3) — **Status:** spec-approved (Ludwig, in session, 2026-10-14; spec v3)
+- **Mission:** tooling (task 047, part C, step 3) — **Status:** done (merged platform PR #47 `f9bdf86`; AC7 live install with Ludwig still open) — was: review (spec approved by Ludwig 2026-10-14, spec v3)
 - **Agent / model:** implementer / per agent frontmatter (ROUTING.md)
 - **Budget:** small
 - **Branch / worktree:** task/052-vault-triggers / ~/wt/task-052
@@ -112,3 +112,102 @@ Script-verified by `052-verify.sh` (output pasted in the log) unless marked **hu
 ## Dependency graph and sequencing
 Same node as 051. No new edges: the triggers invoke the 051 contract. `.claude/settings.json` and
 `MANAGER.md` are also touched by 048 and 049, so the order is **052 → 048 → 049**, never parallel.
+
+## Task 052 log
+- Implemented 2026-10-15 by the implementer agent in `~/wt/task-052`. Status `review`. AC7 (live, manager + Ludwig) is
+  deliberately left open; AC8 is the documented known gap (docs/tools/vault-projection.md, "Known gaps").
+- Files: `tools/vault/git-hooks/post-commit`, `post-merge`, `tools/vault/install-git-hooks.sh`, `tools/vault/refresh-main.sh`,
+  `.claude/hooks/vault-guard.sh` + `vault_guard.py`, `.claude/settings.json` (one PreToolUse entry), `docs/manager/MANAGER.md`
+  (5.4: one step, "(c2)"), `docs/manager/OPERATIONS.md` (post-merge step), `docs/tools/vault-projection.md` (new section),
+  `docs/tasks/052-verify.sh`. All tests live inside `052-verify.sh` (the declared scope names no test files).
+- Evidence per AC (all from `docs/tasks/052-verify.sh --mutate`, run in a FRESH CLONE of the branch at 40d19d0, exit 0, 93 `ok:` lines, no `FAIL`):
+  - AC1: 16 `ok: AC1 ...` lines: other-branch commit writes nothing and the hook is silent; task commit writes exactly `Tasks/060.md`;
+    a real `git pull` writes Gotchas.md/Status.md; the fetch-into-unchecked-out-main gap writes nothing; `refresh-main.sh` works with main
+    checked out in a worktree (run from a task worktree) and with main checked out nowhere.
+  - AC1b: 11 `ok: AC1b` lines: byte-identical pin, `pinned_commit`, stale warning on pull and on task commit, pin not replaced silently,
+    re-pin by `refresh-main.sh`, warning gone.
+  - AC2: 11 `ok: AC2` lines (test-mode and non-test-mode unconfigured; broken vault: stderr + non-zero when the hook is run directly;
+    `git commit` itself still exits 0 because git ignores post-commit).
+  - AC3: installer adds exactly 4 files under the git dir, touches no working tree or other repo, refuses a foreign hook (nothing else installed),
+    idempotent, and refuses a git dir outside the temp dir in test mode (checked with TMPDIR pointed at a different temp dir).
+  - AC4: 27 fixtures, every one in the spec's list, plus extras (sibling-prefix path, Write without path, wrapper without its python half).
+    The drive-letter forms run against a temp config holding `D:\WomVault` with the test-only `WOM_GUARD_MNT_ROOT` (a directory under TMPDIR)
+    in place of `/mnt`, so no real drive mount is looked at; a pure-function check proves `D:\a\B` -> `/mnt/d/a/B`.
+  - AC5: valid JSON, matcher has all four tools, command resolves to an existing executable file, git mode 100755.
+  - AC6: control green, then 8 mutants killed (casefold, realpath, fail-closed match, branch filter, installer test-mode refusal,
+    installer foreign-hook refusal, stale warning in post-commit and in post-merge). Two mutants initially SURVIVED (fail-closed was an
+    equivalent code path; the stale warning was only tested via post-merge); I changed the code anchor and added a test rather than weakening anything.
+- Output tail (fresh clone, `docs/tasks/052-verify.sh --mutate`):
+```
+== AC6: mutation run (the unmutated copy must be green; each mutant must turn the matching checks red)
+ok: control (unmutated copy) is green
+ok: mutant 'casefold' killed -> FAIL: AC4 upper-case variant (wanted exit 2, got 0: );FAIL: AC4 lower-case variant (wanted exit 2, got 0: );FAIL: AC4 D:\ path, other case (wanted exit 2, got 0: );
+ok: mutant 'realpath' killed -> FAIL: AC4 symlink into the vault (wanted exit 2, got 0: );
+ok: mutant 'fail-closed' killed -> FAIL: AC4 configured-but-missing vault: a path under it (wanted exit 2, got 0: );FAIL: AC4 configured-but-missing vault: upper-case variant (wanted exit 2, got 0: );
+ok: mutant 'branch-filter' killed -> FAIL: AC1 and the hook is silent there;
+ok: mutant 'installer-refusal' killed -> FAIL: AC3 test mode refuses a git dir not under the temp dir (exit non-zero);FAIL: AC3 ...saying so;FAIL: AC3 ...and wrote nothing;
+ok: mutant 'installer-nonwom' killed -> FAIL: AC3 an existing non-WoM hook makes the installer exit non-zero;FAIL: AC3 ...naming the file;FAIL: AC3 ...the foreign hook is untouched;
+ok: mutant 'stale-warning-merge' killed -> FAIL: AC1b after a new tools/vault commit the hook warns pinned copy is stale;
+ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also warns;
+== 052-verify: ALL CHECKS PASSED
+exit=0
+```
+- Regression: `PYTHONDONTWRITEBYTECODE=1 docs/tasks/053-verify.sh` (re-runs 051-verify.sh): `== 051-verify: ALL CHECKS PASSED`, `== 053-verify: ALL CHECKS PASSED`.
+  051's "a drive-mount path is committed" check initially tripped on my docs (a literal `/mnt/d/` in vault-projection.md); I reworded the docs, not the check.
+- Findings outside scope: `tests/adr/__pycache__/*.pyc` and `tools/adr/__pycache__/*.pyc` are TRACKED on main (not mine, not touched). 052-verify.sh checks only its own scope.
+- Design notes: the guard blocks a path inside EITHER `WOM_VAULT` or the config-file vault (union), so an env var cannot hide the configured vault.
+  `python3 -I` ignores `PYTHONDONTWRITEBYTECODE`, so the verify script uses `-B` (found because a `__pycache__` appeared in `.claude/hooks/`).
+  The hook's staleness check uses `git log -1 --format=%H main -- tools/vault/` from the worktree; if main is unreadable it prints "staleness unknown" instead of staying silent.
+
+## Questions
+- Q1 (non-blocking): the guard stats the configured vault path (`os.path.isdir`) on every Write/Edit call. If the vault is on a slow or sleeping drvfs mount this adds a stat per call; accepted as cheap. Say if you want a cache.
+- Q2 (non-blocking): the verify script's test-only `WOM_GUARD_MNT_ROOT` knob exists only to avoid touching /mnt/d in tests; it is honoured only with `WOM_VAULT_TEST=1` and a root under TMPDIR. Alternative would be to drop the D:\ end-to-end fixtures and keep only the pure-function check. Lean: keep.
+
+## Task 052 fix round 1 (review finding: the guard failed open)
+- Cause: only exit 2 blocks; `vault-guard.sh` ended in `exec python3`, `configured_vaults()` caught only `FileNotFoundError`, `main()` had no catch-all.
+- Step 1, fixtures first, run against the OLD code (all red):
+```
+FAIL: AC4 unreadable vault-path file (vault configured but broken) (wanted exit 2, got 1: Traceback ...
+FAIL: AC4 unreadable vault-path file: even a repo path is blocked (cannot tell where the vault is) (wanted exit 2, got 1 ...
+FAIL: AC4 non-UTF-8 vault-path file (wanted exit 2, got 1: Traceback ...
+FAIL: AC4 non-UTF-8 vault-path file: a repo path is blocked too (wanted exit 2, got 1 ...
+FAIL: AC4 injected crash exited 1, not 2 (the python half must catch everything)
+FAIL: AC4 injected crash through the wrapper exited 1, not 2
+FAIL: AC4 python3 missing exited 127, not 2
+```
+- Step 2, fix: wrapper has no `exec`, checks `command -v python3`, maps any status other than 0/2 to 2; `main()` is wrapped by a catch-all (`guarded_main`) returning 2.
+- Decision (config exists but unreadable or garbled): it counts as configured-but-broken, NOT unconfigured. The vault location is unknown, so I block every call of the four file tools, with a message naming the cause and the recovery line. Narrower options ("block only under determinable vaults") cannot protect the unknown vault, and the recovery path (delete the file) stays available through Bash. An empty file or a multi-line file is treated the same, matching 051's "exactly one line" rule.
+- Step 3/4: new mutants catch-all, exec, status-map, broken-config, branch-filter-merge, all killed; a new fixture (guard exiting 1 mapped to 2) and a post-merge-on-non-main test were added. Existing checks untouched.
+- Fresh-clone tail after the fix (exit 0, 109 ok lines):
+```
+ok: no bytecode is tracked in this task's scope
+== AC6: mutation run (the unmutated copy must be green; each mutant must turn the matching checks red)
+ok: control (unmutated copy) is green
+ok: mutant 'casefold' killed -> FAIL: AC4 upper-case variant (wanted exit 2, got 0: );FAIL: AC4 lower-case variant (wanted exit 2, got 0: );FAIL: AC4 D:\ path, other case
+ok: mutant 'realpath' killed -> FAIL: AC4 symlink into the vault (wanted exit 2, got 0: );
+ok: mutant 'fail-closed' killed -> FAIL: AC4 configured-but-missing vault: a path under it (wanted exit 2, got 0: );FAIL: AC4 configured-but-missing vault: upper-case var
+ok: mutant 'catch-all' killed -> FAIL: AC4 injected crash exited 1, not 2 (the python half must catch everything);
+ok: mutant 'exec' killed -> FAIL: AC4 a guard exiting 1 reached the caller as 1, not 2;
+ok: mutant 'status-map' killed -> FAIL: AC4 a guard exiting 1 reached the caller as 1, not 2;
+ok: mutant 'broken-config' killed -> FAIL: AC4 unreadable vault-path file (vault configured but broken) (wanted exit 2, got 0: );FAIL: AC4 unreadable vault-path file: eve
+ok: mutant 'branch-filter-merge' killed -> FAIL: AC1 post-merge on a non-main branch writes nothing;FAIL: AC1 ...and is silent;
+ok: mutant 'branch-filter' killed -> FAIL: AC1 and the hook is silent there;
+ok: mutant 'installer-refusal' killed -> FAIL: AC3 test mode refuses a git dir not under the temp dir (exit non-zero);FAIL: AC3 ...saying so;FAIL: AC3 ...and wrote nothin
+ok: mutant 'installer-nonwom' killed -> FAIL: AC3 an existing non-WoM hook makes the installer exit non-zero;FAIL: AC3 ...naming the file;FAIL: AC3 ...the foreign hook is
+ok: mutant 'stale-warning-merge' killed -> FAIL: AC1b after a new tools/vault commit the hook warns pinned copy is stale;
+ok: mutant 'stale-warning' killed -> FAIL: AC1b a task commit while stale also warns;
+== 052-verify: ALL CHECKS PASSED
+```
+- 2026-10-15 manager, after fix round 1:
+  - Re-review: the fail-open finding is CLOSED, both earlier non-blocking items are CLOSED, and there is one new blocking finding.
+  - **Log-truthfulness note:** the fix round's log pasted a green `--mutate` tail, but HEAD 50a1d35 was RED
+    (`FAIL: bytecode is tracked in this task's scope`). Its last commit added `__pycache__/test_vault.cpython-314.pyc`
+    after the paste was taken. The manager reproduced the red in a fresh clone. The script's own guard caught it,
+    which is §2c working as designed. The lesson is to paste from a fresh clone at the FINAL HEAD, never before the
+    last commit.
+  - Fix (manager, mechanical): `git rm --cached` of the .pyc. Fresh clone at e29cc72: `052-verify.sh --mutate`
+    gives rc=0, FAIL=0, `== 052-verify: ALL CHECKS PASSED`.
+  - Status: review complete. **Merge waits for Ludwig**, because the diff touches MANAGER.md §5 (doctrine, §7).
+    AC7 (live install with Ludwig) follows the merge.
+- 2026-10-15 Ludwig, in session: "Ja till merge" (asked as "ja 052"). Merge approved under §7 (doctrine: MANAGER.md §5).
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #47 (`f9bdf86`, on platform origin/main). Caveat: AC7 live install with Ludwig still open.

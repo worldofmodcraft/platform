@@ -1,6 +1,6 @@
 # Task 038: doctrine — breaking cases are the measure of a suite
 
-- **Mission:** SITE-V1 — **Status:** **spec-approved (Ludwig, in session; the companion rule was
+- **Mission:** SITE-V1 — **Status:** done (merged platform PR #28 `97b9fc4`) — was: **spec-approved (Ludwig, in session; the companion rule was
   his wording, tied to task 023's fix round closing)**
 - **Agent / model:** manager (doctrine is manager-owned; precedent: tasks 035, 036)
 - **Budget:** small
@@ -75,3 +75,4 @@ Ludwig's eyes until that edit exists**, and this paragraph is the receipt.
 Manager-authored doctrine with no independent reviewer — the same pattern flagged to Ludwig as
 manager error 5 in session 4 (tasks 033, 035, 032's platform half), on which he has not yet ruled.
 Flagged, not assumed away.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #28 (`97b9fc4`, on platform origin/main).

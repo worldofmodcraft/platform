@@ -1,0 +1,33 @@
+#!/bin/sh
+# wom-vault-hook v1 (task 052). Installed by tools/vault/install-git-hooks.sh; do not edit the installed copy.
+# Runs the PINNED copy of wom_vault.py (in the git common dir) in mode `main` after a merge on main (git pull).
+# A failure is reported on stderr and in the exit status; git does not undo the merge.
+branch=$(git symbolic-ref --short -q HEAD) || exit 0
+[ "$branch" = main ] || exit 0 # CHECK:branch-filter-merge
+common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P) || { echo "wom-vault: cannot find the git common dir" >&2; exit 1; }
+top=$(git rev-parse --show-toplevel) || { echo "wom-vault: cannot find the worktree" >&2; exit 1; }
+pin="$common/wom-vault"
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+if [ ! -f "$pin/wom_vault.py" ] || [ ! -f "$pin/pinned_commit" ]; then
+  echo "wom-vault: no pinned copy in $pin; run tools/vault/install-git-hooks.sh" >&2; exit 1
+fi
+pinned=$(cat "$pin/pinned_commit")
+echo "wom-vault: pinned_commit=$pinned" >&2
+latest=$(git -C "$top" log -1 --format=%H main -- tools/vault/ 2>/dev/null) || latest=""
+if [ -z "$latest" ]; then
+  echo "wom-vault: cannot read main's latest tools/vault commit; staleness unknown" >&2
+elif [ "$latest" != "$pinned" ]; then # CHECK:stale
+  echo "wom-vault: pinned copy is stale; run refresh-main.sh" >&2
+fi
+configured=0
+if [ "${WOM_VAULT_TEST:-}" = 1 ]; then [ -n "${WOM_VAULT:-}" ] && configured=1
+elif [ -n "${WOM_VAULT:-}" ] || [ -f "${HOME:-/nonexistent}/.config/wom/vault-path" ]; then configured=1; fi
+if [ "$configured" = 0 ]; then
+  echo "wom-vault: not configured, skipped" >&2
+  printf '%s post-merge %s: not configured (no WOM_VAULT, no vault-path file)\n' "$(date +%Y-%m-%dT%H:%M:%S%z)" "$branch" >> "$pin/skips.log" || echo "wom-vault: cannot append to $pin/skips.log" >&2
+  exit 0
+fi
+python3 -I "$pin/wom_vault.py" write --ref main --repo "$top" >&2
+rc=$?
+[ "$rc" = 0 ] || echo "wom-vault: write failed with status $rc (the merge itself is not affected)" >&2
+exit "$rc"

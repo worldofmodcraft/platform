@@ -5,6 +5,7 @@
 - **Amended:** 2026-09-05 — **E16 (ownership) added** on Ludwig's explicit approval (task 032, option A). See "Amendment log" at the end of this file.
 - **Authority:** ADR-0117 (graph before code; every boundary edge names its contract)
 - **Last reviewed:** 2026-09-05
+- **See also:** `docs/architecture/system-overview.md` (what runs where, what is stored where, the way off GitHub)
 
 Nodes are components, never files. Eight nodes, as ADR-0117 predicted for this mission.
 Every edge crossing a component boundary names a contract; an edge without one is an

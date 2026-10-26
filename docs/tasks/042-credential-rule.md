@@ -1,6 +1,6 @@
 # Task 042: Agents and credentials — a task-file reason and Ludwig's approval, or nothing
 
-- **Mission:** SITE-V1 (doctrine) — **Status:** **spec-approved (Ludwig, in session, 2026-09-06)**
+- **Mission:** SITE-V1 (doctrine) — **Status:** done (merged platform PR #32 `8bd0759`) — was: **spec-approved (Ludwig, in session, 2026-09-06)**
 - **Agent / model:** manager (doctrine is the one thing the manager writes; Ludwig is its reviewer,
   per his session-5 ruling that "the reviewer is never the author" holds for contracts and not for
   doctrine)
@@ -60,3 +60,4 @@ text exists in this file", verifiable by reading the diff. No criterion is comma
 - `docs/tasks/042-credential-rule.md`
 
 Anything else = stop and report.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as platform PR #32 (`8bd0759`, on platform origin/main).

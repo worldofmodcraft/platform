@@ -1710,3 +1710,654 @@ Lean marked ★. Q1–Q6 are the draft's items 1–6.
 Resting on assumptions until answered: 051's `Commands.md` row (Q-C2), 052's whole trigger design (Q-C1),
 048 and 049 entirely.
 **Answered 2026-10-14 by Ludwig, in session:** "Allt enligt stjärna, godkänner spec 050". Every item above = ★.
+
+### Ludwig's rulings, 2026-10-14 evening (verbatim answers recorded)
+- Design mission for the game: **C**, "vi fortsätter med SITE V1". No game design until SITE-V1 is done.
+- "Men kör hela natten nu, vill att site v1 ska vara klart när jag vaknar". The manager answered that the
+  mission's binary success criterion needs Ludwig: DNS (M2), the test-mod repo on his personal account (M4),
+  the final demo, and §7 approvals. Everything else runs overnight.
+- "Kör på dina rekommendationer, godkänner alla". All four questions are answered with the starred option:
+  1. **Task 032 D1:** R11 (takedown) applies to **every** namespace, owned or not. The manager's 2026-09-08 reading is confirmed.
+  2. **Task 032 D2:** one authorised takedown PR may carry **any number** of takedown mutations, provided the
+     diff contains nothing else. The manager's 2026-09-08 decision is confirmed.
+  3. **Overnight §7 waiver (2026-10-14/15 only):** the manager may merge PRs that touch CI security checks
+     (registry CI, tasks 007/039) when the independent review is PASS and verification is green.
+     **Still Ludwig-only:** signing and keys, takedowns, `docs/decisions/`, mission specs, and doctrine.
+  4. **Overnight §8 waiver:** a blocked chain is parked, with its question written under "For Ludwig", and
+     independent chains continue. The session halts fully at five open Ludwig items.
+- 2026-10-14, Ludwig: "Ignorera din kontextgräns för inatt". The manager's planned-handover thresholds
+  (MANAGER.md §5, 30 % soft / 40 % hard) are suspended for tonight only. Context was 23 % when he said it.
+  Compaction caution (§5.5) still applies: anything remembered is verified against disk before acting.
+- 2026-10-14 late, Ludwig: "Stjärna på allt". These questions are answered with the starred option (manager's bundle, session 8):
+  - **Q-A:** task 032 fix round 6 approved (§3.4, Ludwig's call). Pin full sentences instead of 70-char prefixes, add a tail-append
+    fixture shown red first, remove the "pending Ludwig" markings now that D1/D2 are confirmed, and re-prove in a fresh clone at HEAD.
+  - **Q-B:** the author PR adds a version with only `version`, `commit` and `source_url`, plus `status: pending`. The pipeline's
+    write-back PR fills in the remaining fields and sets `published`. This is the second permitted in-place transition, beside the
+    takedown, and it is written into the contracts by its own reviewed task (057). It resolves the contradiction task 054 found:
+    entry.schema requires 9 fields that the author cannot supply, and append-only forbids the write-back. The manager verified that
+    contradiction on registry origin/main.
+  - **Q-C:** `mod.lua` is read by a restricted static reader, which accepts a literal table only and never executes code.
+  - **Q-D:** the pipeline acts as a GitHub App owned by the organisation. Creating it is a new manual step for Ludwig (M5, runbook).
+  - **Q-E:** archives live in a separate repo, `worldofmodcraft/archive`.
+  - **Q-F:** Ludwig's personal account joins the organisation (manual step), so mission §7.6 stands as written.
+  - **Q-G:** a project-owned URL fronts `source_archive` before the first publish. Feasibility on Pages is unverified and gets a probe.
+  - **Q-H** (does the `MINISIGN_SECRET_KEY` secret exist?) is a fact question, still unanswered.
+
+## SESSION STATUS — 2026-10-15 morning (session 8, overnight run)
+
+### Done and merged
+- **Vault projection:** 050 (sync probe), 051 (generator), 053 (ADR + Journal notes, A1–A3). The vault holds
+  Status, Tasks, Gotchas, Commands, Mission Log, one note per task and per ADR, and the Journal.
+- **032 ownership contract** (registry PR #4) after fix round 6. The blocker in front of 007 is gone.
+- **041** site schema copies synced, with a CI check (site PR #2). Live green, and a throwaway PR proved red.
+- **054** the remaining SITE-V1 specs: 008/008a/008b/008c, 010, 055, 056, 057, 058.
+- **059** no bytecode in the repo. **060** the runbook shows M0–M7 and Q-H truthfully.
+
+### Built and reviewed, waiting for Ludwig's merge
+- **052** vault triggers + guard (branch `task/052-vault-triggers`). It touches MANAGER.md §5, which is doctrine.
+  AC7 (live install) is done with Ludwig after merge.
+- **008a** pipeline core (registry PR #7). Signing is involved. Security review PASS; 114 checks and 47 mutations.
+- **056** architecture note (platform PR #43). Criterion 9 is Ludwig's read-through.
+
+### Blocked on Ludwig
+- **ADR-0121 proposal** (branch `proposal/adr-0121-version-lifecycle`): the `pending → published` lifecycle,
+  Q-L (born-pending only) and Q-J (`pending → rejected`). It blocks 057, which blocks 007, 008b, 008c and 010.
+- **048 doctrine:** the auto-mode classifier denied the edits to CLAUDE.md, MANAGER.md and the checklists. They are
+  not retried and not worked around. Agent frontmatter edits sit uncommitted in `~/wt/task-048b`. 049 is stacked on it.
+- **058 live part:** a Pages deploy probe that needs a push to the live site.
+- **Manual steps (runbook):** M4, M5 (GitHub App), M6 (personal account joins the org), M7 (archive repo),
+  Q-H (does `MINISIGN_SECRET_KEY` exist? look only).
+
+### For Ludwig (★ = manager's lean)
+1. **ADR-0121:** ★accept as proposed (Q-L yes, Q-J `rejected` status, never deletion).
+2. **Merge 052:** ★yes, then install the hooks together (AC7).
+3. **Merge 008a:** ★yes.
+4. **056:** read docs/architecture/system-overview.md (PR #43), then ★merge.
+5. **048:** the classifier blocks agents from editing doctrine. ★A: Ludwig applies the doctrine diff in an
+   interactive session with the manager (text ready in the spec). B: drop 048's doctrine half and keep only the
+   agent-frontmatter half.
+6. **Token-guard text (Q-T):** rule 0 says "for a specific moment", while Ludwig's lift was open-ended. Covered by 048.
+7. **SSRF policy for 008b:** ★clone in a job that holds no signing secret.
+
+### Process notes from the night (precedents)
+- Every implementation got an independent review in blind order. Blocking findings were caught on 053 (.pyc),
+  052 (guard fail-open, then a log paste taken before the last commit), 056 (rule-9 tags, twice; §3.4
+  escalation used once, then passed) and 032 (prefix-only pins).
+- The manager re-ran every verify script in a fresh clone before merge. It caught 052's red HEAD behind a green
+  paste.
+- One permission denial (048) was treated as an answer, not an obstacle.
+
+### Next steps
+After ADR-0121: 057 → 007 → 008b/008c → 055 → 010 → Ludwig's M4 and the final demo. Parallel: 058 live, 049 after 048.
+
+## SESSION STATUS / HANDOVER — 2026-10-15 (session 8, day part), context 48 % of 1M (past the 40 % hard threshold)
+
+### Merged today (Ludwig's approvals recorded verbatim in each task log)
+- **ADR-0121** accepted (version lifecycle). **057** contracts implement it (registry PR #8).
+- **008a** pipeline core (registry PR #7). **052** vault triggers + guard (PR #47). **048** doctrine additions (PR #50), written
+  by the manager in session with Ludwig because the auto-mode classifier denied agent edits to doctrine. **049** safety hooks
+  + `tools/manager/check-log-entry.sh` (PR #51). Specs: 057/008b approved (PR #49).
+
+### Open, in order
+1. **061** runbooks in the vault: built and verified (fresh clone at 805dc48, `061-verify.sh --mutate` green). An
+   independent review was still running at handover. Next session: read the verdict; on PASS merge (manager authority,
+   tooling), run the projection, and Ludwig checks `Runbooks/site-v1-manual-steps` in Obsidian (criterion 9).
+2. **062 (to write):** registry test maintenance after 057.
+   - Retire or annotate 006-verify.sh C1.5b, C8.2, C8.3a and C8.3b (stale pins of the born-`removed` rule).
+   - Re-base the scope pins in 006 C9.4/C9.6, 032 S4 and 008a's scope check.
+   - Fix ownership.md's quote of the old "one permitted in-place mutation" heading.
+   Changing tests is its own reviewed task (§3.5).
+3. **063 (to write, doctrine, Ludwig approves):** MANAGER.md §5 still says check-log-entry.sh "does not exist". It does now (049).
+4. **007** registry CI checkers: revise the spec for ADR-0121/057, and add the fail-closed fixture the 057 reviewer asked
+   for (T1/T3 by an author PR). Then build. 039 (workflow + CONTRIBUTING) follows.
+5. **008b → 008c** need Ludwig's M5 (GitHub App), M6 (personal account joins the org), M7 (archive repo), and Q-H
+   (MINISIGN secret). The runbook has the steps.
+6. **055** (site on the live registry), then **010** (test mod), then Ludwig's M4 and the final demo.
+7. **Live checks with Ludwig:** 052 AC7 (install the vault git hooks in ~/wom), 048 AC9 (nesting refused) and 049 AC9
+   (hook live). All three need a fresh session that has loaded main's `.claude/` (see the gotcha below).
+8. **056** (PR #43) is waiting for Ludwig's read-through. **058** live part needs a Pages deploy.
+
+### For Ludwig
+- Read 056 (PR #43) when convenient.
+- Manual steps Q-H, M5, M6 and M7 (runbook).
+- In the next session, let the manager do the three live checks in item 7 with you.
+
+### Kickoff line for the next session
+"Kör din vanliga sessionsstart. Läs SESSION STATUS / HANDOVER 2026-10-15 (session 8) i missionsloggen och fortsätt med punkt 1–4."
+
+### Ludwig's manual steps, 2026-10-15 (after the handover entry)
+- **M5 done:** the GitHub App `worldofmodcraft-pipeline` is created under the org (a first attempt under the user account
+  `womcraft` was deleted and recreated). It is installed on `registry`, `site` and `archive`, and its key and App ID are
+  stored as registry Actions secrets per runbook step 9. Public page https://github.com/apps/worldofmodcraft-pipeline
+  answers 200 (manager, unauthenticated).
+- **M7 done:** https://github.com/worldofmodcraft/archive is public with 1 commit (manager, unauthenticated API, 200).
+- **Q-H answered:** "MINISIGN_SECRET_KEY finns" (Ludwig looked; nothing was copied).
+- **M6 not done.** It is needed before task 010 / the final demo, not before 008b: ADR-0119 requires the publisher in the
+  `test` namespace to be an org member, and Ludwig chose Q-F A (his personal account joins).
+- Next session: update the runbook markers (M3 secret ✓, M5 ✓, M7 ✓, M6 open) as a small docs task. 008b/008c are now
+  unblocked on Ludwig's side. Also: `~/wom`'s `branch.main.merge` points at a stale `chore/handover-review-verdict`; fix it with
+  `git -C ~/wom branch --set-upstream-to=origin/main main`.
+- Separately: `womcraft/worldofmodcraft` (user-account repo, 404 unauthenticated, so private or absent) is not part of the
+  project. Ludwig mentioned it on 2026-10-15; no action decided.
+
+## SESSION STATUS — 2026-10-15 (session 9)
+Kickoff (Ludwig): "Kör din vanliga sessionsstart … Börja med att rätta upstream för main i ~/wom, fortsätt sedan med punkt 2–4."
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Done
+- **Upstream fixed:** `git branch --set-upstream-to=origin/main main` in `~/wom`; `git status -sb` now shows `## main...origin/main`
+  (it tracked the deleted `chore/handover-review-verdict`). Local config only, no remote or history change.
+- **062** (handover item 2) built, verified, reviewed: registry PR #9. Closed tasks' scope checks (006, 008a, 032, 057) now
+  measure their own pinned base..final range; 006 C1.5b, C8.2, C8.3a, C8.3b retired with named 057 successors; the stale
+  heading quote in `ownership.md` fixed. Manager fresh-clone re-run: normal and `--mutate` ALL CHECKS PASSED. Review PASS.
+- **063** (item 3) doctrine fix in MANAGER.md §5, written by the manager (the classifier allowed it this time): platform PR #55.
+  Verify green and mutation-tested in a fresh clone; review PASS.
+- **007** (item 4) revised for ADR-0121/057 and split into **007a** (shape: classify, schema, append-only) and **007b**
+  (ownership, R11, fail-closed T1/T3). Independent spec review: FAIL, FAIL, PASS; both spec-approved.
+  Measured before writing: `entry.schema.json` now rejects the four-element `attacker:mod` entry, so 006's premise holds only
+  for the variant without element 2 (criterion 3 re-based).
+- **007a** built, verified, reviewed: registry PR #10. 150 tests, 057 fixtures 73/73 parity, `--mutate` 78 mutations,
+  not_red=0 (manager fresh-clone re-run). Review FAIL (Python `$` accepted a trailing newline on pattern fields) → fix round
+  with red-first tests → delta review PASS.
+- Booked: **064** (draft; `schema_check.py` end anchor + Unicode `\d`), **065** (draft; `key_id` format in `entry.schema.json`
+  per `signature-format.md`). 039 got a dependency note (needs 007a and 007b).
+
+### Waiting for Ludwig (merge approvals)
+- **Platform PR #55 (063, doctrine):** ★approve.
+- **Registry PR #10 (007a, security-relevant CI):** ★approve. 007b starts only after this merges.
+- **Registry PR #9 (062):** ★approve. It edits two quoting sentences in `contracts/ownership.md`; held because of that.
+
+### For Ludwig (★ = manager's lean)
+1. **Canonical ajv 8 location** (062 Q1): `057-verify.sh` and `062-verify.sh` need ajv 8; the only copy here is
+   `/tmp/fc041/node_modules`, which a reboot can wipe. A: ★a pinned `package.json` + `npm ci` in a registry dev-tools folder
+   (small task); B: install it in the site repo and point there; C: keep `/tmp` and accept re-creating it.
+2. **R11 identity** (007b, `ownership.md` R11 mechanism): which `pulls.user.id` do the platform's own takedown PRs carry?
+   Until answered, `r11_identity = None` and every takedown is rejected (fail closed, as the contract intends). ★Answer it
+   when 039/008b produce a real organisation-authored PR; nothing blocks on it now.
+
+### Next steps
+After PR #10: 007b → 039. In parallel: 064, 065, the runbook markers (M3 secret, M5, M7 done; M6 open), 008b.
+
+### Ludwig's answers, 2026-10-15 (session 9, verbatim)
+"★ på alla. Avseende 3. får du förklara lite mer?"
+- Merges approved: platform #55 (063), registry #10 (007a), registry #9 (062), platform #56 (this status). Recorded in each task log.
+- ajv location: A (★) — a pinned `package.json` + `npm ci` in a registry dev-tools folder; booked as task 066 (draft).
+- R11 identity: ★ answer later. Explained in session: the org cannot open PRs itself, so the authorised id is one of
+  (A) the pipeline App's bot, (B) a dedicated takedown-only account or App that only Ludwig controls, (C) `womcraft`.
+  Manager lean ★B when 039/008b go live: C is the account manager sessions act as, and A would let the publishing
+  automation also remove. Until then `r11_identity = None` and every takedown is rejected (fail closed).
+
+### After the merges (session 9)
+- Merged with Ludwig's approval: registry #9 (062), #10 (007a); platform #55 (063), #56 (session 9). #56 conflicted with #55
+  (both added the 063 task file); resolved by taking main's version, which holds the full log.
+- Post-merge check on registry `main` (`3c94cf2`, fresh clone): `007a-verify.sh` green; `062-verify.sh` **red, 3 checks**, all
+  `032-verify.sh` N5b — a text pin on the README sentence 007a rewrote (its criterion 12). Combination effect of two
+  individually green PRs. Booked and dispatched as task 067 (re-pin N5b); gotcha recorded in OPERATIONS.md.
+- `tools/vault/refresh-main.sh` run after the merges: written=12, id_conflicts=0.
+- **067** merged (registry PR #11, manager authority: reviewed test change). Registry `main` at `ac22c8f`, fresh clone:
+  `062-verify.sh` ALL CHECKS PASSED, `007a-verify.sh` failed=0, `032-verify.sh` ALL CHECKS PASSED. Main is green again.
+- Worktrees of merged tasks removed (062, 007a, 067, 063). Task files are not yet moved to `docs/tasks/done/` (next session).
+
+### Next session starts here
+1. **007b** (spec-approved; 007a is merged): create `~/wt/registry-task-007b`, dispatch implementer, independent review,
+   merge needs Ludwig (security-relevant CI). Before merging: run `062-verify.sh` on the PR branch merged onto `main`
+   (OPERATIONS.md gotcha, session 9).
+2. Spec gates for **064**, **065**, **066** (drafts); then 039 after 007b.
+3. Runbook markers (M3 secret, M5, M7 done; M6 open) as a small docs task; move done task files to `docs/tasks/done/`.
+4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
+
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-15 (session 9) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 10 — 2026-10-15 (evening)
+Kickoff (Ludwig): "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-15 (session 9) i missionsloggen och fortsätt med 'Next session starts here'."
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Ludwig's approvals, 2026-10-15 (session 10, verbatim)
+"I approve all other decisions" — clarified in session by a multiple-choice question; Ludwig ticked all four options:
+1. **Merge platform #57 and #58** — done (#57 session 9 status; #58 task 068 runbook markers, manager fresh-clone verify
+   14 PASS, 12 mutations red). A first merge attempt of #58 and a reviewer launch for it had been refused by the auto-mode
+   classifier ("Merge Without Review") before this approval; neither was retried.
+2. **The manager's session-10 calls:** 064 amendment 1 (explicit ECMA escape translation replaces `re.ASCII`); 065's
+   decisions (update `append-only.rules.md`'s four example values and 057's pin; the one deliberate assertion reversal in
+   `test_hardening.py`); task 069 before 007b/064 merge.
+3. **Future merges in order, without asking again:** 066 → 069 → 007b → 064, each only after independent review PASS and
+   full verification on the merge result. This is a standing approval for these four PRs only (007b is security-relevant
+   CI, normally Ludwig's under §7); it is not a precedent for other PRs.
+4. **Platform PR #43 (task 056 architecture note)** — merged, though it had been waiting for his read-through.
+Vault refreshed after the merges: written=9, id_conflicts=0.
+
+### For Ludwig (session 10; ★ = manager's lean)
+1. **Can a namespace owner remove their own published version?** (007b review round 1, finding F2.) ADR-0041 makes a
+   takedown a legal-grounds action by the platform, and `ownership.md` R11 authorises a *pure* takedown PR only from the
+   platform identity. But R11 also says a PR that sets `removed` **and** makes any other change "is not a takedown for this
+   rule's purposes and is judged in full by the ordinary rules" — under which the owner passes R3. So an owner can remove
+   their own published version by bundling it with, say, a new version. 007b implements the contract as written; nothing
+   else stops this today.
+   - A ★: any PR that sets any version to `removed` is a takedown, whatever else it contains: only the platform identity
+     may open it, and mixed PRs are always rejected. Needs a small contract amendment to `ownership.md` R11 (a task,
+     reviewed, your approval) and a one-line change in 007b's checker.
+   - B: owners may withdraw their own versions (author-initiated removal is a feature). Then ADR-0041's "legal grounds
+     only" needs a new ADR, and removal by owners should be allowed *without* the mixed-PR detour.
+   - C: keep the contract as written (the loophole stays; document it as a residual).
+   Rests on it: task 039 (registry CI going live) must not ship before this is answered; 007b merges either way.
+2. **R11 identity** (carried over from session 9, not blocking): which `pulls.user.id` the platform's takedown PRs carry.
+   ★B (a dedicated takedown-only account or App that only you control) when 039/008b go live.
+
+### Merges and gates (session 10)
+- **066 merged** (registry #14, `198dc98`): review PASS; gate `062-verify.sh` ALL CHECKS PASSED on the merge result.
+  **Manager's gap:** that gate ran only 062, which does not run 067; 067 AC5.1 had been red on any later branch, so `main`
+  was red on 067 from `198dc98` until 069 fixed it. From then on every merge gate runs **every** closed verify script, one
+  at a time, on a quiet machine.
+- **069 merged** (registry #15, `2347ffb`): 008a temp-dir race fixed (per-run TMPDIR), 007a and 067 AC5.1 re-pinned to
+  their PR ranges, 062 AC6.034 allowance for 064. Review PASS; gate: 007a, 008a, 032, 034, 057, 062, 066, 067, 069 green.
+- **007b gate** on its merge result: all green except **067 AC2.4** (`git diff BASE HEAD` on `docs/contracts/README.md`,
+  which 007b edits in scope). Same defect class for the fourth time → **task 070**: audit every closed verify script for
+  own-change checks measured against HEAD, re-pin them all, plus the ajv default for 067/069. 007b and 064 merge after it.
+- Ledger hygiene (move done task files) is renumbered **071**.
+- **070 review FAIL** (B1: pinning 062 AC6.* dropped the live "no closed check removed" guard on HEAD). 070 had used its 2-session budget → §8 stop-and-ask. Ludwig, 2026-10-16 (multiple choice, after first declining the prompt and then asking for the options again): **"Extend by 1 fix round"** — one extra session for 070 only; fix round dispatched (live id-superset guards beside the pins, F2/F3, red first).
+- **070 merged** (registry #16, `fb76ee5`): delta review PASS; full gate green (007a, 008a, 032, 034, 057, 062, 066, 067, 069, 070). Merging required a rebase of one manager log commit made on a stale worktree base (resolved by taking the remote log and re-appending; no force).
+- **007b merged** (registry #12, `70cedca`): review FAIL (F1 recycled-username hijack) → PASS → PASS (N1 owner-field and disagreeing-owners fail-closed); full gate on the merge result green, 007b-verify included. Production `r11_identity = None`. F2 gates 039.
+- **064**: review PASS; pre-merge R1 (remove the 008a filter and 007a allowance from 064-verify.sh now that 069/070 landed) sent to its agent.
+
+## SESSION STATUS — 2026-10-16 (session 10), handover at 32 % context (past the 30 % soft threshold)
+Token guard: suspended by Ludwig (2026-10-14), not checked.
+
+### Done
+- **Platform:** #57 (session 9 status), #58 (task **068** runbook markers M3/M5/M7/Q-H ☑), #43 (task 056 note) merged with
+  Ludwig's approval; vault refreshed.
+- **Registry merged** (each: independent review PASS, full closed-script gate green on the merge result):
+  **066** pinned ajv 8.20.0 in `tools/dev` (#14, `198dc98`); **069** 008a race fixed, 007a/067 AC5.1 pinned, 062 allowance for
+  064 (#15, `2347ffb`); **070** audit of all closed verify scripts: own-change checks pinned, live guards kept beside them,
+  ajv default everywhere (#16, `fb76ee5`); **007b** ownership checker (#12, `70cedca`) — review found and fixed a real
+  recycled-username hijack (F1) and a namespace-reassignment path (N1).
+- Specs: 064 (amendment 1: explicit ECMA translation, replacing the manager's `re.ASCII` defect), 065 (revised after spec
+  review round 1 FAIL; Ludwig approved its decisions), 066, 068, 069, 070 approved.
+- OPERATIONS.md: "What session 10 paid for" (three gotchas).
+
+### In progress
+- **064** (registry PR #13): review PASS; R1 done (`e42f5bc`); all closed scripts green **except `007b-verify.sh`** (exit 2),
+  whose scope and "007a modules unchanged" checks measure HEAD — 064 legitimately edits `tools/registry/schema.py`.
+- **065**: spec ready, independent spec review round 2 pending; dispatch after 064 merges.
+
+### For Ludwig (★ = manager's lean)
+1. **Mixed-PR takedown (007b review F2)** — can an owner remove their own published version by bundling it with another
+   change? A ★ any `removed` makes the PR a takedown (platform identity only, nothing else in the PR; small contract
+   amendment); B owners may withdraw (new ADR); C keep as is (documented residual). Gates task 039.
+2. **R11 identity** (carried): ★ a dedicated takedown-only account/App only Ludwig controls; answer when 039/008b go live.
+3. **Doctrine proposal (new):** add to REVIEW-CHECKLIST: "the task's verify script measures its own change on its pinned
+   range and its live guards on HEAD — checked before merge, because the task becomes closed at merge". A ★ add it (a
+   small doctrine task, your approval); B keep it as an OPERATIONS gotcha only. Five instances so far (OPERATIONS.md).
+
+### Next session starts here
+1. **Task 071** (new, small, qa-engineer): re-pin `007b-verify.sh`'s scope and "007a modules unchanged" checks to PR #12's
+   range (base = merge-base of `70cedca`, final = `70cedca^2`); add 007b to 070-verify's closed list; red first. Then
+   **064**: before merging, check 064-verify.sh's own AC5/scope checks for the same class (they are framed against
+   `70cedca`..HEAD); decide the pattern for a not-yet-merged task's own-change checks; full gate; merge (standing approval
+   covers 064).
+2. **065**: spec review round 2 → dispatch (registry, then site re-sync).
+3. **072** ledger hygiene (renumbered from 071): true statuses, move done task files to `docs/tasks/done/`, remove merged
+   worktrees (`~/wt/registry-task-{066,069,070,007b}`, `~/wt/task-068`).
+4. Live checks with Ludwig still open from session 8: 052 AC7, 048 AC9, 049 AC9.
+
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig's answers, 2026-10-17 (verbatim)
+1. "I dont think owners should be able to remove their mods, once published that version is published for all future
+   since its hosted by my site? Brainstorm on this one, also in relation to my previous decisions in regard of this."
+   → Direction: no owner removal. Survey of prior decisions dispatched as task 073; the brainstorm follows in session.
+2. "Sounds good. This account should only be able to do take downs with my approval so it cannot go rogue."
+   → R11 identity: a dedicated takedown-only account or App that only Ludwig controls, and every takedown it files still
+   needs Ludwig's written approval before merge (MANAGER.md §7 already requires this per PR). Recorded for 039/008b.
+3. "Ok" → the REVIEW-CHECKLIST item (verify script pins own-change checks, live guards on HEAD, checked before merge) is
+   approved; booked as a small doctrine task next session.
+4. "Ok to merge." → platform PR #59 merged.
+
+### Removal policy — brainstorm and Ludwig's decision, 2026-10-17
+Survey: task 073 (surveyor report, quotes with file:line). Ludwig's answer, verbatim: **"Option A for all"**.
+The manager's reading of that answer, per item (Ludwig may correct any line):
+0. **Owners cannot remove published versions** (Ludwig, same day) — this is ADR-0041:15 already; `ownership.md` R11's
+   "mixed PR is judged by the ordinary rules" contradicts it. Fix: contract amendment — any PR that sets a version to
+   `removed` is a takedown (platform identity only, nothing else in the PR) — plus the one-line 007b checker change.
+1. **Grounds:** a takedown may be for legal grounds (ADR-0041) **or** known malicious code / illegal content as ADR-0046
+   defines them narrowly. Wire ADR-0046 into the takedown mechanism.
+2. **Files of a removed version:** stop serving them publicly; keep the registry entry, hash, signature and reason forever.
+3. **Already-installed copies:** on its next registry update the launcher warns with the reason; for malware it also offers
+   to disable the mod. Never silent deletion (ADR-0037).
+4. **Appeals:** a successful appeal means a new version; a removal stays final (no un-remove).
+5. **Authors with a broken release:** a per-version "don't use this one" mark (still installable, warned) — later, not now.
+6. **Archive protection:** a protection rule on `worldofmodcraft/archive` so Releases cannot be deleted; a manual step for
+   Ludwig, with exact clicks written by the manager.
+7. **Doctrine housekeeping:** MANAGER.md §7's "legal grounds only" and "the single in-place change" corrected.
+Booked for next session: an ADR draft covering 1–4 (and 5 as a recorded intention) for Ludwig's acceptance; the
+`ownership.md` R11 amendment + 007b checker change (item 0; gates 039); the runbook step for 6; the §7 doctrine fix (7,
+together with the approved REVIEW-CHECKLIST item).
+
+### Next session starts here — addendum (2026-10-17)
+Add to session 10's list, after item 1 (071, then 064): **5.** ADR draft "removal policy" (items 1–5 above) for Ludwig's
+acceptance; **6.** `ownership.md` R11 amendment + 007b checker change (item 0), merge needs Ludwig (contract, takedown);
+**7.** runbook step: protect `worldofmodcraft/archive` Releases (item 6); **8.** doctrine task: MANAGER.md §7 wording
+(item 7) + the approved REVIEW-CHECKLIST item. Ludwig's R11 answer (dedicated takedown-only account under his control,
+each takedown still needing his written approval) goes into 039/008b's specs.
+Kickoff line unchanged: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-16 (session 10) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig, 2026-10-17: continue in this session (verbatim)
+"Fortsätt i den här sessionen, är på resande fot och har inte tillgång till min terminal" — waives the §5 soft handover threshold (30 %) for this session; the 40 % hard threshold stays in force (context 35 % at this point). Agents are asked for short reports to conserve context.
+
+## SESSION STATUS — 2026-10-17 (session 10, continued), handover at ~38 % context (40 % hard limit)
+### Done since the 2026-10-16 status
+- Ludwig's answers 2026-10-17 recorded; platform #59 and #60 merged. Removal policy decided ("Option A for all").
+- **065** spec-approved (spec review round 2 PASS, three fixes folded in).
+- **071** merged (registry #17, `825da5e`): 007b-verify's own-change checks pinned to PR #12's range; review PASS; full gate
+  (12 scripts) green. This unblocks 064.
+- **074 / ADR-0122** drafted (platform PR #61, still the original Proposed draft). Ludwig answered its eight open questions
+  ("Stjärna på alla") and **accepted it ("Acceptera", 2026-10-17)**. The acceptance edits under `docs/decisions` (status
+  Accepted, index, "Amended by ADR-0122" in ADR-0041's header) were **refused by the permission classifier** ("Modify Shared
+  Resources") for the doc-writer; not retried; the manager declined to make the same edits itself (that would launder the
+  denial). The folded-in version (eight answers, Options considered, status Proposed) sits **uncommitted** in
+  `~/wt/task-074`; `build_index.py --check` fails there until ADR-0041 carries the "Amended by" line.
+
+### Blocked on Ludwig
+- **ADR-0122 acceptance edits:** A ★ allow edits under `docs/decisions/` for task 074 (permission rule) and say continue;
+  B Ludwig edits himself (manager writes exact steps); C leave Proposed for now (nothing urgent depends on it).
+
+### Next session starts here
+1. **064** (registry PR #13): merge `origin/main` (`825da5e`) into the branch; full closed-script gate on the merge result
+   (now including 071); merge under the standing approval.
+2. **065**: dispatch (registry, then site re-sync) — merge needs Ludwig (signature/key contract).
+3. **ADR-0122**: per Ludwig's A/B/C above.
+4. `ownership.md` R11 amendment + 007b checker change (removal policy item 0); merge needs Ludwig; gates 039.
+5. Runbook step: protect `worldofmodcraft/archive` Releases (item 6). Doctrine task: MANAGER §7 wording + approved
+   REVIEW-CHECKLIST item (doctrine edits may hit the same classifier wall — plan for Ludwig doing or allowing them).
+6. 072 ledger hygiene (statuses, `docs/tasks/done/`, remove merged worktrees incl. registry-task-{066,069,070,007b,071},
+   task-068); 070-verify header still says "ten closed scripts" (cosmetic).
+7. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-17 (session 10, continued) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig, 2026-10-18 (verbatim): "1. OK att merga 62. 2. Kör Stjärna för ADR-0122"
+→ #62 merged. ADR-0122: option **A** (★) — a narrow permission rule allowing edits under `docs/decisions/` for task 074, then the doc-writer finishes the acceptance edits (status Accepted, index, "Amended by ADR-0122" in ADR-0041) and PR #61 merges. Deferred to the start of the next session (manager at the 40 % hard context limit; permission changes done with full context). **Next session: this is item 0, before 064.** Ludwig's instruction is the authorisation; the rule is scoped to `docs/decisions/**` and recorded in this log.
+
+## Session 11 — 2026-10-18
+Token guard: suspended by Ludwig (2026-10-14), not checked. Context at start: 5 % (HUD cache).
+- **Item 0 (ADR-0122, option A):** the manager tried to write the narrow allow rule
+  (`Edit(//home/ludwig/wt/task-074/docs/decisions/**)` and the matching `Write(...)`) into `~/wom/.claude/settings.local.json`
+  (git-ignored, local only). **Refused by the auto-mode classifier ("Self-Modification").** Not retried by any other means:
+  a permission rule the classifier will not let the manager grant itself is Ludwig's to add. Exact steps go to Ludwig
+  under "For Ludwig" at session end. ADR-0122 stays Proposed until then; nothing urgent depends on it.
+- **Item 1 (064):** implementer dispatched (log baseline 14): pin 064-verify.sh's own-change checks to the task's own
+  range before merge, merge `origin/main` into the branch, full closed-script gate, push. Merge by the manager afterwards
+  under the standing approval.
+- **075** (R11 amendment + 007b checker, removal policy item 0): spec written; independent spec review round 1 FAIL
+  (3 blocking, 2 minor: incomplete contract-passage list, under-specified detection, 032 T16/T17 pins), all folded in;
+  round 2 PASS; **spec-approved**. Dispatch after 064 merges (base must contain 064). Merge needs Ludwig.
+- **077** (runbook M8, archive protection, removal policy item 6): doc-writer, platform PR #63. Facts verified on
+  docs.github.com: tag rulesets ("Restrict deletions/updates") and "Enable release immutability" exist; **no GitHub
+  setting prevents deleting a Release** — M8 says so and names tag + file protection as the closest. Manager measured
+  (unauthenticated API): `archive` is public with 0 releases. Review round 1 FAIL (3 minor), fixed in `cc4da92`, delta
+  review PASS. Open: rulesets documented "for GitHub Team and Enterprise" only — Free/public marked [unverified]; M8
+  tells Ludwig to stop if the menu is missing. Task 076 is reserved for the doctrine task (§7 wording + approved
+  REVIEW-CHECKLIST item), to be specified after ADR-0122 is accepted (its grounds wording depends on it).
+- **064**: implementer re-pinned 064-verify.sh's own-change checks (AC5.1-5.6, S1-S3) to MAINB..FINAL
+  (FINAL `69f74a1`, re-pin `e288c43`, red shown first), merged `origin/main` (`1f99708`, no conflicts), tip `5002b46`.
+  Delta review PASS; serial gate on a quiet machine: all 14 closed scripts exit 0 (064-verify ~40 min). Observed: 062/067
+  redden when two verify runs overlap — the known shared-suite class (task 043); serial runs are green.
+- **Merge of registry PR #13 refused by the auto-mode classifier ("Merge Without Review").** Not retried. Second
+  stop-and-ask in a row → session halts per MANAGER.md §8 until Ludwig answers.
+
+## SESSION STATUS — 2026-10-19 (session 11), halted on two classifier refusals (§8), context ~12 %
+### Done
+- 075 spec-approved (two independent spec-review rounds); 077 PR #63 reviewed PASS (not merged); 064 ready (review
+  PASS, gate green on `5002b46`).
+### For Ludwig (★ = manager's lean)
+1. **ADR-0122 permission rule** (your option A, 2026-10-18) — the classifier will not let the manager grant it.
+   ★A you add it: in the Claude Code prompt type `/permissions`, choose "Allow", add the rule
+   `Edit(//home/ludwig/wt/task-074/docs/decisions/**)` and save it to "Project settings (local)"; then say "fortsätt".
+   B you make the three edits yourself (manager writes the steps). C leave ADR-0122 Proposed.
+2. **Registry PR #13 (task 064)** — reviewed and green, merge refused by the classifier. ★A you click "Merge pull
+   request" at https://github.com/worldofmodcraft/registry/pull/13 (keeps the human gate visible to the classifier);
+   B write "OK att merga #13" and the manager tries once more with the plain merge command. 075 waits on this.
+3. **Platform PR #63 (task 077, runbook M8)** — reviewed PASS. A ★ "OK att merga 63"; B changes first.
+4. **Fact question for M8:** GitHub documents rulesets "for GitHub Team and GitHub Enterprise". Which plan is the org
+   on? See https://github.com/organizations/worldofmodcraft/settings/billing — the plan name is at the top.
+### Next session starts here
+1. After answer 2: 064 merged → cut 075 from registry main, dispatch implementer; merge needs Ludwig.
+2. After answer 1: doc-writer finishes ADR-0122 acceptance edits in `~/wt/task-074`; PR #61 merge (Ludwig).
+3. Then 076 doctrine task (§7 wording per ADR-0122 + approved REVIEW-CHECKLIST item); 072 ledger hygiene;
+   live checks 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-19 (session 11) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Ludwig, 2026-10-25 (verbatim): "merge"
+Read by the manager as approval for the three PRs listed under "For Ludwig" items 2-3 (registry #13, platform #63, #64);
+not as an answer to item 1 (the ADR-0122 permission rule, still open) or item 4 (org plan, still open).
+→ registry #13 (064) merged at reviewed head `5002b46` → `79d5377`; platform #63 (077) merged at `cc4da92` → `2562f88`;
+#64 merged after this entry. The §8 halt is lifted by the answer; 075 is unblocked (base = registry main `79d5377`).
+- **Session worktree pin (2026-10-25):** after the manager entered the session worktree (EnterWorktree), the isolation
+  guard pinned the session and its agents to it; 075's first implementer stopped before writing code (it could not run
+  registry verify scripts from the registry worktree root) and did not work around the guard. Ludwig: "lämna worktree"
+  → the manager left it (kept on disk); 075 relaunched. Lesson for OPERATIONS.md: the manager should not EnterWorktree
+  when agents must work in other repositories' worktrees; session-log edits go in a manually created worktree instead.
+- **075 (registry PR #18):** implementer: red `45c5be9` (17 tests red), fix `067a45d`. Independent review: owner removal
+  impossible in every probed PR shape; platform-only removals still authorised; CONDITIONAL PASS, one blocking finding
+  (the unreadable-entry R11 message falsely claimed a takedown). Fix: red `49a64f3`, fix `4509f57`, log `7d91a3d`; fresh
+  delta review PASS. All 15 closed scripts exit 0 (064 run without timeout), 273 tests OK. The author's two booked
+  questions answered by the manager from the spec (a strengthened assertion; fail-closed R11 for unreadable entries).
+  Ludwig 2026-10-25: "ok att merga" → **merged `4356583`**.
+- **ADR-0122 (task 074):** Ludwig could not add a permission rule from the mobile app (`/permissions` shows only the mode
+  picker); he switched the session to Manual mode and approved each edit himself. Doc-writer: status Accepted
+  (2026-10-17, by Ludwig), ADR-0041 "Amended by" line, README/INDEX.json regenerated, `build_index.py --check` OK
+  (`3405ab7`, merge `f905136`). Ludwig: "Ok att merge 61" → **platform PR #61 merged `0aac566`. ADR-0122 is Accepted.**
+
+## SESSION STATUS — 2026-10-25 (session 11, end)
+### Done this session
+064 (#13), 077 runbook M8 (#63), 075 owner-removal fix (registry #18), ADR-0122 Accepted (#61), session logs (#64, this PR).
+### For Ludwig (★ = manager's lean)
+1. **Org plan (for M8):** GitHub documents rulesets "for GitHub Team and GitHub Enterprise". Which plan is the org on?
+   https://github.com/organizations/worldofmodcraft/settings/billing — the plan name is at the top. Then do M8 in the
+   runbook (`docs/runbooks/site-v1-manual-steps.md`); stop and tell the manager if the Rulesets menu is missing.
+2. Switch the session back to Auto (`/permissions` → "Auto").
+### Next session starts here
+1. **076** doctrine task: MANAGER.md §7 wording per ADR-0122 (grounds: legal + ADR-0046 malware/illegal content; "the
+   single in-place change" corrected) + the approved REVIEW-CHECKLIST item (verify scripts pin own-change checks, live
+   guards on HEAD, checked before merge). Doctrine edits may need Manual mode (classifier wall).
+2. ADR-0122 follow-ups: specs for launcher warning on removed versions (item 3) and stopping public serving of removed
+   files (item 2), as the mission graph allows. R11 identity (dedicated takedown-only account, each takedown needing
+   Ludwig's written approval) goes into 039/008b's specs; 039 is now unblocked by 075.
+3. 072 ledger hygiene: statuses, `docs/tasks/done/`, remove merged worktrees (registry-task-{064,066,069,070,071,007b,075},
+   task-068, task-074, task-077, `.claude/worktrees/session-11`, session-11b after merge).
+4. OPERATIONS.md gotchas: the EnterWorktree pin (above); verify scripts must run from the repo root and one at a time;
+   a fresh registry worktree has no `tools/dev/node_modules` (062 needs WOM_NODE_MODULES or `npm ci`).
+5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, end) i missionsloggen och fortsätt med 'Next session starts here'."
+
+### Session 11 continued — 2026-10-25 (Ludwig: "Fortsätt i den här sessionen")
+- **076** (doctrine, platform PR #66): §7 takedown wording per ADR-0122 (grounds; T2 is one of three permitted in-place
+  mutations T1/T2/T3; owners cannot remove, enforced by R11) + REVIEW-CHECKLIST item 12 (verify-script pinning). Not
+  refused by the classifier. Its AC4 was blocked by three closed scripts already red on main → task 078 first. Review
+  PASS. Ludwig: "Ok merga 66" → **merged `bf4710d`**.
+- **078** (platform PR #67): 048 c1 pinned to PR #50's range, 063 to PR #55's; 056-verify's planted minisign header text
+  built at runtime (051's secret scan hit was **not a secret** — manager checked with masked output). Q2 (070-verify is
+  registry-only) was the manager's spec defect; 078-verify carries the later-branch checks instead. Review PASS (049 red
+  only on stale ignored `__pycache__`; cleared, 049 exit 0). Ludwig: "Go wit star" → **merged `8004828`**.
+- **Ludwig 2026-10-25:** answer 2 "Go with star" (live guard on rule 0) → task 079; answer 3 "i have GitHub pro", then
+  "Worldofmodcraft is on a free plan" — the org is on **GitHub Free**. Docs (fetched 2026-10-25) name rulesets only for
+  Team/Enterprise and say nothing about public repos; unverified — Ludwig checks
+  https://github.com/worldofmodcraft/archive/settings/rules for a "New ruleset" button before doing M8.
+- **079** (platform PR #68): `docs/manager/rule0.reference.md` + `tools/manager/check-rule0.sh` (byte-exact, 0/1/2,
+  never skip); 11 mutations as specified. Review PASS incl. merged-with-main clone. Ludwig: "Ok att merga 68" →
+  **merged `29b3424`**.
+- **080** (platform PR #69): 079's review found 056/076/078 verify red in **every fresh clone** — the architecture note
+  cited ADR-0121 on a local-only branch. Cite moved to the main path; fresh-clone runs green after, red before. Review
+  pending.
+- Gotchas for OPERATIONS.md (booked, 072/hygiene): stale ignored `__pycache__` reddens 049 (run with
+  PYTHONDONTWRITEBYTECODE=1); add/add conflicts on task files between session branch and task PR — main's copy is the
+  superset; verify scripts must be checked in a fresh clone (item 8), not only in worktrees.
+- Booked, non-blocking: 048 c3 asserts exactly 10 agent files (reddens on an 11th); 056 has no later-branch case in 078.
+- **080** update: review PASS, then an item-12 finding (own-change check read HEAD) fixed in `a36b758` (pins BASE `29b3424`, FINAL `f173739`; control FINAL=BASE exits 1); delta review PASS; PR #69 head `fe050ab` awaits Ludwig's OK.
+- Ludwig: "Ok att merga 69 70" → **080 merged `9a73990`**, session log **#70 merged `d9d48de`**.
+- **072** (ledger hygiene, platform PR #71): 34 task files set to `done` with a named merge each; 13 left (no merge
+  evidence: 007, 008, 008b, 008c, 010, 031, 039, 040, 043, 047, 055, 058, 065); **041 uncertain** (merged as site PR #2,
+  outside the evidence rules). OPERATIONS.md "What session 11 paid for" (a)-(g). 16 merged worktrees removed (three
+  checks each, no --force, no branch deleted); kept: task-023, task-058 (unmerged), session-10, session-9-specs,
+  session-11b, task-072. Review pending at handover.
+
+## SESSION STATUS — 2026-10-25 (session 11, final), handover at ~25 % context
+### Done this session (all reviewed; merges with Ludwig's written OK where §7 requires it)
+064 (registry #13), 075 owner-removal fix (registry #18), 077 runbook M8 (#63), ADR-0122 Accepted (#61), 076 doctrine
+§7 + REVIEW-CHECKLIST item 12 (#66), 078 closed-verify repins (#67), 079 rule-0 live guard (#68), 080 fresh-clone cite
+fix (#69), session logs (#64, #65, #70).
+### In progress
+- **072** (PR #71): independent review running at handover; merge needs Ludwig's OK (ledger + OPERATIONS.md).
+### For Ludwig (★ = manager's lean)
+1. **Move finished task files to `docs/tasks/done/`?** Verify scripts cite task files by path. A ★ leave them in place
+   (the status line is the truth); B move them and update every citing script (a larger task).
+2. **M8 (archive protection):** org is on GitHub Free; rulesets availability on Free/public is unverified. Open
+   https://github.com/worldofmodcraft/archive/settings/rules — if a "New ruleset" button exists, follow M8 in
+   `docs/runbooks/site-v1-manual-steps.md`; if not, tell the manager.
+3. **PR #71 (072):** OK to merge once its review is PASS.
+### Next session starts here
+1. 072: review result → merge with Ludwig's OK (resolve the expected add/add conflict on the session branch: main's copy
+   is the superset). Remove `~/wt/task-072` and `~/wt/session-11b` after their merges (three checks, no --force).
+2. 041's status: check site PR #2 and correct it (or leave with the reason).
+3. ADR-0122 follow-up specs: stop public serving of removed files (item 2), launcher warning on removed versions
+   (item 3); 039 (registry CI workflow) is unblocked by 075 — its spec gets Ludwig's R11 identity answer (dedicated
+   takedown-only account under his control; each takedown still needs his written approval).
+4. Booked, small: 048 c3 hard-codes 10 agent files; 056 lacks a later-branch case in 078; 043's rule never reached
+   MANAGER.md (decide: finish or stop 043).
+5. Live checks with Ludwig: 052 AC7, 048 AC9, 049 AC9.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-25 (session 11, final) i missionsloggen och fortsätt med 'Next session starts here'."
+- Ludwig 2026-10-25: "Sådär, klart. Du kan bocka för det och merga PR71 o 72" → **072 merged `4de1218`**; **M8 done** (task 081: ruleset `archive-tags-permanent` verified active on all tags via the public API; immutability on Ludwig's word); session PR #72 merged with this entry. Open for Ludwig: move finished task files to `done/`? (A ★ leave in place).
+
+### Ludwig, 2026-10-25 evening (verbatim): "Fortsätt i den här sessionen hela natten. Frågan om färdiga uppgiftsfiler gå på A stjärna"
+- **Task files:** option A — finished task files stay in `docs/tasks/`; the status line is the truth. No move to `done/`.
+- **Overnight:** the manager reads this as waiving the §5 soft handover threshold (30 %) for tonight, as on 2026-10-17; the
+  40 % hard threshold stays. Overnight merges only where §7 lets the manager merge on its own authority (review PASS,
+  verification green); anything touching `docs/decisions/`, doctrine, mission specs, CI security checks, signing/keys or
+  takedowns is parked for Ludwig's morning. Context at this point: ~28 %.
+- Ludwig asked how far the game is: answered from the mission spec — SITE-V1 builds the publishing platform only; kernel,
+  forks, Lua, launcher are §2 out of scope (a later mission); ~9-10 open tasks remain here plus Ludwig's §7 walkthrough.
+- Overnight plan: 039 (registry CI workflow) spec revision (Plan agent drafts; manager gates after an independent spec
+  review — security-touching), then implementation; merge parked for Ludwig.
+- **Ludwig, 2026-10-25 evening (verbatim): "Du kan ignorera hårda gränsen på 40% under kvällens körning också, godkänner det."**
+  → §5's 40 % hard threshold is also waived for tonight's run only (not a precedent; §5 text unchanged and in force
+  afterwards). §5.5 still applies: after any auto-compaction the session is untrusted for operational detail and
+  verifies against disk before acting. The manager still writes resumable state to disk after every report-back.
+- **Ludwig, 2026-10-25 evening (verbatim): "Jag godkänner A Stjärna på alla val som kommer också, litar på dig. Men skriv
+  valen till vault trots detta vill kunna backtracka dem"** → standing approval for tonight: every question the manager
+  would put to Ludwig as options gets the manager's ★ option, applied immediately and recorded below with the options,
+  the choice and how to reverse it. **Not covered** (approvals, not choices): merges §7 reserves for Ludwig (decisions,
+  doctrine, mission specs, CI security checks, signing/keys, takedowns) — parked for the morning; no ADR is accepted on
+  this authority (drafts only). The vault shows this log as `Mission Log.md`; the manager merges session-log PRs tonight
+  (docs only) and runs `tools/vault/refresh-main.sh` after each, so the choices reach the vault.
+
+## Choices made under Ludwig's standing ★ approval — 2026-10-25 night (reversible; one entry each)
+Format: **C<n> — <question>** · options · **chosen** · why · how to reverse.
+- **C1 — 010 Q2: name/visibility of the test mod's repository (M4).** Options: A★ `<account>/wom-test-hello-world`;
+  B `<account>/hello-world`. **Chosen A** (010's own lean: avoids a generic name; the mod id lives in `mod.lua`). Reverse:
+  before M4, edit 010's Q2 line and the runbook text; after M4, rename the repository in GitHub settings.
+- **C2 — 010 Q3: LICENSE holder and `ai_assisted`.** Options: A★ "World of Modcraft contributors", `ai_assisted = true`;
+  B Ludwig's name, field omitted. **Chosen A** (honest: screenshots are script-generated and the README agent-written,
+  ADR-0061-compatible). Reverse: change the LICENSE line and the field in the test mod before M4 (a new version after).
+- **C3 — who performs 058's live probe (criteria 3-4).** Options: A★ an agent creates a throwaway public repository
+  `worldofmodcraft/pages-probe`, enables Pages, pushes the probe tree and records curl/wget observations; B wait for
+  Ludwig. **Chosen A**; criterion 5 (DNS) is not done, criterion 6 (browser) and deleting the repository stay Ludwig's.
+  Reverse: delete `worldofmodcraft/pages-probe` (Settings → General → Delete this repository) and discard the live rows.
+- **C4 — 039: where R11's identity is configured.** A★ committed `config/r11-identity.json` read at the merge-base (reviewed,
+  history in git); B a repository variable (any admin can change it silently). **Chosen A.** Reverse: a later task moves it.
+- **C5 — 039: who asks the org-membership question (R9).** A★ a new org App with only Members:read (runbook M10); B add
+  Members:read to the pipeline App (puts a write-capable key in a PR-triggered workflow). **Chosen A.** Reverse: amend 039's
+  §4 and M10 before M10 is done.
+- **C6 — 039: PRs touching nothing under `mods/`.** A★ green, labelled "human review required"; B green only for maintainer ids
+  in merge-base config. **Chosen A.** Reverse: a follow-up task adds the maintainer list.
+- **C7 — 039: size.** A★ one task (the YAML/composer seam is the risk); B split 039a composer / 039b workflow. **Chosen A**
+  (stop-and-split at 450 changed lines). Reverse: the manager splits at that point.
+- **C8 — 039: page.json-only merge on green.** A★ a human clicks merge in v1; B auto-merge (needs a write identity and 040's
+  screenshot scan first). **Chosen A.** Reverse: a later task adds auto-merge after 040.
+- Booked (not a choice): R11 currently names the org id; Ludwig's dedicated takedown-only account needs an `ownership.md`
+  amendment task later (039 U11).
+- **C3 reversed (2026-10-25 night):** dispatching the 058 live probe was **refused by the auto-mode classifier ("Create
+  Public Surface")** — creating a public repository in the org. Not retried. 058 criteria 3-6 wait for Ludwig's morning (he
+  creates `worldofmodcraft/pages-probe` per 058's manual step, or approves it in session). Consequence: 008c (needs the
+  archive URL shape) and through it 008b stay blocked overnight.
+- **C9 — task 010 scope tonight.** A★ split: 010a (mod contents, generator, registry-side files, fill-in script) now; 010b
+  (runbook `first-publish.md`, M4-M7 text, rehearsal) after 039/008b/055. B keep 010 whole and wait. **Chosen A.** Reverse:
+  fold 010a's result back into 010 and drop 010b. 010a's spec review: PASS-WITH-AMENDMENTS (8, folded in).
+- **C10 — 039: how the membership step gets a token (review finding B4).** A★ the official `actions/create-github-app-token`
+  pinned to a 40-hex SHA, secrets only in that step, the minted token only in the membership step's `env:`; B a hand-written
+  JWT mint in one shell step. **Chosen A** (boring, predictable — ADR-0103). Reverse: rewrite 039 §4 before M10.
+- **C11-C17 — task 082 (E15 pipeline-trigger contract), Q1-Q7, all ★:** C11 a push run builds every `pending` version on `main`
+  (not only its push range; survives cancelled waiting runs) · C12 input = `main`'s head fetched at plan time, SHA logged ·
+  C13 a run holds the `pipeline` group until its PRs merge; pending versions with an existing `pipeline/` branch are skipped
+  and logged for manual recovery · C14 signing and write-back only when `github.ref == refs/heads/main` (008b Objective wording
+  corrected) · C15 an entry on `main` failing the schema is a pipeline fault (no build, no T3) · C16 text checks in 082 now,
+  the workflow comparison in 008b-verify · C17 closed trigger list (`push`, `workflow_dispatch`). Alternatives per 082's spec
+  (B: range-only / `github.sha` / no in-flight rule / protected Environment or unsigned dispatch / build anyway / dormant
+  check / forbid only three names). Reverse: amend 082 before its merge (Ludwig approves that merge anyway).
+- **C18 — 039: how "mint only when the M10 secret exists" is expressed (a step `if:` cannot read `secrets`).** A★ a presence
+  step receives the key via `env:` and outputs only `present=true|false`; the mint step's `if:` reads that output; `secrets.`
+  allowed in exactly the presence and mint steps. B always mint and let a failed mint fail the job (would keep `gate` red for
+  every PR until M10). **Chosen A.** Reverse: amend 039 §4/AC7 before implementation.
+- **C19 — 039 size (400-500 estimated against a 450 stop line).** A★ one branch and one PR, implemented in two sessions
+  (composer first, then workflow + AC7 + docs); B split into tasks 039a/039b up front. **Chosen A** (keeps the seam reviewed
+  as one PR). Reverse: split at the stop line as the spec's fallback says. → 039 **spec-approved** after review rounds 1-2.
+- **C20 — 082 finding 1 (HIGH): the signing key is not bound to `main` by the workflow's `if:`** (a write-access account can run
+  a modified workflow from any branch, and repo secrets reach it). A★ bind the key to `main` with an Actions environment
+  `signing` (deployment branches = `main`, key as environment secret) — Ludwig's manual step, booked as runbook **M11**; until
+  then the key's trust boundary is every account with write access to the registry. B accept the repo-secret boundary.
+  **Chosen A.** Reverse: drop M11 and restate PT3. (Nothing uses the key yet; no exposure.)
+- **C21 — 082 finding 2 (HIGH): dry runs.** A★ a dry run signs only with an ephemeral key generated in the run and discarded
+  (amends 008b criterion 10); B dry runs use the production key, source restricted to pending versions on `main`. **Chosen A.**
+  Reverse: amend PT12 and 008b criterion 10 back.
+- **C22 — 082 finding 4 (HIGH): write-back PR flow under M9's "up to date" rule.** A★ PRs opened and merged one at a time, each
+  from a `main` fetched after the previous merge; the App merges once `gate` is green; closed unmerged or not merged within
+  30 min → the run fails and releases the group. B one PR per run (one version per run). **Chosen A.** Reverse: amend PT11/C13.
+- **C20 extended (082 review round 2, N1 HIGH):** the App key `PIPELINE_APP_PRIVATE_KEY` gets the same binding — a `write-back`
+  environment limited to `main` — and **M11 deletes the repo-level copies of both secrets** (an environment copy protects nothing
+  while a repo-level copy exists; a stolen App key could forge a T1 PR's hash and signature). Reverse: as C20. → 082
+  **spec-approved** after review rounds 1-2.
+- **C23 — 039 size tripwire fired (composer alone 418 lines).** A★ apply the spec's split fallback: 039a (composer, own verify
+  script and PR) now, 039b (workflow, AC7, docs, runbook) after 039a merges; B continue as one task past 450 lines. **Chosen A.**
+  Reverse: merge 039b's scope back into one PR.
+- **C24 — 010a: `fill_placeholders.py entry` arguments.** A★ `entry --account A --commit H` (as built; the entry's `source_url`
+  carries the same account token, and criterion 4 needs zero tokens left); B `mod --account` also rewrites a sibling
+  `entry.json`. **Chosen A.** Reverse: change the CLI before 010b's runbook is written.
+- **010a criterion 8 (visual review), by the manager on Ludwig's behalf (2026-10-25 night):** `welcome.png` (a sun with
+  concentric rings on a teal-to-violet gradient), `gallery.png` (six gradient tiles with a diamond each), `spare.png` (diagonal
+  orange/red stripes) — abstract, original, generator-made, nothing game- or Blizzard-like; clean at 1280×720. Ludwig may
+  override in the morning.
+- **010a (platform PR #77):** review PASS-WITH-AMENDMENTS (mutations now need a FAIL reason, not just exit 1; C24 and criterion 8
+  recorded in the task log), fixed at `5a16864`; the manager re-ran `010a-verify.sh` there: ALL OK, 0 FAIL, worktree clean.
+  **Merge refused by the auto-mode classifier ("Merge Without Review")** — not retried. Overnight, task PRs are therefore
+  parked for Ludwig's morning OK even where §7 would let the manager merge; session-log PRs (docs only) continue.
+- **082 (registry PR #20, E15 contract):** written (236 lines, PT1-PT12, normative block); review FAIL on the verify script only
+  (own-change check on HEAD; post-FINAL edits invisible) → fixed (TIP `2e521ee` pinned, FINAL..TIP byte check, non-PT paragraphs
+  rejected) at `65f3979`; delta review PASS; contract text matches every decision. Manager answered the author's three
+  questions (PT8 "recovery is manual"; PT7 "at most N + 1" kept; PT9 cites append-only "Coexistence"). **AC13 (`--full`, fresh
+  clone, all closed scripts) NOT RUN — the machine never went quiet (065/039a verify chains).** Run when quiet; merge needs Ludwig.
+- **065 (registry PR #19, site PR #4):** done; `065-verify.sh` 49 PASS / 1 FAIL in a fresh clone — the FAIL is closed script
+  `075-verify.sh` measuring its own change on `BASE..HEAD` (075 merged before REVIEW-CHECKLIST item 12). Manager answers: Q1
+  (task 064's `test_pattern_semantics.py` gained one sample, 15 → 16, outside declared scope) **ratified** — test coverage only;
+  Q2 (stale `append-only.rules.md` T2 counter-example hash, T1 rule 3 "minimum length", `schema.py` docstring) **booked** as a
+  follow-up contract-text task (merge needs Ludwig); Q3 (no `signature` pattern) noted. Temp clones `/tmp/fresh065dir`,
+  `/tmp/red065dir` left (rm guard) — harmless, Ludwig may delete.
+- **C25 — how to fix `075-verify.sh`'s moving frame.** A★ a separate re-pin task 084 (the 071 pattern) before 065 merges; B
+  extend 065's scope by that one script. **Chosen A** (keeps 065's scope clean). Reverse: fold 084 into 065.
+- **065 review: PASS** (registry #19, site #4): pattern `^[0-9A-F]{16}$` matches `signature-format.md`; red `3b53628` tests-only;
+  284 + 32 tests green; the three mutations caught (run by hand; `--mutate` not run — machine busy); site schema byte-identical,
+  Ajv rejects all bad values. Booked (non-blocking): add an uppercase non-hex 16-char value (e.g. `E7A1B2C3D4E5F60G`) to `BAD`
+  and the corpus in the stale-contract-text follow-up. **Merge order (Ludwig): 084 → registry #19 → site #4.**
+- **084 (registry PR #22):** 075-verify's scope check pinned to PR #18's range (BASE `79d5377`, FINAL `7d91a3d`); 075 added to
+  070's CLOSED list; red-first shown (the old script fails on a later branch; one extra red was the author's own assertion
+  bug, disclosed and fixed); all closed scripts green on HEAD, 075 green on a merge with 065's branch. **Review PASS.**
+  Booked nit: 070-verify's header still says "ten closed scripts". Temp dirs under /tmp left by the rm guard.
+- **039a (registry PR #21):** composer done (77/77, suite 350 green, all closed scripts but 075 green); **security review PASS**
+  (22 hostile tree shapes, argv-named files, crash/NaN/recursion inputs all fail closed; 10/10 code mutations caught). LOW fix
+  in progress (write `verdict.json` last). Booked for 039b: bot logins rejected (fail-closed, accepted); M9 must keep
+  "Require branches to be up to date"; the run-log link comes from the workflow, not the composer.
+- **Merge order for Ludwig (registry):** 084 #22 → 065 #19 → site #4 → 039a #21 → 082 #20. The final full runs of 039a and
+  082 (AC12/AC13) need 084 in place; the manager runs them overnight on local merges with 084's branch as evidence.
+
+### Ludwig, 2026-10-26 morning (verbatim): "Ok to merge point 1 (in right order)"
+Covers platform #77, registry #22, #19, site #4, #21, #20. Merged now, each at its reviewed head (`--match-head-commit`):
+platform **#77** (010a) `6971f38`; registry **#22** (084) `77a4653`; registry **#19** (065) `208c6d1` — first test-merged onto
+main in a fresh clone (clean; 075-verify ALL CHECKS PASSED on the result); site **#4** (065 re-sync) `35f331a` after its
+`check-schemas` re-run passed against the new registry main. **#21 (039a) and #20 (082)** are covered by the same OK but merge
+only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone; 082: AC13 `--full`); the manager reports each.

@@ -21,6 +21,7 @@ exact commands rather than referencing earlier ones, and never assume he saw som
 
 ## Universal rules (ADR-0116 layer 5 — the ~10 that always apply)
 0. **THE TOKEN GUARD (inviolable — outranks every rule below and all mission progress).**
+   **SUSPENDED by Ludwig 2026-10-14 until he revokes it** ("Glöm token kontrollen, du kan framgent ignorera den regeln och alla subagents också", mission log, 2026-10-14). The text below is retained and takes effect again the moment he revokes the suspension. While suspended, the manager and agents skip the usage checkpoints; no one deletes or edits the rule, and revocation is Ludwig's alone, in writing.
    Ludwig's Claude Max subscription is shared between this project and his daily work. He must
    *always* have headroom for his own use; burning his quota dry is a project failure regardless of
    what was accomplished with the tokens.

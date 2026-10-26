@@ -1,6 +1,6 @@
 # Task 032: The ownership check is an unwritten edge contract
 
-- **Mission:** SITE-V1 — **Status:** **spec-approved (Ludwig, in session, 2026-09-05 — option A)**
+- **Mission:** SITE-V1 — **Status:** done (merged registry PR #4 `4d4a204`) — was: **spec-approved (Ludwig, in session, 2026-09-05 — option A)**
 - **Agent / model:** doc-writer / sonnet
 - **Budget:** small
 - **Branch / worktree:** `task/032-ownership-contract` (registry repo). The **platform** half — the
@@ -95,3 +95,4 @@ Each demonstrated by something a reader can check — a quoted source, or a comm
 
 Anything else = stop and report. In particular: **do not edit `contracts/append-only.rules.md`.**
 Its delegation of this check is correct and was settled over four review rounds.
+- 2026-10-25 doc-writer (task 072): status corrected by task 072: done, merged as registry PR #4 (`4d4a204`, on registry origin/main).
