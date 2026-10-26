@@ -2407,3 +2407,6 @@ future target" locking only the cheap choices; B store the report only. Awaiting
 - **Ludwig, 2026-10-26 (verbatim): "Kör A när det blir aktuellt"** → minigame instancing: option **A** (several world processes
   on the same locally hosted server, listed by an in-game browser) is Ludwig's choice for the later ADR. Booked for the mission
   after SITE-V1: ADR draft on that basis (fast world start, characters moving between worlds vs ADR-0088).
+- **Ludwig, 2026-10-26 (verbatim): "A star on the above one"** → one sweep of all closed verify scripts (both repos) instead of
+  one-at-a-time fixes: task 088 (read-only inventory, now), then 089 (registry) / 090 (platform) fix tasks after 087, 039b and
+  085 merge. 087's scope extended by the manager to 070-verify AC4.m1 (same class; keeps the PR coherent).
