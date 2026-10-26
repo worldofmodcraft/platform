@@ -2404,3 +2404,6 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   local server, listed by the in-game browser (close to ADR-0078's directory), vs B per-instance mods inside one world
   (contradicts 0076/0103/0011). Open for that ADR: fast world start (precompiled snapshot), characters moving between worlds
   (ADR-0088 binds characters to their world). Nothing done.
+- **Ludwig, 2026-10-26 (verbatim): "Kör A när det blir aktuellt"** → minigame instancing: option **A** (several world processes
+  on the same locally hosted server, listed by an in-game browser) is Ludwig's choice for the later ADR. Booked for the mission
+  after SITE-V1: ADR draft on that basis (fast world start, characters moving between worlds vs ADR-0088).
