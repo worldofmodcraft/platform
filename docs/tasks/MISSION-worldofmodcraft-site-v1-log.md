@@ -2431,3 +2431,11 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   on the two questions: **Q9 = A** — the pipeline (pre-T1) and the manager (live checks) verify hop 1 exactly; consumers require
   https on every hop plus hash and signature, so the front can be repointed without a consumer release. **Q10 = A** — 008b does
   not publish versions with build metadata (`+`) until a live Release proves GitHub resolves `+` in `releases/download` (task 010).
+- **Ludwig, 2026-10-26: "Nu fungerar cloudflare redirecten till github"** (M12 done). Manager's unauthenticated live checks
+  (`curl -s -o /dev/null -w '%{http_code} %{redirect_url}'`), all as specified:
+  `/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz` → 302 `https://github.com/worldofmodcraft/archive/releases/download/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz`;
+  `/a.b-1.0.0-rc.1+build.5/…` → 302, `+` kept byte-for-byte; `/a.b-1.0.0-RC.1/…` and `/v0/Test` → case kept;
+  `/v0/test?x=1` → Location without query; `http://archive.worldofmodcraft.com/v0/test` → 302 to the https Location;
+  root `/` → `HTTP/2 302`, `location: …/releases/download/`, `server: cloudflare`; certificate valid (plain curl, no -k).
+  → 091's [unverified] case-preservation and query-drop items are now observed facts; 092 AC11 to be re-run with `--live` once
+  092-verify.sh exists. Still unproven: GitHub resolving a `+` tag (Q10 holds `+` versions back until task 010).
