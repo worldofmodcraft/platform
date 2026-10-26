@@ -2332,3 +2332,11 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   rejected) at `65f3979`; delta review PASS; contract text matches every decision. Manager answered the author's three
   questions (PT8 "recovery is manual"; PT7 "at most N + 1" kept; PT9 cites append-only "Coexistence"). **AC13 (`--full`, fresh
   clone, all closed scripts) NOT RUN — the machine never went quiet (065/039a verify chains).** Run when quiet; merge needs Ludwig.
+- **065 (registry PR #19, site PR #4):** done; `065-verify.sh` 49 PASS / 1 FAIL in a fresh clone — the FAIL is closed script
+  `075-verify.sh` measuring its own change on `BASE..HEAD` (075 merged before REVIEW-CHECKLIST item 12). Manager answers: Q1
+  (task 064's `test_pattern_semantics.py` gained one sample, 15 → 16, outside declared scope) **ratified** — test coverage only;
+  Q2 (stale `append-only.rules.md` T2 counter-example hash, T1 rule 3 "minimum length", `schema.py` docstring) **booked** as a
+  follow-up contract-text task (merge needs Ludwig); Q3 (no `signature` pattern) noted. Temp clones `/tmp/fresh065dir`,
+  `/tmp/red065dir` left (rm guard) — harmless, Ludwig may delete.
+- **C25 — how to fix `075-verify.sh`'s moving frame.** A★ a separate re-pin task 084 (the 071 pattern) before 065 merges; B
+  extend 065's scope by that one script. **Chosen A** (keeps 065's scope clean). Reverse: fold 084 into 065.
