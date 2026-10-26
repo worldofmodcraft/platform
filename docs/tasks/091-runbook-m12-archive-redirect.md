@@ -108,3 +108,11 @@ Changing Cloudflare or DNS; credentials; editing other runbook sections.
   Verification of this fix: `068-verify.sh` NOT re-run — other verify.sh scripts (008a, 039b, 062, 069, ...) were running for
   more than 30 minutes of polling, and the manager asked to run it only when none was; the edit leaves the M3-M7/Q-H
   sections and the header untouched, the first run of this task (before the fix) was ALL PASS. Needs a re-run by the manager.
+- 2026-10-26 doc-writer: M12 ticked (heading ☑, status "done 2026-10-26 by Ludwig; manager's curl checks passed (see mission
+  log)") on the manager's report of Ludwig's "Nu fungerar cloudflare redirecten till github" and the unauthenticated checks:
+  `/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz` -> 302 to the exact GitHub releases/download target; `+` kept; case kept
+  (RC.1, Test); `?x=1` dropped; http:// -> 302 to https Location; root -> HTTP/2 302 `server: cloudflare`; certificate valid.
+  The case-preservation and query-drop items are now "Observed 2026-10-26" in the runbook (source: the manager's report; I did
+  not run the curls myself). Left [unverified]: certificate issuance time, DNS form labels, Hostname drop-down label, the Free-plan
+  "Then" box field names, `http.request.uri.path` excluding the query in the docs' words (behaviour observed, wording not).
+  068-verify.sh: PENDING, other verify.sh scripts were running at the time of this edit; manager to re-run (M12 is not among its markers; M4/M6 must stay ☐, untouched).

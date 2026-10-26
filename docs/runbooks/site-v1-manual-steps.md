@@ -293,11 +293,11 @@ menu is missing or says the feature needs a paid plan, stop and tell the manager
 
 ---
 
-## ☐ M12 — Archive download address (Cloudflare redirect)  (decision C, Ludwig 2026-10-26; task 091)
+## ☑ M12 — Archive download address (Cloudflare redirect)  (decision C, Ludwig 2026-10-26; task 091)
 **Why:** the registry stores one download URL per published version, and that record is append-only. A URL on a domain we
 control can be pointed somewhere else later; a `github.com` URL cannot (task 058, option C). So `archive.worldofmodcraft.com`
 answers every request with an HTTP redirect to the matching file in the `archive` repository's Releases.
-**When:** before the first real publish (task 008a's URL function writes this address). **Status:** not done. Last reviewed:
+**When:** before the first real publish (task 008a's URL function writes this address). **Status:** done 2026-10-26 by Ludwig; manager's curl checks passed (see mission log). Last reviewed:
 2026-10-26 (task 091). Every Cloudflare fact below was read on 2026-10-26 from developers.cloudflare.com (URLs in
 `docs/tasks/091-runbook-m12-archive-redirect.md`, log); a statement marked `[unverified]` was not found there. If a screen
 differs from the text, follow the screen and tell the manager what differed. No terminal, no token; you are in the Cloudflare
@@ -352,8 +352,11 @@ Cloudflare's own examples (`wildcard_replace(http.request.uri.path, "/*", "/apps
 `[unverified]`: the Type/Expression field names in the **Then** box are those of Cloudflare's example pages (Type: Dynamic,
 Expression), not of a screenshot of the Free-plan screen.
 GitHub tag and asset URLs are case-sensitive (`v0/Test` and `v0/test` are different files). Cloudflare's `wildcard` matching
-ignores case, and the documentation does not show whether the text captured by `${1}` keeps the letters exactly as sent
-(its examples keep them, `[unverified]` beyond that); the `Test` check below proves it for this rule.
+ignores case, and the documentation does not show whether the text captured by `${1}` keeps the letters exactly as sent.
+**Observed 2026-10-26 (manager's curl, unauthenticated):** the rule keeps the case of the request (`RC.1`, `Test` came
+through unchanged), keeps `+` in the path, and drops a `?x=1` query; `http://` answers 302 to the `https://` GitHub
+`Location`; the root `archive.worldofmodcraft.com` answers `HTTP/2 302` with `server: cloudflare`; the certificate is valid
+(plain `curl`, no `-k`). The check below is kept as the repeatable test.
 
 *You should see:* open `https://archive.worldofmodcraft.com/v0/test` in a browser. The address bar changes to
 `https://github.com/worldofmodcraft/archive/releases/download/v0/test` and GitHub shows its "Not Found" page (the tag `v0`
