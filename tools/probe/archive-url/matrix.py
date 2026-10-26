@@ -5,6 +5,7 @@ WOM058_MUTATE=swallow  runner discards client errors"""
 import hashlib, json, os, re, subprocess, sys, tempfile, urllib.error, urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.dont_write_bytecode = True  # python3 -I ignores PYTHONDONTWRITEBYTECODE; a stale __pycache__ reddens 049/051/059
 import fixture_server as fx
 
 MUT = os.environ.get("WOM058_MUTATE", "")

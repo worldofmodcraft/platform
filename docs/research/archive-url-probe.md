@@ -1,7 +1,7 @@
-# Archive URL probe (task 058) — PARTIAL: local part only
+# Archive URL probe (task 058) — PARTIAL: local part done; live push refused
 
 **Status of this report:** the *local* criteria (1, 2, 8) are done and reproducible with `docs/tasks/058-verify.sh`.
-Criteria 3, 4, 5, 6, 10 are **NOT RUN — needs Ludwig/manager** (live Pages, DNS, browser). Every cell that depends on them
+Criteria 3, 4 are **NOT RUN — push refused by the permission classifier** (a pre-push baseline is captured); 5, 6, 10 are **NOT RUN — needs Ludwig** (DNS, browser, deletion). Every cell that depends on them
 says so. This report states no recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
 
 ## Environment (commands run 2026-10-14 in the worktree)
@@ -37,19 +37,70 @@ not change the name. With a `Content-Disposition: attachment; filename="named-by
 `wget --content-disposition` used the header name, plain `wget` kept `cd.tar.gz`. Bytes equalled the target in all nine runs.
 Browser file naming: [UNVERIFIED — not observed].
 
-## What Pages emits (criteria 3-4) — NOT RUN — needs Ludwig/manager
-Nothing is claimed about GitHub Pages. The earlier observation (404 from `server: GitHub.com` for an unknown path on the apex)
-shows nothing about redirects. The probe tree is ready at `tools/probe/archive-url/pages-tree/`
-(`a/index.html` meta-refresh, `b.tar.gz` HTML in a `.tar.gz`-named file, `c/index.html` for requesting `/c`, `404.html`,
-`_redirects`, `target.txt`). Steps to run (Ludwig's click path is [UNVERIFIED], per the spec):
-1. Create public throwaway repo (e.g. `worldofmodcraft/pages-probe`) with a README; Settings -> Pages -> Deploy from a branch -> `main` `/ (root)`.
-2. Put the contents of `pages-tree/` at the repo root and push (Ludwig, or the manager with his in-session approval; no token handling by any agent).
-3. Wait for deploy (up to ~10 min), then with `B=https://<owner>.github.io/pages-probe`:
-   `for p in /a/index.html /b.tar.gz /c /c/ /_redirects /old /nonexistent; do echo "== $p"; curl -sI "$B$p"; curl -s -D - -o /dev/null "$B$p"; done`
-   Record status line, `content-type`, `location` per path. Any "Pages answers 3xx" claim only from these captures.
-4. Browser (criterion 6): open `$B/a/` and `$B/b.tar.gz`; note whether it follows, renders or downloads, and the proposed file name.
-5. Criterion 5 (hostname/DNS): NOT RUN — needs Ludwig's explicit approval; not started.
-6. Delete the repo (Settings -> General -> Danger Zone) and record it here (criterion 10: NOT RUN).
+## What Pages emits (criteria 3-4) — PUSH REFUSED, probe tree NOT deployed; only a pre-push baseline was captured
+**What happened (2026-10-26).** Ludwig created `worldofmodcraft/pages-probe` (public, README, Pages from `main` / root;
+`curl -s https://api.github.com/repos/worldofmodcraft/pages-probe | grep -E '"(has_pages|private|default_branch|visibility)"'`
+-> `"private": false, "has_pages": true, "visibility": "public", "default_branch": "main"`) and approved in session that the
+probe agent pushes the probe tree through the session's configured git remote. The agent cloned the repo, committed the tree
+on a local branch (`probe-tree`, commit `c1e8308`; the git-guard hook refuses `git commit` on `main`, so the commit was made on a
+branch and the plan was `git push origin probe-tree:main`, plain, no force). The harness permission classifier then **denied the
+`git push`** ("Auto-Mode Bypass"). Per CLAUDE.md rule 11 the denial is an answer: it was **not retried**, and no other route
+(token, `gh`, API upload) was tried. Nothing from `pages-tree/` is on Pages. Criteria 3 and 4 as specified (`/a/index.html`,
+`/b.tar.gz`, `/c`, `404.html`, `_redirects`) are therefore **NOT RUN**; nothing below is a claim about those files.
+
+**What was captured anyway** (the repo contains only `README.md`, deployed by Pages before the agent's push attempt;
+`date -u` 2026-10-26 06:12 UTC). Each line is `curl -s -D - -o /dev/null <url>` filtered to status / location / content-type:
+
+| URL | status | location | content-type |
+|---|---|---|---|
+| `https://worldofmodcraft.github.io/pages-probe` (project root, **no** trailing slash) | **301** | `https://worldofmodcraft.github.io/pages-probe/` | `text/html` |
+| `https://worldofmodcraft.github.io/pages-probe/` | 200 | - | `text/html; charset=utf-8` |
+| `.../pages-probe/README.md` | 200 | - | `text/markdown; charset=utf-8` (the raw file is served, 13 bytes) |
+| `.../pages-probe/README` | 404 | - | `text/html; charset=utf-8` |
+| `.../pages-probe/nonexistent` | 404 | - | `text/html; charset=utf-8` |
+| `.../pages-probe/a`, `/a/`, `/b.tar.gz` (files not pushed) | 404 | - | `text/html; charset=utf-8` |
+
+`curl -sI https://worldofmodcraft.com/pages-probe/` -> `HTTP/2 404`, `server: GitHub.com`, `content-security-policy: default-src 'none'; ...`
+(the custom domain does **not** front the project repo at `/pages-probe/`; it answers its own 404, so the apex site and
+this probe are separate; `https://worldofmodcraft.github.io/pages-probe/` is the only working address).
+
+**The one fact this gives:** GitHub Pages **does** emit an HTTP `3xx` with a `Location` header: a `301` that adds the trailing
+slash to a directory-style path (observed for the project root). It is Pages' own canonicalisation, to the same host and the
+same path plus `/`; nothing in this capture shows that a project can choose the target. Whether `/c` -> `/c/` behaves the same
+for a subdirectory, whether `404.html` or `_redirects` can produce a `3xx`: **[unverified — not run; push refused]**.
+The sentence "no HTTP redirect route exists on Pages" is therefore **not** supported by this report (spec: report "not found in
+these tries", and the tries were not made).
+
+## What is needed to finish criteria 3-4 (Ludwig, exact commands)
+The commit is ready in `/home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe` (branch `probe-tree`, commit `c1e8308`).
+Either run in your own terminal:
+```
+cd /home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe
+git push origin probe-tree:main
+```
+or allow the push in the session's permission prompt and ask the agent to continue (it will then poll
+`curl -sI https://worldofmodcraft.github.io/pages-probe/a/` every 60 s for up to 15 min and capture
+`for p in /a/index.html /a/ /b.tar.gz /c /c/ /_redirects /old /nonexistent; do echo "== $p"; curl -sI "$B$p"; curl -s -D - -o /dev/null "$B$p"; done`
+with `B=https://worldofmodcraft.github.io/pages-probe`).
+
+## Criteria 5, 6, 10 status
+- **5 (DNS / second hostname): NOT RUN — needs Ludwig's explicit DNS approval; no DNS was touched.**
+- **6 (browser): not tested — Ludwig's observation pending.** Steps, after the tree is pushed: open
+  `https://worldofmodcraft.github.io/pages-probe/a/` and `https://worldofmodcraft.github.io/pages-probe/b.tar.gz` in one
+  desktop browser; note for each whether the address bar ends at `target.txt`, whether it renders or downloads, and the proposed
+  file name. Write the three answers into the table cells marked `[UNVERIFIED — not observed]`.
+- **10 (deletion): NOT DONE by design — the agent does not delete the repository.** Ludwig, after the captures:
+  `https://github.com/worldofmodcraft/pages-probe` -> Settings -> General -> Danger Zone -> Delete this repository
+  [click-path from memory, UNVERIFIED]; then record it here.
+
+## Conclusion (plain, evidence-limited)
+1. Does Pages emit any HTTP 3xx? **Yes, one kind observed:** a `301` adding the trailing slash for the project-root path
+   (capture above). **Not observed:** any `3xx` to a chosen target. Routes `404.html`, `_redirects`, meta-refresh page, `.tar.gz`-named HTML file and subdirectory `/c`: [unverified — not run].
+2. Options A-E for the archive URL shape, on the evidence so far: **A and B** stay viable only for clients that execute HTML (browser);
+   local matrix shows `curl -L`, `wget`, `urllib`, Node `fetch` do not follow them. **C** (Cloudflare real 301/302) and **D**
+   (other static host) remain viable in principle; their feasibility is [unverified] (needs proxied record / a new service, both
+   Ludwig's call). **E** is always viable. No option is eliminated by a Pages capture, because the Pages captures of the
+   relevant routes were not made. The directory-slash 301 does not look usable as a redirect to a release asset, since its target is fixed by Pages.
 
 ## What this means for the tasks that wait
 The spec files for 008a, 008b, 055, 010 and 056 are not in this worktree's scope to edit; the sentence-by-sentence mapping
