@@ -211,11 +211,13 @@ secret name and variable name on registry's Actions secrets page (values are nev
 
 ---
 
-## ☐ M6 — Your personal account joins the organisation  (decision Q-F, Ludwig 2026-10-14)
+## ☑ M6 — Your personal account joins the organisation  (decision Q-F, Ludwig 2026-10-14)
 **Why:** `test` is a reserved namespace and ADR-0119 §3 accepts a pull request there only from an organisation member;
 task 010 plans to open the first-publish PR from `mbmludric`. **When:** before M4 and task 010's runbook.
-**Status:** not done — `mbmludric` is documented as a non-member (OPERATIONS.md), and the organisation's public people
-page (2026-10-15) lists 1 member, not `mbmludric`. Private members are invisible to us, so this is `[unverified]`.
+**Status: done (Ludwig, 2026-10-26).** Ludwig reports that he invited `mbmludric` from the owner account and joined the
+organisation (his word, 2026-10-26). Membership is **not externally verified**: the manager's unauthenticated check of the
+public members list returned HTTP 403 (rate limit). Base permissions = **Read** (Ludwig's screenshot of organisation →
+Settings → Member privileges, 2026-10-26).
 
 1. Sign in to github.com as the account that **owns** the organisation. (Which account is the owner is
    `[unverified]`; if unsure, try `mbmludric` first, then your other account.)
