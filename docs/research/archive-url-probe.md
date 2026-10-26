@@ -65,7 +65,7 @@ Facts read off the table (no claim beyond it):
 4. `curl -sI https://worldofmodcraft.com/pages-probe/target.txt` -> `HTTP/2 404`, `server: GitHub.com`: the apex custom domain does not serve this repo at `/pages-probe/`; the only working address was `worldofmodcraft.github.io/pages-probe/`. (Criterion 5 would change this and was not run.)
 
 ### Clients against the live URLs (criterion 3/4 "curl/wget exactly as the spec says" plus the matrix clients)
-Target SHA-256 (of `/target.txt`): `c40a80d865cb2e46...` (first 16 hex shown; `curl -s $B/target.txt | sha256sum`). Commands: `curl -sL -o /dev/null -w 'final=%{url_effective} status=%{http_code} redirects=%{num_redirects}'`, `wget -S -O out.bin`, `python3 -I live058/py.py $B ...` (`urllib.request.urlopen`), `node live058/n.mjs $B ...` (`fetch`, `redirect: "follow"`); the two scripts are in `/home/ludwig/.claude/jobs/95f471eb/tmp/live058/` (not committed; 14 lines each).
+Target SHA-256 (of `/target.txt`): `c40a80d865cb2e46...` (first 16 hex shown; `curl -s $B/target.txt | sha256sum`). Commands: `curl -sL -o /dev/null -w 'final=%{url_effective} status=%{http_code} redirects=%{num_redirects}'`, `wget -S -O out.bin`, `python3 -I live058/py.py $B ...` (`urllib.request.urlopen`), `node live058/n.mjs $B ...` (`fetch`, `redirect: "follow"`); the two scripts are committed as `tools/probe/archive-url/live_client.py` and `live_client.mjs`. The captures are in `tools/probe/archive-url/live-captures-2026-10-26.txt`: **filtered** header lines copied verbatim from the terminal, **not raw** (the full header blocks were not saved) and **not re-runnable** (the probe repository was deleted on 2026-10-26).
 
 | path | curl -L | wget | python urllib | node fetch | bytes = target? |
 |---|---|---|---|---|---|

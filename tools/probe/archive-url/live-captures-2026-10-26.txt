@@ -1,0 +1,76 @@
+# Task 058 live captures against https://worldofmodcraft.github.io/pages-probe (repo deleted afterwards; cannot be re-run).
+# FILTERED, NOT RAW: the status/location/content-type/content-length lines of `curl -s -D - -o /dev/null <url> | tr -d '\r' | grep -i -E '^(HTTP|location|content-type|content-length|content-disposition)'`,
+# copied verbatim from the terminal output of 2026-10-26 16:46 UTC. The full header blocks were not saved.
+# The client scripts used are live_client.py (urllib) and live_client.mjs (Node fetch) in this directory:
+#   python3 -I live_client.py $B /a/ /a /b.tar.gz /c /old /nonexistent /target.txt
+#   node live_client.mjs $B /a/ /a /b.tar.gz /c /old /nonexistent /target.txt
+=== /target.txt
+HTTP/2 200 
+content-type: text/plain; charset=utf-8
+content-length: 20
+=== /a/index.html
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+content-length: 161
+=== /a/
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+content-length: 161
+=== /a
+HTTP/2 301 
+content-type: text/html
+location: https://worldofmodcraft.github.io/pages-probe/a/
+content-length: 162
+=== /b.tar.gz
+HTTP/2 200 
+content-type: application/gzip
+content-length: 155
+=== /c
+HTTP/2 301 
+content-type: text/html
+location: https://worldofmodcraft.github.io/pages-probe/c/
+content-length: 162
+=== /c/
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+content-length: 74
+=== /_redirects
+HTTP/2 404 
+content-type: text/html; charset=utf-8
+content-length: 117
+=== /old
+HTTP/2 404 
+content-type: text/html; charset=utf-8
+content-length: 117
+=== /old/
+HTTP/2 404 
+content-type: text/html; charset=utf-8
+content-length: 117
+=== /nonexistent
+HTTP/2 404 
+content-type: text/html; charset=utf-8
+content-length: 117
+=== /404.html
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+content-length: 117
+=== client runs (live_client.py / live_client.mjs / curl -sL), target sha16 c40a80d865cb2e46
+py /a/ final= .../pages-probe/a/ status= 200 ctype= text/html; charset=utf-8 sha16= fb1ddd7ed5979804
+py /a final= .../pages-probe/a/ status= 200 ctype= text/html; charset=utf-8 sha16= fb1ddd7ed5979804
+py /b.tar.gz final= .../pages-probe/b.tar.gz status= 200 ctype= application/gzip sha16= c75e3630718ff574
+py /c final= .../pages-probe/c/ status= 200 ctype= text/html; charset=utf-8 sha16= c9335d9b052f62f5
+py /old HTTPError 404 sha16= 4abb94c3e6a46d6b
+py /nonexistent HTTPError 404 sha16= 4abb94c3e6a46d6b
+py /target.txt final= .../pages-probe/target.txt status= 200 ctype= text/plain; charset=utf-8 sha16= c40a80d865cb2e46
+node /a/ status= 200 redirected= false sha16= fb1ddd7ed5979804
+node /a status= 200 redirected= true sha16= fb1ddd7ed5979804
+node /b.tar.gz status= 200 redirected= false ctype= application/gzip sha16= c75e3630718ff574
+node /c status= 200 redirected= true sha16= c9335d9b052f62f5
+node /old status= 404 redirected= false sha16= 4abb94c3e6a46d6b
+node /nonexistent status= 404 redirected= false sha16= 4abb94c3e6a46d6b
+node /target.txt status= 200 redirected= false sha16= c40a80d865cb2e46
+curl -sL /a   -> final=.../pages-probe/a/ status=200 redirects=1
+curl -sL /c   -> final=.../pages-probe/c/ status=200 redirects=1
+curl -sL /old -> final=.../pages-probe/old status=404 redirects=0
+curl -s -o /dev/null -w 'status=%{http_code} redirect=%{redirect_url}' /a -> status=301 redirect=https://worldofmodcraft.github.io/pages-probe/a/
+curl -sI https://worldofmodcraft.com/pages-probe/target.txt -> HTTP/2 404, server: GitHub.com
