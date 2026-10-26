@@ -337,8 +337,8 @@ Then open any open pull request: the merge box says "Required" next to `gate`. P
 itself, so merging it needs a careful human read of the diff, every time; green means nothing there.
 `[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
 documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
-Do not click "Do not allow bypassing the above settings" unless you want to be unable to merge in an emergency; tell the manager
-which way you chose.
+Emergency path: ticking "Do not allow bypassing the above settings" means nobody, administrators included, can merge past a red
+`gate`, even in an emergency. That is the S5 choice in step 7; tell the manager which way you chose.
 
 ---
 
