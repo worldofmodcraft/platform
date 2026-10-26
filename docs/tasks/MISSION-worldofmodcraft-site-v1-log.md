@@ -2383,3 +2383,10 @@ the git repo; transport-agnostic handshake/control contracts plus a token-auth o
 periodic crash-evidence flush; worlds starting from a precompiled snapshot. Offered to Ludwig: A an ADR draft "web client as a
 future target" locking only the cheap choices; B store the report only. Awaiting his choice.
 - **085 (platform PR #80):** 068-verify pinned to PR #58's range (BASE `3f25f03`, FINAL `6d4b61e`), M6 ticked; review running.
+- **Final runs (2026-10-26):** 039a delta review PASS (verdict written last); 039a-verify on a merge with main: code green (362
+  tests, all 17 closed scripts) but exit 2 — its own BASE..HEAD scope check (item-12 class) → fix sent to 039a's author (pin TIP).
+  082 `--full` on a merge with main: 032 (N5, N5b), 062, 064 red — 082 legitimately edits `docs/contracts/README.md` sentences
+  that closed scripts 032/067 pin at HEAD → **task 087** (re-pin) before #20 merges. Orphaned verify processes from the stopped
+  run: the agent's `pkill` was refused by the classifier; the manager did not kill them on its behalf (that would launder the
+  denial) — reported to Ludwig with the pids; they finish on their own.
+- **Merge order now:** 087 → 082 #20; 039a #21 after its TIP fix and a final run; 085 #80 after a quiet-machine run.
