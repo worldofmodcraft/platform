@@ -2313,3 +2313,51 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   environment limited to `main` — and **M11 deletes the repo-level copies of both secrets** (an environment copy protects nothing
   while a repo-level copy exists; a stolen App key could forge a T1 PR's hash and signature). Reverse: as C20. → 082
   **spec-approved** after review rounds 1-2.
+- **C23 — 039 size tripwire fired (composer alone 418 lines).** A★ apply the spec's split fallback: 039a (composer, own verify
+  script and PR) now, 039b (workflow, AC7, docs, runbook) after 039a merges; B continue as one task past 450 lines. **Chosen A.**
+  Reverse: merge 039b's scope back into one PR.
+- **C24 — 010a: `fill_placeholders.py entry` arguments.** A★ `entry --account A --commit H` (as built; the entry's `source_url`
+  carries the same account token, and criterion 4 needs zero tokens left); B `mod --account` also rewrites a sibling
+  `entry.json`. **Chosen A.** Reverse: change the CLI before 010b's runbook is written.
+- **010a criterion 8 (visual review), by the manager on Ludwig's behalf (2026-10-25 night):** `welcome.png` (a sun with
+  concentric rings on a teal-to-violet gradient), `gallery.png` (six gradient tiles with a diamond each), `spare.png` (diagonal
+  orange/red stripes) — abstract, original, generator-made, nothing game- or Blizzard-like; clean at 1280×720. Ludwig may
+  override in the morning.
+- **010a (platform PR #77):** review PASS-WITH-AMENDMENTS (mutations now need a FAIL reason, not just exit 1; C24 and criterion 8
+  recorded in the task log), fixed at `5a16864`; the manager re-ran `010a-verify.sh` there: ALL OK, 0 FAIL, worktree clean.
+  **Merge refused by the auto-mode classifier ("Merge Without Review")** — not retried. Overnight, task PRs are therefore
+  parked for Ludwig's morning OK even where §7 would let the manager merge; session-log PRs (docs only) continue.
+- **082 (registry PR #20, E15 contract):** written (236 lines, PT1-PT12, normative block); review FAIL on the verify script only
+  (own-change check on HEAD; post-FINAL edits invisible) → fixed (TIP `2e521ee` pinned, FINAL..TIP byte check, non-PT paragraphs
+  rejected) at `65f3979`; delta review PASS; contract text matches every decision. Manager answered the author's three
+  questions (PT8 "recovery is manual"; PT7 "at most N + 1" kept; PT9 cites append-only "Coexistence"). **AC13 (`--full`, fresh
+  clone, all closed scripts) NOT RUN — the machine never went quiet (065/039a verify chains).** Run when quiet; merge needs Ludwig.
+- **065 (registry PR #19, site PR #4):** done; `065-verify.sh` 49 PASS / 1 FAIL in a fresh clone — the FAIL is closed script
+  `075-verify.sh` measuring its own change on `BASE..HEAD` (075 merged before REVIEW-CHECKLIST item 12). Manager answers: Q1
+  (task 064's `test_pattern_semantics.py` gained one sample, 15 → 16, outside declared scope) **ratified** — test coverage only;
+  Q2 (stale `append-only.rules.md` T2 counter-example hash, T1 rule 3 "minimum length", `schema.py` docstring) **booked** as a
+  follow-up contract-text task (merge needs Ludwig); Q3 (no `signature` pattern) noted. Temp clones `/tmp/fresh065dir`,
+  `/tmp/red065dir` left (rm guard) — harmless, Ludwig may delete.
+- **C25 — how to fix `075-verify.sh`'s moving frame.** A★ a separate re-pin task 084 (the 071 pattern) before 065 merges; B
+  extend 065's scope by that one script. **Chosen A** (keeps 065's scope clean). Reverse: fold 084 into 065.
+- **065 review: PASS** (registry #19, site #4): pattern `^[0-9A-F]{16}$` matches `signature-format.md`; red `3b53628` tests-only;
+  284 + 32 tests green; the three mutations caught (run by hand; `--mutate` not run — machine busy); site schema byte-identical,
+  Ajv rejects all bad values. Booked (non-blocking): add an uppercase non-hex 16-char value (e.g. `E7A1B2C3D4E5F60G`) to `BAD`
+  and the corpus in the stale-contract-text follow-up. **Merge order (Ludwig): 084 → registry #19 → site #4.**
+- **084 (registry PR #22):** 075-verify's scope check pinned to PR #18's range (BASE `79d5377`, FINAL `7d91a3d`); 075 added to
+  070's CLOSED list; red-first shown (the old script fails on a later branch; one extra red was the author's own assertion
+  bug, disclosed and fixed); all closed scripts green on HEAD, 075 green on a merge with 065's branch. **Review PASS.**
+  Booked nit: 070-verify's header still says "ten closed scripts". Temp dirs under /tmp left by the rm guard.
+- **039a (registry PR #21):** composer done (77/77, suite 350 green, all closed scripts but 075 green); **security review PASS**
+  (22 hostile tree shapes, argv-named files, crash/NaN/recursion inputs all fail closed; 10/10 code mutations caught). LOW fix
+  in progress (write `verdict.json` last). Booked for 039b: bot logins rejected (fail-closed, accepted); M9 must keep
+  "Require branches to be up to date"; the run-log link comes from the workflow, not the composer.
+- **Merge order for Ludwig (registry):** 084 #22 → 065 #19 → site #4 → 039a #21 → 082 #20. The final full runs of 039a and
+  082 (AC12/AC13) need 084 in place; the manager runs them overnight on local merges with 084's branch as evidence.
+
+### Ludwig, 2026-10-26 morning (verbatim): "Ok to merge point 1 (in right order)"
+Covers platform #77, registry #22, #19, site #4, #21, #20. Merged now, each at its reviewed head (`--match-head-commit`):
+platform **#77** (010a) `6971f38`; registry **#22** (084) `77a4653`; registry **#19** (065) `208c6d1` — first test-merged onto
+main in a fresh clone (clean; 075-verify ALL CHECKS PASSED on the result); site **#4** (065 re-sync) `35f331a` after its
+`check-schemas` re-run passed against the new registry main. **#21 (039a) and #20 (082)** are covered by the same OK but merge
+only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone; 082: AC13 `--full`); the manager reports each.
