@@ -76,3 +76,35 @@ Changing Cloudflare or DNS; credentials; editing other runbook sections.
   "you should see" text). No DNS or Cloudflare change, no credential.
   Verification (PYTHONDONTWRITEBYTECODE=1, foreground): `docs/tasks/068-verify.sh` ALL PASS exit 0; `068-verify.sh --mutate`
   all 12 mutations red, exit 0; 048, 052, 072 verify scripts (they mention only the mission log) exit 0. Nothing live was run.
+- 2026-10-26 doc-writer, manager review fix (PR #82 FAIL): the wildcard Request URL is matched against `http.request.full_uri`,
+  so `${2}` carries the query; the earlier "[unverified] query" item is resolved by switching mechanism. M12 Step 2 is now
+  **Custom filter expression** `http.host eq "archive.worldofmodcraft.com"` with **Then**: Type Dynamic, Expression
+  `wildcard_replace(http.request.uri.path, "/*", "https://github.com/worldofmodcraft/archive/releases/download/${1}")`,
+  status 302, Preserve query string off. Manager's curl check now expects the query **absent** and `v0/Test` case kept; a
+  sentence says GitHub tag/asset URLs are case-sensitive. Sources fetched 2026-10-26 (raw `index.md` pages via curl, since
+  they return the page source):
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/functions/index.md : `wildcard_replace(source, wildcard_pattern,
+    replacement, flags)`; "`source` must be a field"; whole value must match the pattern; each `*` is `${1}`..; matching
+    case-insensitive by default; usable in target URL expressions of dynamic URL redirects; example
+    `wildcard_replace(http.request.uri.path, "/*", "/apps/${1}")` on `/calendar` -> `/apps/calendar`; the full-URI example
+    `https://apps.example.com/calendar/admin?expand=true` -> third capture keeps `?expand=true`.
+  - https://developers.cloudflare.com/rules/url-forwarding/single-redirects/settings/index.md : Dynamic URL redirect = Expression
+    (used as `Location`), Status code (301/302/307/308), Preserve query string (disabled by default); a wildcard URL redirect
+    is `wildcard_replace(http.request.full_uri, ...)`.
+  - https://developers.cloudflare.com/rules/url-forwarding/examples/perform-mobile-redirects/index.md : Expression Editor text for
+    the match; **Then** Type: *Dynamic*, Expression `concat("https://m.example.com", http.request.uri.path)`, Status code.
+  - https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-dashboard/index.md : Custom filter expression option.
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/expressions/edit-expressions/index.md : **Edit expression** next
+    to the Expression Preview opens the Expression Editor.
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/http.host/index.md : "the `Host` header".
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/http.request.uri.path/index.md : "The URI path of
+    the request", example `/articles/index`. The page does not say in words that it excludes the query; the field is separate
+    from `http.request.uri.query` and the function page's path examples show no query. Treated as path-only; the manager's
+    `?x=1` curl is the proof.
+  Still [unverified]: exact dashboard label for the Hostname drop-down (Editor text used instead); that the Free-plan **Then**
+  box shows "Type"/"Expression" as in the example pages; case of `${1}` beyond the doc examples (the `Test` curl proves it);
+  the DNS form labels; certificate issuance time. Operator `eq` is the standard equality operator (used in the docs' own
+  `http.request.uri.path eq "/contacts.html"`).
+  Verification of this fix: `068-verify.sh` NOT re-run — other verify.sh scripts (008a, 039b, 062, 069, ...) were running for
+  more than 30 minutes of polling, and the manager asked to run it only when none was; the edit leaves the M3-M7/Q-H
+  sections and the header untouched, the first run of this task (before the fix) was ALL PASS. Needs a re-run by the manager.
