@@ -11,7 +11,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 RED_SHA="3ca6fbfd873ba38f6c9ebbb12f757e5ca40365f6"
 PIN_BASE="3ca6fbfd873ba38f6c9ebbb12f757e5ca40365f6"
-PIN_FINAL="FINAL_PLACEHOLDER"
+PIN_FINAL="eb59f8906c359064e29cc7c09ba7f0be2c8bdbd8"
 RB=docs/runbooks/site-v1-manual-steps.md
 V068=docs/tasks/068-verify.sh
 SCOPE="$V068 $RB docs/tasks/085-runbook-m6-done.md docs/tasks/085-verify.sh"
