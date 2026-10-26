@@ -2417,3 +2417,9 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   browsers — `curl -L`, wget, urllib, Node fetch never reach the target; `_redirects` ignored; the custom domain does not front
   project repos. Options C (Cloudflare redirect on a project-owned host, ★) and E (store the github.com Release URL) put to
   Ludwig, plus his browser check (criterion 6) and deleting `pages-probe`.
+- **Ludwig, 2026-10-26: criterion 6 (verbatim) "For /a/ and /nonexistent/ a page shows WOM058, for /b.tar.gz its a blank page";
+  then "C star, repo deleted"** → archive URL shape: **option C** — a project-owned hostname with a real HTTP redirect at
+  Cloudflare (e.g. `archive.worldofmodcraft.com/...` → the archive repo's Release asset URLs). `pages-probe` deleted (checked:
+  "Repository not found"). Follow-ups: **091** runbook step M12 (Cloudflare redirect rule; clicks verified against Cloudflare's
+  docs; an agent verifies with curl after Ludwig configures it) and **092** `contracts/artifact-naming.md` amendment (the URL
+  shape; contract → Ludwig approves the merge) — 092 unblocks 008c, then 008b.
