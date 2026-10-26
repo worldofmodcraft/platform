@@ -2367,3 +2367,19 @@ only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone;
 - **058 live probe:** the push of the probe tree to `pages-probe` was refused by the classifier ("Auto-Mode Bypass"); not
   retried. Baseline observed: only a trailing-slash 301; `worldofmodcraft.com/pages-probe/` 404. Ludwig to push with
   `! git -C /home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe push origin probe-tree:main` (or from his terminal). PR #79 open.
+
+### Task 086 — web-client ADR survey (Ludwig's idea, 2026-10-26; read-only; nothing decided)
+Idea: a WebAssembly build of the client that streams content and caches assets locally; an online "Find Group" that starts
+instances with a custom game's mods (WC3 custom games style); desktop/offline stays. Legal aspect set aside by Ludwig.
+Surveyor read 122/122 ADRs; none anticipates a web client. **Top risks:** (1) transport and trust — browsers cannot speak TCP,
+so a platform-run WS gateway is needed (conflicts ADR-0046:12); hosting strangers' games with native server plugins (ADR-0012)
+is remote code execution, needing ADR-0002/0010 revisited for hosted play (likely Lua/records-only); (2) rendering and data —
+Vulkan (ADR-0007) must be ported to WebGPU/GLES3; base data assumed in a local extracted directory (ADR-0016/0005) must become
+streamable, cacheable pieces within browser quota/eviction; (3) native plugin ABI (no dlopen in wasm) and per-lobby world
+cold-start (ADR-0076/0103/0101). **Supports:** ADR-0019 (client as a backend), 0004/0084 (browser-native formats), 0013/0085
+(content-addressed caches), 0078 (server directory, phase 3), Lua → wasm. **Cheap now, expensive later:** one virtual-FS
+interface for client file access; immutable versioned artefact URLs with CORS and Range; a static JSON registry index beside
+the git repo; transport-agnostic handshake/control contracts plus a token-auth option; no blocking I/O on the main thread and
+periodic crash-evidence flush; worlds starting from a precompiled snapshot. Offered to Ludwig: A an ADR draft "web client as a
+future target" locking only the cheap choices; B store the report only. Awaiting his choice.
+- **085 (platform PR #80):** 068-verify pinned to PR #58's range (BASE `3f25f03`, FINAL `6d4b61e`), M6 ticked; review running.
