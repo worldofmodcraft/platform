@@ -2390,3 +2390,8 @@ future target" locking only the cheap choices; B store the report only. Awaiting
   run: the agent's `pkill` was refused by the classifier; the manager did not kill them on its behalf (that would launder the
   denial) — reported to Ludwig with the pids; they finish on their own.
 - **Merge order now:** 087 → 082 #20; 039a #21 after its TIP fix and a final run; 085 #80 after a quiet-machine run.
+- **039a merged: registry #21 → `4268735`** under Ludwig's 2026-10-26 OK ("Ok to merge point 1", conditional on final runs).
+  Evidence: full 039a-verify on a merge with main — 362 tests and all 17 closed scripts green, only AC11 red (BASE..HEAD scope);
+  fix `d4d726d` pins TIP `999b2b7` (manager read the diff: own-change checks moved from HEAD to TIP, plus FINAL..TIP byte check,
+  nothing weakened); AC11 block green on a merge with main, red when widened back to HEAD. **Next: 039b** (workflow YAML, AC7,
+  CONTRIBUTING/README, runbook M9/M10/M11 note) — spec is 039's; dispatch when the manager next has a quiet slot.
