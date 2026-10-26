@@ -2354,3 +2354,10 @@ Format: **C<n> — <question>** · options · **chosen** · why · how to revers
   "Require branches to be up to date"; the run-log link comes from the workflow, not the composer.
 - **Merge order for Ludwig (registry):** 084 #22 → 065 #19 → site #4 → 039a #21 → 082 #20. The final full runs of 039a and
   082 (AC12/AC13) need 084 in place; the manager runs them overnight on local merges with 084's branch as evidence.
+
+### Ludwig, 2026-10-26 morning (verbatim): "Ok to merge point 1 (in right order)"
+Covers platform #77, registry #22, #19, site #4, #21, #20. Merged now, each at its reviewed head (`--match-head-commit`):
+platform **#77** (010a) `6971f38`; registry **#22** (084) `77a4653`; registry **#19** (065) `208c6d1` — first test-merged onto
+main in a fresh clone (clean; 075-verify ALL CHECKS PASSED on the result); site **#4** (065 re-sync) `35f331a` after its
+`check-schemas` re-run passed against the new registry main. **#21 (039a) and #20 (082)** are covered by the same OK but merge
+only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone; 082: AC13 `--full`); the manager reports each.
