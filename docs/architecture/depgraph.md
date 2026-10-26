@@ -20,7 +20,7 @@ architecture error with exactly two fixes — define the contract, or merge the 
 | N3 | `registry-ci` | `worldofmodcraft/registry` | Gates on every PR: schema, ownership by numeric id, append-only, PR classification. |
 | N4 | `validation-core` | `worldofmodcraft/registry` | Reusable validators: magic-byte asset scanner (incl. GLB payload walk) + manifest/SPDX validator. Two consumers, hence its own node. |
 | N5 | `build-pipeline` | `worldofmodcraft/registry` | Per accepted version: clone exact commit → validate → tarball → SHA-256 → sign → upload → write results back into N2. |
-| N6 | `artifact-store` | org-owned GitHub Releases | Durable copies of source tarballs + signatures. Pages and installs point here, never at the author's repo (ADR-0041). |
+| N6 | `artifact-store` | org-owned GitHub Releases, addressed via `archive.worldofmodcraft.com` (Cloudflare redirect, M12) | Durable copies of source tarballs + signatures. Pages and installs point here, never at the author's repo (ADR-0041). |
 | N7 | `site-build` | `worldofmodcraft/site` | Astro + Pagefind. Reads N2 and N6, emits static `dist/`. |
 | N8 | `site-host` | GitHub Pages + DNS | Serves `dist/` over HTTPS on the apex domain. |
 
