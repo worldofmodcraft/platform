@@ -1,6 +1,6 @@
 # Task 008b-3a: Ownership carve-out for the pipeline identity
 
-- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`, which keeps the decisions, design and history; design numbers below refer to it) — **Status:** draft — split from 008b at the spec gate 2026-10-26, and again from 008b-3 at the review of the split (manager ★, session 12); independent spec review pending
+- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`, which keeps the decisions, design and history; design numbers below refer to it) — **Status:** spec-approved 2026-10-26 (manager, after independent spec review rounds 1-2 of the split; round-2 fixes mechanical). **Needs Ludwig's approval before merge: CI security check**
 - **Agent / model:** implementer / sonnet
 - **Budget:** small
 - **Branch / worktree:** `task/008b3a-ownership-carve-out` / `~/wt/registry-task-008b3a` — **registry** repo

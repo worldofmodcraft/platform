@@ -1,6 +1,6 @@
 # Task 008b-1: Pipeline planner — which versions to build, skip, refuse or fault
 
-- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`, which keeps the decisions, design and history; design numbers below refer to it) — **Status:** draft — split from 008b at the spec gate 2026-10-26; independent spec review pending
+- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`, which keeps the decisions, design and history; design numbers below refer to it) — **Status:** spec-approved 2026-10-26 (manager, after independent spec review rounds 1-2 of the split; round-2 fixes mechanical)
 - **Agent / model:** implementer / sonnet
 - **Budget:** medium
 - **Branch / worktree:** `task/008b1-pipeline-plan` / `~/wt/registry-task-008b1` — **registry** repo
