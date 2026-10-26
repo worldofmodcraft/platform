@@ -57,3 +57,14 @@ and the Base permissions value. Nothing else in the runbook changes (068-verify 
   - **Found, out of scope, not changed:** `OPERATIONS.md` still documents `mbmludric` as a non-member (the M6 old status cited it); with
     Ludwig's report that statement is now stale, and the M4/M6 "When" ordering text is unchanged. Booked for the manager: update OPERATIONS.md
     (separate task) once membership is verified authenticated.
+- 2026-10-26 qa-engineer (task 085, review fix for PR #80, REVIEW-CHECKLIST item 12): the "AC1/AC3 this tree" block of `085-verify.sh`
+  read the live runbook at HEAD ("M6 is ☑", "runbook outside M6 unchanged vs 3ca6fbf", the M3/M4/M5/M7/M8/Q-H heading loop) — own-change
+  checks on a moving frame. Fixed: they now read `git show "$PIN_FINAL:$RB"` into a temp file (PIN_FINAL stays `eb59f89`, the content
+  commit is unchanged; an unreadable pin fails with "cannot read", never skips). Classification now: OWN-CHANGE (pinned blob) = all
+  of the above plus the M6 status wording and the file-scope check; LIVE (HEAD) = only the re-pinned `068-verify.sh` run. New checks
+  in `085-verify.sh` (skipped when `WOM085_NESTED` is set, to avoid recursion): a throw-away commit on top of HEAD that ticks M4 and moves
+  "Last reviewed" -> the whole of 085-verify run inside it must stay green; a mutation of the pinned content (PIN_FINAL pointed at a
+  commit reverting M6 and M5) -> red for `M6 heading is not ☑` and `M5 heading changed`; unreachable FINAL pin -> red `cannot read`.
+  **Status: the changed script is syntax-checked (`bash -n`) but its full run is PENDING.** `ps` showed another agent's verify chain
+  (039a/064/065/066/062/007a) running for the whole 30 min wait, and the instruction was to run verify scripts only on a clear machine.
+  Run `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/085-verify.sh` (and 068) on a quiet machine before merge.
