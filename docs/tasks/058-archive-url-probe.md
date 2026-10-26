@@ -77,3 +77,68 @@ Declared: `docs/tasks/058-verify.sh` for criteria 1-2 and 8. Criteria 3-6 are li
 - 2026-10-26 implementer (live part, attempt 2). Ludwig pushed the probe tree himself (`833d333..c1e8308 probe-tree -> main` on worldofmodcraft/pages-probe; relayed by the manager) after the agent's push was denied by the classifier. Deployment observed 16:46 UTC (`/target.txt` 404 at 16:45:14, 200 at 16:46:15; polled every 60 s). Criteria 3 and 4 captured and recorded in the report with commands/outputs: directory without slash (`/a`, `/c`) -> 301 with Location to the slashed URL (the only 3xx Pages emitted); `/a/` and `/a/index.html` -> 200 meta-refresh HTML; `/b.tar.gz` -> 200 `application/gzip` with HTML bytes; `_redirects` -> 404 and `/old` -> 404 (no effect); `/nonexistent` -> 404 with the `404.html` body; `worldofmodcraft.com/pages-probe/target.txt` -> 404. curl -L, wget, urllib, node fetch all end on the HTML or a 404 for every route, never target.txt. Criterion 7: table and mapping onto 008a/008b/055/010/056 written, conclusion: Pages gives no project-chosen HTTP redirect (not found in these tries); A/B browser-only, C/D untested, E baseline; observation outside A-E: Pages can serve the tarball bytes itself (unverified limits). Criterion 5 NOT RUN; 6 Ludwig (exact steps in report); 10 Ludwig (repo not deleted). 058-verify.sh re-run green.
 - 2026-10-26 criterion 6 recorded. Ludwig observed on a mobile browser (exact words, relayed by the manager): "For /a/ and /nonexistent/ a page shows WOM058, for /b.tar.gz its a blank page". Recorded: meta-refresh in a directory followed; 404.html meta-refresh followed; `b.tar.gz` (application/gzip, HTML bytes) blank page, not followed, no download observed. Limits: one mobile browser, unnamed; address bar and file name not reported; desktop and JS-redirect not tested. Criterion 10 (delete worldofmodcraft/pages-probe) still pending, Ludwig. Criterion 5 not run.
 - 2026-10-26 criterion 10 DONE and decision recorded. Ludwig: "C star, repo deleted". `worldofmodcraft/pages-probe` deleted by Ludwig (manager checked: `git ls-remote` -> "Repository not found"; relayed, not re-run here). Criterion 5 (DNS) NOT RUN. Decision: option C (project-owned hostname, real HTTP redirect at Cloudflare, e.g. archive.worldofmodcraft.com -> the archive repo's Release asset URLs). C's feasibility remains [unverified]; to be configured (runbook step, Ludwig) and verified with curl in follow-up tasks 091/092. Report updated (status, criterion 10, new "Decision" section).
+- 2026-10-26 review fixes (PR #79 review FAIL item 12 + 2 minors). (1) Own-change check added to 058-verify.sh: PIN_BASE=3ca6fbf (origin/main as merged at 96e1b5e), PIN_FINAL=557780e (last content commit); `git diff --name-only BASE FINAL` must equal the 16-file declared set; unreachable pins fail; mutations added: extra file in range -> red, unreachable pin -> red (now 5/5). (2) Criterion 8 output pasted (run 2026-10-26, PYTHONDONTWRITEBYTECODE=1, foreground, `bash docs/tasks/058-verify.sh --mutate`, full output):
+```
+== environment
+Python 3.14.4
+v24.20.0
+curl 8.18.0 (x86_64-pc-linux-gnu) libcurl/8.18.0 OpenSSL/3.5.5 zlib/1.3.1 brotli/1.2.0 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.2 libssh2/1.11.1 nghttp2/1.68.0 librtmp/2.3 mit-krb5/1.22.1 OpenLDAP/2.6.10
+GNU Wget 1.25.0 built on linux-gnu.
+== baseline (must be green)
+PASS C6 python urllib reports an error for a refused connection URLError(ConnectionRefusedError(111, 'Connection refused'))
+| node fetch | status=0 | error=TypeError: fetch failed |
+PASS C6 node fetch reports an error for a refused connection TypeError: fetch failed
+
+== Criterion 2: saved file names (no browser here; browsers need criterion 6)
+| route | Content-Type | client | saved name(s) | sha == target |
+|---|---|---|---|---|
+| /dl/ct-html.tar.gz | text/html | curl -O -J | ct-html.tar.gz | [True] |
+| /dl/ct-html.tar.gz | text/html | wget | ct-html.tar.gz | [True] |
+| /dl/ct-html.tar.gz | text/html | wget --content-disposition | ct-html.tar.gz | [True] |
+| /dl/ct-gzip.tar.gz | application/gzip | curl -O -J | ct-gzip.tar.gz | [True] |
+| /dl/ct-gzip.tar.gz | application/gzip | wget | ct-gzip.tar.gz | [True] |
+| /dl/ct-gzip.tar.gz | application/gzip | wget --content-disposition | ct-gzip.tar.gz | [True] |
+| /dl/cd.tar.gz | application/gzip + Content-Disposition filename=named-by-header.tar.gz | curl -O -J | named-by-header.tar.gz | [True] |
+| /dl/cd.tar.gz | application/gzip + Content-Disposition filename=named-by-header.tar.gz | wget | cd.tar.gz | [True] |
+| /dl/cd.tar.gz | application/gzip + Content-Disposition filename=named-by-header.tar.gz | wget --content-disposition | named-by-header.tar.gz | [True] |
+PASS C5 curl -O -J saves /dl/ct-html.tar.gz as URL basename ['ct-html.tar.gz']
+PASS C5 wget saves /dl/ct-html.tar.gz as URL basename ['ct-html.tar.gz']
+PASS C5 curl -O -J saves /dl/ct-gzip.tar.gz as URL basename ['ct-gzip.tar.gz']
+PASS C5 wget saves /dl/ct-gzip.tar.gz as URL basename ['ct-gzip.tar.gz']
+PASS C5 curl -O -J honours Content-Disposition ['named-by-header.tar.gz']
+PASS C5 wget --content-disposition honours it ['named-by-header.tar.gz']
+PASS C5 wget without the flag keeps URL basename ['cd.tar.gz']
+
+RESULT: 59 checks, 0 failed
+== own-change check (pinned SHAs)
+ok: git diff --name-only 3ca6fbfd8 557780ef6 == the declared set (16 files)
+== mutation redirect status broken in server fixture (302/301 answer 200) (rc=1)
+RESULT: 59 checks, 10 failed
+RED: C1 positive control 302 / curl -L reaches target
+RED: C1 positive control 302 / wget reaches target
+RED: C1 positive control 302 / python urllib reaches target
+RED: C1 positive control 302 / node fetch reaches target
+RED: C1 positive control 301 / curl -L reaches target
+== mutation SHA comparison dropped (rc=1)
+RESULT: 59 checks, 10 failed
+RED: C3 meta-refresh is NOT followed by curl -L (bytes differ from target)
+RED: C3 meta-refresh is NOT followed by curl (no -L) (bytes differ from target)
+RED: C3 meta-refresh is NOT followed by wget (bytes differ from target)
+RED: C3 meta-refresh is NOT followed by python urllib (bytes differ from target)
+RED: C3 meta-refresh is NOT followed by node fetch (bytes differ from target)
+== mutation client errors swallowed (rc=1)
+RESULT: 59 checks, 5 failed
+RED: C6 curl -L reports an error for a refused connection
+RED: C6 curl (no -L) reports an error for a refused connection
+RED: C6 wget reports an error for a refused connection
+RED: C6 python urllib reports an error for a refused connection
+RED: C6 node fetch reports an error for a refused connection
+== mutation extra file in the range (rc=1)
+FAIL: own-change file set differs from the declared set (< declared only, > in range only)
+    0a1
+    > docs/extra-file-058.txt
+== mutation unreachable pin (rc=1)
+FAIL: own-change pin BASE 0000000000000000000000000000000000000001 is unreachable
+VERIFY OK (baseline green; 5/5 mutations caught)
+```
+(3) Criterion 9: live client scripts committed as tools/probe/archive-url/live_client.py and live_client.mjs; the live captures are committed as tools/probe/archive-url/live-captures-2026-10-26.txt, stated in the file and the report to be FILTERED (not raw) and not re-runnable (repo deleted).
