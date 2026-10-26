@@ -2426,3 +2426,8 @@ future target" locking only the cheap choices; B store the report only. Awaiting
 - **Ludwig, 2026-10-26: "1. OK att merga. 2. Stjärna på allt"** → platform **#79 (058) merged `313e804`**; task 092's Q1-Q8 all ★
   (no schema change; CI equality booked; examples updated; no fallback; pre-T1 fetch-and-hash; depgraph N6 text; live capture
   gates the merge; overview in 056's second pass). 092 spec written; independent spec review next.
+- **092 spec review round 1: FAIL** (wording: the fail-closed rules rejected the correct chain — GitHub's second redirect carries
+  a signed query; hop bound unnumbered; AC11 live inside the closed default run; budget). **Ludwig, 2026-10-26: "Kör A stjärna"**
+  on the two questions: **Q9 = A** — the pipeline (pre-T1) and the manager (live checks) verify hop 1 exactly; consumers require
+  https on every hop plus hash and signature, so the front can be repointed without a consumer release. **Q10 = A** — 008b does
+  not publish versions with build metadata (`+`) until a live Release proves GitHub resolves `+` in `releases/download` (task 010).
