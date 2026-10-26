@@ -1,7 +1,7 @@
-# Archive URL probe (task 058) — local and live Pages captures done; mobile-browser observation recorded; DNS and deletion pending (Ludwig)
+# Archive URL probe (task 058) — local and live Pages captures done; mobile-browser observation recorded, repository deleted, option C chosen; DNS not run
 
 **Status of this report:** criteria 1, 2, 8 (local, `docs/tasks/058-verify.sh`) and 3, 4 (live Pages captures, 2026-10-26) are done.
-Criterion 5 (DNS) is **NOT RUN — needs Ludwig**; criterion 6 (browser) was observed by Ludwig on a mobile browser (below); criterion 10 (repository deletion) is Ludwig's.
+Criterion 5 (DNS) is **NOT RUN — needs Ludwig**; criterion 6 (browser) was observed by Ludwig on a mobile browser (below); criterion 10 is done (repository deleted by Ludwig, 2026-10-26). **Decision (Ludwig, 2026-10-26): option C** - see "Decision" at the end.
 This report states no recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
 
 ## Environment (commands run 2026-10-14 in the worktree)
@@ -88,7 +88,7 @@ All four non-browser clients reach the same end state on every Pages route: the 
   - `/nonexistent/` (served as a 404 whose `404.html` body is a meta-refresh; Ludwig typed it with a trailing slash, the curl captures used `/nonexistent`): **followed**.
   - `/b.tar.gz` (HTML bytes, `Content-Type: application/gzip`): **blank page** - not rendered, not followed, no download observed on mobile.
   - Not observed: a desktop browser, the proposed file name, whether the address bar ended at `target.txt`, a JS-redirect page (none deployed). So the browser cells hold for this one mobile browser only.
-- **10 (deletion): NOT DONE by design — the agent does not delete the repository.** Ludwig, after step 6: `https://github.com/worldofmodcraft/pages-probe` -> Settings -> General -> Danger Zone -> Delete this repository [click-path from memory, UNVERIFIED]; then tell the manager so it is recorded here.
+- **10 (deletion): DONE by Ludwig, 2026-10-26.** `worldofmodcraft/pages-probe` was deleted by Ludwig; the manager checked it: `git ls-remote https://github.com/worldofmodcraft/pages-probe` -> "Repository not found" (output relayed by the manager, not re-run by this agent).
 
 ## Conclusion (evidence = the captures above; "not found in these tries")
 1. **Does Pages emit any HTTP 3xx?** Yes, exactly one kind observed: the `301` that appends `/` to a directory path. Not found in these tries: any 3xx to a project-chosen target (`404.html`, `_redirects`, meta-refresh page, `.tar.gz`-named file, plain file; `/old` and `/nonexistent` answered 404).
@@ -119,3 +119,6 @@ Sentences quoted from the specs on origin/main of this branch (2026-10-26). "If 
 - **056 (`architecture-note`).** Lines 66-76 ("whether GitHub Pages can serve it is unverified until task 058 reports; if 058 finds it infeasible, the note records that finding ... the note names that host (from 058) and says what is lost if it moves"): the second pass records: Pages cannot emit a project-chosen HTTP redirect (not found in these tries; captures in this report); the benefit of Q-G holds only through A/B (browser-only), C/D (needs Ludwig's DNS/service decision) or hosting bytes; it must not be described as `built`.
 - **`artifact-naming.md` amendment (sibling).** Waits on Ludwig choosing the shape; this report fixes nothing.
 This section is a mapping, not a recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
+
+## Decision (Ludwig, 2026-10-26: "C star, repo deleted")
+Ludwig chose **option C**: a project-owned hostname with a real HTTP redirect at Cloudflare (for example `archive.worldofmodcraft.com` redirecting to the archive repo's Release asset URLs). The probe's evidence behind this: Pages emits no project-chosen 3xx and no HTTP client follows its meta-refresh. **C's feasibility is still [unverified]**: nothing in this probe tested Cloudflare (whether the free plan offers the redirect, whether the record must be proxied, which reverses DNS-only for that hostname). Criterion 5 (DNS / second hostname) was **not run**. C will be configured (a runbook step for Ludwig) and verified with `curl` in follow-up tasks 091 and 092; until then the 008a/008b/055/010/056 sentences mapped above stay waiting on that verification. This is Ludwig's decision, recorded here; the report itself still compares and does not recommend.
