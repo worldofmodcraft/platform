@@ -2498,3 +2498,25 @@ approval for every merge tonight, including contract amendments (092) and CI sec
 and demonstrated green (§7 conditions and §3.7 are not waived by an approval); a takedown is not covered (none pending); (3) §5 planned-handover
 thresholds suspended for tonight only (compaction caution §5.5 still applies); (4) questions only Ludwig can answer are booked under
 "For Ludwig" for the morning, not asked tonight. Overnight waiver, expires at Ludwig's next message; not a precedent.
+
+### Session 12 progress (night of 2026-10-26, under Ludwig's overnight approval)
+- **Merged:** platform #80 (085) `41a9818` (delta review PASS; main merged in, task-file-only conflict, 085/068 green after);
+  platform #82 (091) `d5929db` (independent review PASS-WITH-AMENDMENTS, LOW 1 done, LOW 2 booked; 068/085 green on the merged head);
+  platform #85 (008b spec re-gate + split) `06f3ced`.
+- **Reviews:** 087 PASS-WITH-AMENDMENTS (file scope fixed `49988fd`; merge waits on the 082 --full sweep and 070 --mutate on main+087+082);
+  039b security review PASS-WITH-AMENDMENTS (no HIGH) -> fix round (registry `b735046`, platform `8b27351`), delta review PASS-WITH-AMENDMENTS
+  (one neutral-wording fix, done; platform branch merged with main, runbook conflict = two appends, both kept, `c151f4d`); 092 review
+  PASS-WITH-AMENDMENTS -> fix round `f245f91` (AC11f/AC11c exact Location, --live-selftest red-first failed=5, AC9 post-TIP) -> delta review
+  PASS-WITH-AMENDMENTS -> A1/A2 `4f1fcd4` (post-TIP: non-ancestor red, merged NOT-APPLICABLE).
+- **Incident (harmless):** session 11's original 039b agent was still alive after the handover and pushed two log-only commits (`a76f85a`,
+  `9d8dc4e`) after session 12's fix round on the same branch; sequential, no conflict. Its earlier 039b-verify run (exit 1, only 065 red under
+  concurrent runs) is superseded by the quiet-machine run queued here.
+- **Manager setup error, caught:** the first 082 `--full` merge lacked registry main (039a); stopped at 8/18 green; re-run on main+087+082.
+- **Specs approved tonight** (each after independent spec review rounds; manager ★ choices labelled in each file):
+  008c (session/12 `27e8605`; one entry point `apply_write_back(entry, result, source_archive)`, `WriteBackRefused(PipelineError)`);
+  008b re-gated and split into 008b-1 (planner), 008b-2 (build/sign, push trigger gated off), 008b-3a (ownership carve-out; CI security ->
+  Ludwig's merge approval), 008b-3b (write-back job; gate removal only after M11) — platform #85;
+  089 (registry sweep; split A1/A2/B/C, B first) and 090 (platform sweep) — session/12 `81eeabb`.
+- Verify queue (one at a time, logged): see the 092/087/085/091 entries above; 082 `--full` on main+087+082 running (6/20 green so far,
+  then 039a's own sweep), then 039b-verify at 9d8dc4e, 070 `--mutate` on main+087+082, then 092 re-runs (default, selftest, mutate, live,
+  fresh clone, --closed).
