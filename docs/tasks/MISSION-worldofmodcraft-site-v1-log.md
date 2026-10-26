@@ -2473,3 +2473,28 @@ live checks pass, see above). pages-probe created, used and deleted.
 7. Ludwig's direction recorded: no web client; minigame instancing = option A (several world processes on a local server) as a
    later ADR (after SITE-V1).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-26 (session 11, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 12 — 2026-10-26 evening/night (manager: session "WLS-World of Modcraft Continue 2026-10-26")
+- Start: session 11 (`WLS-WoroldofModCraft`) was still busy; asked it by cross-session message; it confirmed it is winding down, Ludwig ran
+  /exit there, it launches nothing more. Session 12 is the only manager from here.
+- Machine was not quiet: an orphaned closed-script chain (process group 1782079, `065-verify.sh` on a temp clone of registry main 4268735,
+  started ~19:28 by a session-11 agent, output /tmp/065-base.out, green so far, nobody consuming it). The manager did not kill it (a peer's
+  kill had been refused earlier; doing it on its behalf would launder the denial) and asked Ludwig: ★A stop it / B wait. **Ludwig chose A and
+  ran `kill -- -1782079` himself.** Old idle waiter loops from sessions 4-8 days old match `pgrep -f '-verify\.sh'` forever (they match
+  themselves); harmless (sleep loops), not touched; the scripts' own `ps -eo args | grep 'docs/tasks/[^ ]*-verify\.sh'` check does not see
+  them. Booked for Ludwig's cleanup list.
+- Quiet-machine queue (manager-run, one script at a time, start/end/exit logged): 092 `--live` exit 1 (only AC11f, script defect, see 092 log);
+  087 default ALL PASS (27); 087 `--mutate` ALL PASS (8: 2 controls, 6 mutations red); 085-verify ALL PASS; 068-verify on 085 16/16; 068-verify
+  on 091 15/15. 082 `--full` first ran on a merge 082+087 that lacked registry main (039a) — the manager's own setup error, caught at 8/18
+  (all green) and stopped; re-started on a local merge main 4268735 + 087 + 082 (`ed4588e`, clean merge, 20 scripts incl. 039a).
+- 092: independent review PASS-WITH-AMENDMENTS (details in the 092 log, `a687da7`); fix round to follow.
+
+### Ludwig, 2026-10-26 ~22:00 (verbatim), before sleeping:
+"1. Ta stjärna på alla beslut (men dokumentera dem). 2. Merga allt, jag ger godkännade till alla merge. 3. Ignorera context-varningar under
+natten, vill att du ska kommit så långt som möjligt imorgon bitti. 4. För beslut som kräver min input (dvs. du KAN inte göra dem själv, så
+skjut så många som möjligt tills imorrn)"
+Manager's reading: (1) every open question with a ★ option takes the ★, each recorded with reason here or in its task log; (2) written §7
+approval for every merge tonight, including contract amendments (092) and CI security (039b); the manager still merges only what is reviewed
+and demonstrated green (§7 conditions and §3.7 are not waived by an approval); a takedown is not covered (none pending); (3) §5 planned-handover
+thresholds suspended for tonight only (compaction caution §5.5 still applies); (4) questions only Ludwig can answer are booked under
+"For Ludwig" for the morning, not asked tonight. Overnight waiver, expires at Ludwig's next message; not a precedent.
