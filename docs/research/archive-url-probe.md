@@ -1,8 +1,8 @@
-# Archive URL probe (task 058) — PARTIAL: local part done; live push refused
+# Archive URL probe (task 058) — local and live Pages captures done; browser, DNS and deletion pending (Ludwig)
 
-**Status of this report:** the *local* criteria (1, 2, 8) are done and reproducible with `docs/tasks/058-verify.sh`.
-Criteria 3, 4 are **NOT RUN — push refused by the permission classifier** (a pre-push baseline is captured); 5, 6, 10 are **NOT RUN — needs Ludwig** (DNS, browser, deletion). Every cell that depends on them
-says so. This report states no recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
+**Status of this report:** criteria 1, 2, 8 (local, `docs/tasks/058-verify.sh`) and 3, 4 (live Pages captures, 2026-10-26) are done.
+Criterion 5 (DNS) is **NOT RUN — needs Ludwig**; criterion 6 (browser) is **not tested — Ludwig's observation pending**; criterion 10 (repository deletion) is Ludwig's.
+This report states no recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
 
 ## Environment (commands run 2026-10-14 in the worktree)
 `which wget` -> `/usr/bin/wget`; Node `v24.20.0`; Python `3.14.4`; `curl 8.18.0 (x86_64-pc-linux-gnu)`.
@@ -15,7 +15,7 @@ the client does with that response shape, not that Pages can emit it.
 
 | mechanism | curl -L | curl (no -L) | wget | python urllib | node fetch | browser |
 |---|---|---|---|---|---|---|
-| A meta-refresh page | does not follow (local, row `meta-refresh`) | does not follow (same) | does not follow (local) | does not follow (local) | does not follow (local) | [UNVERIFIED — not observed] (criterion 6) |
+| A meta-refresh page | does not follow (local row `meta-refresh`; live `/a/`, see below) | does not follow (same) | does not follow (local) | does not follow (local) | does not follow (local) | [UNVERIFIED — not observed] (criterion 6) |
 | B JS redirect page | does not follow (local, row `js-redirect`) | does not follow (local) | does not follow (local) | does not follow (local) | does not follow (local) | [UNVERIFIED — not observed] (criterion 6) |
 | C Cloudflare redirect rule (a real 301/302) | follows, *if* a 301/302 exists (local `301`/`302` rows are the shape) — whether Cloudflare can emit it for this setup: not tested | stops at the 3xx with Location (local) | follows (local shape) | follows (local shape) | follows (local shape) | not tested |
 | D other static host with `_redirects` | same shape as C; the host's behaviour: not tested | as C | as C | as C | as C | not tested |
@@ -37,72 +37,84 @@ not change the name. With a `Content-Disposition: attachment; filename="named-by
 `wget --content-disposition` used the header name, plain `wget` kept `cd.tar.gz`. Bytes equalled the target in all nine runs.
 Browser file naming: [UNVERIFIED — not observed].
 
-## What Pages emits (criteria 3-4) — PUSH REFUSED, probe tree NOT deployed; only a pre-push baseline was captured
-**What happened (2026-10-26).** Ludwig created `worldofmodcraft/pages-probe` (public, README, Pages from `main` / root;
-`curl -s https://api.github.com/repos/worldofmodcraft/pages-probe | grep -E '"(has_pages|private|default_branch|visibility)"'`
--> `"private": false, "has_pages": true, "visibility": "public", "default_branch": "main"`) and approved in session that the
-probe agent pushes the probe tree through the session's configured git remote. The agent cloned the repo, committed the tree
-on a local branch (`probe-tree`, commit `c1e8308`; the git-guard hook refuses `git commit` on `main`, so the commit was made on a
-branch and the plan was `git push origin probe-tree:main`, plain, no force). The harness permission classifier then **denied the
-`git push`** ("Auto-Mode Bypass"). Per CLAUDE.md rule 11 the denial is an answer: it was **not retried**, and no other route
-(token, `gh`, API upload) was tried. Nothing from `pages-tree/` is on Pages. Criteria 3 and 4 as specified (`/a/index.html`,
-`/b.tar.gz`, `/c`, `404.html`, `_redirects`) are therefore **NOT RUN**; nothing below is a claim about those files.
+## What Pages emits (criteria 3-4) — LIVE CAPTURES, 2026-10-26
+**Setup.** Ludwig created `worldofmodcraft/pages-probe` (public, Pages from `main` / root). The agent's own push was denied by the harness
+permission classifier (not retried); Ludwig then pushed the probe tree himself, `833d333..c1e8308 probe-tree -> main`
+(reported by the manager). Deployment seen at 16:46 UTC (`curl` of `/target.txt`: 404 at 16:45:14, 200 at 16:46:15).
+Base `B=https://worldofmodcraft.github.io/pages-probe`. Each capture below is
+`curl -s -D - -o /dev/null "$B<path>"` filtered to status / location / content-type / content-length (`tr -d '\r' | grep -i -E '^(HTTP|location|content-type|content-length)'`).
 
-**What was captured anyway** (the repo contains only `README.md`, deployed by Pages before the agent's push attempt;
-`date -u` 2026-10-26 06:12 UTC). Each line is `curl -s -D - -o /dev/null <url>` filtered to status / location / content-type:
+| path | status | Location | Content-Type | length | body (`curl -s`) |
+|---|---|---|---|---|---|
+| `/target.txt` | 200 | - | `text/plain; charset=utf-8` | 20 | `WOM058 pages target` |
+| `/a/index.html` | 200 | - | `text/html; charset=utf-8` | 161 | meta-refresh to `../target.txt` |
+| `/a/` | 200 | - | `text/html; charset=utf-8` | 161 | same |
+| `/a` (directory, no slash) | **301** | `https://worldofmodcraft.github.io/pages-probe/a/` | `text/html` | 162 | - |
+| `/b.tar.gz` (HTML content, `.tar.gz` name) | 200 | - | **`application/gzip`** | 155 | the meta-refresh HTML, not gzip |
+| `/c` (directory, no slash) | **301** | `https://worldofmodcraft.github.io/pages-probe/c/` | `text/html` | 162 | - |
+| `/c/` | 200 | - | `text/html; charset=utf-8` | 74 | `directory c` |
+| `/_redirects` (file `/old /target.txt 302`) | 404 | - | `text/html; charset=utf-8` | 117 | the 404 page |
+| `/old` (the `_redirects` rule's source) | **404** | - | `text/html; charset=utf-8` | 117 | the 404 page |
+| `/nonexistent` | **404** | - | `text/html; charset=utf-8` | 117 | the repo's `404.html` body (meta-refresh) |
+| `/404.html` | 200 | - | `text/html; charset=utf-8` | 117 | meta-refresh |
 
-| URL | status | location | content-type |
-|---|---|---|---|
-| `https://worldofmodcraft.github.io/pages-probe` (project root, **no** trailing slash) | **301** | `https://worldofmodcraft.github.io/pages-probe/` | `text/html` |
-| `https://worldofmodcraft.github.io/pages-probe/` | 200 | - | `text/html; charset=utf-8` |
-| `.../pages-probe/README.md` | 200 | - | `text/markdown; charset=utf-8` (the raw file is served, 13 bytes) |
-| `.../pages-probe/README` | 404 | - | `text/html; charset=utf-8` |
-| `.../pages-probe/nonexistent` | 404 | - | `text/html; charset=utf-8` |
-| `.../pages-probe/a`, `/a/`, `/b.tar.gz` (files not pushed) | 404 | - | `text/html; charset=utf-8` |
+Facts read off the table (no claim beyond it):
+1. Pages **does** emit HTTP 3xx: a `301` with `Location` for a directory requested without trailing slash (`/a`, `/c`, and the project root `/pages-probe`, captured earlier the same day). The target is the same URL plus `/`; nothing in the captures lets the project choose it.
+2. `_redirects` has **no effect** (`/old` -> 404; `/_redirects` itself -> 404). **Not found in these tries:** any 3xx to a chosen target via `404.html`, `_redirects`, or a plain file. The custom 404 page is served **with status 404** and its meta-refresh body, so clients see a 404, not a redirect.
+3. A file named `b.tar.gz` is served with `Content-Type: application/gzip` whatever its content; the bytes are served as stored (155 bytes of HTML). Pages therefore also serves a real tarball under a `.tar.gz` name; that is hosting the bytes, not redirecting.
+4. `curl -sI https://worldofmodcraft.com/pages-probe/target.txt` -> `HTTP/2 404`, `server: GitHub.com`: the apex custom domain does not serve this repo at `/pages-probe/`; the only working address was `worldofmodcraft.github.io/pages-probe/`. (Criterion 5 would change this and was not run.)
 
-`curl -sI https://worldofmodcraft.com/pages-probe/` -> `HTTP/2 404`, `server: GitHub.com`, `content-security-policy: default-src 'none'; ...`
-(the custom domain does **not** front the project repo at `/pages-probe/`; it answers its own 404, so the apex site and
-this probe are separate; `https://worldofmodcraft.github.io/pages-probe/` is the only working address).
+### Clients against the live URLs (criterion 3/4 "curl/wget exactly as the spec says" plus the matrix clients)
+Target SHA-256 (of `/target.txt`): `c40a80d865cb2e46...` (first 16 hex shown; `curl -s $B/target.txt | sha256sum`). Commands: `curl -sL -o /dev/null -w 'final=%{url_effective} status=%{http_code} redirects=%{num_redirects}'`, `wget -S -O out.bin`, `python3 -I live058/py.py $B ...` (`urllib.request.urlopen`), `node live058/n.mjs $B ...` (`fetch`, `redirect: "follow"`); the two scripts are in `/home/ludwig/.claude/jobs/95f471eb/tmp/live058/` (not committed; 14 lines each).
 
-**The one fact this gives:** GitHub Pages **does** emit an HTTP `3xx` with a `Location` header: a `301` that adds the trailing
-slash to a directory-style path (observed for the project root). It is Pages' own canonicalisation, to the same host and the
-same path plus `/`; nothing in this capture shows that a project can choose the target. Whether `/c` -> `/c/` behaves the same
-for a subdirectory, whether `404.html` or `_redirects` can produce a `3xx`: **[unverified — not run; push refused]**.
-The sentence "no HTTP redirect route exists on Pages" is therefore **not** supported by this report (spec: report "not found in
-these tries", and the tries were not made).
+| path | curl -L | wget | python urllib | node fetch | bytes = target? |
+|---|---|---|---|---|---|
+| `/a/` (meta-refresh) | final `/a/`, 200, 0 redirects | 200, stays, 161 B | final `/a/`, 200 | final `/a/`, 200 | **no** (sha16 `fb1ddd7e...`) in all four |
+| `/a` | follows the 301 to `/a/`, then stops (200 HTML) | follows 301, stops | follows 301, stops | follows 301, stops | no |
+| `/b.tar.gz` | final `/b.tar.gz`, 200, `application/gzip`, HTML bytes | 200, saved HTML named `b.tar.gz` (`file`: HTML document) | 200, HTML bytes | 200, HTML bytes | no (sha16 `c75e3630...`) |
+| `/c` | follows 301 to `/c/`, 200 | follows 301 | follows 301 | follows 301 | n/a (not the target) |
+| `/old` (`_redirects`) | 404, 0 redirects | `ERROR 404` | HTTPError 404 | status 404 | no |
+| `/nonexistent` (`404.html`) | 404, 0 redirects | `ERROR 404` | HTTPError 404 | status 404 | no (404 body) |
+| `/target.txt` (control) | 200 | 200 | 200 | 200 | yes |
 
-## What is needed to finish criteria 3-4 (Ludwig, exact commands)
-The commit is ready in `/home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe` (branch `probe-tree`, commit `c1e8308`).
-Either run in your own terminal:
-```
-cd /home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe
-git push origin probe-tree:main
-```
-or allow the push in the session's permission prompt and ask the agent to continue (it will then poll
-`curl -sI https://worldofmodcraft.github.io/pages-probe/a/` every 60 s for up to 15 min and capture
-`for p in /a/index.html /a/ /b.tar.gz /c /c/ /_redirects /old /nonexistent; do echo "== $p"; curl -sI "$B$p"; curl -s -D - -o /dev/null "$B$p"; done`
-with `B=https://worldofmodcraft.github.io/pages-probe`).
+`curl` without `-L`: `/a` -> `status=301 redirect=https://worldofmodcraft.github.io/pages-probe/a/`; `/c` the same; `/b.tar.gz` -> `status=200`.
+Saved names: `curl -sOJ $B/b.tar.gz` and `wget -q $B/b.tar.gz` both saved `b.tar.gz`; `file` reports `HTML document, ASCII text` (155 bytes). Consistent with the local result that Content-Type does not change the name.
+All four non-browser clients reach the same end state on every Pages route: the meta-refresh HTML or a 404, **never** `target.txt`.
 
 ## Criteria 5, 6, 10 status
 - **5 (DNS / second hostname): NOT RUN — needs Ludwig's explicit DNS approval; no DNS was touched.**
-- **6 (browser): not tested — Ludwig's observation pending.** Steps, after the tree is pushed: open
-  `https://worldofmodcraft.github.io/pages-probe/a/` and `https://worldofmodcraft.github.io/pages-probe/b.tar.gz` in one
-  desktop browser; note for each whether the address bar ends at `target.txt`, whether it renders or downloads, and the proposed
-  file name. Write the three answers into the table cells marked `[UNVERIFIED — not observed]`.
-- **10 (deletion): NOT DONE by design — the agent does not delete the repository.** Ludwig, after the captures:
-  `https://github.com/worldofmodcraft/pages-probe` -> Settings -> General -> Danger Zone -> Delete this repository
-  [click-path from memory, UNVERIFIED]; then record it here.
+- **6 (browser): not tested — Ludwig's observation pending.** Steps (one desktop browser, a private window):
+  1. Open `https://worldofmodcraft.github.io/pages-probe/a/`. Write down: does the address bar end at `.../pages-probe/target.txt`? is the text `WOM058 pages target` shown?
+  2. Open `https://worldofmodcraft.github.io/pages-probe/b.tar.gz`. Write down: does a download start, with which proposed file name; or is the HTML rendered; or does it show an error?
+  3. Open `https://worldofmodcraft.github.io/pages-probe/nonexistent`. Write down whether it ends at `target.txt` (the 404 page's meta-refresh) or stays on a 404.
+  4. Send the three answers to the manager; they go into the browser cells below.
+- **10 (deletion): NOT DONE by design — the agent does not delete the repository.** Ludwig, after step 6: `https://github.com/worldofmodcraft/pages-probe` -> Settings -> General -> Danger Zone -> Delete this repository [click-path from memory, UNVERIFIED]; then tell the manager so it is recorded here.
 
-## Conclusion (plain, evidence-limited)
-1. Does Pages emit any HTTP 3xx? **Yes, one kind observed:** a `301` adding the trailing slash for the project-root path
-   (capture above). **Not observed:** any `3xx` to a chosen target. Routes `404.html`, `_redirects`, meta-refresh page, `.tar.gz`-named HTML file and subdirectory `/c`: [unverified — not run].
-2. Options A-E for the archive URL shape, on the evidence so far: **A and B** stay viable only for clients that execute HTML (browser);
-   local matrix shows `curl -L`, `wget`, `urllib`, Node `fetch` do not follow them. **C** (Cloudflare real 301/302) and **D**
-   (other static host) remain viable in principle; their feasibility is [unverified] (needs proxied record / a new service, both
-   Ludwig's call). **E** is always viable. No option is eliminated by a Pages capture, because the Pages captures of the
-   relevant routes were not made. The directory-slash 301 does not look usable as a redirect to a release asset, since its target is fixed by Pages.
+## Conclusion (evidence = the captures above; "not found in these tries")
+1. **Does Pages emit any HTTP 3xx?** Yes, exactly one kind observed: the `301` that appends `/` to a directory path. Not found in these tries: any 3xx to a project-chosen target (`404.html`, `_redirects`, meta-refresh page, `.tar.gz`-named file, plain file; `/old` and `/nonexistent` answered 404).
+2. **Options for the archive URL shape:**
+   - **A (meta-refresh page) and B (JS redirect):** servable on Pages, but **no HTTP client tested follows them** (curl -L, wget, urllib, fetch all end on the HTML; live and local agree). Viable only if every consumer is a browser or our own code that parses the HTML. Browser behaviour [UNVERIFIED — not observed]. A `.tar.gz`-named meta-refresh file is served as `application/gzip` with HTML bytes: a poor shape for any download client.
+   - **C (Cloudflare real 301/302):** not eliminated, not tested. [unverified] whether it needs a proxied record (the DNS-only decision is Ludwig's) and what the plan allows.
+   - **D (other host with real redirects):** not eliminated, not tested; new service outside the mission.
+   - **E (store the `github.com` release URL):** works today (302 captured 2026-10-14) but is the lock-in Q-G declined.
+   - Remaining on Pages alone: **no option gives a project-chosen HTTP redirect.** An observation outside A-E: Pages serves arbitrary files with their own Content-Type (`b.tar.gz` -> `application/gzip`), so the project-owned URL could serve the tarball bytes itself instead of redirecting. That is hosting, not fronting `worldofmodcraft/archive`; its size limits and its fit with decision Q-E are [unverified] and the choice is Ludwig's.
+
+## Comparison table, live cells filled
+| mechanism | curl -L | curl | wget | urllib | node fetch | browser |
+|---|---|---|---|---|---|---|
+| A meta-refresh on Pages | does not follow (live `/a/`) | does not follow | does not follow | does not follow | does not follow | not tested — Ludwig pending (step 1) |
+| B JS redirect on Pages | does not follow (local; same shape as A, not deployed live) | same | same | same | same | not tested |
+| C Cloudflare real redirect | follows if a 301/302 exists (local shape) | stops at 3xx | follows | follows | follows | not tested |
+| D other host `_redirects` | as C; host not tested | as C | as C | as C | as C | not tested |
+| Pages' only 3xx (dir `/a` -> `/a/`) | follows, ends on the HTML | stops at 301 | follows | follows | follows | not tested |
+| `_redirects` / `404.html` on Pages | 404 (no 3xx) | 404 | 404 | 404 | 404 | `/nonexistent`: not tested |
 
 ## What this means for the tasks that wait
-The spec files for 008a, 008b, 055, 010 and 056 are not in this worktree's scope to edit; the sentence-by-sentence mapping
-requires reading each and the live outcome, and is **NOT DONE** here (criterion 7 is only partly met). What the local
-evidence alone fixes: a meta-refresh or JS front is invisible to `curl -L`, `wget`, `urllib` and `fetch`; only an HTTP 3xx is followed by all of them.
+Sentences quoted from the specs on origin/main of this branch (2026-10-26). "If A/B" = the front is a Pages HTML page; "if C/D" = a real HTTP redirect on a project hostname; "if E" = the `github.com` URL is stored.
+- **008a (`pipeline-core`).** Line 231 ("`source_archive_url` ... — 008c (they need tasks 057 and 058)") and line 279 ("URL shape waits on task 058"): 008a itself is unaffected (it does not need 058, line 259). The URL function moves to 008c; its body is: A/B -> a Pages path of the form `https://<project host>/<path>` that is an HTML page (hostname and path still to be fixed by Ludwig); C/D -> the redirecting hostname; E -> the `github.com/.../releases/download/<tag>/<tag>.tar.gz` URL already produced by `release_asset_url`.
+- **008b (`pipeline-workflow`).** Line 158-159 ("The `source_archive_url` expectation comes from task 058's report ..."): the expected string is the one chosen above. Line 174 ("is fetched with `curl -L` and with a browser-equivalent client and yields the same bytes — blocked until task 058 reports"): this clause **cannot pass under A or B** (curl -L ends on the HTML, live capture); it passes under C/D/E, or under hosting the bytes on Pages; it is Ludwig's decision which, and it should not be silently rewritten. Line 235 ("Writing `source_archive` as anything other than the URL 008c's `source_archive_url` returns") stays as is.
+- **055 (`site-live-registry`).** Line 88-94 ("The URL must match the project-owned shape ...; the redirect chain must end at `https://github.com/worldofmodcraft/archive/releases/download/<tag>/<tag>.tar.gz` ... If 058 finds the front is an HTML meta-refresh page rather than an HTTP redirect, the staging script's handling of it is specified after 058, not guessed here"): this probe shows Pages offers **only** the meta-refresh shape. Under A the staging script must parse HTML (an extra, attackable step before the host allowlist); under C/D the chain is the HTTP redirects it already assumes; under E the first hop is `github.com`. Q3's allowed-redirect-host list gains the project host (its name from Ludwig). Under all outcomes the dir-slash 301 stays on the project host.
+- **010 (`test-mod`).** Line 96 ("check that the entry's `source_archive` URL (the project-owned one ...; shape from task 058) resolves"): "resolves" means, under A/B, "returns the HTML page" (200, bytes not the tarball), under C/D/E "redirects to the asset". The runbook check must name which; a plain `curl -sL ... | sha256sum` check is wrong under A/B.
+- **056 (`architecture-note`).** Lines 66-76 ("whether GitHub Pages can serve it is unverified until task 058 reports; if 058 finds it infeasible, the note records that finding ... the note names that host (from 058) and says what is lost if it moves"): the second pass records: Pages cannot emit a project-chosen HTTP redirect (not found in these tries; captures in this report); the benefit of Q-G holds only through A/B (browser-only), C/D (needs Ludwig's DNS/service decision) or hosting bytes; it must not be described as `built`.
+- **`artifact-naming.md` amendment (sibling).** Waits on Ludwig choosing the shape; this report fixes nothing.
+This section is a mapping, not a recommendation; the choice and any reversal of the DNS-only decision are Ludwig's.
