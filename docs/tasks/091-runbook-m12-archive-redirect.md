@@ -1,0 +1,78 @@
+# Task 091: runbook step M12 — a Cloudflare redirect from archive.worldofmodcraft.com to the archive's Release assets
+
+- **Mission:** SITE-V1 (D2 archive URL, decision C) — **Status:** spec-approved (manager, solo gate, 2026-10-26)
+- **Repo:** platform. **Agent / model:** doc-writer. **Budget:** small (≤ 1 agent-session)
+- **Branch / worktree:** `task/091-runbook-m12` / `~/wt/task-091`, cut from platform `origin/main`
+
+## Source
+Ludwig, 2026-10-26: "C star" — the archive URL shape is a project-owned hostname with a real HTTP redirect at Cloudflare
+(task 058's option C; mission log). DNS for worldofmodcraft.com is at Cloudflare (runbook M2).
+
+## Objective
+`docs/runbooks/site-v1-manual-steps.md` gains `## ☐ M12 — Archive download address (Cloudflare redirect)` after the last M-step:
+exact Cloudflare dashboard clicks to make `https://archive.worldofmodcraft.com/<tag>/<file>` answer a **301 or 302** with
+`Location: https://github.com/worldofmodcraft/archive/releases/download/<tag>/<file>` (path segments preserved, query dropped),
+including the DNS record the redirect needs (proxied, so Cloudflare answers), and a "you should see" check Ludwig can do in a
+browser. Which redirect status (301 permanent vs 302) is recommended and why, in one sentence.
+
+## Requirements
+1. Every UI path, product name (Single Redirects / Redirect Rules / Page Rules — whichever Cloudflare documents today for the
+   Free plan), wildcard/dynamic-target syntax and plan limit is taken from developers.cloudflare.com, fetched in this task, with
+   URLs in the log; anything not found is `[unverified]`, never invented.
+2. Plain web-UI clicks for a non-terminal user. No DNS change is made by the agent; no credential is used.
+3. A verification block the manager runs afterwards (unauthenticated): `curl -sI https://archive.worldofmodcraft.com/v0/test`
+   expecting the 30x and the computed `Location`; written into M12 as "the manager checks".
+4. `docs/tasks/068-verify.sh` and every verify script touching the runbook exit 0 (the runbook's other markers unchanged).
+
+## File scope
+`docs/runbooks/site-v1-manual-steps.md` (new M12 section only), `docs/tasks/091-runbook-m12-archive-redirect.md` (log).
+
+## Forbidden
+Changing Cloudflare or DNS; credentials; editing other runbook sections.
+
+---
+# Task 091 log
+- 2026-10-26 manager: written from Ludwig's decision C.
+- 2026-10-26 doc-writer: added `## ☐ M12` to the runbook after M8 (before Q-H); no other runbook section touched (the
+  header "Last reviewed" line left as is because `068-verify.sh` pins its text; M12 carries its own "Last reviewed
+  2026-10-26 (task 091)"). Mechanism: Cloudflare Redirect Rule (Single Redirects), **Wildcard pattern** option, plus a proxied
+  AAAA `archive` -> `100::`. Rule: Request URL `http*://archive.worldofmodcraft.com/*`, Target URL
+  `https://github.com/worldofmodcraft/archive/releases/download/${2}`, status 302, Preserve query string off.
+  Status choice: 302 (a 301 is cached as permanent, defeating the point of a repointable address).
+  Sources, all fetched 2026-10-26 with WebFetch (summaries by the fetch tool's model, not raw HTML):
+  - https://developers.cloudflare.com/rules/url-forwarding/ : Single Redirects and Bulk Redirects "require that you proxy the DNS
+    records of your domain (or subdomain) through Cloudflare"; "available on all Cloudflare plans"; Single Redirects per zone
+    Free 10 / Pro 25 / Business 50 / Enterprise 300; wildcard on all plans, regex not on Free or Pro. Page Rules appear only
+    in the execution-order note, not as a redirect product there.
+  - https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-dashboard/ : Rules Overview -> Create rule ->
+    Redirect Rule -> rule name -> "When incoming requests match": Wildcard pattern / All incoming requests / Custom filter
+    expression -> Request URL, Target URL (static, or dynamic with `${1}`, `${2}`), Status code, Preserve query string ->
+    Deploy or Save as Draft; the dashboard may prompt to create a proxied DNS record for a matched hostname.
+  - https://developers.cloudflare.com/rules/url-forwarding/examples/redirect-all-different-hostname/ : Request URL
+    `http*://smallshop.example.com/*`, Target URL `https://globalstore.example.net/${2}`, 301, Preserve query string enabled
+    ("keeping the original path and query string"). Basis for the `${2}` choice.
+  - https://developers.cloudflare.com/rules/url-forwarding/examples/redirect-root-to-www/ : `https://example.com/*` ->
+    `https://www.example.com/${1}`, 301, preserve enabled.
+  - https://developers.cloudflare.com/rules/url-forwarding/single-redirects/settings/ : statuses 301, 302, 307, 308;
+    Preserve query string "disabled by default"; the API form of a wildcard redirect is `wildcard_replace(http.request.full_uri, ...)`.
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/operators/#wildcard-matching : `*` = zero or more
+    characters; operator case-insensitive; matched against `http.request.full_uri`, which includes the query string.
+  - https://developers.cloudflare.com/ruleset-engine/rules-language/functions/#wildcard_replace : each `*` is a capture group,
+    `${1}`..`${8}`.
+  - https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/ : Dashboard -> DNS Records -> Add
+    record -> Type -> fields -> Proxy status -> Save; originless setups use proxied `100::` or `192.0.2.0`, "work with
+    Redirect Rules, Page Rules, or Workers".
+  - https://developers.cloudflare.com/dns/proxy-status/ : only A, AAAA, CNAME can be proxied; proxied TTL Auto = 300 s;
+    DNS queries answered with Cloudflare anycast addresses.
+  - https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/ : Universal SSL on Free, certificates for the root
+    and first-level subdomains, issued automatically for proxied hostnames.
+  [unverified] and marked so in M12: (1) whether `${2}` includes the `?query` and whether Preserve-off strips it (the
+  documented examples are consistent with the wildcard `*` excluding the query, but the pages never say; the full-URI
+  match in the operator page points the other way); (2) whether the capture keeps the case of the request; (3) the exact
+  Name/address field labels of the DNS form; (4) certificate issuance time for a new proxied subdomain. Two of the fetched URLs
+  (examples/redirect-all-different-domain/, examples/redirect-new-domain/) returned 404 and were not used. The manager's
+  curl block in M12 is the check for (1) and (2).
+  Also observed: `curl -sI https://github.com/worldofmodcraft/archive/releases/download/v0/test` -> `HTTP/2 404` (used for the
+  "you should see" text). No DNS or Cloudflare change, no credential.
+  Verification (PYTHONDONTWRITEBYTECODE=1, foreground): `docs/tasks/068-verify.sh` ALL PASS exit 0; `068-verify.sh --mutate`
+  all 12 mutations red, exit 0; 048, 052, 072 verify scripts (they mention only the mission log) exit 0. Nothing live was run.
