@@ -318,10 +318,23 @@ pull request yourself.
 6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
    yet: stop, tell the manager, come back later.
 7. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
+   **Open choice, Ludwig decides; until then the box stays unticked as written** (security review S5): leaving everything else
+   unticked has two costs. Without **Require a pull request before merging**, an account with write access can push to `main`
+   directly and skip `gate` altogether. Without **Do not allow bypassing the above settings**, an administrator can merge past a
+   red `gate`. Ticking them closes both, at the price of an emergency path (see the last paragraph below). Tell the manager
+   which way you decide; the manager does not decide it for you.
+8. **Confirm the rule works before you call M9 done (live check L1, `[unverified]`: task 039 U1).** Open a real pull request
+   into `main` (the manager's infrastructure test PR is enough) and look at its merge box. `gate` must be listed with the word
+   **Required** next to it. Basis: the check is produced by a `pull_request_target` run, and whether GitHub counts that run as
+   satisfying a required check on the PR head `[unverified]` has not been seen. If `gate` is missing, or is not marked
+   "Required", or the box says it is "Expected" and waiting forever: **stop and tell the manager. M9 is not done.**
 
 *You should see:* on the Branches page the rule for `main` listing "Require status checks to pass" with `gate` under it.
 Then open any open pull request: the merge box says "Required" next to `gate`. Pull requests that touch nothing under
 `mods/` stay mergeable (their `gate` is green by design, and says that human review is required).
+**Infrastructure pull requests (S6):** a pull request that touches only paths outside `mods/` (for example `.github/workflows/` or
+`tools/registry/`) takes the infrastructure route and is green without any mods check. Such a pull request changes the gate
+itself, so merging it needs a careful human read of the diff, every time; green means nothing there.
 `[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
 documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
 Do not click "Do not allow bypassing the above settings" unless you want to be unable to merge in an emergency; tell the manager
@@ -359,6 +372,9 @@ secret exists before then, so the gate is proven first without it. Budget ~15 mi
    - Name `REGISTRY_MEMBERSHIP_APP_ID`, value: the App ID from step 6.
    - Name `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY`, value: open the `.pem` in Notepad, select all, copy, paste, **Add secret**.
      This is the only place its text goes.
+   **Exposure, accepted (S4):** this key is a *repository-level* secret. Anyone with write access to `registry` can run a branch
+   workflow that reads it. What that exposes is a Members:read token on one organisation, which is accepted. M11's environment
+   binding does not cover this key.
 10. Keep the `.pem` offline next to your other key backups, or delete it (a lost key is replaced by generating a new one on
     the App's page). Tell the manager only the App's name.
 
