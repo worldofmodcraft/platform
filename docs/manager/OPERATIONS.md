@@ -369,3 +369,22 @@ foreground, on a quiet machine. 064-verify.sh alone took about 40 minutes.
 The auto-mode classifier refused the manager's self-granted permission rule for `docs/decisions/**` ("Self-Modification")
 and a merge that looked unreviewed ("Merge Without Review"). Neither was retried or worked around; both were taken to
 Ludwig, who switched the session to Manual mode and approved each edit himself, and approved the merge himself.
+
+## What session 12 paid for (2026-10-26/27)
+- **`039a-verify.sh` deadlocks when another verify script runs it.** Its quiet-wait (`others_running`, excludes only itself) sees the
+  parent sweep (`082-verify.sh --full`, `092-verify.sh --closed`) and sleeps up to six hours, then FAILs. Until task 089 fixes it, run
+  closed-script sweeps as **standalone `039a-verify.sh <nm>`** (it runs every other script one at a time); do not nest it.
+- **`pgrep -f PATTERN` / `pkill -f` match your own shell** when PATTERN is on your command line: the manager killed its own shell (exit 144)
+  this way. Waiter loops written as `while pgrep -f '-verify\.sh'` wait forever on themselves — several such loops from sessions 4-8 days old
+  still sit idle on this machine. Wait with the scripts' own check, or start queue scripts from a FILE (`bash queue.sh`) so no
+  `docs/tasks/...-verify.sh` text appears on any shell's command line.
+- **A local test merge must start from current `main`.** A merge of two task branches that both predate a main merge (here 039a) silently
+  tests the wrong tree and leaves the newest script out of the sweep. Fetch main's full SHA first (`git fetch` by abbreviated SHA fails).
+- **A verify script can carry the defect its own task fixes** (087's AC4.7 read BASE..HEAD). Every sweep on a post-merge tree is the place
+  this shows; budget a fix round after it.
+- **Two agents on one branch:** an agent from a session that had handed over was still alive and pushed after the new session's fix round.
+  Before dispatching on a branch, `git fetch` and compare the remote head with what the log says.
+- **Queue runs (one at a time, logged):** a queue file in `$CLAUDE_JOB_DIR/tmp/`, a `run()` that writes START (with the count of other verify
+  processes) / END exit=N to `summary.txt`, and a background `until grep -q ...` waiter is boring and works. Monitors expire after 30 minutes.
+- **The registry CI gate is live (039b merged 2026-10-27).** First runs: PR #24 and #20 `gate` pass in 6-8 s on the infra route, comment
+  posted. Runbook M9 can now be done (Ludwig's S5 choice: tick "Require a pull request before merging"; leave bypass unticked).

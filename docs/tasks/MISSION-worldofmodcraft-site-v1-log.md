@@ -2520,3 +2520,39 @@ thresholds suspended for tonight only (compaction caution §5.5 still applies); 
 - Verify queue (one at a time, logged): see the 092/087/085/091 entries above; 082 `--full` on main+087+082 running (6/20 green so far,
   then 039a's own sweep), then 039b-verify at 9d8dc4e, 070 `--mutate` on main+087+082, then 092 re-runs (default, selftest, mutate, live,
   fresh clone, --closed).
+
+### Ludwig, 2026-10-27 ~15:00 (verbatim): "1. Kör på stjärna. 2. Stjärna. 3. OK"
+(1) runbook M9 / security review S5: **tick "Require a pull request before merging"; leave "Do not allow bypassing" unticked** (emergency
+path kept). (2) Q-L (008b-3b): the refusal log for a `+` version's T3 is written to `archive` — **kept**. (3) merges of 087, 082, 092 approved.
+The overnight waiver (§7/§5) expired at his first message this morning; these are fresh approvals.
+- **Merged 2026-10-27:** registry #23 (039b) `e909174`, platform #81 (039b runbook) `2fc4bfb`; registry #24 (087) `eb21e96` after its fix
+  round (087's own AC4.7 read HEAD; red/green shown; standalone 039a-verify ALL PASS (70) and 070 --mutate ALL PASS on main+087+082);
+  registry #20 (082) `fd35859` (main merged in, 082/087-own/039b-no-closed exit 0, gate green). **L1 observed:** the live registry gate passes
+  infra PRs (6-8 s) and posts its comment.
+
+## SESSION STATUS — 2026-10-27 (session 12, handover) — context ~36 % (over the 30 % soft line)
+### Done (session 12)
+Merged: platform #80 (085), #82 (091), #85 (008b spec re-gate + split), #81 (039b runbook); registry #23 (039b), #24 (087), #20 (082).
+Specs approved after independent review: 008c (session/12), 008b-1/-2/-3a/-3b (platform main), 089, 090 (session/12).
+### In progress
+- **092** (registry #25, platform #84): all manager re-runs green at 4f1fcd4 (default, selftest, mutate, live, fresh clone); **AC12 via
+  standalone `039a-verify.sh` started 2026-10-27T13:56Z** (session-12 queue: `/home/ludwig/.claude/jobs/8bf3d47c/tmp/q/039a-on-092.out`,
+  `summary.txt`; if that directory is gone, re-run `bash docs/tasks/039a-verify.sh /home/ludwig/wt/registry-task-084/tools/dev/node_modules`
+  in /home/ludwig/wt/registry-task-092 on a quiet machine, ~5 h). Ludwig approved the merge.
+- Queue round 6 (087 `--mutate` after the fix, informational now that 087 is merged) runs after it.
+### Next session starts here
+1. When 039a-on-092 is green: merge registry main into task/092-artifact-naming-archive-url, re-run `092-verify.sh` and `--live-selftest`
+   there, wait for `gate`, merge registry #25, then platform #84 (`--match-head-commit` each). Log in the 092 task file.
+2. Dispatch **008c** (registry; spec on platform main after session/12 merges; implementer) — it needs 092 merged.
+3. Then 008b-1 → 008b-2 → 008b-3a (merge needs Ludwig: CI security) → 008b-3b (gate removal only after M11).
+4. 089 (registry; parts B first, then A1, A2, C) and 090 (platform) — all their dependencies are now merged except 092 for nothing (089
+   dropped 092); dispatch when the machine is quiet; each runs verify scripts.
+5. Ludwig's manual steps now due: **M9** (registry branch protection: required check `gate` + "Require a pull request before merging",
+   bypass unticked; step 8 confirms "Required" on a real PR), **M10** (membership-read App), **M11** (environments `signing`/`write-back`,
+   delete repo-level key copies). M10 after L3 (an invalid-schema PR shows red) — the manager runs L3 first.
+6. Booked follow-ups: runbook M9 step 7 text should record Ludwig's S5 choice (small doc task); 091 LOW 2 (Cloudflare doc facts unmarked);
+   039b S2 (concurrency group); 085 nested-control assertion (in 090); 092 Q2 (CI equality of `source_archive`); stale contract texts from 065 Q2;
+   R11 identity task; OPERATIONS.md still calls mbmludric a non-member; old waiter loops and /tmp dirs (Ludwig may clean up: harmless).
+### For Ludwig
+Nothing open: today's three answers closed M9/S5 and Q-L. Manual steps M9-M11 are due (item 5).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, handover) i missionsloggen och fortsätt med 'Next session starts here'."
