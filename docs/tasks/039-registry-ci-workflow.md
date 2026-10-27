@@ -343,3 +343,12 @@ permission scope) — its README at the pinned SHA.
   = the workflow YAML, AC7, AC10, CONTRIBUTING/README, the platform runbook M9/M10/M11 note, `039b-verify.sh`. Rule for the
   failing path-component test: any git failure on a crafted tree (e.g. `ls-tree` exit 128) maps to composer exit 2; the test
   asserts exit 2 and nothing written outside the temp root, not which guard fired.
+- 2026-10-26 implementer (039b, platform side): runbook `docs/runbooks/site-v1-manual-steps.md` gains **M9** (required check `gate`, with
+  "Require branches to be up to date" kept), **M10** (membership-read App `worldofmodcraft-membership`, Organization permission Members:
+  read-only, secrets `REGISTRY_MEMBERSHIP_APP_ID` and `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY`, sequenced after live checks L1 and L3),
+  **M11** (environments `signing` and `write-back` limited to `main`, repository-level copies of `MINISIGN_SECRET_KEY` and
+  `PIPELINE_APP_PRIVATE_KEY` deleted, with a re-enter-from-backup warning because Q-H step 5 left the offline backup unconfirmed) and a
+  ⏸ note on the R11 takedown-only identity. Click paths follow docs.github.com read 2026-10-26 (branch protection rule, environments,
+  registering a GitHub App); not stated there and marked `[unverified]`: the Members permission menu entry, GitHub Free availability
+  of required checks, which secret wins when a repository and an environment secret share a name, the selector listing `gate` only
+  after a first run. The registry-side log is in the registry copy of this file (branch `task/039b-registry-ci-workflow`).
