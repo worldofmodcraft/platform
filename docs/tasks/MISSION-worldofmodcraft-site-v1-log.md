@@ -2545,8 +2545,8 @@ Specs approved after independent review: 008c (session/12), 008b-1/-2/-3a/-3b (p
    there, wait for `gate`, merge registry #25, then platform #84 (`--match-head-commit` each). Log in the 092 task file.
 2. Dispatch **008c** (registry; spec on platform main after session/12 merges; implementer) — it needs 092 merged.
 3. Then 008b-1 → 008b-2 → 008b-3a (merge needs Ludwig: CI security) → 008b-3b (gate removal only after M11).
-4. 089 (registry; parts B first, then A1, A2, C) and 090 (platform) — all their dependencies are now merged except 092 for nothing (089
-   dropped 092); dispatch when the machine is quiet; each runs verify scripts.
+4. 089 (registry; parts B first, then A1, A2, C): its dependencies (087, 082, 039b) are merged — dispatch when the machine is quiet.
+   090 (platform) waits for platform #84 (092). Each runs verify scripts; one at a time.
 5. Ludwig's manual steps now due: **M9** (registry branch protection: required check `gate` + "Require a pull request before merging",
    bypass unticked; step 8 confirms "Required" on a real PR), **M10** (membership-read App), **M11** (environments `signing`/`write-back`,
    delete repo-level key copies). M10 after L3 (an invalid-schema PR shows red) — the manager runs L3 first.
