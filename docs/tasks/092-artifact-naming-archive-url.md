@@ -265,3 +265,147 @@ the 008 umbrella; the Q2 follow-up.
   and AC11(c). Awaiting independent spec review.
 - 2026-10-26 manager: spec review round 1 FAIL (2 HIGH, 4 MED, 2 LOW) folded in; Q9 = A, Q10 = A decided by Ludwig ('Kör A stjärna'); round 2 pending.
 - 2026-10-26 manager: spec review round 2 PASS with four LOW fixes folded in (reading-list justification, Q10 outcome T3 `rejected`, each normative sentence stated once, later hops any 301/302/307/308; size cap now a stated decision). Status: spec-approved (manager, 2026-10-26, after spec review rounds 1-2).
+- 2026-10-26 doc-writer (phase 1 of 2): BASE = 426873502a150ef746063c1b55c2cfbfeed31566 (registry origin/main at cut;
+  platform cut 313e804761ec9abd6cfcb0c2cc6ef295d6e92418). FINAL = 41776d74c3200f8a9eded5a3444fcd4703d998ef (content commit: contracts/artifact-naming.md,
+  14 files under contracts/examples/entry/, docs/contracts/README.md row). Platform branch task/092-depgraph carries the
+  depgraph.md N6 cell. Suites on FINAL, PYTHONDONTWRITEBYTECODE=1: tests/contracts 32 tests OK; tests/registry 362 tests OK.
+  Left for phase 2: 092-verify.sh, the PR(s), the AC11 live capture, pasting verify output here.
+- 2026-10-26 implementer (phase 2 of 2): `docs/tasks/092-verify.sh` written (script commit 001058e on top of TIP `3348f0a`; TIP stays the
+  last commit before the script, as in 039a). Modes: default = AC1-AC9 offline (git + stdlib python3, ~25 s); `--mutate` = AC10;
+  `--live` = AC11 (NOT run: M12 is not configured); `--closed [--nm DIR]` = AC12; `--site DIR` = the AC7 ADVISORY node check.
+  Pins typed in the script: BASE `426873502a150ef746063c1b55c2cfbfeed31566`, FINAL `41776d74c3200f8a9eded5a3444fcd4703d998ef`, TIP
+  `3348f0a52b95887c034c1835b604433c19237f6c`. Every expected literal (host, URL form, redirect-target form, the examples' URLs and
+  targets, each normative sentence, the 24 reserved device names, the scope pattern) is typed in the script; the contract text is only
+  searched. The script's own `derive()` (typed from the Objective's formula) is cross-checked against its typed literals (AC2.1/2.2).
+  Phase-1 rulings applied: "hop" = one redirect response, the final 2xx not counted (pinned by the sentence "A **hop** is one redirect
+  response (301, 302, 307 or 308); the response that ends the chain is not a hop." exactly once); the contract may cite runbook M12 by
+  name before 091 merges; `depgraph.md`'s "Last reviewed" stamp is untouched.
+  **Design notes for the reviewer.**
+  (1) AC12 is its own flag (`--closed`), not part of the default run: closed script 039a sweeps every `docs/tasks/*-verify.sh`, so a
+  default 092 that also swept them would recurse (039a -> 092 -> 039a). The default run is what 039a's sweep will call after merge
+  (it needs no node and no network). (2) The spec says "the three worked examples"; the contract spells out two triples, and the
+  signature's redirect target is defined by the rule "the tarball's redirect target plus `.minisig`", not by a literal. AC2 therefore
+  pins six literals in the contract (tarball URL, signature URL, tarball target of example 1, example 2's URL and target, plus the
+  target form) and AC2.9 pins the signature-target rule (typed `EX1_TS == EX1_T + ".minisig"`, rule sentence present); AC3.1 checks
+  `naming.release_asset_url` returns the typed signature target. (3) AC5 pins each normative block whole: the 7 consumer rules, 3
+  producer obligations, both fail-closed lists and the 4 `[unverified]` bullets are compared byte-for-byte (whitespace-normalised) with
+  the typed text, and each is counted exactly once over the whole file; a tail sentence appended to a rule, a deleted rule or a
+  weakened number therefore reddens. (4) AC7's parsed-JSON diff covers all 20 example files (14 changed, 6 untouched pending/rejected
+  shapes), and a raw line diff proves only `"source_archive":` lines changed (no reformatting). (5) The `--live` helpers were exercised
+  against a throwaway local fake front on 127.0.0.1 (302 + Location, with `+` and a query) to prove the parsing; the real host was NOT
+  contacted. AC11c is written to fail with "STOP: ... change the contract text" if the front ever forwards a query.
+  **Run, default, PYTHONDONTWRITEBYTECODE=1, foreground, worktree at 001058e: exit 0, 184 PASS, 0 FAIL** (AC9 own-change block 9 PASS +
+  3 controls + 4 scope controls; content checks 159 PASS: AC1 6, AC2 14, AC3 18, AC4 11, AC5 55, AC6 18, AC7 29, AC8 8). Key lines:
+  - AC9: `PASS  git diff --name-only BASE FINAL is non-empty and inside the file scope (16 files)`; `PASS  AC9 control: FINAL=BASE makes 2
+    own-change check(s) fail (red as required)`; `PASS  AC9 control: an unreachable FINAL pin is red, never skipped (5 failure(s))`.
+  - AC4: `PASS  AC4.4 24178 distinct valid triples generated (floor 2000); 24 reserved-namespace triples excluded, 0 invalid skipped`;
+    `PASS  AC4.6 injectivity: 24178 URLs from 24178 triples, collisions: []`; `PASS  AC4.7 every URL matches
+    ^https://archive\.worldofmodcraft\.com/[0-9A-Za-z._+-]+/[0-9A-Za-z._+-]+\.tar\.gz$ with no %, .., //, ? or # (bad: [])`; the
+    reserved-device-name rule is quoted from the unchanged section (AC4.3) and `naming.check_namespace` rejects all 26 spellings (AC4.2).
+  - AC7: sha256 equal at BASE and FINAL for `entry.schema.json` (`109e172e0d56a58f...`), `append-only.rules.md` (`c555d2f87ca14e98...`),
+    `signature-format.md` (`fdda671956214292...`), `archive-layout.md` (`c8a5466ba13f18cf...`), `page.schema.json`, `manifest.schema.json`
+    (the site needs no schema re-sync); `AC7.6 the 14 example files with a parsed-JSON diff are exactly the 14 files git reports changed`.
+  - AC3: `naming.release_asset_url` at BASE and at FINAL (imported from the clones) and `tests/pipeline/test_cli.py::ComputedValues::
+    test_ac12_release_asset_url_pinned_over_artifact_naming_examples` (run in both clones) agree with the typed targets; `naming.py`
+    and `test_cli.py` are byte-identical BASE/FINAL; both published and removed version documents for both example URLs validate under
+    `tests/contracts/schema_check.py` and the strict `tools/registry/schema.py`; two negative controls (http://, a space) are rejected by both.
+  **`--mutate` (foreground): exit 0, 45 PASS, 0 FAIL.** Positive control green (159 checks) before and after; every mutation red on the
+  named check and restored byte-identically (sha256 equal, `git status` clean):
+  host -> .org (AC2, 12 failing); URL join -> `<tag>-<asset>` (AC2, 1); redirect target repo -> `worldofmodcraft/registry` (AC2, 5);
+  example tag -> `mc:hello-world-1.0.0` (AC2, 4); hash-and-signature-before-use sentence deleted (AC5, 5); permissive tail "may fall back
+  to the github.com URL" (AC5, 4); tail making consumers enforce hop 1's target (AC5, 2); "5 hops" -> "bounded" (AC5, 6); an `[unverified]`
+  marker dropped (AC5, 2); one byte of `entry.schema.json`'s description (AC7.2, 2); `signature-format.md` touched (AC7.2, 2); the README
+  phrase "None of the three tasks implements checking logic" deleted (AC8.4, 7).
+  **Fresh clone** (`git clone -b task/092-artifact-naming-archive-url https://github.com/worldofmodcraft/registry.git`, at 001058e, default
+  mode): exit 0, 184 PASS, 0 FAIL.
+  **AC7 ADVISORY (`--site /home/ludwig/wt/site-task-065`, the site branch task/065-resync-entry-schema at a5c88d6, which carries `scripts/check-schemas.mjs`; site main
+  does not have the script yet)**: `compared=3 differ=0` against the FINAL clone.
+  **AC11 (live): NOT RUN.** Pending: Ludwig finishes runbook step M12; then the manager runs
+  `docs/tasks/092-verify.sh --live` (unauthenticated `curl`, no credentials) and pastes the capture here; it gates the merge (Q7).
+  **AC12 closed-script sweep: PENDING (not run).** `docs/tasks/092-verify.sh --closed --nm <node_modules with ajv>` was started and polled the
+  machine for ~15 minutes; `ps -eo args | grep -E 'docs/tasks/.*-verify\.sh'` never showed it quiet (other sessions' 007a, 062, 064, 065, 067,
+  069, 070 verify runs were in flight, e.g. `062-verify.sh /tmp/tmp.W34JSvI2pC/L/tools/dev/node_modules`). The run was stopped before sweeping
+  anything, so no closed script was measured concurrently with another. To complete: when `ps` shows no other `*-verify.sh`, run
+  `PYTHONDONTWRITEBYTECODE=1 docs/tasks/092-verify.sh --closed --nm /home/ludwig/wt/registry-task-084/tools/dev/node_modules` (foreground; it
+  polls up to 60 minutes itself) and paste the result here. After merge, 039a's sweep calls 092 in default mode (no node, no network, no flag).
+- 2026-10-26 manager (session 12): **AC11 live capture** — run on a quiet machine (queue log: 0 other verify processes at start),
+  `docs/tasks/092-verify.sh --live` at 2e1cd15, 2026-10-26T19:56:52Z, unauthenticated curl 8.18.0: AC1-AC8 159 PASS 0 FAIL;
+  AC11a (tarball URL -> 302, Location byte-equal to the derived target), AC11b (`+` kept; `-RC.1` case kept), AC11c (`?x=1` -> Location
+  without query), AC11d (`server: cloudflare`), AC11e (plain curl, certificate valid) PASS; **AC11f FAIL**: `http://archive.../mc.hello-world-1.0.0/
+  mc.hello-world-1.0.0.tar.gz` -> `302 https://github.com/worldofmodcraft/archive/releases/download/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz`;
+  the script requires the Location on `https://archive.worldofmodcraft.com/`. SUMMARY failed=1. This FAIL line is the red-before-fix evidence.
+  **Manager ruling (§8b 3a, follows from the spec):** script defect. The task's AC11(f) requires only "an `http://` request -> 302 to an https
+  `Location`", and runbook M12's third check (task/091, 46f3a20) expects exactly the observed GitHub target. The front is correct.
+- 2026-10-26 independent review (reviewer, read-only, no suite run): **PASS-WITH-AMENDMENTS.** Scope clean; Q1-Q10 implemented; examples change
+  only `source_archive`. Agrees with the AC11f ruling. Required for the fix round:
+  F1 (MED, §3.6c) `contracts/artifact-naming.md:112-115` states Cloudflare's case-insensitive wildcard matching as fact with no source or inline
+  caveat: cite runbook M12 / Cloudflare docs at the claim or mark it [unverified] there; re-pin AC5's text.
+  F2 (LOW) the [unverified] markers for case preservation, the literal `+` in the path and certificate issuance (:191-195) are now observed
+  (capture above): update them to "observed 2026-10-26, unauthenticated curl, task 092 log", and fix the "the manager's live checks record whether
+  it does" sentence (:114-115); re-pin AC5.
+  F3 AC11f: require 3xx in {301,302,307,308} with `redirect_url` AND the raw Location byte-equal to `EX1_T`; no host-prefix match; new failure text.
+  Add an offline `--live-selftest` (local fake front on 127.0.0.1) with a passing case (http -> the https GitHub target) and a failing case (wrong
+  target), shown red against the current check before the fix. AC11c: also compare the raw Location header. AC9: add a name-only check that
+  TIP..HEAD touches only `docs/tasks/092-*` files.
+  Merge-order condition: platform #82 (091, runbook M12) merges before 092 (the contract cites M12). Before merge: `--mutate`, a fresh-clone default
+  run at the new head, `--live`, and the AC12 `--closed` sweep, all pasted here.
+  Fix round dispatched after the session-12 quiet-machine queue ends (its runs would overlap the queue).
+- 2026-10-26 implementer (fix round for the review F1-F3, base head a687da7):
+  **F1** `contracts/artifact-naming.md` (path-safety paragraph): the case-insensitivity claim now cites platform runbook step M12
+  (`docs/runbooks/site-v1-manual-steps.md`, task 091, commit 46f3a20, which cites Cloudflare's documentation as read 2026-10-26) and says this
+  document has not re-read that documentation; the rule itself is unchanged. **F2** same paragraph: "the manager's live checks record whether it
+  does" -> "observed 2026-10-26 by unauthenticated curl, recorded in the task 092 log: the live front does preserve it". The "Unverified"
+  list now holds only the two GitHub `+` items (still `[unverified]`, decision Q10, not observed); a new **Observed 2026-10-26** list records
+  case preserved, literal `+` kept in the path, valid certificate (issuance time not recorded, not a dependency). The old bullet
+  "How long certificate issuance ... takes" is therefore gone, and AC5.8/AC5.9 now pin two markers plus three observed facts.
+  **F3** `docs/tasks/092-verify.sh`: AC11f requires 301/302/307/308 with redirect_url AND raw Location byte-equal to EX1_T (no host-prefix match;
+  new failure text); AC11c also compares the raw Location (shared `ac11_exact_ok`); AC9 gains `post_tip_check` (commits after TIP, first-parent,
+  name-only, touch only `docs/tasks/092-*`) with two red controls (BASE..FINAL as range; unreachable pin); new offline `--live-selftest`
+  (python3 stdlib fake front on 127.0.0.1, 17 cases; the real host is never contacted); two new `--mutate` cases for the F1/F2 text.
+  **Red before the fix** (commit 7ca6ca2: selftest fixture, old AC11f/AC11c functions; `--live-selftest`, SUMMARY failed=5):
+  `FAIL selftest AC11f http -> https GitHub target (302|301|308): verdict FAIL, required PASS` (3 lines),
+  `FAIL selftest AC11f http -> https://archive.worldofmodcraft.com: verdict PASS, required FAIL`,
+  `FAIL selftest AC11c raw Location has a dot segment (redirect_url is normalised and looks right): verdict PASS, required FAIL`
+  (curl normalises `../` in redirect_url, so only the raw header differs). **Green after the fix**: same command, every selftest line PASS,
+  `SUMMARY failed=0`. Pins: BASE unchanged; FINAL = TIP = ab31a88e6e828db689b64e73d4310320938570de (the F1/F2 contract commit); the AC9
+  "no closed verify script touched" regex now exempts `092-verify.sh` itself (BASE..FINAL contains it). Post-TIP check design note: it walks
+  the first-parent chain, so a merge of registry main into the branch adds no files; if TIP is not on HEAD's first-parent chain (after the
+  branch is merged into main) it prints an explicit "skipped on purpose" PASS line instead of reddening 039a's post-merge sweep (see Questions).
+  **Results** (all `PYTHONDONTWRITEBYTECODE=1`, head 129aadf): default and `--live-selftest`: exit 0, SUMMARY failed=0 (204 PASS with selftest);
+  `--mutate`: exit 0, SUMMARY failed=0, 52 PASS, the two new mutations red on AC5 and restored byte-identically (sha256 e8f3149cadbe1d08);
+  `--live` (2026-10-26T21:00:27Z, unauthenticated curl 8.18.0): AC11a, AC11b (x2), AC11c (redirect_url and raw Location both the clean target),
+  AC11d `server: cloudflare`, AC11e, AC11f (`302`, redirect_url and raw Location = the https GitHub target) all PASS, SUMMARY failed=0.
+  Fresh-clone default run: see the next line. `--closed` (AC12) not run, as instructed; the manager runs it.
+  **Questions (booked, conservative option assumed):** Q11. The AC9 post-TIP check skips (with an explicit PASS line) when TIP is not on
+  HEAD's first-parent chain, which is the post-merge state. Option A (assumed, ★): skip with a message. Option B: always red after merge
+  (039a's sweep would fail). Option C: pin a second TIP after merge in a follow-up task.
+  **Fresh clone** (`git clone -b task/092-artifact-naming-archive-url`, at 1d9570b, default mode): exit 0, 187 PASS, `SUMMARY failed=0`, `PASS  post-TIP: commits after TIP touch only docs/tasks/092-* files (2 file name(s))`.
+- 2026-10-26 implementer (delta-review amendments A1/A2, Q11 ruled by the manager): **A1** `post_tip_check` now skips only when TIP is an ancestor
+  of HEAD but off its first-parent chain (the merged case); that case prints `NA    post-TIP NOT-APPLICABLE (merged): ...`, not a PASS. If TIP
+  is not an ancestor of HEAD at all the check is RED. **A2** a comment at the check records that `git log --first-parent --name-only` lists no files
+  for merge commits (conflict-resolution edits in a main-into-branch merge after TIP are not seen; mitigation: BASE..TIP pinned, main reviewed
+  separately). Two new AC9 controls (the second uses a temp clone with a synthetic `--no-ff` merge of TIP into BASE). **Red before the fix**
+  (fixture commit, old skip logic, default run, SUMMARY failed=2): `FAIL  AC9 control: a non-ancestor TIP did not fail the post-TIP check` and
+  `FAIL  AC9 control: the merged case did not print NOT-APPLICABLE (merged) alone (rc 0: PASS  post-TIP check skipped on purpose: ...)`.
+  **Green after**: default, `--live-selftest` and `--mutate` each exit 0, `SUMMARY failed=0`, with `PASS  AC9 control: a TIP that is not an ancestor of
+  HEAD (rewritten away) makes the post-TIP check red` and `PASS  AC9 control: the merged case prints NOT-APPLICABLE (merged), not a PASS`. Pins
+  unchanged (contract untouched; FINAL = TIP = ab31a88). Q11 closed.
+- 2026-10-27 manager (session 12): manager's re-runs at 4f1fcd4 on a quiet machine (queue log: 0 other verify processes at each start):
+  default, `--live-selftest`, `--mutate`, `--live` (real front, unauthenticated curl) and a fresh GitHub clone (default) — each `SUMMARY failed=0`.
+  Delta review of the fix round PASS-WITH-AMENDMENTS; A1/A2 done (4f1fcd4). AC12: `--closed` cannot be used as written — it calls
+  039a-verify.sh, whose quiet-wait sees its parent sweep and deadlocks (booked to task 089). Manager's ★ equivalent: standalone
+  `039a-verify.sh <nm>` on this head (it runs every other verify script one at a time, 092's default included); started 2026-10-27T13:56Z,
+  output in the session-12 queue (`$CLAUDE_JOB_DIR/tmp/q/039a-on-092.out`). Remaining before merge: that run green; merge registry main
+  (039b, 087, 082 merged since) into this branch and re-run default + `--live-selftest`; gate green; then merge #25, then platform #84.
+  Ludwig approved the merge 2026-10-27 ("3. OK").
+- 2026-10-27 manager (session 12): **AC12 done** — standalone `039a-verify.sh <nm>` at 4f1fcd4 (quiet machine, 13:56-19:05Z): ALL CHECKS PASSED
+  (69), every other verify script exit 0 one at a time. **Post-merge state proven** on a local merge registry main (fd35859) <- this branch
+  (main first parent, the shape GitHub's merge produces): `092-verify.sh` and `--live-selftest` SUMMARY failed=0 with
+  `post-TIP NOT-APPLICABLE (merged)`; `039b-verify.sh --no-closed`, `032-verify.sh`, `067-verify.sh <nm>`, `082-verify.sh`,
+  `087-verify.sh --own-only` all exit 0 (092 edits docs/contracts/README.md, which those pin).
+  **Defect found (booked, not fixed here):** merging main INTO this branch (what GitHub's "Update branch" does, required once M9's
+  "up to date" rule is on) makes the post-TIP check red: `git log --first-parent --name-only` diffs a merge commit against its first parent
+  (git >= 2.31 makes --first-parent imply --diff-merges=first-parent), so A2's comment ("lists no files for merge commits") is wrong and
+  main's files appear "after TIP". Observed at a local merge ec84588 (not pushed). Fix in a follow-up (exclude merge commits whose second
+  parent is on main, or diff only non-merge commits) — applies to every verify script using this pattern; booked with task 089.
+  Merged with Ludwig's approval (2026-10-27, "3. OK") as a merge INTO main, not by updating the branch.
