@@ -2556,3 +2556,21 @@ Specs approved after independent review: 008c (session/12), 008b-1/-2/-3a/-3b (p
 ### For Ludwig
 Nothing open: today's three answers closed M9/S5 and Q-L. Manual steps M9-M11 are due (item 5).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## SESSION STATUS — 2026-10-27 (session 12, final) — supersedes the handover entry above
+- **092 merged:** AC12 via standalone 039a-verify ALL PASS (69) at 4f1fcd4; post-merge state proven on a local main<-092 merge (092 default +
+  selftest failed=0 with post-TIP NOT-APPLICABLE; 032, 067, 082, 087 own, 039b no-closed exit 0); registry #25 -> `e2f7fe3` (gate + comment
+  green); platform #84 -> `11ce466` (main merged in, task-file copy synced to the registry's final version; 056/068/085 green).
+- **Defect found and booked (with task 089):** the post-TIP pattern `git log --first-parent --name-only TIP..HEAD` reddens when main is
+  merged INTO a task branch (git >= 2.31: --first-parent implies --diff-merges=first-parent, so a merge commit lists main's files). Once M9's
+  "Require branches to be up to date" is on, GitHub's "Update branch" will do exactly that. Until fixed: merge task PRs into main without
+  updating the branch first, or expect that check red on an updated branch. A local merge commit `ec84588` (not pushed) is left on the local
+  ref task/092-artifact-naming-archive-url in the registry clone (worktree removed; the hook refuses reset --hard; harmless).
+### Next session starts here (replaces the handover list's items 1 and 4)
+1. Dispatch **008c** (registry; spec docs/tasks/008c-pipeline-write-back.md on platform main; implementer). 092 is merged.
+2. Then 008b-1 -> 008b-2 -> 008b-3a (merge needs Ludwig: CI security) -> 008b-3b (gate removal only after M11).
+3. **089** (registry; B first, then A1, A2, C) — add the post-TIP merge-into-branch defect above to its scope at dispatch. **090** (platform) —
+   now unblocked (#84 merged).
+4. Items 5-6 of the handover entry stand (Ludwig's M9/M10/M11; booked follow-ups). Before M9: the manager runs live check L3 (an
+   invalid-schema registry PR shows `gate` red, then close it).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, final) i missionsloggen och fortsätt med 'Next session starts here'."
