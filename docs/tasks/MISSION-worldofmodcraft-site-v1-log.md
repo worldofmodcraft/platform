@@ -2361,3 +2361,198 @@ platform **#77** (010a) `6971f38`; registry **#22** (084) `77a4653`; registry **
 main in a fresh clone (clean; 075-verify ALL CHECKS PASSED on the result); site **#4** (065 re-sync) `35f331a` after its
 `check-schemas` re-run passed against the new registry main. **#21 (039a) and #20 (082)** are covered by the same OK but merge
 only after their final full runs pass on main (039a: LOW fix + AC12 fresh clone; 082: AC13 `--full`); the manager reports each.
+- **M6 (Ludwig, 2026-10-26: "Ja det är klart"):** `mbmludric` invited and joined; Base permissions = **Read** (his screenshot).
+  Not externally verified (public-members API 403, rate limit). Ticking M6 needs 068-verify's marker checks re-pinned first
+  (they assert "M6 stays ☐" at HEAD — the item-12 class) → task 085.
+- **058 live probe:** the push of the probe tree to `pages-probe` was refused by the classifier ("Auto-Mode Bypass"); not
+  retried. Baseline observed: only a trailing-slash 301; `worldofmodcraft.com/pages-probe/` 404. Ludwig to push with
+  `! git -C /home/ludwig/.claude/jobs/95f471eb/tmp/pages-probe push origin probe-tree:main` (or from his terminal). PR #79 open.
+
+### Task 086 — web-client ADR survey (Ludwig's idea, 2026-10-26; read-only; nothing decided)
+Idea: a WebAssembly build of the client that streams content and caches assets locally; an online "Find Group" that starts
+instances with a custom game's mods (WC3 custom games style); desktop/offline stays. Legal aspect set aside by Ludwig.
+Surveyor read 122/122 ADRs; none anticipates a web client. **Top risks:** (1) transport and trust — browsers cannot speak TCP,
+so a platform-run WS gateway is needed (conflicts ADR-0046:12); hosting strangers' games with native server plugins (ADR-0012)
+is remote code execution, needing ADR-0002/0010 revisited for hosted play (likely Lua/records-only); (2) rendering and data —
+Vulkan (ADR-0007) must be ported to WebGPU/GLES3; base data assumed in a local extracted directory (ADR-0016/0005) must become
+streamable, cacheable pieces within browser quota/eviction; (3) native plugin ABI (no dlopen in wasm) and per-lobby world
+cold-start (ADR-0076/0103/0101). **Supports:** ADR-0019 (client as a backend), 0004/0084 (browser-native formats), 0013/0085
+(content-addressed caches), 0078 (server directory, phase 3), Lua → wasm. **Cheap now, expensive later:** one virtual-FS
+interface for client file access; immutable versioned artefact URLs with CORS and Range; a static JSON registry index beside
+the git repo; transport-agnostic handshake/control contracts plus a token-auth option; no blocking I/O on the main thread and
+periodic crash-evidence flush; worlds starting from a precompiled snapshot. Offered to Ludwig: A an ADR draft "web client as a
+future target" locking only the cheap choices; B store the report only. Awaiting his choice.
+- **085 (platform PR #80):** 068-verify pinned to PR #58's range (BASE `3f25f03`, FINAL `6d4b61e`), M6 ticked; review running.
+- **Final runs (2026-10-26):** 039a delta review PASS (verdict written last); 039a-verify on a merge with main: code green (362
+  tests, all 17 closed scripts) but exit 2 — its own BASE..HEAD scope check (item-12 class) → fix sent to 039a's author (pin TIP).
+  082 `--full` on a merge with main: 032 (N5, N5b), 062, 064 red — 082 legitimately edits `docs/contracts/README.md` sentences
+  that closed scripts 032/067 pin at HEAD → **task 087** (re-pin) before #20 merges. Orphaned verify processes from the stopped
+  run: the agent's `pkill` was refused by the classifier; the manager did not kill them on its behalf (that would launder the
+  denial) — reported to Ludwig with the pids; they finish on their own.
+- **Merge order now:** 087 → 082 #20; 039a #21 after its TIP fix and a final run; 085 #80 after a quiet-machine run.
+- **039a merged: registry #21 → `4268735`** under Ludwig's 2026-10-26 OK ("Ok to merge point 1", conditional on final runs).
+  Evidence: full 039a-verify on a merge with main — 362 tests and all 17 closed scripts green, only AC11 red (BASE..HEAD scope);
+  fix `d4d726d` pins TIP `999b2b7` (manager read the diff: own-change checks moved from HEAD to TIP, plus FINAL..TIP byte check,
+  nothing weakened); AC11 block green on a merge with main, red when widened back to HEAD. **Next: 039b** (workflow YAML, AC7,
+  CONTRIBUTING/README, runbook M9/M10/M11 note) — spec is 039's; dispatch when the manager next has a quiet slot.
+- **Ludwig, 2026-10-26 (verbatim): "We're going to stick with a easy to host local server/client setup, but I still like the
+  idea of having a kind of "server browser" in game that runs different mods instanced in a minigame setup. These will run on
+  the server though, as the servers will be locally hosted anyhow so any players will run it locally"** → 086 outcome: **no
+  web client.** Direction recorded (not an ADR yet; a later mission): an in-game browser on a locally hosted server that starts
+  minigames with their own mod sets. Manager's note to Ludwig: today's ADRs bind mods to a world (0076 one world = one process,
+  0024 instances are rooms inside a world, 0103 mod changes at restart), so the fit is ★A several world processes on the same
+  local server, listed by the in-game browser (close to ADR-0078's directory), vs B per-instance mods inside one world
+  (contradicts 0076/0103/0011). Open for that ADR: fast world start (precompiled snapshot), characters moving between worlds
+  (ADR-0088 binds characters to their world). Nothing done.
+- **Ludwig, 2026-10-26 (verbatim): "Kör A när det blir aktuellt"** → minigame instancing: option **A** (several world processes
+  on the same locally hosted server, listed by an in-game browser) is Ludwig's choice for the later ADR. Booked for the mission
+  after SITE-V1: ADR draft on that basis (fast world start, characters moving between worlds vs ADR-0088).
+- **Ludwig, 2026-10-26 (verbatim): "A star on the above one"** → one sweep of all closed verify scripts (both repos) instead of
+  one-at-a-time fixes: task 088 (read-only inventory, now), then 089 (registry) / 090 (platform) fix tasks after 087, 039b and
+  085 merge. 087's scope extended by the manager to 070-verify AC4.m1 (same class; keeps the PR coherent).
+- **088 inventory done** (34 closed scripts; 14 unfixed own-change checks: 13 registry, 1 platform; side findings incl. a
+  silent skip in 069 AC5.3 and env-overridable pins in platform 072/080). Recorded in `docs/research/closed-verify-sweep-088.md`.
+  089 (registry) and 090 (platform) to be specced from it after 087, 039b and 085 merge.
+- **058 probe done** (PR #79): Pages emits no redirect to a chosen target (only trailing-slash 301s); meta-refresh/JS work only in
+  browsers — `curl -L`, wget, urllib, Node fetch never reach the target; `_redirects` ignored; the custom domain does not front
+  project repos. Options C (Cloudflare redirect on a project-owned host, ★) and E (store the github.com Release URL) put to
+  Ludwig, plus his browser check (criterion 6) and deleting `pages-probe`.
+- **Ludwig, 2026-10-26: criterion 6 (verbatim) "For /a/ and /nonexistent/ a page shows WOM058, for /b.tar.gz its a blank page";
+  then "C star, repo deleted"** → archive URL shape: **option C** — a project-owned hostname with a real HTTP redirect at
+  Cloudflare (e.g. `archive.worldofmodcraft.com/...` → the archive repo's Release asset URLs). `pages-probe` deleted (checked:
+  "Repository not found"). Follow-ups: **091** runbook step M12 (Cloudflare redirect rule; clicks verified against Cloudflare's
+  docs; an agent verifies with curl after Ludwig configures it) and **092** `contracts/artifact-naming.md` amendment (the URL
+  shape; contract → Ludwig approves the merge) — 092 unblocks 008c, then 008b.
+- **Ludwig, 2026-10-26: "1. OK att merga. 2. Stjärna på allt"** → platform **#79 (058) merged `313e804`**; task 092's Q1-Q8 all ★
+  (no schema change; CI equality booked; examples updated; no fallback; pre-T1 fetch-and-hash; depgraph N6 text; live capture
+  gates the merge; overview in 056's second pass). 092 spec written; independent spec review next.
+- **092 spec review round 1: FAIL** (wording: the fail-closed rules rejected the correct chain — GitHub's second redirect carries
+  a signed query; hop bound unnumbered; AC11 live inside the closed default run; budget). **Ludwig, 2026-10-26: "Kör A stjärna"**
+  on the two questions: **Q9 = A** — the pipeline (pre-T1) and the manager (live checks) verify hop 1 exactly; consumers require
+  https on every hop plus hash and signature, so the front can be repointed without a consumer release. **Q10 = A** — 008b does
+  not publish versions with build metadata (`+`) until a live Release proves GitHub resolves `+` in `releases/download` (task 010).
+- **Ludwig, 2026-10-26: "Nu fungerar cloudflare redirecten till github"** (M12 done). Manager's unauthenticated live checks
+  (`curl -s -o /dev/null -w '%{http_code} %{redirect_url}'`), all as specified:
+  `/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz` → 302 `https://github.com/worldofmodcraft/archive/releases/download/mc.hello-world-1.0.0/mc.hello-world-1.0.0.tar.gz`;
+  `/a.b-1.0.0-rc.1+build.5/…` → 302, `+` kept byte-for-byte; `/a.b-1.0.0-RC.1/…` and `/v0/Test` → case kept;
+  `/v0/test?x=1` → Location without query; `http://archive.worldofmodcraft.com/v0/test` → 302 to the https Location;
+  root `/` → `HTTP/2 302`, `location: …/releases/download/`, `server: cloudflare`; certificate valid (plain curl, no -k).
+  → 091's [unverified] case-preservation and query-drop items are now observed facts; 092 AC11 to be re-run with `--live` once
+  092-verify.sh exists. Still unproven: GitHub resolving a `+` tag (Q10 holds `+` versions back until task 010).
+
+## SESSION STATUS — 2026-10-26 (session 11, handover) — context far past 40 %; tonight's waiver has expired (§5 back in force)
+### Merged this session (night + day; all reviewed; Ludwig's OK where §7 requires)
+platform #77 (010a), #79 (058 probe), session logs #73-#78; registry #22 (084), #19 (065), #21 (039a); site #4 (065 re-sync).
+Ludwig's runbook steps done: M6 (mbmludric member; Base permissions Read), M8 earlier, **M12** (Cloudflare redirect; manager's
+live checks pass, see above). pages-probe created, used and deleted.
+### Open PRs (state at handover)
+- **registry #20 (082, E15 contract)** — reviewed PASS; blocked on **087** (its README edit reddens closed 032/067); then AC13 run.
+- **registry #24 (087)** — re-pins 032/067 README checks + 070 AC4.m1; full closed-script run and `070 --mutate` PENDING (quiet
+  machine). Merge before #20.
+- **registry #23 / platform #81 (039b)** — workflow YAML, AC7, CONTRIBUTING, runbook M9/M10/M11 + R11 note. Agent was still
+  running at handover; on report: independent security review, then Ludwig's OK. After merge: Ludwig does M9 (required check
+  `gate`, only after a first live run), M10 (membership-read App), M11 (environments `signing`/`write-back`, delete repo-level
+  copies of both keys).
+- **platform #80 (085)** — 068 re-pin + M6 tick; fix `b0479b5` (085-verify reads FINAL); full run PENDING (quiet machine); then
+  delta review and Ludwig's OK.
+- **platform #82 (091, runbook M12)** — reviewed after fix; M12 ticked (`46f3a20`); 068-verify PENDING (quiet machine); Ludwig's OK.
+- **092 (artifact-naming URL contract)** — spec-approved (2 rounds; Q1-Q10 ★ by Ludwig); phase 1 done (registry
+  `task/092-artifact-naming-archive-url`, FINAL `41776d7`; platform `task/092-depgraph` `1da5751`); **phase 2 (092-verify.sh +
+  PRs) agent was still running at handover.** Then: run `092-verify.sh --live` (AC11; M12 is live), independent review, Ludwig.
+### Next session starts here
+1. **Quiet-machine queue** (one agent, strictly one script at a time, nothing else running): 085 (068 + 085-verify), 087
+   (all closed scripts + `070 --mutate`), 091 (068-verify), then 082 `--full` (AC13) on a merge with 087. Several runs failed or
+   were cut short tonight because chains overlapped (039a/039b verify chains run 4-5 h).
+2. Pick up the reports of the 039b and 092-phase-2 agents from their branches/logs (they wrote to disk); review; Ludwig's OK.
+3. Merge order: 087 → 082; 085, 091 (platform); 039b (both repos); 092 (both repos) after `--live`.
+4. Then **008c** (unblocked by 092), then **008b** (re-gate of its 2026-10-25 amendment first), then 040, 055, 010b.
+5. **089/090**: fix the 14 own-change findings in `docs/research/closed-verify-sweep-088.md` after the open PRs merge.
+6. Booked follow-ups: Q2 of 092 (CI equality for `source_archive`); stale contract texts from 065 Q2 (+ uppercase non-hex BAD value);
+   R11 takedown-only identity task (ownership.md amendment + config); 070-verify header "ten closed scripts"; OPERATIONS.md still
+   calls mbmludric a non-member; temp dirs left in /tmp by the rm guard; 008b re-gate.
+7. Ludwig's direction recorded: no web client; minigame instancing = option A (several world processes on a local server) as a
+   later ADR (after SITE-V1).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-26 (session 11, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 12 — 2026-10-26 evening/night (manager: session "WLS-World of Modcraft Continue 2026-10-26")
+- Start: session 11 (`WLS-WoroldofModCraft`) was still busy; asked it by cross-session message; it confirmed it is winding down, Ludwig ran
+  /exit there, it launches nothing more. Session 12 is the only manager from here.
+- Machine was not quiet: an orphaned closed-script chain (process group 1782079, `065-verify.sh` on a temp clone of registry main 4268735,
+  started ~19:28 by a session-11 agent, output /tmp/065-base.out, green so far, nobody consuming it). The manager did not kill it (a peer's
+  kill had been refused earlier; doing it on its behalf would launder the denial) and asked Ludwig: ★A stop it / B wait. **Ludwig chose A and
+  ran `kill -- -1782079` himself.** Old idle waiter loops from sessions 4-8 days old match `pgrep -f '-verify\.sh'` forever (they match
+  themselves); harmless (sleep loops), not touched; the scripts' own `ps -eo args | grep 'docs/tasks/[^ ]*-verify\.sh'` check does not see
+  them. Booked for Ludwig's cleanup list.
+- Quiet-machine queue (manager-run, one script at a time, start/end/exit logged): 092 `--live` exit 1 (only AC11f, script defect, see 092 log);
+  087 default ALL PASS (27); 087 `--mutate` ALL PASS (8: 2 controls, 6 mutations red); 085-verify ALL PASS; 068-verify on 085 16/16; 068-verify
+  on 091 15/15. 082 `--full` first ran on a merge 082+087 that lacked registry main (039a) — the manager's own setup error, caught at 8/18
+  (all green) and stopped; re-started on a local merge main 4268735 + 087 + 082 (`ed4588e`, clean merge, 20 scripts incl. 039a).
+- 092: independent review PASS-WITH-AMENDMENTS (details in the 092 log, `a687da7`); fix round to follow.
+
+### Ludwig, 2026-10-26 ~22:00 (verbatim), before sleeping:
+"1. Ta stjärna på alla beslut (men dokumentera dem). 2. Merga allt, jag ger godkännade till alla merge. 3. Ignorera context-varningar under
+natten, vill att du ska kommit så långt som möjligt imorgon bitti. 4. För beslut som kräver min input (dvs. du KAN inte göra dem själv, så
+skjut så många som möjligt tills imorrn)"
+Manager's reading: (1) every open question with a ★ option takes the ★, each recorded with reason here or in its task log; (2) written §7
+approval for every merge tonight, including contract amendments (092) and CI security (039b); the manager still merges only what is reviewed
+and demonstrated green (§7 conditions and §3.7 are not waived by an approval); a takedown is not covered (none pending); (3) §5 planned-handover
+thresholds suspended for tonight only (compaction caution §5.5 still applies); (4) questions only Ludwig can answer are booked under
+"For Ludwig" for the morning, not asked tonight. Overnight waiver, expires at Ludwig's next message; not a precedent.
+
+### Session 12 progress (night of 2026-10-26, under Ludwig's overnight approval)
+- **Merged:** platform #80 (085) `41a9818` (delta review PASS; main merged in, task-file-only conflict, 085/068 green after);
+  platform #82 (091) `d5929db` (independent review PASS-WITH-AMENDMENTS, LOW 1 done, LOW 2 booked; 068/085 green on the merged head);
+  platform #85 (008b spec re-gate + split) `06f3ced`.
+- **Reviews:** 087 PASS-WITH-AMENDMENTS (file scope fixed `49988fd`; merge waits on the 082 --full sweep and 070 --mutate on main+087+082);
+  039b security review PASS-WITH-AMENDMENTS (no HIGH) -> fix round (registry `b735046`, platform `8b27351`), delta review PASS-WITH-AMENDMENTS
+  (one neutral-wording fix, done; platform branch merged with main, runbook conflict = two appends, both kept, `c151f4d`); 092 review
+  PASS-WITH-AMENDMENTS -> fix round `f245f91` (AC11f/AC11c exact Location, --live-selftest red-first failed=5, AC9 post-TIP) -> delta review
+  PASS-WITH-AMENDMENTS -> A1/A2 `4f1fcd4` (post-TIP: non-ancestor red, merged NOT-APPLICABLE).
+- **Incident (harmless):** session 11's original 039b agent was still alive after the handover and pushed two log-only commits (`a76f85a`,
+  `9d8dc4e`) after session 12's fix round on the same branch; sequential, no conflict. Its earlier 039b-verify run (exit 1, only 065 red under
+  concurrent runs) is superseded by the quiet-machine run queued here.
+- **Manager setup error, caught:** the first 082 `--full` merge lacked registry main (039a); stopped at 8/18 green; re-run on main+087+082.
+- **Specs approved tonight** (each after independent spec review rounds; manager ★ choices labelled in each file):
+  008c (session/12 `27e8605`; one entry point `apply_write_back(entry, result, source_archive)`, `WriteBackRefused(PipelineError)`);
+  008b re-gated and split into 008b-1 (planner), 008b-2 (build/sign, push trigger gated off), 008b-3a (ownership carve-out; CI security ->
+  Ludwig's merge approval), 008b-3b (write-back job; gate removal only after M11) — platform #85;
+  089 (registry sweep; split A1/A2/B/C, B first) and 090 (platform sweep) — session/12 `81eeabb`.
+- Verify queue (one at a time, logged): see the 092/087/085/091 entries above; 082 `--full` on main+087+082 running (6/20 green so far,
+  then 039a's own sweep), then 039b-verify at 9d8dc4e, 070 `--mutate` on main+087+082, then 092 re-runs (default, selftest, mutate, live,
+  fresh clone, --closed).
+
+### Ludwig, 2026-10-27 ~15:00 (verbatim): "1. Kör på stjärna. 2. Stjärna. 3. OK"
+(1) runbook M9 / security review S5: **tick "Require a pull request before merging"; leave "Do not allow bypassing" unticked** (emergency
+path kept). (2) Q-L (008b-3b): the refusal log for a `+` version's T3 is written to `archive` — **kept**. (3) merges of 087, 082, 092 approved.
+The overnight waiver (§7/§5) expired at his first message this morning; these are fresh approvals.
+- **Merged 2026-10-27:** registry #23 (039b) `e909174`, platform #81 (039b runbook) `2fc4bfb`; registry #24 (087) `eb21e96` after its fix
+  round (087's own AC4.7 read HEAD; red/green shown; standalone 039a-verify ALL PASS (70) and 070 --mutate ALL PASS on main+087+082);
+  registry #20 (082) `fd35859` (main merged in, 082/087-own/039b-no-closed exit 0, gate green). **L1 observed:** the live registry gate passes
+  infra PRs (6-8 s) and posts its comment.
+
+## SESSION STATUS — 2026-10-27 (session 12, handover) — context ~36 % (over the 30 % soft line)
+### Done (session 12)
+Merged: platform #80 (085), #82 (091), #85 (008b spec re-gate + split), #81 (039b runbook); registry #23 (039b), #24 (087), #20 (082).
+Specs approved after independent review: 008c (session/12), 008b-1/-2/-3a/-3b (platform main), 089, 090 (session/12).
+### In progress
+- **092** (registry #25, platform #84): all manager re-runs green at 4f1fcd4 (default, selftest, mutate, live, fresh clone); **AC12 via
+  standalone `039a-verify.sh` started 2026-10-27T13:56Z** (session-12 queue: `/home/ludwig/.claude/jobs/8bf3d47c/tmp/q/039a-on-092.out`,
+  `summary.txt`; if that directory is gone, re-run `bash docs/tasks/039a-verify.sh /home/ludwig/wt/registry-task-084/tools/dev/node_modules`
+  in /home/ludwig/wt/registry-task-092 on a quiet machine, ~5 h). Ludwig approved the merge.
+- Queue round 6 (087 `--mutate` after the fix, informational now that 087 is merged) runs after it.
+### Next session starts here
+1. When 039a-on-092 is green: merge registry main into task/092-artifact-naming-archive-url, re-run `092-verify.sh` and `--live-selftest`
+   there, wait for `gate`, merge registry #25, then platform #84 (`--match-head-commit` each). Log in the 092 task file.
+2. Dispatch **008c** (registry; spec on platform main after session/12 merges; implementer) — it needs 092 merged.
+3. Then 008b-1 → 008b-2 → 008b-3a (merge needs Ludwig: CI security) → 008b-3b (gate removal only after M11).
+4. 089 (registry; parts B first, then A1, A2, C): its dependencies (087, 082, 039b) are merged — dispatch when the machine is quiet.
+   090 (platform) waits for platform #84 (092). Each runs verify scripts; one at a time.
+5. Ludwig's manual steps now due: **M9** (registry branch protection: required check `gate` + "Require a pull request before merging",
+   bypass unticked; step 8 confirms "Required" on a real PR), **M10** (membership-read App), **M11** (environments `signing`/`write-back`,
+   delete repo-level key copies). M10 after L3 (an invalid-schema PR shows red) — the manager runs L3 first.
+6. Booked follow-ups: runbook M9 step 7 text should record Ludwig's S5 choice (small doc task); 091 LOW 2 (Cloudflare doc facts unmarked);
+   039b S2 (concurrency group); 085 nested-control assertion (in 090); 092 Q2 (CI equality of `source_archive`); stale contract texts from 065 Q2;
+   R11 identity task; OPERATIONS.md still calls mbmludric a non-member; old waiter loops and /tmp dirs (Ludwig may clean up: harmless).
+### For Ludwig
+Nothing open: today's three answers closed M9/S5 and Q-L. Manual steps M9-M11 are due (item 5).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, handover) i missionsloggen och fortsätt med 'Next session starts here'."
