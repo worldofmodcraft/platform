@@ -2,7 +2,8 @@
 
 Every step says what to click, what to enter, and **what you should see when it worked**.
 Do them in order; each one unblocks tasks that cannot start without it.
-Nothing here is reversible-by-accident: no step deletes anything.
+Nothing here is reversible-by-accident: no step deletes anything, with one exception, **M11**, which deletes two repository
+secrets and says so in capital letters before it does.
 
 Status key: ☑ done · ☐ waiting on you · ⏸ waiting on a decision first · `[unverified]` = no evidence
 found; check it yourself.
@@ -10,6 +11,10 @@ found; check it yourself.
 `docs/tasks/060-runbook-manual-steps.md`, section "Task 060 log". Markers M3, M5, M7 and Q-H were updated by task 068
 for Ludwig's manual steps of 2026-10-15; the new evidence is in `docs/tasks/068-runbook-markers-session9.md`, section
 "Task 068 log".
+M9, M10, M11 and the R11 note added 2026-10-26 (task 039b). Their click paths follow the GitHub documentation read that day
+(docs.github.com, unauthenticated: managing a branch protection rule, managing environments, registering a GitHub App);
+anything the documentation did not state is marked `[unverified]`. If a screen differs from the text, follow the screen
+and tell the manager what differed.
 **Rule for every step below: you never copy or paste a secret into chat, a file or an issue. Where a
 step handles a secret, it goes from GitHub's own page straight into GitHub's own form.**
 
@@ -118,7 +123,7 @@ returns the four addresses. Tell me when the records are in and I will verify th
 ## ☑ M3 — Signing keypair → Actions secret  — decided: Q3=A (minisign, Ed25519)
 **Status: done.** Keypair made (key id `6E5B30596A7A8CC4`, OPERATIONS.md); the `MINISIGN_SECRET_KEY` Actions secret
 existed on 2026-09-05 (Ludwig; checked then with `gh secret list`, mission log "M3 is DONE") and Ludwig re-confirmed on
-2026-10-15 that it is listed (Q-H below). Do not redo this step. His offline backup of the private key is unconfirmed.
+2026-10-15 that it is listed (Q-H below). Do not redo this step. (M11, added 2026-10-26, later moves the key into the `signing` environment and deletes this repository-level copy.) His offline backup of the private key is unconfirmed.
 Every command below is one I ran end-to-end against minisign 0.12 before writing it here: I
 generated a throwaway key, signed a file, verified it, tampered with the file, confirmed
 verification fails with exit code 1, then destroyed the throwaway key.
@@ -292,6 +297,151 @@ your normal browser login; no token and no terminal. Do not delete a tag or Rele
 rulesets are available "for customers on GitHub Team and GitHub Enterprise plans" and does not mention the Free plan or
 public repositories (`[unverified]` whether they work on Free; `archive` is public, checked 2026-10-18). If the Rulesets
 menu is missing or says the feature needs a paid plan, stop and tell the manager.
+
+---
+
+## ☐ M9 — Make `gate` a required check on `registry`  (task 039, C4-C10; sequenced after the first live run)
+**Why:** every pull request to `registry` gets one automatic check named `gate` (task 039). Until you make it *required*,
+GitHub lets a pull request merge even when `gate` is red. **When:** only after the workflow has run once on a real pull
+request: the check name appears in the selector below only after it has run `[unverified]` (task 039 U2). The manager will
+tell you when that has happened (live check L1: an infrastructure pull request shows `gate` green). Budget ~5 minutes.
+**What this does not do:** a green `gate` means "the automatic checks pass", never "approved". You still read and merge every
+pull request yourself.
+
+1. Open `https://github.com/worldofmodcraft/registry` → **Settings**. (If you cannot see it, click the **...** menu, then
+   **Settings**.)
+2. Left sidebar, under "Code, planning, and automation": **Branches**.
+3. If a rule for `main` already exists under "Branch protection rules", click **Edit** on it and keep every setting it already
+   has. Otherwise click **Add classic branch protection rule**. Under **Branch name pattern** type `main`.
+   (Whether a rule exists today is `[unverified]`: private settings; tell the manager what you find.)
+4. Tick **Require status checks to pass before merging**.
+5. Tick **Require branches to be up to date before merging**. **Keep this ticked**: task 082's write-back flow (C22) is
+   designed around it, and without it a pull request that was green against an old `main` could merge.
+6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
+   yet: stop, tell the manager, come back later.
+7. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
+   **Open choice, Ludwig decides; until then the box stays unticked as written** (security review S5): leaving everything else
+   unticked has two costs. Without **Require a pull request before merging**, an account with write access can push to `main`
+   directly and skip `gate` altogether. Without **Do not allow bypassing the above settings**, an administrator can merge past a
+   red `gate`. Ticking them closes both, at the price of an emergency path (see the last paragraph below). Tell the manager
+   which way you decide; the manager does not decide it for you.
+8. **Confirm the rule works before you call M9 done (live check L1, `[unverified]`: task 039 U1).** Open a real pull request
+   into `main` (the manager's infrastructure test PR is enough) and look at its merge box. `gate` must be listed with the word
+   **Required** next to it. Basis: the check is produced by a `pull_request_target` run, and whether GitHub counts that run as
+   satisfying a required check on the PR head `[unverified]` has not been seen. If `gate` is missing, or is not marked
+   "Required", or the box says it is "Expected" and waiting forever: **stop and tell the manager. M9 is not done.**
+
+*You should see:* on the Branches page the rule for `main` listing "Require status checks to pass" with `gate` under it.
+Then open any open pull request: the merge box says "Required" next to `gate`. Pull requests that touch nothing under
+`mods/` stay mergeable (their `gate` is green by design, and says that human review is required).
+**Infrastructure pull requests (S6):** a pull request that touches only paths outside `mods/` (for example `.github/workflows/` or
+`tools/registry/`) takes the infrastructure route and is green without any mods check. Such a pull request changes the gate
+itself, so merging it needs a careful human read of the diff, every time; green means nothing there.
+`[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
+documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
+Emergency path: ticking "Do not allow bypassing the above settings" means nobody, administrators included, can merge past a red
+`gate`, even in an emergency. That is the S5 choice in step 7; tell the manager which way you chose.
+
+---
+
+## ☐ M10 — The membership-read App  (task 039 §4, choice C5; do this AFTER live checks L1 and L3 pass)
+**Why:** the namespaces `mc` and `test` accept a pull request only from an organisation member (ADR-0119 §3), and only the
+organisation can say who is a member. This is a **separate, read-only** App: it must not be the pipeline App (M5), whose key
+can write, and **`PIPELINE_APP_PRIVATE_KEY` is never used by the CI check**. Until M10 is done, every pull request into a
+reserved namespace is rejected by the check ("status none"): that is accepted for now and must be lifted before task 010
+(`test:hello-world`). **When:** after the manager reports L1 (infra PR green) and L3 (invalid-schema PR red, closed) done; no
+secret exists before then, so the gate is proven first without it. Budget ~15 minutes.
+**You never paste a secret into chat, a file or an issue.**
+
+1. Open `https://github.com/organizations/worldofmodcraft/settings/apps/new` (or: profile picture → **Your organizations** →
+   **Settings** beside worldofmodcraft → **Developer settings** → **GitHub Apps** → **New GitHub App**).
+2. GitHub App name: `worldofmodcraft-membership` (if taken, add a suffix and tell the manager the final name; 34 characters
+   at most). Homepage URL: `https://worldofmodcraft.com`.
+3. Webhook: untick **Active**.
+4. **Permissions:** the documentation page read does not name the exact menu entry (`[unverified — check on screen]`). Open the
+   **Organization permissions** dropdowns, find **Members** and choose **Read-only**. Leave **every** other permission,
+   under Repository permissions and Account permissions too, at "No access". ("Metadata: Read-only" may appear by itself;
+   leave it.)
+5. Where can this GitHub App be installed: **Only on this account**. Click **Create GitHub App**.
+6. On the page that opens, write down the **App ID** (a number; not a secret). Do not confuse it with the "Client ID"
+   (starts with `Iv`): the workflow wants the **App ID**.
+7. Same page, **Private keys** → **Generate a private key**. A `.pem` file downloads. **This file is a secret. Do not open it
+   in chat or send it to anyone.**
+8. Left menu **Install App** → next to worldofmodcraft click **Install** → **Only select repositories** → pick `registry` →
+   **Install**. (If GitHub asks to accept the permission request, accept it.)
+9. Store both in **repository** secrets on `registry` (not environment secrets: the check's job has no environment).
+   Open `https://github.com/worldofmodcraft/registry/settings/secrets/actions` → **New repository secret**, twice:
+   - Name `REGISTRY_MEMBERSHIP_APP_ID`, value: the App ID from step 6.
+   - Name `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY`, value: open the `.pem` in Notepad, select all, copy, paste, **Add secret**.
+     This is the only place its text goes.
+   **Exposure, accepted (S4):** this key is a *repository-level* secret. Anyone with write access to `registry` can run a branch
+   workflow that reads it. What that exposes is a Members:read token on one organisation, which is accepted. M11's environment
+   binding does not cover this key.
+10. Keep the `.pem` offline next to your other key backups, or delete it (a lost key is replaced by generating a new one on
+    the App's page). Tell the manager only the App's name.
+
+*You should see:* both secret names on registry's Actions secrets page (values are never shown). Then the manager runs
+one live check: a pull request from `womcraft` into a reserved namespace should show the membership answer in the run log
+(status only, nothing else). `[unverified]` (task 039 U6): that this App's token gets a plain 204/404 and no redirect for private
+members; that check closes it.
+
+---
+
+## ☐ M11 — Bind the signing key and the App key to `main`  (task 082, choice C20 as extended; before task 008b goes live)
+**Why:** a workflow's `if: github.ref == 'refs/heads/main'` only protects the *unmodified* file. Anyone with write access to
+`registry` can push a branch with an edited workflow and, while the secrets are ordinary repository secrets, that branch's run
+can read them. An Actions **environment** limited to the branch `main` is what actually keeps the secret away from every other
+branch. Two secrets get one environment each: `MINISIGN_SECRET_KEY` in `signing`, `PIPELINE_APP_PRIVATE_KEY` in
+`write-back`. Until M11 is done, every account with write access to `registry` is inside both keys' trust boundary. Nothing
+uses the keys yet (task 008b is not live), so there is no exposure today. Budget ~20 minutes.
+
+**READ THIS BEFORE YOU DELETE ANYTHING.** GitHub never shows a secret's value again, so you cannot "move" a secret: you must
+**type it in again** from your own backup, and only then delete the repository-level copy. You need both:
+- the minisign private key file `~/wom-keys/worldofmodcraft.key` (key id `6E5B30596A7A8CC4`). **Whether your offline backup
+  exists is still unconfirmed (Q-H, step 5). If you do not have the file, STOP and tell the manager; do not delete the
+  repository secret.**
+- the App key `.pem` for `worldofmodcraft-pipeline` (M5 step 10). If you deleted it, generate a new key on the App's page
+  (`https://github.com/apps/worldofmodcraft-pipeline` → settings → Private keys) and use that; the old one then stops working.
+
+**Part A — create the `signing` environment**
+1. `https://github.com/worldofmodcraft/registry` → **Settings** → left sidebar **Environments** → **New environment**.
+2. Name `signing` → **Configure environment**.
+3. **Deployment branches and tags** dropdown → **Selected branches and tags** → **Add deployment branch or tag rule** →
+   Ref type **Branch** → name pattern `main` → **Add rule**. Add nothing else. Leave "Required reviewers" and the other
+   protection rules off.
+4. Under **Environment secrets** → **Add Secret** → Name `MINISIGN_SECRET_KEY` → value: the whole contents of
+   `cat ~/wom-keys/worldofmodcraft.key` (copy from the terminal straight into the box) → **Add secret**.
+
+**Part B — create the `write-back` environment:** same steps 1-3 with the name `write-back`; then **Add Secret** → Name
+`PIPELINE_APP_PRIVATE_KEY` → value: the whole text of the `.pem` file → **Add secret**. (The App ID variable
+`PIPELINE_APP_ID` is not a secret and stays a repository variable.)
+
+*You should see (after A and B):* Settings → Environments lists `signing` and `write-back`, each showing "1 secret" and a
+deployment-branch limit of `main`. `[unverified]`: that these labels match the screen; the documentation page read on
+2026-10-26 gave the click path above and said environments on the Free plan work for public repositories only (`registry`
+is public).
+
+**Part C — delete the repository-level copies (this deletes two secrets).** Only after Parts A and B show their secrets:
+open `https://github.com/worldofmodcraft/registry/settings/secrets/actions`, under **Repository secrets** find
+`MINISIGN_SECRET_KEY` and click the **trash/delete icon** beside it, confirm; do the same for `PIPELINE_APP_PRIVATE_KEY`.
+Do **not** delete `REGISTRY_MEMBERSHIP_APP_ID` or `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY` (M10); they are repository secrets by design.
+Why delete rather than keep both: the documentation read does not say which copy wins when a repository secret and an
+environment secret share a name `[unverified]`, and an environment copy protects nothing while a repository copy exists.
+
+*You should see:* the repository secrets list no longer shows `MINISIGN_SECRET_KEY` or `PIPELINE_APP_PRIVATE_KEY`; the two
+environments still list their one secret each. Tell the manager "M11 done". Do not run anything to "test" it.
+
+---
+
+## ⏸ R11 — the takedown-only identity  (Ludwig, 2026-10-17; waiting for its own task)
+**Waiting on a decision and a task, not on you today.** You decided that takedowns (removing a published version, ADR-0122,
+rule R11 of `contracts/ownership.md`) are filed only by a dedicated account or App that only you control, and every takedown it
+files still needs your written approval before merge. That identity does not exist yet. Task 039 ships R11 **unconfigured**:
+`config/r11-identity.json` says `"r11_identity": null`, and per `ownership.md` R11 ("until it is configured, R11 authorises
+nobody") **every takedown pull request is rejected, whoever opens it**. That is the intended state for now. A later task will:
+(1) have you create the identity (a runbook step will appear here when it exists), (2) amend `ownership.md` R11, which today
+names the organisation id `324218296`, to name it, and (3) set the configuration file. Its merge needs your approval.
+Nothing for you to click until that task exists.
 
 ---
 
