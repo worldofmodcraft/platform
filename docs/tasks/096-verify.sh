@@ -20,12 +20,13 @@ trap 'rm -rf -- "$TMP"' EXIT
 
 
 # Marker checks as functions of a runbook file, so the mutation section below can run the SAME check on a mutated copy (MANAGER.md 2c rule 5).
-chk_step2_marker() { # file; returns 0 when the marker is present
-  grep -qF '`[unverified]`' <(awk '/^## .* M9 /{f=1;next} f&&/^## /{exit} f' "$1")
+chk_step2_marker() { # file; 0 when step 2 (M9, from "2. " to "3. ") carries the exact new route-unverified sentence
+  awk '/^## .* M9 /{f=1;next} f&&/^## /{exit} f&&/^2\. /{g=1} f&&/^3\. /{g=0} g' "$1" | tr '\n' ' ' | tr -s ' ' \
+    | grep -qF 'which route Ludwig then took is `[unverified]`'
 }
-chk_m11_qh() { # file; returns 0 when Q-H unconfirmed is recorded
-  local m11; m11="$(awk '/^## .* M11 /{f=1;next} f&&/^## /{exit} f' "$1")"
-  echo "$m11" | grep -q 'Q-H' && echo "$m11" | grep -qi 'unconfirmed'
+chk_m11_qh() { # file; 0 when M11's "**Status: done" paragraph carries the exact new Q-H sentence
+  awk '/^## .* M11 /{f=1;next} f&&/^## /{exit} f&&/^\*\*Status: done/{g=1} g&&/^$/{exit} g' "$1" | tr '\n' ' ' | tr -s ' ' \
+    | grep -qF '**Still unconfirmed:** the offline backup of the minisign key (Q-H)'
 }
 
 URL="$(git -C "$HERE" remote get-url origin 2>/dev/null)" || { echo "FAIL no origin remote"; exit 2; }
