@@ -1,6 +1,6 @@
 # Task 099: move the 098 ADR proposal out of `docs/tasks/` (it broke the vault projection's task-id uniqueness)
 
-- **Mission:** none (repair of task 098's file placement) — **Status:** spec-approved 2026-10-28 (manager, session 14; small, solo §2b)
+- **Mission:** none (repair of task 098's file placement) — **Status:** done 2026-10-28 (spec-approved 2026-10-28 (manager, session 14; small, solo §2b)
 - **Agent / model:** manager (a file move and two reference edits in documentation; no production code) — **Budget:** small
 - **Branch / worktree:** `task/099-move-098-proposal` / `~/wt/task-099` (platform)
 
@@ -17,3 +17,7 @@ spec and log lines are history and stay, with a log note here.
 
 ---
 # Task 099 log
+- 2026-10-28 manager (session 14): done. AC1 `git diff --name-status origin/main...HEAD`: `R100 docs/tasks/098-proposed-adr.md -> docs/design/party-board-mod-proposed-adr.md`,
+  `M docs/design/party-board-mod.md`, `A docs/tasks/099-move-098-proposal.md`. AC2: old-name grep in docs/design 0 lines; new name 2 hits. AC3 (projection in
+  test mode, temporary vault from `mktemp -d`, `WOM_VAULT_TEST=1`): on `origin/main` -> `error: two task files share the id 098 ...` (red); on this branch ->
+  `planned=1 written=1 ... id_conflicts=0` (green). The 098 task file's spec/log lines naming the old path are history and unchanged. **Done.**
