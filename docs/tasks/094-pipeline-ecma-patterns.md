@@ -55,11 +55,11 @@ section), task logs 008c (findings' origin) and 064 (the translator). Doctrine: 
 
 ## File scope (registry)
 New: `tools/pipeline/ecma.py`, `tests/pipeline/test_ecma_patterns.py`, `docs/tasks/094-verify.sh`. Changed: `tools/pipeline/build_version.py`,
-`tools/pipeline/write_back.py`, `tests/pipeline/test_write_back.py` (the `_ecma_digits` tests only), `tests/pipeline/mutate.py` (the one
+`tools/pipeline/write_back.py`, `tools/pipeline/plan_pending.py` (its pattern matching and subset validator, added 2026-10-28 from 008b-1 Q-P6), `tests/pipeline/test_write_back.py` (the `_ecma_digits` tests only), `tests/pipeline/mutate.py` (the one
 adapted mutation), `docs/pipeline/build-pipeline.md` (write-back section), `docs/tasks/094-pipeline-ecma-patterns.md` (log).
 
 ## Size
-3 source files (`ecma.py`, `build_version.py`, `write_back.py`), est. under 120 changed lines; within the §2b soft cap.
+4 source files (`ecma.py`, `build_version.py`, `write_back.py`, `plan_pending.py`), est. under 160 changed lines; within the §2b soft cap.
 
 ## Forbidden here
 Editing `tools/registry/schema.py`, `tests/contracts/schema_check.py`, `contracts/*` or any other task's verify script; `re.ASCII` or any global
@@ -72,3 +72,4 @@ replacement; reading schema patterns from anywhere but `contracts/entry.schema.j
 - 2026-10-28 manager (session 13): independent spec review PASS-WITH-AMENDMENTS (6 findings: import direction + graph line (★ allow, no move);
   file scope + size; HIGH criterion 5 undemonstrable (008c-verify bound to its branch -> regression frame; repin booked under 089); red-first
   frame; non-vacuous equivalence; artefact pins + Forbidden). All folded in. **spec-approved.** Dispatch after 089b releases the machine.
+- 2026-10-28 manager (session 13): scope extended by `tools/pipeline/plan_pending.py` (008b-1 Q-P6: it borrows `write_back`'s private helpers and carries a fail-closed subset schema validator; both move to the gate's semantics here). Dispatch after 008b-1 merges; the delta is re-checked against SPEC-CHECKLIST at dispatch.

@@ -2710,3 +2710,6 @@ marked unverified to him, with "stop and describe what you see" if the page diff
 - **096 phase 1 done** (`74cdea2`; content commit `60a7ef6`; log check exit 0): M9-M11 ☑ with status paragraphs, M9 step 2 direct URL; hunks only
   in M9-M11; `096-verify.sh` written (PIN_FINAL pending), not run. **Phase-2 queue** (when 089b's chain ends; one at a time): 068-verify, 085-verify,
   pin + 096-verify + its mutations; then independent review and PR.
+- **008b-1 phase 1 done** (`c4c143a`, log check exit 0): planner + 49 checks (suite 206/206 before the last three test edits); `008b1-verify.sh`
+  written, not run (23 mutations, emulated red outside the repo — not evidence). Q-P1..Q-P7 triaged by the manager (no Ludwig item); 094's scope
+  gains `plan_pending.py`. Phase 2 queued behind 089b's chain.
