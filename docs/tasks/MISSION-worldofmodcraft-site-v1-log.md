@@ -2744,3 +2744,10 @@ marked unverified to him, with "stop and describe what you see" if the page diff
 ### For Ludwig
 Nothing open. (Optional: delete the local branch above in your own terminal: `cd ~/registry && git branch -D task/039-l3-invalid-schema`.)
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-28 (session 13, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 14 — 2026-10-28 (manager; worktree `~/wt/session-14`, branch `session/14`)
+- Start 16:33Z: context ~8 % (HUD cache, session "WSL-WorldofModcraft-26-10-28-continue_1"). Token guard suspended (Ludwig, 2026-10-14).
+- **089b driver still running** (PID 3956671 alive): L1-065-unfixed exit 0 (13:14Z), **L1-065-fixed exit 0 (15:57Z)**, L2-039a-full-on-HEAD
+  running since 15:57Z, then L3. Machine stays reserved; handover items 1-2 wait for the driver to exit.
+- **090** (platform) dispatched to qa-engineer in **phase 1 only** (edits + written `090-verify.sh`, no verify runs): worktree `~/wt/task-090`,
+  branch `task/090-closed-verify-sweep-platform`, base `4321d07`; log-entry baseline 2. Phase 2 joins the quiet-machine queue after 096 and 008b-1.
