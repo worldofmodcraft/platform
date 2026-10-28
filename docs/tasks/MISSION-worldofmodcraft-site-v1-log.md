@@ -2651,3 +2651,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 4. After M9: close L3 PR #26 unmerged, delete branch `task/039-l3-invalid-schema`; then Ludwig's M10, M11.
 5. OPERATIONS.md gotchas to add (small doc task): manager must not use EnterWorktree; SendMessage to a finished subagent resumes it; schema
    step reports only the first schema error (L3 observation).
+
+### Ludwig, 2026-10-28 (verbatim): "1. Är klar. 2. Vet inte var jag kryssar ur den."
+(1) Ludwig merged platform #88 (093) -> `465835a` and registry #27 (008c) -> `32c641b` (confirmed with `gh pr view`). (2) Read as choice
+**A** (untick "Require approvals"); the manager gave click-by-click directions from memory of GitHub's classic branch-protection UI,
+marked unverified to him, with "stop and describe what you see" if the page differs. Runbook M9 step 7 to record choice A in a later doc task.
