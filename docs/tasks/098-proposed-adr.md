@@ -49,8 +49,8 @@ sentences, which the README does not provide for.
 
 ## Decision
 Conditional on Ludwig's answer to Question 1. The ADR text is the **same for A and for C**
-because it names no mod; A and C differ only in what the build-order task file then says (one
-mod or two). For **B** nothing is written.
+because it names no mod and covers one or more mods; A and C differ only in what the build-order
+task file then says (one mod or two). For **B** nothing is written.
 
 ## Amendments
 ### ADR-0001 (`docs/decisions/0001-platform-is-the-goal.md`)
@@ -60,9 +60,8 @@ Line 16: the sentence beginning "The roguelike is the first modpack" currently r
 
 It is read as:
 
-> The reference implementation that drives the kernel API from real needs is the mod named in the current build-order task file; the roguelike remains a planned mod and is no longer fixed in this role.
+> The reference implementation that drives the kernel API from real needs is the mod (or are the mods) named in the current build-order task file; the roguelike remains a planned mod and is no longer fixed in this role.
 
-[C: "... is the mod, or are the mods, named in the current build-order task file; the roguelike remains one of them."]
 
 ### ADR-0050 (`docs/decisions/0050-build-order-walking-skeleton.md`)
 - Line 17 currently reads:
@@ -73,7 +72,7 @@ It is read as:
   new record type, a server hook, RPC, a client panel, persistence and observability. The feature
   is named in the reference mod's own task file, not in this ADR."
 - Line 28 currently ends: "8. Breadth, driven by the roguelike." It is read as: "8. Breadth,
-  driven by the reference mod." [C: "driven by the reference mods."]
+  driven by the reference mod(s) named in the build-order task file."
 
 ### Metadata lines added on acceptance (headers only; no other edit to either file)
 - `docs/decisions/0001-platform-is-the-goal.md`, after the `Related:` line:
@@ -124,7 +123,7 @@ reader sees (titles of accepted ADRs are never edited).
 **The arcade driver mod.** ADR-0114:7 names three driver mods: roguelike, housing, arcade. The
 arcade mod already pulls teams (ADR-0114:20), match abort on restart (ADR-0114:24) and group
 teleport and player-state snapshot (`docs/open-questions.md:23-24`); the party mod's minigames
-need the same surfaces. Whether the two share code is open (design doc h.3a) and is added to Q1.
+need the same surfaces. Whether the two share code is open (design doc h.3a) and is Q5.
 
 Non-ADR files: `docs/open-questions.md` Q8 and "Deferred to the roguelike design kit" stay valid
 (roguelike-specific). `docs/handover/00-start-here.md:36` summarises 0050 generically (checked:
@@ -140,7 +139,7 @@ Each: two sentences of context, options, consequences, lean marked with a star.
 ### Q1 (decides whether this proposal exists)
 ADR-0001/0050 make the roguelike the mod that "drives the kernel API from real needs" and the
 step-1 feature. Your party mod could be just another standalone mod, or take over that driving
-role. Also: should the party mod share code with the planned arcade driver mod (ADR-0114:7)?
+role.
 - **A ★** The party mod becomes the reference/first mod. Amend only the sentences above; the
   roguelike stays planned. Consequence: platform work is pulled by the party mod's needs
   (instancing, groups, overlays, UI) first; combat and character-lifecycle surfaces wait. Resting on
@@ -172,6 +171,15 @@ lanterns and longer games.
 Default game length: A. 10 rounds (about 30 min). B. 15 rounds ★ (about 45 min). C. 20 rounds
 (about 60 min). All are settings anyway (ADR-0029:9); this only sets the default and what the
 pacing numbers are tuned for.
+
+### Q5 (changes the design doc, sections h.3a and c.5)
+The ADRs plan an arcade driver mod (ADR-0114:7) that needs teams, zones, countdowns and match abort
+(ADR-0114:20, :24), which the party mod's minigames also need. Should the two be related?
+- **A ★** Separate mods that both build on the platform's surfaces. Consequence: some duplicated
+  minigame plumbing; each mod stays standalone, as you asked.
+- **B** The party mod's minigame layer becomes the arcade mod (or the arcade mod is a minigame
+  pack for it). Consequence: less duplication, but the arcade mod then depends on the party mod.
+- **C** Decide later. Consequence: nothing changes now; the design assumes A.
 
 ## Interacts with
 ADR-0001, ADR-0050 (amended); ADR-0051, ADR-0097, ADR-0113, ADR-0098, ADR-0115 (exceptions above,

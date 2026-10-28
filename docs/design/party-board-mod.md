@@ -9,9 +9,9 @@
 ## In short (read this first)
 
 - **What it is:** a party board game for 2 to 4 friends (or 1 human with bots). You roll a die, walk a 48-space board, fetch **lanterns** from lit Piers and carry them to the **Beacon** to earn **Stars**, and play a short **minigame** at the end of every round. Most Stars after 15 rounds wins.
-- **The twists that are our own:** a carried lantern can be dropped, robbed (Tripwire, Snatch, Lantern Hook) or burn out; teams for the minigame come from the standings (leader against the rest, or a draft by the player in last place); in the last five rounds a **Rising Tide** floods the board; two game-specific bonus Stars (Lamp Bearer, Snare Master). Details: section b.
+- **The twists that are our own:** a carried lantern can be dropped, robbed (Tripwire, Snatch, Lantern Hook) or burn out; teams for the minigame come from the standings (leader against the rest, or a draft by the player in last place); in the last five rounds a **Rising Tide** floods the board; two game-specific bonus Stars (Lantern Courier, Snare Master). Details: section b.
 - **Built only on the platform's mod API.** It changes no ADR. Where the API lacks something, section g.4 lists it as a gap (15 gaps, G1-G15).
-- **Decided vs open:** every rule number is a **[design proposal]** to be tuned by simulation. Four questions need Ludwig (j.1: Q1 reference-mod role, Q2 bots, Q3 player count, Q4 game length), plus five rulings made overnight that he can overturn (j.1).
+- **Decided vs open:** every rule number is a **[design proposal]** to be tuned by simulation. Five questions need Ludwig (j.1: Q1 reference-mod role, Q2 bots, Q3 player count, Q4 game length, Q5 arcade mod relation), plus five rulings made overnight that he can overturn (j.1).
 - **First build step:** "press Roll": one record type, one command, one RPC pair, one client panel, saved position, one counter (section i, step 1).
 
 ---
@@ -77,7 +77,7 @@ All numbers are **[design proposal]** and are to be tuned by a headless simulato
 ### b.2 The dice
 - The **Wayfarer die** is an 8-sided die (1 to 8, uniform), rolled on the server with the mod's own `kernel.rng` stream, so the same seed replays the same game (ADR-0091:7). `math.random` is forbidden in server Lua (`validate` warns; ADR-0091:7).
 - Average roll 4.5. On Lantern Isles a lap of the 36-space Rim takes about 8 of your turns, about 6 if you use a bridge.
-- A player **carrying a lantern** (b.4) moves the roll minus 1 (at least 1): the lantern is heavy. Average carried move: (1+1+2+3+4+5+6+7)/8 = 3.6 spaces.
+- A player **carrying a lantern** (b.4) moves the roll minus 1 (at least 1): the lantern is heavy. The penalty is decided once, when the move starts: a lantern picked up in mid-move does not shorten that move, and a delivery in mid-move does not lengthen it. Average carried move: (1+1+2+3+4+5+6+7)/8 = 3.6 spaces.
 
 ### b.3 Movement
 - You move forward exactly as many steps as your die (or item) says, one space at a time. All edges are one-way; you never walk backward except by event (b.5).
@@ -90,15 +90,15 @@ All numbers are **[design proposal]** and are to be tuned by a headless simulato
 - **Brass** is the coin. Everyone starts with **12 Brass** (setting).
 - The **Beacon** is a fixed space on the board (Lantern Isles: Rim space R28). It is the only place a Star can be earned.
 - **Stars are earned by carrying a lantern to the Beacon**, not bought. A **Star** is an eight-point compass star lantern (not the five-point shape).
-- **Lit Piers.** At any time some Piers hold a lantern of the Lamplighter (a lantern-keeper figure). The number of lit Piers is *players minus 1* (4 players: 3 lit, 3 players: 2, 2 players: 1; minimum 1). At game start they are drawn with `kernel.rng`. They are drawn on the board by overlay (ADR-0083:7).
-- **Picking up.** When you pass or land on a lit Pier while you hold no lantern, you may pick up its lantern by paying the **wick fee**. **Wick fee = 6 Brass + 4 Brass for each Star you already hold** (so the leader pays more: 6, 10, 14 ...), paid to the bank and never refunded. You may decline. You may carry **one** lantern at a time. If you cannot pay, you cannot pick it up.
+- **Lit Piers.** At any time some Piers hold a lantern of the Lamplighter (a lantern-keeper figure). The number of lanterns is *seats minus 1*, bots included (4 seats: 3 lanterns, 3 seats: 2, 2 seats: 1; minimum 1). A lantern is always in exactly one of four states: **lit** (waiting at a Pier), **carried**, **dropped** (lying on a space) or **waiting** (out of play until it relights). At game start they are drawn with `kernel.rng`. They are drawn on the board by overlay (ADR-0083:7).
+- **Picking up.** When you pass or land on a lit Pier while you hold no lantern, you may pick up its lantern by paying the **wick fee**. **Wick fee = 9 Brass + 5 Brass for each Star you already hold** (so the leader pays more: 9, 14, 19, 24 ...), paid to the bank and never refunded. You may decline. You may carry **one** lantern at a time. If you cannot pay, you cannot pick it up.
 - **Carrying.** The carrier is marked with a glow visible to everyone (overlay) and moves at roll minus 1 (b.2).
-- **Delivering.** Walking onto *or through* the Beacon with a lantern delivers it: **+1 Star** at once. That Pier relights at the start of the next round at a random unlit Pier other than the one just used.
-- **Burning out.** A lantern burns out **7 rounds** after it was picked up, wherever it is (carried or lying). It then relights as above. The fee is lost. (Longest carry from any Pier to the Beacon on Lantern Isles is 18 spaces, 18 / 3.6 = 5 turns, so 7 rounds is a margin.)
+- **Delivering.** Walking onto *or through* the Beacon with a lantern delivers it: **+1 Star** at once. The lantern becomes **waiting** and a new lantern lights at the start of the next round, on a random unlit Pier other than the one this lantern came from. Delivery needs walking: a swap (Swap Charm, Whirl) onto the Beacon does not deliver.
+- **Burning out.** A lantern burns out **7 rounds** after it was picked up, wherever it is (carried or lying): at the start of the next round it becomes **waiting** (the carrier holds nothing), and relights at the start of the round after, as above. A lantern that is still lit at a Pier does not burn. The fee is lost. (Longest carry from any Pier to the Beacon on Lantern Isles is 18 spaces, 18 / 3.6 = 5 turns, so 7 rounds is a margin.)
 - **How a carrier can lose the lantern (the ambushes; every one is a board mechanic):**
   1. **Ember space.** Landing on an Ember: the lantern is dropped on that space and lies there (the carrier also pays the Ember cost).
   2. **Tripwire.** A Tripwire (b.6) stops the carrier, costs Brass and makes the carrier drop the lantern on that space; the Tripwire's owner may pick it up **at once, for free** (a robbery).
-  3. **Snatch.** If another player ends their move on the carrier's space, that player may Snatch: both roll the die; the higher roll takes the lantern, a tie leaves it with the carrier. One attempt per landing. Nobody pays.
+  3. **Snatch.** If another player ends their move on the carrier's space, that player may Snatch: both roll the die; the higher roll takes the lantern, a tie leaves it with the carrier. One attempt per landing. Nobody pays. The Snatch is resolved **before** the snatcher's own space effect, so a snatcher who landed on an Ember drops the lantern at once.
   4. **Lantern Hook** (item, b.6): takes the lantern from a carrier within 4 spaces ahead of you.
   A **Ward** (b.6) cancels one of these against its owner.
 - **A dropped lantern** lies on its space, and still burns (7-round rule). The first player to pass or land on it may take it for free (no wick fee) and carry it on.
@@ -141,10 +141,10 @@ Each player holds up to **3 items** (setting). At most **one item may be used pe
 
 | Item | Stall price | Effect |
 |---|---|---|
-| Steady Die | 6 | Your roll this turn is exactly 4. |
+| Steady Die | 6 | Your roll this turn is exactly 4 (3 if you are carrying a lantern, by the same minus 1). |
 | Twin Dice | 9 | Roll two dice and move their sum (2 to 16; minus 1 if carrying). |
 | Tripwire | 8 | Place it on the space you stand on. The first other player to pass or land on it stops there and loses 4 Brass to you; a carrier also drops the lantern there and you may take it at once, free. Used up when it triggers. One Tripwire on the board per owner. |
-| Swap Charm | 12 | Swap places with any one player; you do not resolve the new space. |
+| Swap Charm | 12 | Swap places with any one player; you do not resolve the new space, and a swap never delivers a lantern. Lanterns stay with their carriers. |
 | Ward | 7 | Cancel the next Ember, Tripwire, Snatch or Lantern Hook effect against you. |
 | Pickpocket Glove | 12 | Steal 5 Brass from a player within 6 spaces of you. |
 | Rain Check | 10 | Use before rolling: this turn, after you see your roll, you may roll once more and use the second result. |
@@ -152,7 +152,7 @@ Each player holds up to **3 items** (setting). At most **one item may be used pe
 | Golden Wick | 20 | Your next pick-up costs no wick fee, you move at the full roll while carrying, and that lantern's burn time is 4 rounds longer. |
 
 ### b.7 The Rising Tide (final five rounds): a board-changing twist
-In the last 5 rounds (setting `tide_rounds`, default 5) the water rises on Lantern Isles. At the start of each of those rounds, the next stretch of the Rim is **flooded**: 4 consecutive Rim spaces per round, 20 of the 36 Rim spaces in total, in an order shown from round 1 as a water-line preview on the overlay. Bridges, the Beacon island (R24 to R31) and the Harbour Gate stay dry. A flooded space costs **2 steps to enter** (b.3); everything else about it is unchanged. Effects: by the last round, crossing the Rim is up to 1.5 times slower, bridges become more valuable, and carriers must hurry or take the dry route. Clockwork Orchard has its own twist (d.2). Neither doubles any payout.
+In the last 5 rounds (setting `tide_rounds`, default 5) the water rises on Lantern Isles. At the start of each of those rounds, the next stretch of the Rim is **flooded**: 4 consecutive Rim spaces per round, 20 of the 36 Rim spaces in total, in an order shown from round 1 as a water-line preview on the overlay. Bridges, the Beacon island (R24 to R31) and the Harbour Gate stay dry. A flooded space costs **2 steps to enter** (b.3); everything else about it is unchanged. Effects: by the last round, crossing the Rim is about 1.5 times slower (a lap costs 56 steps instead of 36), bridges become more valuable, and carriers must hurry or take the dry route. Clockwork Orchard has its own twist (d.2). Neither doubles any payout.
 
 ### b.8 End of game and scoring
 1. After the last round's minigame, the two Honours are decided and each gives +1 Star to its winner(s) (b.9).
@@ -164,7 +164,7 @@ Both are always in play and shown on the card from the start (setting `honours_v
 
 | Honour | Won by |
 |---|---|
-| Lamp Bearer | Most lanterns delivered to the Beacon. |
+| Lantern Courier | Most lanterns delivered to the Beacon. |
 | Snare Master | Most Tripwire catches (a catch is a player stopped by your Tripwire). |
 
 ### b.10 Timers and the pace of one turn
@@ -186,23 +186,23 @@ Each player picks a small companion with one tiny passive. **[design proposal]**
 | Dell the mole | Has 4 item slots. |
 
 ### b.12 Economy check: the arithmetic
-Hand calculation for a 4-player, 15-round game; these are **estimates**, to be replaced by the simulator's numbers (section i, step 4).
+Hand calculation for a 4-player, 15-round game; these are **estimates**, to be replaced by the simulator's numbers (section i, step 4). Recomputed in fix round 2 (items limited by the number of Stalls; Wonder events counted for every player they affect).
 
 | Source of Brass, per player over 15 rounds | Calculation | Brass |
 |---|---|---|
 | Start | setting | 12 |
 | Space landings (15 turns) | per landing (16 x 4 + 3 unlit Piers x 2 + Beacon 2 - 7 x 6) / 48 = 30 / 48 = 0.625; x 15 | 9.4 |
-| Wonder events | weighted value per event (3 x 9 - 2 x 6 + 2 x 3 + 2 x 1.3 - 1 x 4 + 1 x 1.75) / 17 = 1.26; x (6/48 x 15 landings = 1.9 events) | 2.4 |
-| Minigame payouts | rounds: 3 co-op, about 4 free-for-all, 4 draft 2v2, 4 hunt 1v3 (b.2 mix, c.1). Averages per player per round: free-for-all (6+4+2+0)/4 = 3.0; draft 5/2 = 2.5; hunt (0.4 x 10 + 3 x 0.6 x 4)/4 = 2.8; co-op tier average 4.0. 4 x 3.0 + 4 x 2.5 + 4 x 2.8 + 3 x 4.0 | 45.2 |
-| **Total in** | | **69** |
+| Wonder events | Per draw, the expected Brass to one given player (the drawer is a random player, so the drawer's gain is divided by 4): Windfall (weight 3) 9 / 4 = 2.25; Pay the Piper (2) -6 / 4 = -1.5; Open Hands (2) +3; Lantern Rain (2) 4 x 16/48 = 1.33; Rebate (1) 7 / 4 = 1.75; the other five events 0 Brass (Wishing Well is a transfer). Weighted: (3 x 2.25 - 2 x 1.5 + 2 x 3 + 2 x 1.33 + 1.75) / 17 = 14.2 / 17 = 0.83 per draw. Draws per game: 4 players x 15 landings x 6/48 = 7.5. 0.83 x 7.5 | 6.2 |
+| Minigame payouts | Rounds: 3 co-op (every 5th); a Hunt needs a 2-Star lead, which is rare before the late rounds, so about 1.5 Hunts; the other 10.5 rounds split about evenly: 5.25 Draft (odd rounds) and 5.25 free-for-all. Averages per player per round: free-for-all (6+4+2+0)/4 = 3.0; Draft 5/2 = 2.5; Hunt (0.4 x 10 + 3 x 0.6 x 4)/4 = 2.8; co-op tier average (2+4+6)/3 = 4.0. 5.25 x 3.0 + 5.25 x 2.5 + 1.5 x 2.8 + 3 x 4.0 = 15.75 + 13.1 + 4.2 + 12 | 45.1 |
+| **Total in** | 12 + 9.4 + 6.2 + 45.1 | **72.7** |
 
 | Sink of Brass, per player | Calculation | Brass |
 |---|---|---|
-| Wick fees | about 9 paid pick-ups per game (3 lantern slots x about 2.5 cycles, plus lost ones), fee average 6 + 4 x 1 Star = 10, shared by 4 players: 9 x 10 / 4 | 22.5 |
-| Items | about 2 items bought per player at an average price of 11 (the 9 items average 11.1) | 22 |
-| **Total out** | | **44.5** |
+| Wick fees | about 9 paid pick-ups per game (3 lanterns x about 2.5 cycles, plus lost ones), fee average 9 + 5 x 1.1 Stars held on average = 14.5, shared by 4 players: 9 x 14.5 / 4 | 32.6 |
+| Items bought | Items are bought only at the 2 Stalls: a player lands on a Stall 15 x 2/48 = 0.63 times and buys at most 2 items, about 1.5 on average, so about 0.94 purchases at an average price of 11.1 (the 9 items sum to 100). Items from Cache spaces cost nothing. | 10.4 |
+| **Total out** | 32.6 + 10.4 | **43.0** |
 
-Expected unspent Brass per player at the end: 69 - 44.5 = about **24**. That is a deliberate buffer of about two fees. Calibration targets for the simulator: median unspent Brass between 10 and 30; fewer than 10% of lit-Pier visits fail because the player cannot pay; deliveries per game about 7 (3 lantern slots x about 2.5 cycles each, with a cycle of about 6 rounds: pick-up wait 1.5 + carry 3.7 + relight 1) plus 2 Honour Stars; the winner holds about 3 Stars.
+Expected unspent Brass per player at the end: 72.7 - 43.0 = about **30**. That is at the top of the calibration target below, so the first levers, if the simulator confirms it, are a higher wick-fee base, payouts lowered by 1, or a third Stall. Calibration targets for the simulator: median unspent Brass between 10 and 35; fewer than 10% of lit-Pier visits fail because the player cannot pay (the first fee, 9, is covered by the start Brass of 12); deliveries per game about 7 (3 lanterns x about 2.5 cycles each, with a cycle of about 6 rounds: pick-up wait 1.5 + carry 3.7 + relight 1) plus 2 Honour Stars; the winner holds about 3 Stars.
 
 ### b.13 What changed in fix round 1, and why (for Ludwig)
 The first draft copied too many of the genre leader's signature rules at once (start coins, one star bought at a moving space, +/- coin spaces, last-turns doubling, space-colour teams, three bonus stars). The manager's overnight ruling replaced them: stars are earned by carrying a lantern; teams come from standings (c.1); the final-rounds twist is a rising tide; the numbers differ; there are two Honours specific to this game. These are rulings Ludwig may overturn; see j.1.
@@ -393,12 +393,12 @@ return {
 ### e.2 Lobby and joining
 Commands are written `/wager ...` for short. ADR-0082:7 registers `/modname`, so the real command is `/wayfarers-wager ...`; whether a short alias such as `/wager` is possible is **[open]**.
 
-1. A player with the permission `<ns>.wager.host` runs `/wager host` (commands are manifest-declared, namespaced, with permission levels and generated help; ADR-0082:7; permissions are namespaced strings with default roles; ADR-0031:9). Default role for `host`: `player` **[design proposal]**.
+1. A player with the permission `<ns>.wayfarers-wager.host` runs `/wager host` (commands are manifest-declared, namespaced, with permission levels and generated help; ADR-0082:7; permissions are namespaced strings with default roles; ADR-0031:9). Default role for `host`: `player` **[design proposal]**.
 2. The lobby panel shows the seats, the board, the length, bots on or off, and a Ready button per seat. Others join with `/wager join <host name>` or by clicking the entry in the panel.
 3. The host can kick a seat before start (`/wager kick <name>`). The permission for it is the same as `host`.
 4. When every seat presses Ready (or the host presses Start after 30 s, with fewer than all Ready), the game moves to SETUP (g.5).
 5. **Late joiners** cannot take a seat after start. They may join as spectators (e.3).
-6. A host with the permission `<ns>.wager.admin` (default role `admin`) can abort any game.
+6. A host with the permission `<ns>.wayfarers-wager.admin` (default role `admin`) can abort any game.
 
 ### e.3 Spectators
 Any player may type `/wager watch`. Spectators receive the same overlay and UI updates as seated players for the board (not the arena). Spectating requires that the board's overlays can be sent to chosen players only. ADR-0083:7 says elements are sent via RPC but not who can be addressed: **[assumption: overlay RPC can target chosen players; added to G8]**. Watching the arena while playing minigames is **[open]** (needs per-player visibility; ADR-0114:21 names phasing as a gap to be exposed).
@@ -417,7 +417,7 @@ The kernel gives the mod a `player.logout` event with a reason and `server.pre_r
 | A player disconnects during a minigame | They keep the score they had; the minigame goes on; they return to the board on reconnect. |
 | 5 minutes pass | The seat becomes an **autopilot** seat (same as a board-only bot, e.6). Their Brass, Stars and items stay and count. |
 | Only one human is left, in a game that started with two or more humans | A seat counts as human until its 5 minutes have passed. After that the remaining human plays on against autopilot seats; with `abort_if_alone` on (default off) the game instead ends after the current round with normal scoring. |
-| Server restart queued (ADR-0103:7 countdown) | If the game is on the board, the current turn is finished (a turn is shorter than the 60 s countdown) and the state saved. If a minigame is running, the engine saves at the last phase boundary and aborts the minigame without payout (arena instances are destroyed). On resume the game restarts at MINIGAME_ANNOUNCE for that round. |
+| Server restart queued (ADR-0103:7 countdown) | If the current turn can finish before the countdown ends, it is finished and the state saved; otherwise the engine saves at the last phase boundary and resumes there. If a minigame is running, the engine saves at the last phase boundary and aborts the minigame without payout (arena instances are destroyed). On resume the game restarts at MINIGAME_ANNOUNCE for that round. |
 | Server crash | The game resumes from the last phase boundary, because the engine tags every phase boundary as a "save now" event (ADR-0074:7: mods can tag such events; without a tag the interval is 30-60 s and the KV store is write-behind, ADR-0023:10). |
 | Mod removed | Players in the arena or board instance are moved to their last valid position (ADR-0092:7). |
 
@@ -426,7 +426,7 @@ The kernel gives the mod a `player.logout` event with a reason and `server.pre_r
 ### e.6 Bots for empty seats (question Q2)
 - **Option B (leaning):** *board-only bots*. A bot rolls; picks up a lantern whenever it can pay the fee and keep 5 Brass spare; carries it by the shortest path to the Beacon; Snatches when it stands on a carrier's space; takes the shortest path at forks; uses an item at random; and picks the nearest target for Duels and Pickpocket. In minigames a bot gets a **simulated score**: a placement drawn from a distribution weighted by a setting `bot_skill` (default 0.5; at 0.5 the expected place is the middle). Bots are labelled "(bot)". The simulated placement uses `kernel.rng` so it is reproducible (ADR-0091:7).
 - The same logic runs the **autopilot** for disconnected humans.
-- **Bots in team and co-op minigames [design proposal]:** while any bot is seated, the Hunt and Draft rules of c.1 do not apply (Free-for-all is drawn instead), so no human is ever teamed with a bot. In All Hands (co-op) rounds only humans play, and the tier thresholds are scaled by (humans / seats). Duels need two humans or a bot with a simulated result.
+- **Bots in team and co-op minigames [design proposal]:** while any bot is seated, the Hunt and Draft rules of c.1 do not apply (Free-for-all is drawn instead), so no human is ever teamed with a bot. In All Hands (co-op) rounds only humans play, the tier thresholds are scaled by (humans / seats), and bots receive the tier payout the humans reached (so the ledger stays balanced). Duels need two humans or a bot with a simulated result.
 - A bot is not a WoW character; it has no pawn in the arena. Board pawns for bots are overlay markers (ADR-0083:7) **[design proposal]**.
 - Real bot players in minigames are **not** planned. (`mc:playerbots` as an unsafe-tier plugin is an early ring-3 milestone for soak tests (ADR-0052:13); the mod does not depend on it.)
 
@@ -440,7 +440,7 @@ The kernel gives the mod a `player.logout` event with a reason and `server.pre_r
 ## f. Presentation
 
 ### f.1 Camera
-- **Board camera:** a raised three-quarter "table view" that frames the active player and the next 10 spaces, looking down at about 55 degrees. It eases between turns and cuts to a wide shot for the Star purchase and the finale.
+- **Board camera:** a raised three-quarter "table view" that frames the active player and the next 10 spaces, looking down at about 55 degrees. It eases between turns and cuts to a wide shot for a delivery at the Beacon and the finale.
 - **Arena camera:** the player's normal third-person camera, except in minigames that need a top-down view (Tidal Tiles, Echo Pillars, Bonfire Hold), which switch to a fixed overhead camera.
 - The platform names "camera" as a ring-2 client surface (ADR-0020:12) but gives no function list: gap G10.
 
@@ -453,7 +453,7 @@ The kernel gives the mod a `player.logout` event with a reason and `server.pre_r
 |                       (the board in the world view)                      |
 |                                                                          |
 |   [Item 1] [Item 2] [Item 3]                         [   ROLL  (d8)   ]  |
-|   Space info: "Pier (lit) - lantern, fee 10 Brass"    Timer: 24 s        |
+|   Space info: "Pier (lit) - lantern, fee 14 Brass"    Timer: 24 s        |
 +--------------------------------------------------------------------------+
 ```
 - **Player cards** (top): portrait, Brass, Stars, held items (small icons), an "away" badge.
@@ -561,7 +561,7 @@ KV acts like a table (`mod.state.games[id] = {...}` is saved by write-through, A
 | Key (scope) | Fields | Notes |
 |---|---|---|
 | `games/<id>` (world) | `id`, `board`, `seed`, `rounds_total`, `round`, `phase` (state name, g.5), `active_seat`, `lit_count`, `tide_stage`, `gear_state` (Clockwork Orchard), `last_category` (for the Hunt rule, c.1), `created_at`, `rules_version` | One row per game. `seed` makes the game replayable (ADR-0091:7). |
-| `games/<id>/lanterns` (world) | List of `{id, state = lit \| carried \| dropped, pier, space, carrier_seat, picked_round, burns_out_round}` | Exactly `lit_count` lanterns exist at any time (b.4). |
+| `games/<id>/lanterns` (world) | List of `{id, state = lit \| carried \| dropped \| waiting, pier, space, carrier_seat, picked_round, burns_out_round, relights_round}` | Exactly `lit_count` lanterns exist at any time (b.4); some may be `waiting`. |
 | `games/<id>/seats/<n>` (world) | `character_guid`, `name`, `is_bot`, `companion`, `space` (space id), `brass`, `stars`, `items[1..4]`, `lantern` (id or nil), `connected`, `away`, `autopilot`, `stats = {earned, lost, moved, embers, duels, items_used, minigame_wins, lanterns_delivered, trip_catches, coop_score}` | `lanterns_delivered` and `trip_catches` feed the two Honours (b.9). |
 | `games/<id>/edges` (world) | The live edge list | Needed only for boards with a Gear Turn (d.2). |
 | `games/<id>/traps` (world) | `{space, owner}` | Tripwires. |
@@ -611,6 +611,7 @@ LOBBY --start--> SETUP --> ROUND_START --> TURN_BEGIN(seat) --> ITEM_WINDOW --> 
       +-- more seats? --> TURN_BEGIN(next seat)
       +-- no --> MINIGAME_SELECT --> [MINIGAME sub-machine] --> ROUND_END
                                                                    |
+    (a Duel space starts the same sub-machine from RESOLVE_SPACE and returns to TURN_END, not to ROUND_END)
                           rounds left: --> ROUND_START   no: --> FINAL_HONOURS --> RESULTS --> ENDED
 
 MINIGAME SUB-MACHINE (round minigame: all seats; Duel space: the two duellists)
@@ -625,18 +626,18 @@ ANY STATE --(admin abort / fatal error)-----> ABORTED
 |---|---|---|---|---|
 | LOBBY | Host and players | 10 min idle | `/wager host` | `lobby/<host>` |
 | SETUP | Engine | none | All ready | `games/<id>`, seats; seed; seat order; lit Piers drawn |
-| ROUND_START | Engine | none | New round | `round`; **relight** lanterns due; **advance the tide** (Rising Tide or Creeping Vines, b.7, d.2); **Gear Turn** on its round (d.2); choose the round's category (c.1) |
+| ROUND_START | Engine | none | New round | `round`; **burn out** carried or dropped lanterns whose `burns_out_round` has come (they become `waiting`); **relight** `waiting` lanterns due (each on a random unlit Pier other than its previous one); **advance the tide** (Rising Tide or Creeping Vines, b.7, d.2); **Gear Turn** on its round (d.2); choose the round's category (c.1) |
 | TURN_BEGIN | Engine | none | Next seat | `active_seat` |
 | ITEM_WINDOW | Active seat | 20 s | After begin | item use, ledger |
 | ROLL | Active seat | 30 s | After items | roll value, seed position |
 | REROLL_CHOICE | Active seat | 10 s | After a roll, only if Rain Check was used or the Sable passive is available | choice |
 | MOVE | Engine | about 0.4 s per step (2 steps for a flooded space) | After roll | `space` per step |
 | FORK_CHOICE | Active seat | 20 s (default: main path; shorter path to the Beacon when carrying) | Fork reached | choice |
-| PICKUP_OFFER | Active seat | 20 s | Passing or landing on a lit Pier with no lantern held and enough Brass, or passing a dropped lantern | Brass (fee), lantern state |
+| PICKUP_OFFER | Active seat | 20 s | Passing or landing on a lit Pier, or passing or landing on a dropped lantern, with no lantern held (and enough Brass for the fee at a Pier) | Brass (fee), lantern state |
 | DELIVER | Engine | none | Walking onto or through the Beacon with a lantern | Stars, lantern relight, ledger |
 | TRIP_STOP | Engine | none | Passing or landing on a Tripwire | Brass, lantern drop, possible robbery, trap removed |
 | LAND | Engine | none | Steps used | `space` |
-| RESOLVE_SPACE | Engine and seat | 20 s per choice | After landing | Brass, items; sub-flows: SHOP, DUEL (starts the MINIGAME sub-machine), EVENT, WHIRL, EMBER (lantern dropped) |
+| RESOLVE_SPACE | Engine and seat | 20 s per choice | After landing: **Snatch first** (SNATCH_OFFER, if the space holds a carrier), then the space effect | Brass, items; sub-flows: SHOP, DUEL (starts the MINIGAME sub-machine), EVENT, WHIRL, EMBER (lantern dropped) |
 | SNATCH_OFFER | Active seat | 20 s | Landing on a carrier's space | both rolls, lantern owner |
 | EVENT_MOVE | Engine | about 0.4 s per step | Headwind or Tailwind drawn | `space`; Tailwind then runs LAND and RESOLVE_SPACE again |
 | TURN_END | Engine | none | Space resolved | seat stats |
@@ -655,7 +656,7 @@ ANY STATE --(admin abort / fatal error)-----> ABORTED
 | PAUSED_RESUMABLE | none | 10 min | Pre-restart or humans gone | everything |
 | ABORTED | none | none | Abort or fatal | log kept |
 
-**Invariants checked on every transition (and counted if they fail; ADR-0115:8-12):** Brass >= 0; Stars >= 0; total Stars equals lanterns delivered plus Honour Stars; exactly `lit_count` lanterns exist, each in exactly one of lit / carried / dropped; each player carries at most one lantern; every seat's `space` exists in the board graph; one item used per turn; at most one Tripwire per owner; the board is still strongly connected in its current gear and flood state.
+**Invariants checked on every transition (and counted if they fail; ADR-0115:8-12):** Brass >= 0; Stars >= 0; total Stars equals lanterns delivered plus Honour Stars; exactly `lit_count` lanterns exist, each in exactly one of lit / carried / dropped / waiting (lit + carried + dropped may be **below** `lit_count`, by the number of `waiting` lanterns, from a delivery or burn-out until the next ROUND_START relights them; that is the only time it may be below); each player carries at most one lantern; every seat's `space` exists in the board graph; one item used per turn; at most one Tripwire per owner; the board is still strongly connected in its current gear and flood state.
 
 ### g.6 Server and client responsibilities, and the message protocol
 
@@ -670,7 +671,7 @@ ANY STATE --(admin abort / fatal error)-----> ABORTED
 | client to server | `intent.ready` | lobby ready toggle |
 | client to server | `intent.action` | minigame input: kind, client sequence number |
 | server to client | `snapshot` | the whole visible game state; sent on join, on reconnect, after any gap in sequence numbers |
-| server to client | `event` | `n`, type: `dice_rolled`, `pawn_moved`, `brass_changed(seat, before, after, reason)`, `star_moved`, `decision_request(id, kind, options, duration)`, `minigame_announce`, `minigame_result`, `game_over` ... |
+| server to client | `event` | `n`, type: `dice_rolled`, `pawn_moved`, `brass_changed(seat, before, after, reason)`, `lantern_changed(id, state, seat)`, `star_earned(seat)`, `decision_request(id, kind, options, duration)`, `minigame_announce`, `minigame_result`, `game_over` ... |
 | server to client | `toast` | text and a sound id |
 
 - Every `decision_request` has an id; a reply with a stale id is rejected **and counted with its reason** ("late: timer already expired", "duplicate", "wrong seat"), as ADR-0115:11 requires for silent early returns.
@@ -758,13 +759,14 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 
 ## j. Risks and open questions
 
-### j.1 Questions for Ludwig (the same four as in the ADR proposal, `docs/tasks/098-proposed-adr.md`), and overnight rulings awaiting him
+### j.1 Questions for Ludwig (the same five as in the ADR proposal, `docs/tasks/098-proposed-adr.md`), and overnight rulings awaiting him
 | # | Question | Effect on this document |
 |---|---|---|
-| Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? Also: does it share code with the planned arcade driver mod (h.3a)? | None on the design. Only decides whether ADR-0123 exists. |
+| Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? | None on the design. Only decides whether ADR-0123 exists. |
 | Q2 | Bots for empty seats: none (A), board-only bots (B, leaning), full bots (C)? | Section e.6 and build step 5 |
 | Q3 | Player count: 2 to 4 (A, leaning), up to 6 (B), up to 8 (C)? | Sections b.1, c.1, c.2, b.4 (lit-lantern count) |
 | Q4 | Default length: 10 (A), 15 (B, leaning), 20 (C) rounds? | Sections a, b.1, b.10 |
+| Q5 | Relation to the planned arcade driver mod (ADR-0114:7): separate mods (A, leaning), the party mod's minigame layer becomes the arcade mod (B), decide later (C)? | Sections h.3a and c.5 |
 
 **Rulings made overnight by the manager (not by Ludwig); he can change any of them in the morning.** They were made so that the rule set is our own and does not reproduce a published game's signature rules.
 | # | Ruling | If Ludwig overturns it |
@@ -772,8 +774,8 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 | (a) | Minigame teams come from the standings (leader vs the rest, or a draft by the last-place player, or free-for-all), not from space colours (c.1). | Replace c.1; the minigame records are unaffected. |
 | (b) | Stars are earned by carrying a lantern from a lit Pier to the Beacon, with a wick fee, ambushes and burn-out (b.4), instead of buying a Star at a moving space. | Replace b.4 and the lantern parts of b.5, b.6, g.3, g.5; the rest stands. |
 | (c) | The last five rounds bring a Rising Tide (Creeping Vines on the Orchard) instead of doubled payouts (b.7, d.2). | Replace b.7 and d.2's twist. |
-| (d) | Numbers: 12 start Brass, Lantern +4, Ember -6, wick fee 6 + 4 per Star, payouts 6/4/2/0 and so on (b.12 shows the arithmetic). | Re-run the b.12 arithmetic and the simulator. |
-| (e) | Two Honours only, specific to this game: Lamp Bearer and Snare Master (b.9). | Edit b.9. |
+| (d) | Numbers: 12 start Brass, Lantern +4, Ember -6, wick fee 9 + 5 per Star, payouts 6/4/2/0 and so on (b.12 shows the arithmetic). | Re-run the b.12 arithmetic and the simulator. |
+| (e) | Two Honours only, specific to this game: Lantern Courier and Snare Master (b.9). | Edit b.9. |
 
 ### j.2 Risks
 | # | Risk | Mitigation |
@@ -801,7 +803,7 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 - [ ] No name, character, item, place or phrase from Nintendo's party games or any other published game.
 - [ ] No Blizzard asset, name or motif (ADR-0004:17, ADR-0061:7).
 - [ ] The Star silhouette, the dice, the spaces and their effects are our own (b.4, b.5).
-- [ ] No rule combination that reproduces a published game's signature rules (star price and relocation, space-colour team selection, final-turns doubling, end-of-game bonus stars).
+- [ ] No rule combination that reproduces a published game's signature rules (all of: star price and relocation, space-colour team selection, final-turns doubling, a random pool of end-of-game bonus stars). The design keeps two game-specific bonus Stars (b.9); that is allowed because the rule forbids the combination..
 - [ ] Music and sound effects are not recognisable as a known melody.
 - [ ] Every asset has a recorded source and a licence that fits the mod's licence field (ADR-0061:7).
 - [ ] "Mario Party" appears only as the genre reference, quoting Ludwig (section 0 and the ADR proposal Context).
