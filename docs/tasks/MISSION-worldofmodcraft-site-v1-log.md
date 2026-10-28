@@ -2836,3 +2836,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   action pins equal their tags. Q-D, Q-K ★ A. Static security review PASS-WITH-AMENDMENTS (secret exposure clean, no `${{` in run:); fix round for F1
   (unset the secret before python parses untrusted bytes), F3, c25, F4 (result.json allow-list), F5. Booked: F6 (per-leg environment approvals, for
   M11 if reviewers are added); key-management.md rotation must name the workflow's public-key literal (platform doc task).
+- **008b-2 fix round 1** (red `ef248f5`, fix `162d791`; log check exit 0): F1 secret unset before python, F3 no `${{` in any run:, c25 exact `if:` per
+  job, F4 result.json allow-list (`result/shape` refusal -> exit_code 2), F5 single REJECTED line. **Manager reproduced red-then-green** in throwaway
+  worktrees: 236 unit tests, `FAILED (failures=3)` at `ef248f5`, `OK` at `162d791`. Verify script and its mutations still phase 2.
