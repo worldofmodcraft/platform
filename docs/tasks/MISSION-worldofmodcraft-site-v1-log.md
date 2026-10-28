@@ -2707,3 +2707,6 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   + unit tests, no `*-verify.sh`, since 039a's quiet-wait counts verify processes): **008b-1** dispatched (registry `~/wt/registry-task-008b1`,
   base `32c641b`, baseline 2); **096** (runbook M9-M11 ☑, M9 step 2 direct URL) specified and dispatched (platform `~/wt/task-096`, baseline 1).
   094 waits for 008b-1 (both touch `docs/pipeline/build-pipeline.md`; sequenced, §6).
+- **096 phase 1 done** (`74cdea2`; content commit `60a7ef6`; log check exit 0): M9-M11 ☑ with status paragraphs, M9 step 2 direct URL; hunks only
+  in M9-M11; `096-verify.sh` written (PIN_FINAL pending), not run. **Phase-2 queue** (when 089b's chain ends; one at a time): 068-verify, 085-verify,
+  pin + 096-verify + its mutations; then independent review and PR.
