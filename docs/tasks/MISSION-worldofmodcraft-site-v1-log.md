@@ -2779,3 +2779,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **097 done** (Ludwig's request, wowdecomp survey): `docs/research/wowdecomp-survey.md` (`c1f198d`). It is a decompilation of Blizzard's own
   3.3.5a `Wow.exe` (build 12340), x64-first, Windows-only, no licence, ~90 % of functions ported (self-reported). WoWee is already 64-bit
   (manager re-checked both READMEs). Decision ★ A: watch only; read none of its code, never link, ship or depend on it (ADR-0004/0007/0049).
+- **089a1 phase 1 done** (`69da39a`, triage `see 089a1 log`): finding 4 confirmed vacuous, now anchored on a positive line. **New finding booked**
+  (from its Q5): `008a-verify.sh` section 2 greps `build-pipeline.md`/`manifest-reader.md` headings at HEAD (possibly own-change) -> a later
+  umbrella part F. All six 089 parts are now phase-1 complete; the quiet-machine queue is 089b readout, 096, 008b-1, 090, 089e, 089c, 089d,
+  089a2, 089a1 (short scripts first).
