@@ -60,17 +60,41 @@ Why one task might still be acceptable: every change is the same mechanical move
 
 ### Part D (added 2026-10-28, session 13; from session 12's final status): the post-TIP merge-into-branch defect
 - D1. `docs/tasks/092-verify.sh:657-700` (AC9 post-TIP) lists files with `git log --first-parent --name-only TIP..HEAD`. With git >= 2.31,
-  `--first-parent` implies `--diff-merges=first-parent`, so a merge of `main` INTO the task branch (what GitHub's "Update branch" does once
-  M9's "Require branches to be up to date" is on) lists all of main's files and the check goes red on a correct branch. On registry `main`
-  today the check prints NOT-APPLICABLE (092 is merged), so this is latent; the risk is the pattern being copied (warned in 008c's brief).
-  Fix: the post-TIP file set must exclude what a merge from `main` brings in while still catching a change the branch itself makes,
-  including one made inside a merge commit (an "evil merge"). Method is the agent's; it is recorded in the log with the git version used.
-  Source file: `docs/tasks/092-verify.sh` (1 file). Can run in any order relative to A1/A2/B/C (disjoint files).
-- D criteria (shipped as `089d-verify.sh`): (a) red first: in a temp clone, TIP + a merge of a synthetic `main` commit that changes a file
-  outside `docs/tasks/092-*` into the branch; the unfixed check is red, the fixed check is green; (b) controls that must stay red after the
-  fix: a post-TIP commit on the branch touching a non-092 file, and a merge commit whose resolution adds a non-092 change; (c) the merged
-  case still prints NOT-APPLICABLE (merged); (d) `092-verify.sh` default and `--live-selftest` still exit 0 on registry main; (e) a mutation
-  restoring the old pattern reddens (a). Scope: `git diff --name-only` is `docs/tasks/092-verify.sh`, `docs/tasks/089d-verify.sh`, this log.
+  `--first-parent` implies `--diff-merges=first-parent`, so a merge of `main` INTO the task branch lists all of main's files and the check
+  goes red on a correct branch (confirmed by the spec reviewer with git 2.53.0 in a throwaway repo). The trigger that makes it live is M9's
+  "Require branches to be up to date" (GitHub's "Update branch" makes exactly that merge). On registry `main` today the check prints
+  NOT-APPLICABLE (092 is merged) and no other script uses the pattern (`git grep`, e2f7fe3), so the risk is latent: copying (warned in
+  008c's brief). The comment at `092-verify.sh:657-658` ("lists no files for merge commits") is wrong and is rewritten.
+  **Definition (Q6, manager ★ A):** a merge C on the first-parent chain `TIP..HEAD` is a *merge from main* only if every commit in
+  `C^1..C^2` is reachable from the local ref `refs/remotes/origin/main` (or `refs/heads/main` when there is no remote). Local read, no
+  network; main advances only by merges, so a past merge from main stays an ancestor of current main. If neither ref exists, or `C^2` is
+  not an ancestor of it, the merge is not from main. A merge not from main contributes every file of `git diff --name-only C^1 C^2`. For
+  **every** merge, the files of `git diff-tree --cc --name-only -r C` (differing from all parents: conflict resolutions and evil-merge
+  edits) are added to the set. Non-merge first-parent commits are listed as today. An octopus merge (more than two parents) is RED. A
+  stale clone whose main predates the merge therefore gives RED, never a skip; this is accepted and stated in the script header. The
+  log records the exact commands and `git --version`.
+  Source file: `docs/tasks/092-verify.sh` (1 file). Disjoint from A1/A2/B/C, any order; dispatch only after this part's spec approval.
+- D context (in addition to the umbrella list): registry `docs/tasks/092-artifact-naming-archive-url.md` (log lines 365-412),
+  `docs/tasks/092-verify.sh` lines 640-720.
+- D criteria (shipped as `089d-verify.sh`; mechanism: it pins the red and the fixed commit of `092-verify.sh` as full 40-character SHAs,
+  extracts `post_tip_check` from each with `git show <sha>:docs/tasks/092-verify.sh` and a sed range between two marker lines named in
+  the script, evaluates each with stub `G`/`pass`/`fail` in a temp clone, never reads the worktree or HEAD, and asserts every extraction
+  is non-empty as a positive control):
+  (a) red first: TIP + a merge of a synthetic `main` commit that changes a file outside `docs/tasks/092-*` into the branch: unfixed RED,
+      fixed GREEN; and the same with a main commit that changes a file the branch does not touch, resolved to main's version: GREEN.
+  (b) controls RED after the fix: (b1) a post-TIP branch commit touching a non-092 file; (b2) a merge from main whose resolution differs
+      from both parents, twice: a modified main-supplied file, and a new file; (b3) a `--no-ff` merge of a non-main side branch touching
+      a non-092 file; (b4) an octopus merge; (b5) main ref absent.
+  (c) the existing AC9 controls (BASE..FINAL red, unreachable pin red, non-ancestor TIP red, merged case prints NOT-APPLICABLE (merged))
+      pass unchanged in the fixed script; the merged-case control is kept byte-for-byte.
+  (d) `092-verify.sh` default and `--live-selftest` exit 0 on registry main, and standalone `039a-verify.sh <node_modules>` passes; each
+      run alone on a quiet machine (`ps` logged), `PYTHONDONTWRITEBYTECODE=1`, output pasted; `--live` (network) not required.
+  (e) mutation: restoring the old `git log --first-parent --name-only` pattern in a temp copy reddens (a) and only (a).
+  (f) scope: `git diff --name-only` for part D equals exactly `docs/tasks/092-verify.sh`, `docs/tasks/089d-verify.sh` and this task file;
+      inside `092-verify.sh` the hunks touch only the post-TIP comment, `post_tip_check`, its controls and the one call-site line; 092's
+      pins (BASE, FINAL, TIP) and `own_change_checks` are unchanged (a hunk elsewhere is a finding).
+- D forbidden: skipping or relaxing the post-TIP check for any merge; replacing it with `--no-merges` alone; using `HEAD`/`origin/main`
+  as a skip condition; changing or removing the existing AC9 controls.
 
 ## File scope (declared)
 Exactly these, and nothing else:
@@ -105,9 +129,11 @@ Fixed scripts and tests as in File scope; `089-verify.sh` (or `089a/b/c`) with r
 - Q4: S2 - `057-verify.sh:30` ADR-0121 status | options: A) read the ADR at a pinned commit; B) a fixture blob in the verify script directory | assumed: A | built on assumption: line 30 only
 - Q5: the split in Size | options: A) four parts A1/A2/B/C, B first; B) two tasks; C) one task | assumed: A (splitting is the default) | built on assumption: none yet; one task file per part is cut at dispatch
 - A (manager ★, session 12): A.
+- Q6: part D - how "a merge from main" is identified offline | options: A) local ref check: every commit of `C^1..C^2` reachable from `refs/remotes/origin/main` (else `refs/heads/main`), absent ref = not from main; B) any second parent counts as main; C) `--no-merges` | assumed: A | A (manager ★, session 13, after spec review finding 1): B and C let a side branch's non-092 files through unseen.
 
 ---
 # Task 089 log  (append-only, updated continuously by the executing agent)
 - 2026-10-26 doc-writer (session 12): drafted from the 088 inventory. Not yet reviewed. No pins re-derived; the pins in the table are the inventory's.
 - 2026-10-26 manager (session 12): independent spec review PASS-WITH-AMENDMENTS folded in (mechanical). Mapping: split A -> A1/A2 with file counts (review 1); S2 only in A2 (2); B-first justified, 092 dropped as dependency (3); finding 12 conditional in AC1/AC4 (4); Q2 -> B, test AC9ProductionR11Unconfigured moved to 039a-verify (5); S1 reachability criterion (6); full 40-char SHAs in pin tables (7); Q3 consequence stated (8). Status set to spec-approved.
 - 2026-10-28 manager (session 13): part D added (post-TIP merge-into-branch defect in `092-verify.sh`, booked in session 12's final status); File scope extended by `092-verify.sh` (AC9 post-TIP only) and `089d-verify.sh`. Scope change: part D needs an independent spec review before its dispatch; parts A1/A2/B/C keep their approval.
+- 2026-10-28 manager (session 13): part D independent spec review PASS-WITH-AMENDMENTS (9 findings: 2 HIGH, 4 MED, 3 LOW), all folded in: (1 HIGH) definition of a merge from main, Q6 ★ A; (2 HIGH) main-file GREEN case in (a), two-form resolution control (b2); (3 MED) side-branch and octopus controls (b3, b4); (4 MED) red/fixed extraction mechanism; (5 MED) D forbidden list; (6 MED) scope (f) with hunk limits and unchanged pins, 039a run in (d); (7 LOW) quiet-machine rule in (d); (8 LOW) context lines; (9 LOW) dispatch after D's approval. Part D **spec-approved** (manager; amendments are the reviewer's text, no decision changed beyond Q6 ★).
