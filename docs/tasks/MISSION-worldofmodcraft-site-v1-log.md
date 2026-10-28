@@ -2681,3 +2681,12 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   observation: "Update branch" re-triggers `gate`. #26 closed unmerged with a comment; remote branch deleted; local worktree removed. The
   local branch `task/039-l3-invalid-schema` in `~/registry` stays (git-guard refuses `branch -D`; harmless; Ludwig may delete it).
   Next for Ludwig: **M10** (membership-read App; L1 and L3 have passed), then M11.
+- **M10 done (Ludwig, 2026-10-28: "M10 klar, appen heter worldofmodcraft-membership").** Secret names verified (`gh secret list`, names
+  only): `REGISTRY_MEMBERSHIP_APP_ID` 12:35:45Z, `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY` 12:36:07Z. **Live check (task 039 U6) passed:** registry
+  PR #28 (`mods/test.m10-probe/entry.json`, owner = the org, from `womcraft`): App present, token minted (`owner: worldofmodcraft`,
+  `permission-members: read`), run log `MEMBERSHIP_STATUS: 204` (no redirect), `gate` pass, comment "all checks pass" with the reserved-namespace
+  note. Closed unmerged, branch deleted, worktree removed. Observation: the token action logs "Creating token for all repositories owned by
+  worldofmodcraft" (no `repositories` input); the App is installed on `registry` only (Ludwig, step 8), so the scope is that one repo [per the
+  install choice; not separately verified]. Manager slip, harmless: a stray `git checkout --detach origin/main` in `~/registry` was reverted at
+  once (clone back on `main`, clean).
+  Next for Ludwig: **M11** (environments `signing`/`write-back`; delete repo-level copies of both keys) — before 008b goes live.
