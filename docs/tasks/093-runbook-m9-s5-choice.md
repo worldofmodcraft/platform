@@ -1,6 +1,6 @@
 # Task 093: runbook M9 step 7 records Ludwig's S5 choice
 
-- **Mission:** SITE-V1 (runbook hygiene) — **Status:** spec-approved 2026-10-28 (manager, solo: small doc-only task; SPEC-CHECKLIST items checked in session)
+- **Mission:** SITE-V1 (runbook hygiene) — **Status:** done 2026-10-28 (spec-approved same day, manager solo)
 - **Agent / model:** doc-writer (model per its frontmatter) — **Budget:** small (1 agent-session)
 - **Branch / worktree:** `task/093-runbook-m9-s5` / `~/wt/task-093` — **platform** repo
 
@@ -30,3 +30,17 @@ Any other runbook step; M10/M11 text; the vault copy (refreshed by `tools/vault/
 ---
 # Task 093 log  (append-only)
 - 2026-10-28 manager (session 13): drafted and spec-approved; booked follow-up from session 12's handover (item 6).
+- 2026-10-28 doc-writer: verified the decision in the mission log ("### Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna", S5 = tick
+  "Require a pull request before merging", leave "Do not allow bypassing" unticked). Edited M9 only: step 7 (decision + cited, costs kept as
+  reason), step 8 (added (b) the open L3 PR, merge button must be blocked, live check L4), final "Emergency path" paragraph (now records the
+  decision). New UI labels: none; "bypass option" for an administrator in step 8 is marked `[unverified]`; "merge button" is descriptive, not a
+  quoted label. Sub-options of "Require a pull request before merging": "leave at defaults", none named. Criterion 5 (run after commit, below).
+- 2026-10-28 doc-writer: criterion 5 commands and output (run on the committed branch):
+  `git diff --name-only origin/main...HEAD` -> `docs/runbooks/site-v1-manual-steps.md`, `docs/tasks/093-runbook-m9-s5-choice.md`.
+  `git diff -U0 origin/main...HEAD -- docs/runbooks/site-v1-manual-steps.md | grep '^@@'` -> hunks at old/new lines 322, 329->331, 332->336, 342->349;
+  `grep -n '^## ☐ M9\|^## ☐ M10'` -> M9 starts line 303, M10 line 354; all hunks lie inside 303-353 (M9 only).
+- 2026-10-28 doc-writer (fix round): F1-F5 done in M9 only. F1 step 7: sub-options now checked, stop-and-tell-manager if "Require approvals"/a number is shown, pre-tick and "no such account" marked `[unverified]`, one-sentence reason. F2 step 8(b): expected = ordinary merge button greyed/missing, `gate` failing and Required; administrator merge-anyway option (wording `[unverified]`) must NOT be clicked; clickable ordinary button = stop, M9 not done. F3: after L4, do not merge or close the L3 PR, tell manager "L4 blocked", manager closes it. F4: "administrator can merge past a red gate" marked `[unverified]` in step 7 and Emergency path. F5: step 8(a) wording changed (any open PR, L3/registry #26, none = tell manager); "You should see" mentions L3 blocked.
+  Criterion 5 re-run on the committed branch: `git diff --name-only origin/main...HEAD` -> `docs/runbooks/site-v1-manual-steps.md`, `docs/tasks/093-runbook-m9-s5-choice.md`.
+  `git diff -U0 origin/main...HEAD -- docs/runbooks/site-v1-manual-steps.md | grep '^@@'` -> new-side hunks start at lines 322, 335, 347, 354 (old 322, 329, 335, 342);
+  `grep -n '^## ☐ M9\|^## ☐ M10'` -> M9 line 303, M10 line 359; all hunks inside 303-358 (M9 only).
+- 2026-10-28 manager (session 13): independent review PASS-WITH-AMENDMENTS (F1-F5); fix round 545272a applied all five verbatim; manager read the delta diff (M9 only, hunks 322-358); log check exit 0. Status done; PR opened and merged.

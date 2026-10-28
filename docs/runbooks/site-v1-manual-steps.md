@@ -319,28 +319,44 @@ pull request yourself.
    designed around it, and without it a pull request that was green against an old `main` could merge.
 6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
    yet: stop, tell the manager, come back later.
-7. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
-   **Open choice, Ludwig decides; until then the box stays unticked as written** (security review S5): leaving everything else
-   unticked has two costs. Without **Require a pull request before merging**, an account with write access can push to `main`
-   directly and skip `gate` altogether. Without **Do not allow bypassing the above settings**, an administrator can merge past a
-   red `gate`. Ticking them closes both, at the price of an emergency path (see the last paragraph below). Tell the manager
-   which way you decide; the manager does not decide it for you.
+7. Also tick **Require a pull request before merging**. Then look at the options that appear under it. Directly under that
+   tick box, indented a little, there should be a line **Require approvals** with a small box or drop-down beside it showing `1`
+   `[unverified]` (placement and wording are from the manager's memory of GitHub's classic branch-protection page; Ludwig
+   confirms them when he does M9). If **Require approvals** is ticked, **untick it** (Ludwig's choice A, 2026-10-28; mission log,
+   "Ludwig, 2026-10-28 (verbatim)"). If it is not ticked, change nothing under it. If the page looks different (for example it is
+   called Rulesets), or you cannot find that line, **stop before you click Create or Save changes and tell the manager**.
+   Whether GitHub pre-ticks it is `[unverified]`.
+   Why it matters: a required approval must come from an account other than the pull request's author that has write access, and
+   the project has no such account today `[unverified]`, so it could block every normal merge.
+   Leave **Do not allow bypassing the above settings** **unticked**. Do not tick anything else.
+   Click **Create** (new rule) or **Save changes** (existing rule).
+   **Decided, Ludwig 2026-10-27 (security review S5; mission log, "Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna"):**
+   tick the first, leave the second unticked. The reason is the two costs of the alternatives. Without **Require a pull request
+   before merging**, an account with write access can push to `main` directly and skip `gate` altogether, so it is ticked.
+   Without **Do not allow bypassing the above settings**, an administrator can merge past a red `gate` `[unverified]`; that stays possible on
+   purpose, as the emergency path (see the last paragraph below).
 8. **Confirm the rule works before you call M9 done (live check L1, `[unverified]`: task 039 U1).** Open a real pull request
-   into `main` (the manager's infrastructure test PR is enough) and look at its merge box. `gate` must be listed with the word
-   **Required** next to it. Basis: the check is produced by a `pull_request_target` run, and whether GitHub counts that run as
-   satisfying a required check on the PR head `[unverified]` has not been seen. If `gate` is missing, or is not marked
-   "Required", or the box says it is "Expected" and waiting forever: **stop and tell the manager. M9 is not done.**
+   into `main` and look at its merge box. (a) Use the manager's infrastructure test PR, or any other open PR (the L3 PR, registry
+   #26, works too); if none is open, tell the manager. `gate` must be listed with the word **Required** next to it. Basis: the
+   check is produced by a `pull_request_target` run, and whether GitHub counts that run as satisfying a required check on the PR
+   head `[unverified]` has not been seen. If `gate` is missing, or is not marked "Required", or the box says it is "Expected" and
+   waiting forever: **stop and tell the manager. M9 is not done.**
+   (b) Then look at the manager's open L3 pull request (invalid schema, so its `gate` is red; live check L4). Expected: the ordinary
+   merge button is greyed out or missing, and `gate` shows as failing and Required. If GitHub offers an administrator option to merge
+   anyway (wording `[unverified]`), **DO NOT click it**: that would merge the deliberately invalid pull request. Only if the
+   ordinary merge button is clickable: **stop and tell the manager. M9 is not done.**
+   When you have seen L4, do not merge or close the L3 pull request. Tell the manager "L4 blocked"; the manager closes it.
 
 *You should see:* on the Branches page the rule for `main` listing "Require status checks to pass" with `gate` under it.
-Then open any open pull request: the merge box says "Required" next to `gate`. Pull requests that touch nothing under
+Then open any open pull request: the merge box says "Required" next to `gate`; the L3 pull request is blocked. Pull requests that touch nothing under
 `mods/` stay mergeable (their `gate` is green by design, and says that human review is required).
 **Infrastructure pull requests (S6):** a pull request that touches only paths outside `mods/` (for example `.github/workflows/` or
 `tools/registry/`) takes the infrastructure route and is green without any mods check. Such a pull request changes the gate
 itself, so merging it needs a careful human read of the diff, every time; green means nothing there.
 `[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
 documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
-Emergency path: ticking "Do not allow bypassing the above settings" means nobody, administrators included, can merge past a red
-`gate`, even in an emergency. That is the S5 choice in step 7; tell the manager which way you chose.
+Emergency path (kept, per the S5 decision in step 7): because **Do not allow bypassing the above settings** is left unticked, an
+administrator can still merge past a red `gate` in an emergency `[unverified]`. Everyone else is blocked by the required check.
 
 ---
 
