@@ -5,11 +5,14 @@
 set -u
 cd "$(git rev-parse --show-toplevel)"
 export PYTHONDONTWRITEBYTECODE=1
-BASE=${T072_BASE:-d9d48de}
-FINAL=${T072_FINAL:-7df8a50979cc834918871ba948aa9ed7e9eb4352}
+# Task 090: BASE/FINAL are fixed pins, no environment override (078/085 rule). REG is a LOCATION (a live read of the registry's origin/main), not a pin.
+BASE=d9d48de
+FINAL=7df8a50979cc834918871ba948aa9ed7e9eb4352
 REG=${T072_REGISTRY:-/home/ludwig/registry}
 fail=0
 for c in "$BASE" "$FINAL"; do git cat-file -e "$c^{commit}" 2>/dev/null || { echo "FAIL pin $c unreachable"; exit 1; }; done
+[ -d "$REG" ] && [ "$(git -C "$REG" rev-parse --is-inside-work-tree 2>/dev/null)" = true ] && [ "$(git -C "$REG" rev-parse --show-toplevel 2>/dev/null)" = "$(cd "$REG" && pwd -P)" ] || { echo "FAIL registry $REG is not a git repository (its own top level)"; exit 1; }
+git -C "$REG" rev-parse --verify -q "origin/main^{commit}" >/dev/null 2>&1 || { echo "FAIL registry origin/main does not resolve in $REG"; exit 1; }
 git -C "$REG" cat-file -e origin/main 2>/dev/null || { echo "FAIL registry origin/main missing in $REG"; exit 1; }
 
 MAP=$(cat <<'MAPEOF'

@@ -117,6 +117,7 @@ mkclone "$TMP/n" "$(git rev-parse HEAD)"; cp "$HERE/docs/tasks/085-verify.sh" "$
 ( cd "$TMP/n" && sed -i -e 's/^## ☐ M4 /## ☑ M4 /' -e 's/^\*\*Last reviewed: 2026-10-15 (task 068)\./**Last reviewed: 2026-11-01 (task 999)./' "$RB" \
   && git add -A && git "${GITID[@]}" commit -q -m "throw-away later task: M4 done, Last reviewed moved" ) || { echo "nested setup failed"; exit 2; }
 grep -q '^## ☑ M4 ' "$TMP/n/$RB" && ok "later commit on top of HEAD ticked M4 and moved Last reviewed (throw-away)" || bad "nested later setup did not apply"
+grep -qF 'Last reviewed: 2026-10-15 (task 068)' "$TMP/n/$RB" && bad "nested: Last reviewed substitution applied (old string still present)" || { grep -qF 'Last reviewed: 2026-11-01 (task 999)' "$TMP/n/$RB" && ok "nested: Last reviewed substitution applied" || bad "nested: Last reviewed substitution applied (new string absent)"; }
 expect_green nested "$TMP/n" docs/tasks/085-verify.sh
 # mutate the pinned content: a commit that reverts M6 and ticks nothing else back; PIN_FINAL of the copy points at it
 mkclone "$TMP/m" "$(git rev-parse HEAD)"; cp "$HERE/docs/tasks/085-verify.sh" "$TMP/m/docs/tasks/085-verify.sh"

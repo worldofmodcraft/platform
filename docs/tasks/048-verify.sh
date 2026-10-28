@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Task 048 verification artefact (MANAGER.md section 2c).
-#   docs/tasks/048-verify.sh            checks AC1-AC7: c1 (own change) on the task's PR range PIN_BASE..PIN_FINAL, c2-c7 on HEAD
+#   docs/tasks/048-verify.sh            checks AC1-AC7: c1 and c4 (own change) on the task's PR range PIN_BASE..PIN_FINAL, c2, c3, c5-c7 on HEAD
 #   docs/tasks/048-verify.sh --mutate   additionally applies each mutation AC10 names to a temp copy and requires
 #                                       the matching check to go red (positive control first: the clean tree must be green)
 # AC8 and AC9 are live (tool name; nesting refused; maxTurns run) and AC11 is human: none of them is covered here.
@@ -86,11 +86,12 @@ assert d["hooks"]["PreToolUse"], "empty"
     [ -n "${TURNS[$name]:-}" ] || bad "c3: unexpected agent file $name.md (not in the table)"
   done
 
-  # ---- c4: token-guard marker -----------------------------------------------------------------------------
+  # ---- c4: token-guard marker (OWN-CHANGE, task 090: reads the pinned FINAL export T1, never HEAD; Ludwig revoking the
+  # suspension later must not redden a closed task. The live guard of the marker is 079-verify.sh / check-rule0.sh.) ----
   local m ln1 ln2
   for f in CLAUDE.md docs/manager/MANAGER.md; do
-    ln1=$(grep -n 'SUSPENDED by Ludwig 2026-10-14' "$T/$f" | head -1 | cut -d: -f1)
-    ln2=$(grep -n "Ludwig's Claude Max subscription is shared" "$T/$f" | head -1 | cut -d: -f1)
+    ln1=$(grep -n 'SUSPENDED by Ludwig 2026-10-14' "$T1/$f" | head -1 | cut -d: -f1)
+    ln2=$(grep -n "Ludwig's Claude Max subscription is shared" "$T1/$f" | head -1 | cut -d: -f1)
     if [ -z "$ln1" ]; then bad "c4: $f has no SUSPENDED marker";
     elif [ -z "$ln2" ]; then bad "c4: $f lost the sentence \"Ludwig's Claude Max subscription is shared\"";
     elif [ "$ln2" -gt "$ln1" ]; then ok "c4: $f marker (line $ln1) precedes the retained sentence (line $ln2)";
@@ -171,11 +172,11 @@ MFAIL=0
 mutate() {
   local name="$1" tag="$2" snippet="$3" T
   local clean1="$T0" T1
-  # a c1 mutation edits the pinned FINAL export (what c1 measures); every other mutation edits the HEAD tree
-  if [ "$tag" = c1 ]; then T="$(fresh_tree m "$PIN_FINAL")"; clean1="$F0"; else T="$(fresh_tree m)"; fi
+  # a c1 or c4 mutation edits the pinned FINAL export (what c1 and c4 measure); every other mutation edits the HEAD tree
+  if [ "$tag" = c1 ] || [ "$tag" = c4 ]; then T="$(fresh_tree m "$PIN_FINAL")"; clean1="$F0"; else T="$(fresh_tree m)"; fi
   ( cd "$T" && T="$T" eval "$snippet" ) 2>"$TMP/merr"
   if diff -rq "$clean1" "$T" >/dev/null 2>&1; then echo "FAIL mutation '$name': no-op, the tree did not change"; MFAIL=1; return; fi
-  if [ "$tag" = c1 ]; then run_checks "$T0" "$T" > "$TMP/mut.out"; else run_checks "$T" "$F0" > "$TMP/mut.out"; fi
+  if [ "$tag" = c1 ] || [ "$tag" = c4 ]; then run_checks "$T0" "$T" > "$TMP/mut.out"; else run_checks "$T" "$F0" > "$TMP/mut.out"; fi
   local new; new=$(grep "^FAIL ${tag}" "$TMP/mut.out" | grep -vxFf <(grep '^FAIL' "$TMP/clean.out") | head -1 || true)
   if [ -n "$new" ]; then echo "ok   mutation '$name' -> red: ${new:0:150}"; else echo "FAIL mutation '$name' did NOT turn ${tag} red"; MFAIL=1; fi
 }
