@@ -300,17 +300,28 @@ menu is missing or says the feature needs a paid plan, stop and tell the manager
 
 ---
 
-## ☐ M9 — Make `gate` a required check on `registry`  (task 039, C4-C10; sequenced after the first live run)
+## ☑ M9 — Make `gate` a required check on `registry`  (task 039, C4-C10; sequenced after the first live run)
 **Why:** every pull request to `registry` gets one automatic check named `gate` (task 039). Until you make it *required*,
 GitHub lets a pull request merge even when `gate` is red. **When:** only after the workflow has run once on a real pull
 request: the check name appears in the selector below only after it has run `[unverified]` (task 039 U2). The manager will
 tell you when that has happened (live check L1: an infrastructure pull request shows `gate` green). Budget ~5 minutes.
+**Status: done (Ludwig, 2026-10-28).** Ludwig reported "Klart för M9 med gate" (mission log, session 13, 2026-10-28). The manager read the
+rule back through the API (`gh api .../branches/main/protection`): required status check `gate` (app 15368), `strict: true` ("up to date"),
+a pull request required with `required_approving_review_count: 0` (choice A of step 7), `enforce_admins: false` (the S5 emergency path).
+**Live check L4 done:** registry PR #26 (the L3 invalid-schema pull request) was `BEHIND` (not decisive), so the manager updated its branch
+through the REST `update-branch` endpoint; `gate` re-ran red and `mergeStateStatus` became `BLOCKED` (head `e37c243`). PR #26 was then
+closed unmerged and its remote branch deleted. Not verified by the manager: which screen Ludwig clicked through (the Step 2 sidebar
+wording below is from his report, not from a screenshot).
 **What this does not do:** a green `gate` means "the automatic checks pass", never "approved". You still read and merge every
 pull request yourself.
 
 1. Open `https://github.com/worldofmodcraft/registry` → **Settings**. (If you cannot see it, click the **...** menu, then
    **Settings**.)
-2. Left sidebar, under "Code, planning, and automation": **Branches**.
+2. Open `https://github.com/worldofmodcraft/registry/settings/branches` directly (this is the route Ludwig used on 2026-10-28).
+   Or, in the left sidebar of Settings, look for **Branches** under whichever heading holds it. The sidebar heading varies:
+   Ludwig did not find "Code, planning, and automation" on 2026-10-28 (mission log, session 13: "\"Code planning and automation\"
+   finns inte i sidebaren för M9 på registry/settings"), and what the heading is called today is `[unverified]` (the manager suggested
+   "often 'Code and automation'" without having seen the page). If only **Rulesets** appears and no **Branches**, stop and tell the manager.
 3. If a rule for `main` already exists under "Branch protection rules", click **Edit** on it and keep every setting it already
    has. Otherwise click **Add classic branch protection rule**. Under **Branch name pattern** type `main`.
    (Whether a rule exists today is `[unverified]`: private settings; tell the manager what you find.)
@@ -360,7 +371,7 @@ administrator can still merge past a red `gate` in an emergency `[unverified]`. 
 
 ---
 
-## ☐ M10 — The membership-read App  (task 039 §4, choice C5; do this AFTER live checks L1 and L3 pass)
+## ☑ M10 — The membership-read App  (task 039 §4, choice C5; do this AFTER live checks L1 and L3 pass)
 **Why:** the namespaces `mc` and `test` accept a pull request only from an organisation member (ADR-0119 §3), and only the
 organisation can say who is a member. This is a **separate, read-only** App: it must not be the pipeline App (M5), whose key
 can write, and **`PIPELINE_APP_PRIVATE_KEY` is never used by the CI check**. Until M10 is done, every pull request into a
@@ -368,6 +379,13 @@ reserved namespace is rejected by the check ("status none"): that is accepted fo
 (`test:hello-world`). **When:** after the manager reports L1 (infra PR green) and L3 (invalid-schema PR red, closed) done; no
 secret exists before then, so the gate is proven first without it. Budget ~15 minutes.
 **You never paste a secret into chat, a file or an issue.**
+**Status: done (Ludwig, 2026-10-28).** Ludwig reported "M10 klar, appen heter worldofmodcraft-membership" (mission log, session 13,
+2026-10-28). The manager verified the secret names only (`gh secret list`): `REGISTRY_MEMBERSHIP_APP_ID` (12:35:45Z) and
+`REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY` (12:36:07Z). **Live check (task 039 U6) passed:** registry PR #28 (`mods/test.m10-probe/entry.json`,
+owner = the organisation, from `womcraft`): token minted (`owner: worldofmodcraft`, `permission-members: read`), run log
+`MEMBERSHIP_STATUS: 204` (no redirect), `gate` pass, comment "all checks pass" with the reserved-namespace note; PR #28 closed unmerged.
+Not separately verified: the token action logged "Creating token for all repositories owned by worldofmodcraft", and the App is installed
+on `registry` only per Ludwig's step 8, so the scope is that one repository `[unverified]`.
 
 1. Open `https://github.com/organizations/worldofmodcraft/settings/apps/new` (or: profile picture → **Your organizations** →
    **Settings** beside worldofmodcraft → **Developer settings** → **GitHub Apps** → **New GitHub App**).
@@ -403,13 +421,24 @@ members; that check closes it.
 
 ---
 
-## ☐ M11 — Bind the signing key and the App key to `main`  (task 082, choice C20 as extended; before task 008b goes live)
+## ☑ M11 — Bind the signing key and the App key to `main`  (task 082, choice C20 as extended; before task 008b goes live)
 **Why:** a workflow's `if: github.ref == 'refs/heads/main'` only protects the *unmodified* file. Anyone with write access to
 `registry` can push a branch with an edited workflow and, while the secrets are ordinary repository secrets, that branch's run
 can read them. An Actions **environment** limited to the branch `main` is what actually keeps the secret away from every other
 branch. Two secrets get one environment each: `MINISIGN_SECRET_KEY` in `signing`, `PIPELINE_APP_PRIVATE_KEY` in
 `write-back`. Until M11 is done, every account with write access to `registry` is inside both keys' trust boundary. Nothing
 uses the keys yet (task 008b is not live), so there is no exposure today. Budget ~20 minutes.
+
+**Status: done (Ludwig, 2026-10-28).** Ludwig reported "M11 done" and noted that he had two `.pem` files and chose the newer one (mission
+log, session 13, 2026-10-28). The manager read the API (names and timestamps only): environments `signing` and `write-back`, each with a
+`branch:main` deployment policy; `signing` holds `MINISIGN_SECRET_KEY` (14:36:25Z), `write-back` holds `PIPELINE_APP_PRIVATE_KEY`
+(14:38:07Z); the repository secrets are now only `REGISTRY_MEMBERSHIP_APP_ID` and `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY`. Secret values
+were never read. Ludwig named the file as `worldofmodcraft-pipeline.2026-10-27.private-key.pem(1)` and said he then created a newer key,
+so the `write-back` secret holds a key of the pipeline App from 2026-10-27 (Ludwig's file name); that it is valid is `[unverified]` until
+task 008b-3b's first live token mint proves it. **Open hygiene item:** after that first live run, delete the pipeline App's unused private
+keys on its App page (it has several active keys: 2026-10-15 and one or two from 2026-10-27) and keep one offline backup. **Still
+unconfirmed:** the offline backup of the minisign key (Q-H); the manager recommended one. The manager checked only that
+`~/wom-keys/worldofmodcraft.key` exists (`ls -l`: 262 bytes, 2026-09-02); its contents were never read.
 
 **READ THIS BEFORE YOU DELETE ANYTHING.** GitHub never shows a secret's value again, so you cannot "move" a secret: you must
 **type it in again** from your own backup, and only then delete the repository-level copy. You need both:
