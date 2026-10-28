@@ -35,3 +35,7 @@ Any other runbook step; M10/M11 text; the vault copy (refreshed by `tools/vault/
   reason), step 8 (added (b) the open L3 PR, merge button must be blocked, live check L4), final "Emergency path" paragraph (now records the
   decision). New UI labels: none; "bypass option" for an administrator in step 8 is marked `[unverified]`; "merge button" is descriptive, not a
   quoted label. Sub-options of "Require a pull request before merging": "leave at defaults", none named. Criterion 5 (run after commit, below).
+- 2026-10-28 doc-writer: criterion 5 commands and output (run on the committed branch):
+  `git diff --name-only origin/main...HEAD` -> `docs/runbooks/site-v1-manual-steps.md`, `docs/tasks/093-runbook-m9-s5-choice.md`.
+  `git diff -U0 origin/main...HEAD -- docs/runbooks/site-v1-manual-steps.md | grep '^@@'` -> hunks at old/new lines 322, 329->331, 332->336, 342->349;
+  `grep -n '^## ☐ M9\|^## ☐ M10'` -> M9 starts line 303, M10 line 354; all hunks lie inside 303-353 (M9 only).
