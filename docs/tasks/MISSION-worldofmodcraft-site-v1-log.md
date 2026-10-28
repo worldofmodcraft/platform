@@ -2783,3 +2783,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   (from its Q5): `008a-verify.sh` section 2 greps `build-pipeline.md`/`manifest-reader.md` headings at HEAD (possibly own-change) -> a later
   umbrella part F. All six 089 parts are now phase-1 complete; the quiet-machine queue is 089b readout, 096, 008b-1, 090, 089e, 089c, 089d,
   089a2, 089a1 (short scripts first).
+- **089b driver:** L2-039a-full-on-HEAD **exit 0, ALL CHECKS PASSED** (15:57Z-21:22Z, 5.4 h). L3 (whole 039a on HEAD + four synthetic later
+  branches) started 21:22Z; expected ~03:00Z. Decision ★: meanwhile, **static pre-phase-2 reviews** (reviewer agents, read-only, no verify runs)
+  of the eight phase-1 branches (090, 096, 008b-1, 089a1, 089a2, 089c, 089d, 089e), so harness bugs are found before the quiet-machine runs;
+  the formal review after phase 2 is then a delta review.
