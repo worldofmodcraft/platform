@@ -2755,3 +2755,11 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   from merge `c323460`, match the spec), 072/080 env pin overrides removed, 072 `REG` assertion, 085 nested `Last reviewed` check, 079 live-guard
   comment; `090-verify.sh` (324 lines) written, not run. Two agent questions answered from the spec (in the 090 log). Phase-2 commands are in the
   090 log. **Quiet-machine queue when the 089b driver exits:** 089b readout -> 096 phase 2 -> 008b-1 phase 2 -> 090 phase 2 (one at a time).
+### Ludwig's ruling, 2026-10-28 evening (verbatim): "Vill att du kör hela natten tills imorgonbitti. Du har rätt att ignorera context limit, alla beslut kommer vara stjärna (men loggför besluten som vanligt), endast saker där min input verkligen behövs och du inte kan göra det själv skickas till mig imorgonbitti"
+- Manager's reading (logged per §8b): overnight run until the morning of 2026-10-29. §5 planned-handover thresholds suspended for tonight only
+  (compaction caution §5.5 still applies: verify against disk after any compaction). Every manager decision takes the ★ option and is logged
+  as usual; §8 "two consecutive stop-and-ask" halt does not apply to ★-resolved items. Items that truly need Ludwig are parked under
+  "For Ludwig" and delivered in the morning; independent chains continue.
+- **Not read into the ruling (stays Ludwig-only, §7):** merges touching CI security checks (e.g. 008b-3a), signing/keys, `docs/decisions/`,
+  mission specs, doctrine, takedowns; credentials (rule 11). Ordinary task PRs merge on the manager's authority when §7's conditions hold.
+  Expires at the morning handover; not a precedent.
