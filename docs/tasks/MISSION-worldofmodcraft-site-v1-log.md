@@ -2674,3 +2674,10 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   sidebar heading is wrong for today's GitHub. Manager gave the direct URL `.../registry/settings/branches` and "look for **Branches** under any
   heading (often 'Code and automation')", stop and describe if only Rulesets appear. **Booked:** small doc task after M9 to correct step 2 from
   what Ludwig actually sees.
+- **M9 done (Ludwig, 2026-10-28: "Klart för M9 med gate").** Manager verified via `gh api .../branches/main/protection`: required check
+  `gate` (app 15368), `strict: true` (up to date), PR required with `required_approving_review_count: 0` (choice A), `enforce_admins: false`
+  (S5 emergency path). **L4 done:** PR #26 was `BEHIND` (not decisive), so the manager updated its branch via the REST `update-branch`
+  endpoint (installed `gh` lacks `pr update-branch`); `gate` re-ran red and `mergeStateStatus` became `BLOCKED` (head `e37c243`). Bonus
+  observation: "Update branch" re-triggers `gate`. #26 closed unmerged with a comment; remote branch deleted; local worktree removed. The
+  local branch `task/039-l3-invalid-schema` in `~/registry` stays (git-guard refuses `branch -D`; harmless; Ludwig may delete it).
+  Next for Ludwig: **M10** (membership-read App; L1 and L3 have passed), then M11.
