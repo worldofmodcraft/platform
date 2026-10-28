@@ -2799,3 +2799,14 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   mutation literals (closed-script coupling); F2-F4 minor. Decision ★ for F1: extend 089a2's scope by `062-verify.sh` (those mutation literals only;
   4 source files, within cap) rather than keep short pins (umbrella criterion 2 requires full SHAs), plus a cross-script check in 089a2-verify.sh.
   Fix rounds dispatched (phase 1, red-first fixtures written per §2c rule 5, shown red in phase 2).
+- **Ludwig (verbatim):** "Såhär, tänker att min Mario Party-mod inte bör påverka några ADRs som så eftersom hela tanken med mod API-upplägget är
+  att kunna göra moddar på detta sättet helt fristående från varandra". Manager check: no ADR holds mod content; but ADR-0001:16 ("the reference
+  implementation that drives the kernel API from real needs") and ADR-0050:17, :28 ("Step 1 — first real roguelike feature", "Breadth, driven by the
+  roguelike") make the roguelike the platform's build-order driver. Decision ★: 098's design doc is the main deliverable, framed as a standalone mod
+  on the mod API; the ADR proposal shrinks to a conditional amendment of only those 0001/0050 sentences, pending Ludwig's answer (A ★ party mod
+  becomes the reference mod; B no ADR change, roguelike stays reference; C both). 098 agent redirected.
+- **Static reviews complete (8/8):** 090 PASS-WITH-AMENDMENTS (2 HIGH harness: silent setup failures can end "ALL CHECKS PASSED"; mutations count
+  any FAIL as red), 096 PWA, 008b-1 PWA (F1 MED: deeply nested entry.json -> RecursionError crashes the whole planner), 089a2 RETURN (062 coupling),
+  089a1 PASS, 089c PWN, 089d PWN, 089e PASS. Fix rounds dispatched for all eight (phase 1; fixtures before fixes; authors resumed where they were
+  this session's; 008b-1 implementer and 096 qa-engineer fresh). Two review agents (089c, 089a1) ended on an API safeguard error after delivering
+  their full reports (request ids in the transcript); reports were complete and used.
