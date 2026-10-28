@@ -2615,3 +2615,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   docs "RFC 3339 UTC" too narrow; (5 MED) the scope check's "tolerates merges from main" claim is false (fixed base) -> merge-base with
   origin/main, absent = FAIL. Fix round dispatched (baseline 11), red-first per §2c rule 5.
   **Booked follow-up:** 008a's `build_version` likely has the same `\d` Unicode-digit gap (reviewer inference, not checked) -> its own task.
+- **008c fix round 1** (`84a236b`): manager re-run in a fresh GitHub clone green (suite 40, 24 mutations red, scope self-test 4/4). Delta
+  review PASS-WITH-AMENDMENTS, one MED: `re.ASCII` also made `\S` accept Unicode whitespace (NBSP, U+2028) that ECMA rejects — a weakening.
+  Not booked away: fix round 2 dispatched (★ option B: translate `\d` -> `[0-9]`, no ASCII flag; red-first NBSP/U+2028 tests; baseline 14).
