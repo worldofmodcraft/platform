@@ -58,9 +58,23 @@ Exceeds SPEC-CHECKLIST 5b. Source files touched: `007a-verify.sh`, `007b-verify.
 - C (S1): `069-verify.sh` - 1 source file.
 Why one task might still be acceptable: every change is the same mechanical move, one reference pattern, one set of pins, and one quiet-machine full sweep serves all. Why splitting is better: 13 files each need a red fixture, a mutation and a later-branch control; a single reviewer round cannot hold that, and one failure would block the HIGH items. Changed lines per part are reported by the agent. Q5 records the choice.
 
+### Part D (added 2026-10-28, session 13; from session 12's final status): the post-TIP merge-into-branch defect
+- D1. `docs/tasks/092-verify.sh:657-700` (AC9 post-TIP) lists files with `git log --first-parent --name-only TIP..HEAD`. With git >= 2.31,
+  `--first-parent` implies `--diff-merges=first-parent`, so a merge of `main` INTO the task branch (what GitHub's "Update branch" does once
+  M9's "Require branches to be up to date" is on) lists all of main's files and the check goes red on a correct branch. On registry `main`
+  today the check prints NOT-APPLICABLE (092 is merged), so this is latent; the risk is the pattern being copied (warned in 008c's brief).
+  Fix: the post-TIP file set must exclude what a merge from `main` brings in while still catching a change the branch itself makes,
+  including one made inside a merge commit (an "evil merge"). Method is the agent's; it is recorded in the log with the git version used.
+  Source file: `docs/tasks/092-verify.sh` (1 file). Can run in any order relative to A1/A2/B/C (disjoint files).
+- D criteria (shipped as `089d-verify.sh`): (a) red first: in a temp clone, TIP + a merge of a synthetic `main` commit that changes a file
+  outside `docs/tasks/092-*` into the branch; the unfixed check is red, the fixed check is green; (b) controls that must stay red after the
+  fix: a post-TIP commit on the branch touching a non-092 file, and a merge commit whose resolution adds a non-092 change; (c) the merged
+  case still prints NOT-APPLICABLE (merged); (d) `092-verify.sh` default and `--live-selftest` still exit 0 on registry main; (e) a mutation
+  restoring the old pattern reddens (a). Scope: `git diff --name-only` is `docs/tasks/092-verify.sh`, `docs/tasks/089d-verify.sh`, this log.
+
 ## File scope (declared)
 Exactly these, and nothing else:
-`docs/tasks/007a-verify.sh`, `docs/tasks/007b-verify.sh`, `docs/tasks/008a-verify.sh`, `docs/tasks/057-verify.sh`, `docs/tasks/057-textchecks.py`, `docs/tasks/065-verify.sh`, `docs/tasks/069-verify.sh`, `docs/tasks/070-verify.sh` (header text only), `docs/tasks/075-verify.sh`, `docs/tasks/039a-verify.sh`, `tests/registry/test_hardening.py`, `tests/registry/test_ci_gate.py`, `tests/registry/test_classify.py`, `docs/tasks/089-closed-verify-sweep-registry.md` (log), `docs/tasks/089-verify.sh` (new; per part `089a1-verify.sh`, `089a2-verify.sh`, `089b-verify.sh`, `089c-verify.sh`, each part touching only its own files listed under Size). In each file only the checks named in the table. Anything else = stop and report.
+`docs/tasks/007a-verify.sh`, `docs/tasks/007b-verify.sh`, `docs/tasks/008a-verify.sh`, `docs/tasks/057-verify.sh`, `docs/tasks/057-textchecks.py`, `docs/tasks/065-verify.sh`, `docs/tasks/069-verify.sh`, `docs/tasks/070-verify.sh` (header text only), `docs/tasks/075-verify.sh`, `docs/tasks/039a-verify.sh`, `tests/registry/test_hardening.py`, `tests/registry/test_ci_gate.py`, `tests/registry/test_classify.py`, `docs/tasks/092-verify.sh` (part D only, AC9 post-TIP only), `docs/tasks/089-closed-verify-sweep-registry.md` (log), `docs/tasks/089-verify.sh` (new; per part `089a1-verify.sh`, `089a2-verify.sh`, `089b-verify.sh`, `089c-verify.sh`, `089d-verify.sh`, each part touching only its own files listed under Size). In each file only the checks named in the table. Anything else = stop and report.
 
 ## Acceptance criteria
 All command-based, shipped per part as `docs/tasks/089<part>-verify.sh` (below "089-verify.sh" means that part's script and criteria for that part's findings), whose output the log pastes. Pins in scripts and in `089-verify.sh` are full 40-character SHAs. It runs in a fresh clone, with `PYTHONDONTWRITEBYTECODE=1`, own-change checks on fixed SHAs.
@@ -96,3 +110,4 @@ Fixed scripts and tests as in File scope; `089-verify.sh` (or `089a/b/c`) with r
 # Task 089 log  (append-only, updated continuously by the executing agent)
 - 2026-10-26 doc-writer (session 12): drafted from the 088 inventory. Not yet reviewed. No pins re-derived; the pins in the table are the inventory's.
 - 2026-10-26 manager (session 12): independent spec review PASS-WITH-AMENDMENTS folded in (mechanical). Mapping: split A -> A1/A2 with file counts (review 1); S2 only in A2 (2); B-first justified, 092 dropped as dependency (3); finding 12 conditional in AC1/AC4 (4); Q2 -> B, test AC9ProductionR11Unconfigured moved to 039a-verify (5); S1 reachability criterion (6); full 40-char SHAs in pin tables (7); Q3 consequence stated (8). Status set to spec-approved.
+- 2026-10-28 manager (session 13): part D added (post-TIP merge-into-branch defect in `092-verify.sh`, booked in session 12's final status); File scope extended by `092-verify.sh` (AC9 post-TIP only) and `089d-verify.sh`. Scope change: part D needs an independent spec review before its dispatch; parts A1/A2/B/C keep their approval.
