@@ -78,3 +78,4 @@ Edited scripts as in File scope; `090-verify.sh` with the red fixtures, mutation
     4. `bash docs/tasks/090-verify.sh --sweep 2>&1 | tee /tmp/090-sweep.txt` (AC6, long)
     5. `bash docs/tasks/048-verify.sh --mutate 2>&1 | tee /tmp/048-mutate.txt` (048's own mutations incl. the c4 ones now on the pin)
     Paste output into this log; any FAIL is a finding to fix by a new fix round with the fixture first (rule 5), not by editing a check.
+- 2026-10-28 qa-engineer: PIN_FINAL recorded in 090-verify.sh = 46a20c84f8308cd2f4ac5243b70578e1859387ce (content commit). Phase 1 ends here; remaining: phase 2 runs (commands above), then fix rounds for any red.

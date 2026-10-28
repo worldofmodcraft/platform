@@ -16,7 +16,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 
 BASE_SHA="4321d079e4273d20bd448edadce72e36d56b5f24"
-PIN_FINAL="__FINAL__"
+PIN_FINAL="46a20c84f8308cd2f4ac5243b70578e1859387ce"
 M048="c323460b9898e44a7c487c310f0b3707f4bce2e8"        # merge of task 048 (PR #50)
 P048_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"   # merge-base(M^1, M^2)
 P048_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"  # M^2
