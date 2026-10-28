@@ -2592,3 +2592,14 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   pass, comment "Registry CI: rejected" (schema, append-only, ownership R5/R6 rejected; classify accepted). The probe's `owner` was also
   the wrong shape (integer, schema needs an object), so schema rejected on `owner`; it reports only that first schema error (observation,
   booked). **#26 stays open** for Ludwig's M9 step 8 and L4, then it is closed unmerged and the branch deleted.
+- **Manager error 2 (two writers in one worktree), contained:** the manager's post-TIP warning, sent by `SendMessage` to the *first*
+  (already stopped) 008c agent, **resumed** it; it then worked in `~/wt/registry-task-008c` in parallel with the re-dispatched agent. It
+  noticed the foreign edits, stopped, and committed `fa4d6ad` (write_back.py), `e3b18c5` (captured the other agent's suite), `77a18ec`
+  (build-pipeline.md section), `1fb83b0` (log), plus an uncommitted `008c-verify.sh`; nothing pushed. Not an absolute stop (same worktree,
+  no file outside it). The re-dispatched agent was told it is the sole writer and must treat those commits as unreviewed input (adopt or
+  replace, logged). Its Q2 answered from the spec (AC2): reserved namespace -> `WriteBackRefused("reserved-namespace")`.
+  Gotcha for OPERATIONS.md: **`SendMessage` to a finished subagent resumes it.** Never message a stopped agent whose task was re-dispatched;
+  message only the live one.
+- **093 review** PASS-WITH-AMENDMENTS (F1 MAJOR: "defaults" under "Require a pull request" unverified; GitHub may pre-tick "Require approvals",
+  which could block every normal merge; F2 MAJOR: step 8 must say not to click an admin merge-anyway option on L3; F3-F5 minor). Fix round
+  dispatched (baseline 3). Question booked for Ludwig (see For Ludwig at session end).
