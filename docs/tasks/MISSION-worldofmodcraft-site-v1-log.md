@@ -2618,3 +2618,36 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **008c fix round 1** (`84a236b`): manager re-run in a fresh GitHub clone green (suite 40, 24 mutations red, scope self-test 4/4). Delta
   review PASS-WITH-AMENDMENTS, one MED: `re.ASCII` also made `\S` accept Unicode whitespace (NBSP, U+2028) that ECMA rejects — a weakening.
   Not booked away: fix round 2 dispatched (★ option B: translate `\d` -> `[0-9]`, no ASCII flag; red-first NBSP/U+2028 tests; baseline 14).
+- **008c ready to merge:** fix round 2 (`3227c5c`: `\d` -> `[0-9]` translation, no ASCII flag; NBSP/U+2028 red-first), manager decision on the
+  residual `\s` differences (accepted + booked as **094**, draft), delta review 2 **PASS**, manager re-run in a fresh GitHub clone at `6651b5a`
+  (43 tests, 27 mutations red). Registry PR **#27** (`7810e70`), `gate` pass (8 s). Not merged: see For Ludwig 1.
+- **089b** (part B: findings 8-12, S4) cut from the umbrella and dispatched to qa-engineer (`~/wt/registry-task-089b`, base `e2f7fe3`,
+  baseline 1). Long quiet-machine runs; nothing else may run verify scripts meanwhile.
+
+## SESSION STATUS — 2026-10-28 (session 13, interim) — context ~20 %
+### Done
+- 093 (runbook M9 step 7/8) done, platform PR #88. 008c done, registry PR #27. L3 observed (registry #26, kept open for M9/L4).
+- 089 part D specified and spec-approved. 094 drafted. Two manager errors caught and logged (EnterWorktree isolation; SendMessage resumed a
+  stopped agent).
+### In progress
+- 089b (qa-engineer, background; long runs).
+### For Ludwig
+1. **Two reviewed, green PRs wait for a merge; the manager's merge command was denied by Claude Code's permission classifier.**
+   platform #88 (task 093, runbook) and registry #27 (task 008c). ★ A: you merge them (open each link, click "Merge pull request", then
+   "Confirm merge"): https://github.com/worldofmodcraft/platform/pull/88 and https://github.com/worldofmodcraft/registry/pull/27 .
+   B: allow the manager to merge by adding a permission rule (the manager can set it up with the update-config skill on your word).
+   C: leave them for now. Nothing else depends on #88; 008b-1 and task 094 wait for #27.
+2. **M9, "Require approvals":** when you tick "Require a pull request before merging", GitHub may also tick "Require approvals" (1)
+   `[unverified]`. A required approval must come from another account with write access to the PR's author; today none exists, so every
+   normal merge would be blocked. ★ A: untick "Require approvals" (gate + PR requirement stay; you still read and merge every PR yourself).
+   B: keep 1 approval (needs a second write-capable account, e.g. giving mbmludric write access — a change to the M6 setup).
+   C: tell the manager what the page shows first. Runbook step 7 tells you to stop and ask if it is ticked.
+3. **Manual steps due:** M9 (runbook `docs/runbooks/site-v1-manual-steps.md`, after #88 merges for the updated text; step 8 uses L3 PR
+   registry #26 — do NOT click any admin "merge anyway" on it; tell the manager "L4 blocked"), then M10, then M11.
+### Next session starts here
+1. Pick up 089b's report from its task log (`~/wt/registry-task-089b/docs/tasks/089b-closed-verify-sweep-registry-b.md`); independent review.
+2. After #27 merges: spec review of 094 draft; dispatch 008b-1 (planner).
+3. 089 parts A1, A2, C, D one at a time after 089b (quiet machine); 090 (platform).
+4. After M9: close L3 PR #26 unmerged, delete branch `task/039-l3-invalid-schema`; then Ludwig's M10, M11.
+5. OPERATIONS.md gotchas to add (small doc task): manager must not use EnterWorktree; SendMessage to a finished subagent resumes it; schema
+   step reports only the first schema error (L3 observation).
