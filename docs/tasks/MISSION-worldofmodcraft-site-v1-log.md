@@ -2610,3 +2610,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   `15dfd08` (the agent's "fresh clone" was from the local git dir), 2026-10-28T09:25Z, quiet machine, `PYTHONDONTWRITEBYTECODE=1`:
   `008c-verify.sh` exit 0 (suite 33 passed, 0 failed; scope ok, 5 files; `SUMMARY failed=0`); `--mutate` exit 0 (21 mutations red, real
   tree byte-identical, `SUMMARY mutate failed=0`). Independent review dispatched.
+- **008c review** PASS-WITH-AMENDMENTS, no HIGH: (1 MED) Python `\d` accepts non-ASCII digits -> `re.ASCII`; (2 LOW) stray keys on the
+  pending version -> new refusal `pending-shape` (manager ★, strict tightening); (3 LOW) AC3 multi-path condition near-vacuous; (4 LOW)
+  docs "RFC 3339 UTC" too narrow; (5 MED) the scope check's "tolerates merges from main" claim is false (fixed base) -> merge-base with
+  origin/main, absent = FAIL. Fix round dispatched (baseline 11), red-first per §2c rule 5.
+  **Booked follow-up:** 008a's `build_version` likely has the same `\d` Unicode-digit gap (reviewer inference, not checked) -> its own task.
