@@ -2713,3 +2713,34 @@ marked unverified to him, with "stop and describe what you see" if the page diff
 - **008b-1 phase 1 done** (`c4c143a`, log check exit 0): planner + 49 checks (suite 206/206 before the last three test edits); `008b1-verify.sh`
   written, not run (23 mutations, emulated red outside the repo — not evidence). Q-P1..Q-P7 triaged by the manager (no Ludwig item); 094's scope
   gains `plan_pending.py`. Phase 2 queued behind 089b's chain.
+
+## SESSION STATUS — 2026-10-28 (session 13, handover) — context 31 % (over the 30 % soft line; supersedes the interim entry above)
+### Done (session 13)
+- Merged (by Ludwig): platform #88 (093 runbook M9 S5), #89 (095 runbook Require-approvals + OPERATIONS gotchas); registry #27 (**008c**
+  write-back, `32c641b`). Vault refreshed after each.
+- Ludwig's manual steps **M9, M10, M11 all done** and manager-verified via the API (names/settings only); live checks **L3, L4** (PR #26) and
+  **M10/U6** (PR #28, `MEMBERSHIP_STATUS: 204`) passed; both probe PRs closed unmerged.
+- Specs: 089 part D spec-approved; 094 spec-approved (scope + `plan_pending.py`); 096 spec-approved.
+### In progress (state on disk)
+- **089b** (registry `~/wt/registry-task-089b`, `2b7785a`): agent stopped at its turn cap; its detached long-run driver
+  (`/tmp/w089b/long-driver.sh`, PID 3956671) continues: L1-unfixed exit 0 (13:14Z), **L1-fixed running since 13:14Z**, then L2, L3 (whole 039a
+  sweeps; hours each). Status: `cat /tmp/w089b/long/status.txt` (a step without an `exit` line is not finished); outputs `/tmp/w089b/long/*.out`.
+  **The machine stays reserved until the driver exits** (`kill -0 3956671` fails). Do not kill it.
+- **008b-1** phase 1 done (`5625fd1`; Q-P1..P7 triaged). Phase 2 pending.
+- **096** phase 1 done (`74cdea2`). Phase 2 pending.
+### Next session starts here
+1. Check the 089b driver. When it has exited: a fresh qa-engineer reads `/tmp/w089b/long/*.out` into the 089b log (criteria 9, 10; L1-unfixed
+   exit 0 = the 039b agent's 065 failure **not reproduced**), then independent review, PR.
+2. Then, one at a time on the quiet machine: 096 phase 2 (068-verify, 085-verify, pin + 096-verify + mutations; commands in its log) -> review ->
+   PR; 008b-1 phase 2 (`./docs/tasks/008b1-verify.sh`, `--mutate`, fresh GitHub clone) -> independent review (check Q-P3's extra faults) -> PR.
+3. Then 094 (after 008b-1 merges; re-check its delta at dispatch), then 008b-2 (copy 008b-1's Q-P1/P2/P5/P7 interface facts into it), 008b-3a
+   (merge needs Ludwig: CI security), 008b-3b (M11 done, so its gate removal is unblocked). 089 parts A1, A2, C, D (+ the 008c-verify repin
+   finding), 090.
+4. Merging: run `gh pr merge N --repo … --merge --match-head-commit <SHA>` as a BARE command, with the SHA read in a separate earlier step
+   (OPERATIONS.md); then `tools/vault/refresh-main.sh`.
+5. Booked: pipeline App unused-key cleanup after 008b-3b's first live run (Ludwig); minisign offline backup (Q-H) unconfirmed; local branch
+   `task/039-l3-invalid-schema` in `~/registry` (git-guard refuses `branch -D`; Ludwig may delete it); 091 LOW 2; 039b S2; 092 Q2; 065 Q2 stale
+   contract texts; R11 identity task; OPERATIONS.md still calls mbmludric a non-member; old waiter loops and /tmp dirs.
+### For Ludwig
+Nothing open. (Optional: delete the local branch above in your own terminal: `cd ~/registry && git branch -D task/039-l3-invalid-schema`.)
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-28 (session 13, handover) i missionsloggen och fortsätt med 'Next session starts here'."
