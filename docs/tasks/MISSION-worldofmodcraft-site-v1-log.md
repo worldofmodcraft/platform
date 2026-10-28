@@ -2763,3 +2763,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Not read into the ruling (stays Ludwig-only, §7):** merges touching CI security checks (e.g. 008b-3a), signing/keys, `docs/decisions/`,
   mission specs, doctrine, takedowns; credentials (rule 11). Ordinary task PRs merge on the manager's authority when §7's conditions hold.
   Expires at the morning handover; not a precedent.
+- **Ludwig, 2026-10-28 evening (verbatim), added to the ruling above:** "Du får merga allt som behövs på egen hand". Manager's reading: for
+  tonight the §7 Ludwig-only merge classes (CI security checks, signing/keys code such as 008b-2's signing job, doctrine) may be merged by the
+  manager when §7's conditions hold (review PASS, criteria demonstrated, verify green in a fresh clone, docs, log). **Still excluded:** takedowns
+  (absolute stop, §7/§8), credentials (rule 11), edits to `docs/decisions/` and mission specs (none planned). Expires at the morning handover;
+  not a precedent.
