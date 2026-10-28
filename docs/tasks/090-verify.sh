@@ -154,9 +154,11 @@ ac2_fn() {
   ( cd "$C" && sed -i '/SUSPENDED by Ludwig 2026-10-14/d' CLAUDE.md ) && ! grep -q 'SUSPENDED by Ludwig 2026-10-14' "$C/CLAUDE.md" || bad "CLAUDE.md marker removal did not apply"
   commit_all "$C" "marker removed (CLAUDE.md)"
   expect_red "$C" a2-claude bash "$V079"
+  has a2-claude "cannot locate anchors"   # 079 line 30: the live anchor `sus` is gone, named reason, not just any non-zero exit
   ( cd "$C" && sed -i '/SUSPENDED by Ludwig 2026-10-14/d' docs/manager/MANAGER.md ) && ! grep -q 'SUSPENDED by Ludwig 2026-10-14' "$C/docs/manager/MANAGER.md" || bad "MANAGER.md marker removal did not apply"
   commit_all "$C" "marker removed (both)"
   expect_red "$C" a2-both bash "$V079"
+  has a2-both "cannot locate anchors"
   echo "  named: $(grep -m2 -E 'FAIL|cannot locate' "$TMP/a2-both.out" | tr '\n' '|' | cut -c1-200)"
 }
 
@@ -175,7 +177,9 @@ ac3_fn() {
     rc1=$(run "$C" "a3-$s-env" env "$v=deadbee" bash "$T/$s-verify.sh")
     [ "$rc0" = 0 ] && ok "$s unset -> exit 0" || bad "$s unset -> exit $rc0, expected 0"
     [ "$rc0" = "$rc1" ] && ok "$s with $v=deadbee -> exit $rc1 (unchanged)" || bad "$s with $v=deadbee -> exit $rc1, unset gave $rc0 (override has effect)"
-    cmp -s "$TMP/a3-$s-unset.out" "$TMP/a3-$s-env.out" && ok "$s output byte-identical with and without $v" || bad "$s output differs with $v set"
+    # compare only the sorted PASS/FAIL verdict lines (080 reads the network; other lines may vary), and require that there are some
+    grep -E '^(PASS|FAIL)' "$TMP/a3-$s-unset.out" | sort >"$TMP/a3-$s-unset.v"; grep -E '^(PASS|FAIL)' "$TMP/a3-$s-env.out" | sort >"$TMP/a3-$s-env.v"
+    [ -s "$TMP/a3-$s-unset.v" ] && cmp -s "$TMP/a3-$s-unset.v" "$TMP/a3-$s-env.v" && ok "$s PASS/FAIL lines identical with and without $v ($(wc -l <"$TMP/a3-$s-unset.v") lines)" || bad "$s PASS/FAIL lines differ with $v set (or none found)"
     for k in BASE FINAL; do   # the script's own pin replaced by deadbee: red, never skip
       sed "s/^$k=.*/$k=deadbee/" "$C/$T/$s-verify.sh" >"$C/$T/$s-dead.sh"
       cmp -s "$C/$T/$s-verify.sh" "$C/$T/$s-dead.sh" && bad "$s $k deadbee mutation was a no-op"
@@ -263,6 +267,16 @@ ac7_fn() {
   # 048: the removed lines are only c4 and the c4 mutation harness (and its header comment); named, not counted
   local bad048; bad048=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V048" | grep '^-[^-]' | grep -vE 'c4: token-guard marker|ln[12]=\$\(grep -n|a c1 mutation edits|\[ "\$tag" = c1 \]|checks AC1-AC7: c1' || true)
   [ -z "$bad048" ] && ok "048: every removed line belongs to c4, its mutation harness or the header comment" || bad "048: removed line outside c4: $bad048"
+  # 048: the ADDED lines are exactly the c4 comment, the two c4 reads of "$T1/$f", the harness condition lines and the header line
+  local a048; a048=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V048" | grep '^+[^+]' | grep -vE 'c4: token-guard marker \(OWN-CHANGE|live guard of the marker|ln[12]=\$\(grep -n .*"\$T1/\$f"|a c1 or c4 mutation edits|\[ "\$tag" = c1 \] \|\| \[ "\$tag" = c4 \]|checks AC1-AC7: c1 and c4' || true)
+  [ -z "$a048" ] && ok "048: every added line is a c4 / harness / header line" || bad "048: added line outside c4: $a048"
+  [ "$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V048" | grep -cE '^\+ +ln[12]=.*"\$T1/\$f"')" = 2 ] && ok "048: exactly two added c4 reads of \"\$T1/\$f\"" || bad "048: the two c4 reads of \"\$T1/\$f\" are not exactly the added ln1=/ln2= lines"
+  # 072/080: ADDED lines are exactly the fixed pins, the comment and (072) the REG assertions
+  local ad; ad=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V072" "$V080" | grep '^+[^+]' | grep -vE '^\+# Task 090: (BASE/FINAL are fixed pins|fixed pins)|^\+BASE=(d9d48de|29b3424fc97ba919f598531e9f4f154acc2a0619)$|^\+FINAL=(7df8a50979cc834918871ba948aa9ed7e9eb4352|f173739800707d44a32fe495e96a39022c0c84bb)$|^\+\[ -d "\$REG" \]|^\+git -C "\$REG" rev-parse --verify -q "origin/main' || true)
+  [ -z "$ad" ] && ok "072/080: added lines are only the fixed pins, the comment and the REG assertions" || bad "072/080: added line outside the allowed set: $ad"
+  # after FINAL only this task's own log and script may change (HEAD = FINAL + the recording commit)
+  local late; late=$(git diff --name-only "$FINAL" "$HEADSHA" | grep -vxF -e "$T/090-closed-verify-sweep-platform.md" -e "$T/090-verify.sh" || true)
+  [ -z "$late" ] && ok "FINAL..HEAD touches only the 090 task file and 090-verify.sh" || bad "later change out of scope: $late"
   # 072/080: removed lines are exactly the pin lines
   local b; b=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V072" "$V080" | grep '^-[^-]' | grep -vE '^-(BASE|FINAL)=\$\{T0(72|80)_(BASE|FINAL):-' || true)
   [ -z "$b" ] && ok "072/080: removed lines are only the BASE/FINAL pin lines" || bad "072/080: removed line outside the pins: $b"
@@ -307,15 +321,15 @@ section ac7_fn "$PIN_FINAL"
 if [ "$DO_MUTATE" = 1 ]; then
   echo "== mutations: each check function is run against a broken subject and must report at least one FAIL line"
   MF=0
-  # mexpect NAME CMD... : the function's output must contain a FAIL line
-  mexpect() { local n=$1; shift; "$@" >"$TMP/m-$n.out" 2>&1; if grep -q '^  FAIL' "$TMP/m-$n.out"; then ok "mutation '$n' -> check red: $(grep -m1 '^  FAIL' "$TMP/m-$n.out" | cut -c1-110)"; else bad "mutation '$n' did NOT turn its check red"; fi; }
-  section mexpect "old 048 (c4 on HEAD) vs AC1"        ac1_fn "$BASE_SHA"
+  # mexpect NAME REQUIRED CMD... : the function's output must contain a FAIL line that includes the fixed string REQUIRED (not just any FAIL)
+  mexpect() { local n=$1 req=$2; shift 2; "$@" >"$TMP/m-$n.out" 2>&1; if grep '^  FAIL' "$TMP/m-$n.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"; else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi; }
+  section mexpect "old 048 (c4 on HEAD) vs AC1" "FAIL a1-after-$BASE_SHA -> exit"   ac1_fn "$BASE_SHA"
   section ac1_widen
-  section mexpect "old 072/080 (env overrides) vs AC3" ac3_fn "$BASE_SHA"
-  section mexpect "old 085 (no nested assertion) vs AC4" ac4_fn "$BASE_SHA"
-  section mexpect "old 048 on the merge vs AC5"        ac5_fn "$BASE_SHA"
-  section mexpect "079 that never reddens vs AC2"      ac2_fn STUB
-  section mexpect "FINAL = an out-of-scope commit vs AC7" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
+  section mexpect "old 072/080 (env overrides) vs AC3" "override still present" ac3_fn "$BASE_SHA"
+  section mexpect "old 085 (no nested assertion) vs AC4" "a4-broken-$BASE_SHA output lacks 'FAIL nested: Last reviewed substitution applied'" ac4_fn "$BASE_SHA"
+  section mexpect "old 048 on the merge vs AC5" "FAIL a5-merge-048-$BASE_SHA -> exit" ac5_fn "$BASE_SHA"
+  section mexpect "079 that never reddens vs AC2" "a2-claude -> exit 0 but must be red" ac2_fn STUB
+  section mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
 fi
 
 NF=$(grep -c '^  FAIL' "$ALL" || true)
