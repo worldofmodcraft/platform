@@ -2665,3 +2665,7 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   L3 whole 039a on HEAD + four synthetic later branches) continues, est. 12-16 h; the machine is reserved for it. Manager watches
   `/tmp/w089b/long/status.txt`; a fresh qa-engineer will read the outputs into the log afterwards.
 - **095** (runbook M9 step 7 records Ludwig's choice A; OPERATIONS.md gains session 13's four gotchas, written by the manager) in progress.
+- **095 done** (review PASS-WITH-AMENDMENTS, applied; `4986689`), platform PR **#89**. The manager's bare `gh pr merge 89 --match-head-commit`
+  failed safely ("Head branch was modified": the manager had typed a guessed full SHA instead of reading it — its own error; the guard
+  worked); the following `git rev-parse` to read the SHA was then denied by the classifier ("Merge Without Review"). Not retried. #89 is
+  left for Ludwig. Lesson: read the SHA first, in a separate step, before composing the merge command.
