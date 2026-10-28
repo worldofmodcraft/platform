@@ -2574,3 +2574,21 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 4. Items 5-6 of the handover entry stand (Ludwig's M9/M10/M11; booked follow-ups). Before M9: the manager runs live check L3 (an
    invalid-schema registry PR shows `gate` red, then close it).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, final) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 13 — 2026-10-28 (manager: session "WLS-World-of-Modcraft-26-10-28")
+- Start: session 12 (`WLS-World of Modcraft Continue 2026-10-26`) idle, no verify scripts running; told by cross-session message that
+  session 13 has taken over. Context at start ~6 % (HUD cache). Token guard suspended (Ludwig, 2026-10-14).
+- Registry clone `~/registry` local main fast-forwarded to origin/main `e2f7fe3` (was 181 behind).
+- **Manager harness error, caught:** after dispatching 008c the manager entered a harness-isolated worktree (`EnterWorktree`), which
+  then refused every agent shell command outside it; the 008c agent stopped cleanly with no change (logged in the 008c task file). The
+  manager left the isolated worktree and works in `~/wt/session-13` (branch `session/13`) instead. Gotcha for OPERATIONS.md: the manager
+  must not use `EnterWorktree`; it blocks git in other worktrees (registry, `~/wt/*`) for the manager and its agents.
+- **008c** dispatched (registry `task/008c-pipeline-write-back`, `~/wt/registry-task-008c`, base `e2f7fe3`; baseline 6 log entries).
+- **089 part D** added (post-TIP merge-into-branch defect, `092-verify.sh` only); independent spec review PASS-WITH-AMENDMENTS (9 findings,
+  2 HIGH), folded in; Q6 ★ A (local-ref definition of a merge from main); part D spec-approved (`e149c42`).
+- **093** (runbook M9 step 7 records Ludwig's S5 choice; step 8 names the L3 PR for L4) drafted, spec-approved, done by doc-writer
+  (`32cec74`, log check exit 0); independent review running.
+- **Live check L3 done:** registry PR #26 (`task/039-l3-invalid-schema`, `mods/womcraft.l3-probe/entry.json`): `gate` fail (9 s), `comment`
+  pass, comment "Registry CI: rejected" (schema, append-only, ownership R5/R6 rejected; classify accepted). The probe's `owner` was also
+  the wrong shape (integer, schema needs an object), so schema rejected on `owner`; it reports only that first schema error (observation,
+  booked). **#26 stays open** for Ludwig's M9 step 8 and L4, then it is closed unmerged and the branch deleted.
