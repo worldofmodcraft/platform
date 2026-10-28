@@ -628,3 +628,106 @@ LOBBY --start--> SETUP --> ROUND_START --> TURN_BEGIN(seat) --> ITEM_WINDOW --> 
 4. *Minigame scenario tests:* each minigame script is driven by a scripted `ctx` (positions set by the test, inputs injected) and must return a valid result; real movement is manual (G15).
 5. *Permissions-denied smoke test* runs on the site automatically (ADR-0028:15).
 
+---
+
+## h. What building this mod first exercises in the platform
+
+This section is factual. It lists which platform surfaces this mod uses early, and which surfaces the roguelike was planned to use that this mod does **not** use. It rewords no ADR. For the roguelike, the sources are the ADR sentences that name it.
+
+### h.1 Surfaces this mod exercises (all from g.2 and g.4)
+| Area | Surfaces exercised | Where defined |
+|---|---|---|
+| Mod format | Custom record types with placeholders; schemas; manifest `declares`; capability tags; modpack | ADR-0008:13; ADR-0030:26; ADR-0048:12; ADR-0032:8; ADR-0044:9 |
+| Persistence | KV with write-through, restore-before-save barrier, save cadence, backups of mod tables | ADR-0023:9; ADR-0115:17; ADR-0074:7; ADR-0045:9 |
+| Multiplayer | RPC with several clients at once; server-side validation; reconnect and snapshot; throttle | ADR-0020:11; ADR-0066:7; ADR-0090:7 |
+| Instancing | Create, populate, destroy instances, many times per game; limits as settings | ADR-0024:9, :11 |
+| Groups and movement | Group handling, group teleport with origin restore, scripted pawn movement | ADR-0114:20; `docs/open-questions.md:23`; G1, G3 |
+| Spatial | Zones with enter/leave, proximity queries | ADR-0114:16 |
+| Client | Overlays (heavily), UI framework, audio, camera, input | ADR-0083:7; ADR-0020:12; ADR-0084:7 |
+| Services | `kernel.rng` with seeds, commands, permissions, config schema, achievements | ADR-0091:7; ADR-0082:7; ADR-0031:8; ADR-0029:9; ADR-0096:9 |
+| Lifecycle | Logout reasons, pre-restart, saving events; pause and clock | ADR-0114:24; ADR-0025:14, :18 |
+| Observability | Outcome counters, ledger reconciliation, self-check command | ADR-0115:8-14; ADR-0034:10 |
+| Tooling | `validate`, `test`, docs, the soak test with bots | ADR-0051:14; ADR-0052:10, :12; ADR-0113:13 |
+| Extension | Another mod adding minigames without touching this one | ADR-0032:8; ADR-0021:9 |
+
+### h.2 Step-1 shape, and what the mod does with it
+ADR-0050:17 describes the shape of the first real feature: "a new record type, a server hook, RPC, a client panel, persistence, observability". The party mod's first real feature, "press Roll and the server moves your token on a test ring" (section i, step 1), has that shape. It is described here as a candidate feature of this mod; it is not a statement about the platform's build order.
+
+### h.3 What the roguelike was to exercise that this mod does not
+These are stated plainly. The party mod does **not** exercise, and so does not prove early:
+- **Combat and damage hooks**, including the Lua-performance test the roguelike's damage hooks were to provide (ADR-0015:17).
+- **Spell and aura scripting**, including `replace` on spell scripts (ADR-0022:18) and the wrapper chain around C++ scripts (ADR-0022:12).
+- **Character lifecycle** (create/reset/rename/delete; ADR-0114:17, which names the roguelike's core loop as its blocker).
+- **Loot, spawns and creature AI** as game content, and the spawn-state surface (ADR-0114:34).
+- **Field-level merge under conflict** between two content mods (ADR-0009:15's example): the party mod's records are its own types, so it creates few merge conflicts. Merge is exercised only by tests.
+- **Player progression** through levels, stats and equipment.
+- **Daily seeds and shareable runs** as a feature (ADR-0091:7): `kernel.rng` is used, but only for dice and draws.
+- **A very large content mod with many interacting systems**, which is the context in which the reference-mod rule (ADR-0051:16) was written.
+
+### h.4 What the party mod proves that the roguelike would prove less of
+Multi-client play from the first week; instancing as a daily tool, not an exotic one; the overlay and UI client surfaces under real use; mod-to-mod extension (minigame packs) in a record-type-defining mod; the restore barrier and resume after restart under a game state that has several actors. None of this changes an ADR.
+
+---
+
+## i. Build order: walking skeleton
+
+The method is the platform's own: a thin slice through every layer first, then depth (ADR-0050:11-15). Each step has a task file, ends with a demonstration, and updates docs in the same branch. **Prerequisite (not part of this mod):** the platform's step 0 smoke test and the mod loader (ADR-0050:15-16). Estimates are deliberately absent: hobby estimates miss by a factor of two (ADR-0050:21).
+
+| Step | Build | Proof (must be shown, not claimed) | Gaps touched |
+|---|---|---|---|
+| 1 | **"Roll."** A mod with one record type, `/wager roll`, an RPC pair, a small client panel with a Roll button and the result, KV persistence of position on a 12-space test ring, and a histogram counter | Restart the server: position is kept. The log shows the seed and each roll. 1,000 simulated rolls are in 1 to 8 with a flat histogram | G9 (minimal) |
+| 2 | **Board as data.** `wager:board` record (Lantern Isles, 48 spaces) with graph checks in `validate`; overlay drawing of spaces and lines; an overlay marker as the pawn, moving one hop per step | `validate` rejects a board with an unreachable space and names it. The client shows 48 icons and the path. | G1 (teleport fallback) |
+| 3 | **Headless engine.** The state machine of g.5 without any client: spaces, Brass, Star purchase and move, items stubbed, bot seats, ledger, invariants | 1,000 seeded 4-bot games finish; all invariants hold; the game is replayable from its seed | none |
+| 4 | **Calibration.** Run the simulator; tune the numbers in section b | A report: Stars per player (spread), win rate by seat order (target: first-seat advantage not above 3 points over a fair split), game length in rounds, Brass inflation. Numbers written back into section b | none |
+| 5 | **One human plus bots.** `/wager host`, snapshot and events over RPC, timers, away and autopilot, resume after restart | Kill the server mid-game; it resumes at the same phase with the same state. The counters show the early returns with reasons | G9, G11 |
+| 6 | **2 to 4 humans.** Lobby, join and ready, spectators, disconnect rules | Two clients play a full game; disconnect, reconnect and AFK each shown. Ledger reconciles | G14, G8 |
+| 7 | **First minigame, end to end:** Lantern Lunge (record, script, arena instance, transport, payout, return) | Ledger shows the payout diff. Pull the plug mid-minigame: on restart, players are back on valid positions (ADR-0092:7) | G2, G3, G4, G5 |
+| 8 | **More minigames across categories:** Hearth Hold (2v2), Quickdraw Lanterns (duel), Bucket Brigade (co-op), Lighthouse Keeper (1v3). **A separate minigame-pack mod** with one minigame | The record shape works for all five categories; the pack mod loads and its minigame is drawn in a game, with the base mod unchanged | G5, G12, G13 |
+| 9 | **Items, events, Honours, Companions, Duel, Tide, Stall, Festival** | Each effect has an engine test and appears in the ledger | none |
+| 10 | **Board 2** with the Gear Turn | `validate` passes; a headless game on Clockwork Orchard finishes | none |
+| 11 | **Polish:** audio, camera, UI widgets as available, achievements, config panels, console admin panel | Settings change values live (ADR-0029:11); achievement toast shown | G6, G9, G10 |
+| 12 | **Soak and docs:** 6-hour soak with bots; the guide "Your first party game mod" built from this mod | Soak output with leak flags clean; code blocks in the guide run in CI (ADR-0113:13) | none |
+
+Steps 1 to 4 need **no** client features beyond a button, so they can start as soon as the loader and server-side Lua exist. Steps 7 and later need instancing and the gaps in g.4.
+
+---
+
+## j. Risks and open questions
+
+### j.1 Questions for Ludwig (the same four as in the ADR proposal, `docs/tasks/098-proposed-adr.md`)
+| # | Question | Effect on this document |
+|---|---|---|
+| Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? | None on the design. Only decides whether ADR-0123 exists. |
+| Q2 | Bots for empty seats: none (A), board-only bots (B, leaning), full bots (C)? | Section e.6 and build step 5 |
+| Q3 | Player count: 2 to 4 (A, leaning), up to 6 (B), up to 8 (C)? | Sections b.1, c.1, c.2 |
+| Q4 | Default length: 10 (A), 15 (B, leaning), 20 (C) rounds? | Sections a, b.1, b.10 |
+
+### j.2 Risks
+| # | Risk | Mitigation |
+|---|---|---|
+| R1 | **The mod depends on platform surfaces that do not exist yet** (g.4). Instancing is limited to dungeon shells at first (ADR-0024:11). | Steps 1 to 6 need almost none of them. Step 7 is where the platform must have delivered G2-G4; if not, that step waits (the manager decides). |
+| R2 | **Movement-based minigames cannot be tested automatically** (ADR-0052:10). | Engine tests cover rules; minigames get scenario tests plus manual play-tests. |
+| R3 | **Fun is unproven** until people play. | Steps 3-4 (simulation) catch broken economies; step 6 is the first real play-test. Rule numbers are expected to change. |
+| R4 | **Look and feel too close to the genre leader.** | Originality checklist (j.4) at each art step; the Star is eight-pointed lantern-like, not a five-point golden star; no characters or items resembling known ones. |
+| R5 | **AI-generated art or sound might echo existing work.** | ADR-0061:7 forbids re-creations; human review at each asset batch; optional `ai_assisted` label (ADR-0030:26). |
+| R6 | **Unequal characters make arenas unfair** (G2). | Prefer skill-neutral minigames first; request the standardisation primitive. |
+| R7 | **Latency decides reaction games** (G12). | Few reaction games; server timestamps; compensate if needed. |
+| R8 | **Four clients plus server on one PC** may exceed the reference machine (ADR-0081:7, specs unrecorded, `docs/open-questions.md:27`). | Instance limits as settings (ADR-0024:9); bots for solo tests; measure at step 6. |
+| R9 | **Scope creep:** companions, a second board, 14 minigames, and so on. | Build order i: steps 1-8 give a complete small game; 9-12 add breadth. |
+| R10 | **A mod that carries 14 minigames is large** for a first mod. | Minigames are separate records; ship 5 at first (step 8) and the rest as updates or packs (ADR-0044:9). |
+
+### j.3 Open points (each marked [open] above)
+1. Mod namespace and the final name of the mod (title page).
+2. Which AzerothCore shell maps are suitable for the board and arenas (G4): a survey item.
+3. Whether the capability tag `party_minigame` is registered, and by whom (c.5).
+4. Scaled variants of 1v3 minigames for 3 players (c.1).
+5. A star-stealing event (b.4), spectating arenas (e.3), and reaction-time compensation (G12).
+6. Whether mods may define new client UI widgets (f.2).
+
+### j.4 Originality checklist (to run at every art, audio and naming step)
+- [ ] No name, character, item, place or phrase from Nintendo's party games or any other published game.
+- [ ] No Blizzard asset, name or motif (ADR-0004:17, ADR-0061:7).
+- [ ] The Star silhouette, the dice, the spaces and their colours are our own (b.4, b.5).
+- [ ] Music and sound effects are not recognisable as a known melody.
+- [ ] Every asset has a recorded source and a licence that fits the mod's licence field (ADR-0061:7).
+- [ ] "Mario Party" appears only as the genre reference, quoting Ludwig (section 0 and the ADR proposal Context).
