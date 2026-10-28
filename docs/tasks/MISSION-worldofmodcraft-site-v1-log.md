@@ -2656,3 +2656,12 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 (1) Ludwig merged platform #88 (093) -> `465835a` and registry #27 (008c) -> `32c641b` (confirmed with `gh pr view`). (2) Read as choice
 **A** (untick "Require approvals"); the manager gave click-by-click directions from memory of GitHub's classic branch-protection UI,
 marked unverified to him, with "stop and describe what you see" if the page differs. Runbook M9 step 7 to record choice A in a later doc task.
+- **Correction to For Ludwig 1 (interim status):** the denied `gh pr merge 88` was the manager's own error: it was chained with `gh pr checks`
+  and `gh pr view` in one call, which OPERATIONS.md (2026-09-06, "`gh pr merge` must be run as a BARE command") already says the classifier
+  refuses. Not a missing permission; option B (a permission rule) was never needed. Vault refreshed after Ludwig's merges
+  (`tools/vault/refresh-main.sh`: written=5).
+- **089b** qa-engineer stopped at its 80-turn cap (§8: budget stop, no silent retry). Work through `2d8063c` pushed, log check exit 0; its
+  detached long-run driver (`/tmp/w089b/long-driver.sh`, one sequential chain: L1 065 unfixed/fixed on the 039b merge, L2 whole 039a on HEAD,
+  L3 whole 039a on HEAD + four synthetic later branches) continues, est. 12-16 h; the machine is reserved for it. Manager watches
+  `/tmp/w089b/long/status.txt`; a fresh qa-engineer will read the outputs into the log afterwards.
+- **095** (runbook M9 step 7 records Ludwig's choice A; OPERATIONS.md gains session 13's four gotchas, written by the manager) in progress.
