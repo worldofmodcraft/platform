@@ -319,27 +319,32 @@ pull request yourself.
    designed around it, and without it a pull request that was green against an old `main` could merge.
 6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
    yet: stop, tell the manager, come back later.
-7. Also tick **Require a pull request before merging**. Leave every option that appears under it at its default (the page
-   shows them after you tick the box; this step names none to change). Leave **Do not allow bypassing the above settings**
-   **unticked**. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
+7. Also tick **Require a pull request before merging**. Then look at the options that appear under it. If **Require approvals**
+   is ticked, or any required number of approvals is shown, **stop before you click Create or Save changes and tell the manager**
+   (the manager has a question booked for you on this; do not change it yourself). Whether GitHub pre-ticks it is `[unverified]`.
+   Why it matters: a required approval must come from an account other than the pull request's author that has write access, and
+   the project has no such account today `[unverified]`, so it could block every normal merge. If it is not ticked and no number is
+   shown, change nothing under it. Leave **Do not allow bypassing the above settings** **unticked**. Do not tick anything else.
+   Click **Create** (new rule) or **Save changes** (existing rule).
    **Decided, Ludwig 2026-10-27 (security review S5; mission log, "Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna"):**
    tick the first, leave the second unticked. The reason is the two costs of the alternatives. Without **Require a pull request
    before merging**, an account with write access can push to `main` directly and skip `gate` altogether, so it is ticked.
-   Without **Do not allow bypassing the above settings**, an administrator can merge past a red `gate`; that stays possible on
+   Without **Do not allow bypassing the above settings**, an administrator can merge past a red `gate` `[unverified]`; that stays possible on
    purpose, as the emergency path (see the last paragraph below).
 8. **Confirm the rule works before you call M9 done (live check L1, `[unverified]`: task 039 U1).** Open a real pull request
-   into `main` and look at its merge box. Two pull requests are useful. (a) The manager's infrastructure test PR: `gate` must
-   be listed with the word
-   **Required** next to it. Basis: the check is produced by a `pull_request_target` run, and whether GitHub counts that run as
-   satisfying a required check on the PR head `[unverified]` has not been seen. If `gate` is missing, or is not marked
-   "Required", or the box says it is "Expected" and waiting forever: **stop and tell the manager. M9 is not done.**
-   (b) The manager's open L3 pull request (invalid schema, so its `gate` is red): its merge button must be blocked (live check
-   L4). As an administrator you may be offered a bypass option instead `[unverified]`; that is expected, because bypassing stays
-   unticked on purpose. What must not happen is a normal merge: if the pull request can be merged normally, **stop and tell the
-   manager. M9 is not done.**
+   into `main` and look at its merge box. (a) Use the manager's infrastructure test PR, or any other open PR (the L3 PR, registry
+   #26, works too); if none is open, tell the manager. `gate` must be listed with the word **Required** next to it. Basis: the
+   check is produced by a `pull_request_target` run, and whether GitHub counts that run as satisfying a required check on the PR
+   head `[unverified]` has not been seen. If `gate` is missing, or is not marked "Required", or the box says it is "Expected" and
+   waiting forever: **stop and tell the manager. M9 is not done.**
+   (b) Then look at the manager's open L3 pull request (invalid schema, so its `gate` is red; live check L4). Expected: the ordinary
+   merge button is greyed out or missing, and `gate` shows as failing and Required. If GitHub offers an administrator option to merge
+   anyway (wording `[unverified]`), **DO NOT click it**: that would merge the deliberately invalid pull request. Only if the
+   ordinary merge button is clickable: **stop and tell the manager. M9 is not done.**
+   When you have seen L4, do not merge or close the L3 pull request. Tell the manager "L4 blocked"; the manager closes it.
 
 *You should see:* on the Branches page the rule for `main` listing "Require status checks to pass" with `gate` under it.
-Then open any open pull request: the merge box says "Required" next to `gate`. Pull requests that touch nothing under
+Then open any open pull request: the merge box says "Required" next to `gate`; the L3 pull request is blocked. Pull requests that touch nothing under
 `mods/` stay mergeable (their `gate` is green by design, and says that human review is required).
 **Infrastructure pull requests (S6):** a pull request that touches only paths outside `mods/` (for example `.github/workflows/` or
 `tools/registry/`) takes the infrastructure route and is green without any mods check. Such a pull request changes the gate
@@ -347,7 +352,7 @@ itself, so merging it needs a careful human read of the diff, every time; green 
 `[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
 documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
 Emergency path (kept, per the S5 decision in step 7): because **Do not allow bypassing the above settings** is left unticked, an
-administrator can still merge past a red `gate` in an emergency. Everyone else is blocked by the required check.
+administrator can still merge past a red `gate` in an emergency `[unverified]`. Everyone else is blocked by the required check.
 
 ---
 
