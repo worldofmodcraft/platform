@@ -2839,3 +2839,12 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **008b-2 fix round 1** (red `ef248f5`, fix `162d791`; log check exit 0): F1 secret unset before python, F3 no `${{` in any run:, c25 exact `if:` per
   job, F4 result.json allow-list (`result/shape` refusal -> exit_code 2), F5 single REJECTED line. **Manager reproduced red-then-green** in throwaway
   worktrees: 236 unit tests, `FAILED (failures=3)` at `ef248f5`, `OK` at `162d791`. Verify script and its mutations still phase 2.
+- **098 merged** (platform #91 -> `1a2dc0a`): review chain Opus re-review (33) -> round 1 -> delta (3 MED, 10 LOW) -> round 2 -> delta 2 (4 LOW) -> L1-L3
+  fixed, L4 decided. **Post-merge vault refresh FAILED** ("two task files share the id 098": the proposal file `docs/tasks/098-proposed-adr.md` matched the
+  projection's `NNN-*.md` task-file rule; manager's naming slip). **Task 099** (manager, doc move): proposal moved to
+  `docs/design/party-board-mod-proposed-adr.md`; projection test mode in a `mktemp -d` vault red on main, `id_conflicts=0` on the branch; #92 -> `849a22b`;
+  `refresh-main.sh` then `planned=228 written=5 ... id_conflicts=0`. Vault current.
+- **Design doc into the vault folder root: blocked for the manager by git-guard** (`BLOCKED [vault]: an agent's Bash command mentions the vault`); this
+  session counts as an agent. Not retried, not worked around. -> For Ludwig (one copy command, see below); booked: a projection change so `docs/design/*.md`
+  is projected automatically (needs a contract change to `docs/tools/vault-projection.md`; Ludwig's call).
+- Manager slips, harmless: a git-guard fail-closed on an unbalanced-parenthesis heredoc (split into separate steps, PR body from a file).
