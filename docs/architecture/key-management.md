@@ -1,6 +1,6 @@
 # Platform identity and signing key
 
-- **Status:** current · **Last reviewed:** 2026-09-02
+- **Status:** current · **Last reviewed:** 2026-10-28
 - **Authority:** ADR-0041 (integrity chain, key management, rotation), ADR-0058 §2 (ownership by
   numeric account id), ADR-0119 (reserved namespaces), mission SITE-V1 §D5
 
@@ -75,6 +75,9 @@ key from now on".
 5. Kernel and launcher ship a **set** of trusted public keys, not one, so a rotation does not
    strand installed content. Retire an old key only when no supported version references it.
 6. Record the rotation here: date, retiring `key_id`, new `key_id`, reason.
+7. **Applies once task 008b-2 is merged:** the registry workflow `.github/workflows/pipeline.yml` carries
+   the production public key as a literal in its `sign` job. A rotation must update that literal, and
+   its key id, in the same change as steps 2 and 3.
 
 ### Rotation history
 | Date | Retired key_id | New key_id | Reason |

@@ -33,3 +33,29 @@ Exactly these edits, in English, matching each file's existing style; nothing el
 ---
 # Task 100 log
 - 2026-10-28 manager (session 14): created; dispatched to doc-writer.
+- 2026-10-28 doc-writer (session 14): done. Edits: OPERATIONS.md (membership fact in table row, identity bullet and paragraph; new section 'What session 14 paid for' with 1a-1e; last-reviewed 2026-10-28); key-management.md (rotation step 7, last-reviewed 2026-10-28). Note: the mission log held no session-14 entries at write time, so 1a-1d facts and the 'request ids' pointer come from this task file and task 099; no request ids were invented.
+  AC1 `git diff --name-only origin/main...HEAD` (after commit): see below. AC2 greps:
+```
+$ grep -n 'share the id 098' docs/manager/OPERATIONS.md
+425:"two task files share the id 098". Task 099 moved it to `docs/design/`. Rule: proposals and drafts go unde
+$ grep -n 'BLOCKED \[vault\]' docs/manager/OPERATIONS.md
+429:git-guard answered `BLOCKED [vault]` to the manager copying files into the vault. Only the projection tool
+$ grep -n 'unbalanced parenthesis' docs/manager/OPERATIONS.md
+433:A long chained command containing a heredoc with parentheses was refused with "unbalanced parenthesis". Ru
+$ grep -n 'reasoning_extraction' docs/manager/OPERATIONS.md
+437:Reviewer and doc agents running on Sonnet were terminated mid-report with `[reasoning_extraction]` (reques
+$ grep -n 'mktemp -d' docs/manager/OPERATIONS.md
+442:With `WOM_VAULT_TEST=1`, create the temporary vault with `mktemp -d` (the system temp dir), not inside the
+$ grep -n 'no longer\*\* a non-member' docs/manager/OPERATIONS.md
+39:log M6: "Ja det är klart"); organisation Base permissions = Read. It is **no longer** a non-member.
+$ grep -n 'non-member' docs/manager/OPERATIONS.md
+23:  (Ludwig, mission log M6; not externally verified). Before that it was a non-member with no write
+39:log M6: "Ja det är klart"); organisation Base permissions = Read. It is **no longer** a non-member.
+41:**History (the 2026-09-06 situation, when `mbmludric` was still a non-member):** it looked like the
+42:obvious tool for reproducing any "what does a non-member caller see?" question — and that was exactly
+46:stand in for a non-member caller in any case.
+48:**The right way to reproduce a non-member caller costs nothing and needs no identity:**
+$ grep -n '008b-2' docs/architecture/key-management.md
+78:7. **Applies once task 008b-2 is merged:** the registry workflow `.github/workflows/pipeline.yml` carries
+```
+  Remaining non-member lines: 23, 41, 46, 48 are history/how-to; line 39 states it is no longer one. AC3: text edits only, no credential read.

@@ -2,7 +2,7 @@
 
 - **Purpose:** facts a session learns by getting them wrong. Context is lost at compaction or
   handover; this file is not. If you catch yourself deducing one of these from scratch, it belongs here.
-- **Last reviewed:** 2026-09-03
+- **Last reviewed:** 2026-10-28
 - **This is a living document.** Every session that learns a new gotcha appends it here before
   handing over. Adding to it is part of the handover procedure (MANAGER.md §5), not optional.
 
@@ -19,7 +19,9 @@ happens); the ledger entry and mission log stay in `platform`.
 ## Identities and keys
 - `gh` is authenticated as **`womcraft`** (numeric id **324089373**) — the platform identity.
 - Organisation `worldofmodcraft` = **324218296**. Ludwig's older personal account `mbmludric` =
-  **37807560**, which has **no** write access to the org (this caused the first push failure).
+  **37807560**. Since 2026-10-26 it is a **member** of the org with organisation Base permissions = **Read**
+  (Ludwig, mission log M6; not externally verified). Before that it was a non-member with no write
+  access (this caused the first push failure).
 - Git identity in the platform and registry clones: `womcraft <womcraft@snabbpost.com>`.
 - Signing key id **`6E5B30596A7A8CC4`** (minisign, Ed25519). Public key and rotation procedure in
   `docs/architecture/key-management.md`. The private key is only an Actions secret plus Ludwig's
@@ -31,13 +33,17 @@ happens); the ledger entry and mission log stay in `platform`.
 | Account | Numeric id | What it is | `gh` state |
 |---|---|---|---|
 | `womcraft` | 324089373 | the platform bot identity; all project git and `gh` work runs as this | **active** |
-| `mbmludric` | 37807560 | **Ludwig's older personal GitHub account**; no write access to the org | stored, inactive |
+| `mbmludric` | 37807560 | **Ludwig's older personal GitHub account**; org member, Base permissions = Read (since 2026-10-26) | stored, inactive |
 
-`mbmludric` is a genuine **non-member** of `worldofmodcraft`, which makes it the obvious tool for
-reproducing any "what does a non-member caller see?" question — and that is exactly the trap. On
-2026-09-06 a doc-writer agent tried `gh auth token --user mbmludric` three times for that reason and
-was blocked three times. **Credentials now require a task-file reason and Ludwig's approval**
-(CLAUDE.md rule 11, MANAGER.md guardrail 10).
+**Current fact:** `mbmludric` was invited and joined `worldofmodcraft` on 2026-10-26 (Ludwig, mission
+log M6: "Ja det är klart"); organisation Base permissions = Read. It is **no longer** a non-member.
+
+**History (the 2026-09-06 situation, when `mbmludric` was still a non-member):** it looked like the
+obvious tool for reproducing any "what does a non-member caller see?" question — and that was exactly
+the trap. On 2026-09-06 a doc-writer agent tried `gh auth token --user mbmludric` three times for that
+reason and was blocked three times. **Credentials now require a task-file reason and Ludwig's approval**
+(CLAUDE.md rule 11, MANAGER.md guardrail 10). Because `mbmludric` is now a member, it can no longer
+stand in for a non-member caller in any case.
 
 **The right way to reproduce a non-member caller costs nothing and needs no identity:**
 ```
@@ -410,3 +416,28 @@ classified as a defect: the PR is red either way, but a contributor fixing one e
 ### `gh pr merge` chained with other commands was denied again
 `gh pr checks 88`, `gh pr merge 88` and `gh pr view 88` chained in one call were refused ("Merge Without Review"), exactly as the 2026-09-06
 section above says. Re-learned: run `gh pr merge` as its own bare command, then `tools/vault/refresh-main.sh`. (Mission log, session 13.)
+
+## What session 14 paid for (2026-10-28)
+
+### Never name a non-task file `docs/tasks/NNN-*.md`
+The vault projection reads every `docs/tasks/NNN-*.md` as a task file and refuses two files with one id. A proposal saved as
+`docs/tasks/098-proposed-adr.md` beside `098-adr-first-mod-party-board.md` made `tools/vault/refresh-main.sh` fail after the merge of #91:
+"two task files share the id 098". Task 099 moved it to `docs/design/`. Rule: proposals and drafts go under `docs/design/` or get a
+non-numbered name. (Mission log, session 14; task 099.)
+
+### In a background session the manager counts as an agent for git-guard's vault rule
+git-guard answered `BLOCKED [vault]` to the manager copying files into the vault. Only the projection tool (run via
+`tools/vault/refresh-main.sh`) or Ludwig writes there. Do not work around the block. (Mission log, session 14.)
+
+### git-guard fails closed on a command it cannot parse
+A long chained command containing a heredoc with parentheses was refused with "unbalanced parenthesis". Rule: split the work into separate
+steps, and give `gh pr create` its body with `--body-file` instead of an inline heredoc. (Mission log, session 14.)
+
+### Sonnet reviewer and doc agents were cut off mid-report by an API safeguard
+Reviewer and doc agents running on Sonnet were terminated mid-report with `[reasoning_extraction]` (request ids are in the mission log);
+resuming them did not help. Working approach: dispatch a fresh, independent reviewer on Opus (general-purpose agent, model override) that
+writes its findings to a file in the job tmp dir; the manager reads that file. (Mission log, session 14.)
+
+### The vault projection's test mode needs its temporary vault under the system temp dir
+With `WOM_VAULT_TEST=1`, create the temporary vault with `mktemp -d` (the system temp dir), not inside the job tmp dir. (Mission log,
+session 14; task 099 used this form.)
