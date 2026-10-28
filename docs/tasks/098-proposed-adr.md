@@ -174,7 +174,7 @@ pacing numbers are tuned for.
 
 ### Q5 (changes the design doc, sections h.3a and c.5)
 The ADRs plan an arcade driver mod (ADR-0114:7) that needs teams, zones, countdowns and match abort
-(ADR-0114:20, :24), which the party mod's minigames also need. Should the two be related?
+(ADR-0114:20, :24; zones and countdowns ADR-0083:7), which the party mod's minigames also need. Should the two be related?
 - **A ★** Separate mods that both build on the platform's surfaces. Consequence: some duplicated
   minigame plumbing; each mod stays standalone, as you asked.
 - **B** The party mod's minigame layer becomes the arcade mod (or the arcade mod is a minigame

@@ -202,7 +202,7 @@ Hand calculation for a 4-player, 15-round game; these are **estimates**, to be r
 | Items bought | Items are bought only at the 2 Stalls: a player lands on a Stall 15 x 2/48 = 0.63 times and buys at most 2 items, about 1.5 on average, so about 0.94 purchases at an average price of 11.1 (the 9 items sum to 100). Items from Cache spaces cost nothing. | 10.4 |
 | **Total out** | 32.6 + 10.4 | **43.0** |
 
-Expected unspent Brass per player at the end: 72.7 - 43.0 = about **30**. That is at the top of the calibration target below, so the first levers, if the simulator confirms it, are a higher wick-fee base, payouts lowered by 1, or a third Stall. Calibration targets for the simulator: median unspent Brass between 10 and 35; fewer than 10% of lit-Pier visits fail because the player cannot pay (the first fee, 9, is covered by the start Brass of 12); deliveries per game about 7 (3 lanterns x about 2.5 cycles each, with a cycle of about 6 rounds: pick-up wait 1.5 + carry 3.7 + relight 1) plus 2 Honour Stars; the winner holds about 3 Stars.
+Expected unspent Brass per player at the end: 72.7 - 43.0 = about **30**. That is near the top of the target below (10-35, widened from 10-30 in fix round 2), so the first levers, if the simulator confirms it, are a higher wick-fee base, payouts lowered by 1, or a third Stall. Calibration targets for the simulator: median unspent Brass between 10 and 35; fewer than 10% of lit-Pier visits fail because the player cannot pay (the first fee, 9, is covered by the start Brass of 12); deliveries per game about 7 (3 lanterns x about 2.5 cycles each, with a cycle of about 6 rounds: pick-up wait 1.5 + carry 3.7 + relight 1) plus 2 Honour Stars; the winner holds about 3 Stars.
 
 ### b.13 What changed in fix round 1, and why (for Ludwig)
 The first draft copied too many of the genre leader's signature rules at once (start coins, one star bought at a moving space, +/- coin spaces, last-turns doubling, space-colour teams, three bonus stars). The manager's overnight ruling replaced them: stars are earned by carrying a lantern; teams come from standings (c.1); the final-rounds twist is a rising tide; the numbers differ; there are two Honours specific to this game. These are rulings Ludwig may overturn; see j.1.
@@ -803,7 +803,7 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 - [ ] No name, character, item, place or phrase from Nintendo's party games or any other published game.
 - [ ] No Blizzard asset, name or motif (ADR-0004:17, ADR-0061:7).
 - [ ] The Star silhouette, the dice, the spaces and their effects are our own (b.4, b.5).
-- [ ] No rule combination that reproduces a published game's signature rules (all of: star price and relocation, space-colour team selection, final-turns doubling, a random pool of end-of-game bonus stars). The design keeps two game-specific bonus Stars (b.9); that is allowed because the rule forbids the combination..
+- [ ] No rule combination that reproduces a published game's signature rules (all of: star price and relocation, space-colour team selection, final-turns doubling, a random pool of end-of-game bonus stars). The design keeps two game-specific bonus Stars (b.9); that is allowed because the rule forbids the combination.
 - [ ] Music and sound effects are not recognisable as a known melody.
 - [ ] Every asset has a recorded source and a licence that fits the mod's licence field (ADR-0061:7).
 - [ ] "Mario Party" appears only as the genre reference, quoting Ludwig (section 0 and the ADR proposal Context).
