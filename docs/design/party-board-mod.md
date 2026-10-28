@@ -1,6 +1,6 @@
 # Design: "Wayfarers' Wager" — a party board game mod
 
-- **Status:** Draft — rests on the proposed ADR in `docs/tasks/098-proposed-adr.md`; not accepted. (The design itself needs no ADR change: the mod is built only on the platform's mod API. The proposed ADR only decides whether this mod drives the platform build order.)
+- **Status:** Draft — rests on the proposed ADR in `docs/design/party-board-mod-proposed-adr.md`; not accepted. (The design itself needs no ADR change: the mod is built only on the platform's mod API. The proposed ADR only decides whether this mod drives the platform build order.)
 - **Last reviewed:** 2026-10-28
 - **Author:** doc-writer, task 098, for Ludwig
 - **Working title:** Wayfarers' Wager (a placeholder; renaming is free). Mod id: `<ns>:wayfarers-wager`, namespace **[open]** (a personal namespace follows the GitHub username, ADR-0030:30; `mc:` is reserved for platform core mods, ADR-0003:10, ADR-0119:30-34).
@@ -759,7 +759,7 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 
 ## j. Risks and open questions
 
-### j.1 Questions for Ludwig (the same five as in the ADR proposal, `docs/tasks/098-proposed-adr.md`), and overnight rulings awaiting him
+### j.1 Questions for Ludwig (the same five as in the ADR proposal, `docs/design/party-board-mod-proposed-adr.md`), and overnight rulings awaiting him
 | # | Question | Effect on this document |
 |---|---|---|
 | Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? | None on the design. Only decides whether ADR-0123 exists. |
