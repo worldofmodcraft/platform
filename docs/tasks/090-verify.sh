@@ -29,9 +29,11 @@ DO_MUTATE=0; DO_SWEEP=0
 for a in "$@"; do case "$a" in --mutate) DO_MUTATE=1;; --sweep) DO_SWEEP=1;; *) echo "usage: $0 [--mutate] [--sweep]"; exit 2;; esac; done
 
 ok()  { echo "  ok   $*"; }
-bad() { echo "  FAIL $*"; }
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/wom090-XXXXXX")"
 trap 'rm -rf -- "$TMP"' EXIT
+# bad also appends to a file (BADFILE, default $TMP/fails.txt) that the final gate reads, so a FAIL can never be lost to a pipe or a subshell;
+# --mutate points BADFILE elsewhere while it runs a deliberately broken subject, so expected failures do not count against the run
+bad() { echo "  FAIL $*"; echo "$*" >>"${BADFILE:-$TMP/fails.txt}"; }
 GITID=(-c user.name=qa -c user.email=qa@example.invalid -c commit.gpgsign=false)
 HEADSHA="$(git rev-parse HEAD)"
 git diff --quiet HEAD -- . || { echo "FAIL: working tree is dirty; run from a clean (fresh) clone"; exit 2; }
@@ -47,7 +49,7 @@ mkclone() {
     && git -C "$1" fetch -q "$HERE" HEAD \
     && { git -C "$1" fetch -q "$HERE" '+refs/remotes/origin/*:refs/remotes/origin/*' 2>/dev/null || true; } \
     && { git -C "$1" rev-parse -q --verify refs/remotes/origin/main >/dev/null || git -C "$1" update-ref refs/remotes/origin/main "$BASE_SHA"; } \
-    && git -C "$1" checkout -q --detach "$2" || { echo "clone failed ($1 at $2)" >&2; exit 2; }
+    && git -C "$1" checkout -q --detach "$2" || { bad "setup: clone failed ($1 at $2)"; return 1; }
 }
 commit_all() { git -C "$1" add -A && git -C "$1" "${GITID[@]}" commit -q --allow-empty -m "$2"; }
 # overlay DIR REV PATH... : write the scripts as they are at REV into the clone and commit them
@@ -80,14 +82,16 @@ has() { grep -qF -- "$2" "$TMP/$1.out" && ok "$1 output names '$2'" || { bad "$1
 # merge_clone DIR REV : DIR = HEAD merged with a later synthetic branch (cut from BASE_SHA) that revokes the suspension, ticks M4 and
 # moves Last reviewed; then the scripts as at REV are laid over it (REV=HEAD leaves them as they are)
 merge_clone() {
-  mkclone "$1" "$BASE_SHA"
-  git -C "$1" checkout -q -b later \
-    && revoke "$1" >/dev/null && runbook_edit "$1" >/dev/null \
-    && git -C "$1" checkout -q --detach "$HEADSHA" \
-    && git -C "$1" "${GITID[@]}" merge -q --no-edit later >/dev/null || { echo "merge setup failed" >&2; exit 2; }
+  mkclone "$1" "$BASE_SHA" || return 1
+  git -C "$1" checkout -q -b later || { bad "setup: cannot create branch 'later' in $1"; return 1; }
+  revoke "$1" || { bad "setup: revoke commit failed in $1"; return 1; }
+  runbook_edit "$1" || { bad "setup: runbook commit failed in $1"; return 1; }
+  git -C "$1" checkout -q --detach "$HEADSHA" || { bad "setup: cannot check out HEAD $HEADSHA in $1"; return 1; }
+  git -C "$1" "${GITID[@]}" merge -q --no-edit later >"$TMP/merge.err" 2>&1 || { bad "setup: merge of the later branch failed (conflict?): $(head -3 "$TMP/merge.err" | tr '\n' ' ')"; return 1; }
   grep -q 'REVOKED by Ludwig 2026-11-01' "$1/CLAUDE.md" && grep -q '^## ☑ M4 ' "$1/$RB" && [ "$(git -C "$1" rev-list --parents -n1 HEAD | wc -w)" = 3 ] \
-    || { echo "merge fixture check failed" >&2; exit 2; }
-  [ "$2" = "$HEADSHA" ] || overlay "$1" "$2" "$V048" "$V072" "$V080" "$V085"
+    || { bad "setup: merge fixture check failed in $1"; return 1; }
+  [ "$2" = "$HEADSHA" ] || overlay "$1" "$2" "$V048" "$V072" "$V080" "$V085" || { bad "setup: overlay failed in $1"; return 1; }
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC1
@@ -103,21 +107,22 @@ ac1_pins() {
     git show "$P048_FINAL:$f" | grep -q 'SUSPENDED by Ludwig 2026-10-14' && ok "marker present in $f at the pin" || bad "marker absent in $f at the pin"
   done
   grep -q "^PIN_BASE=\"$P048_BASE\"" "$V048" && grep -q "^PIN_FINAL=\"$P048_FINAL\"" "$V048" && ok "048-verify.sh carries exactly these pins" || bad "048-verify.sh pins differ from the derived ones"
+  return 0
 }
 # ac1_fn REV : 048 at REV is green before and after the revocation; the unreachable pin is red (exit 2), never skip
 ac1_fn() {
   local REV=$1 C="$TMP/a1-$1"
   echo "== AC1 048-verify.sh@${REV:0:7} on a later branch that revokes the suspension (c4 reads the pinned FINAL)"
-  mkclone "$C" "$BASE_SHA"
+  mkclone "$C" "$BASE_SHA" || return 1
   if [ "$REV" = "$BASE_SHA" ] || [ -n "${AC1_REDFIRST:-}" ]; then
     expect_rc 0 "$C" "a1-old-before" bash "$V048"      # old script, unrevoked tree: green (control)
-    revoke "$C" >/dev/null || return
+    revoke "$C" || return 1
     expect_red "$C" "a1-old-after" bash "$V048"        # old script, revoked tree: RED (the defect)
     has a1-old-after "FAIL c4: CLAUDE.md has no SUSPENDED marker"
   else
-    revoke "$C" >/dev/null || return
+    revoke "$C" || return 1
   fi
-  overlay "$C" "$REV" "$V048"
+  overlay "$C" "$REV" "$V048" || return 1
   expect_rc 0 "$C" "a1-after-$REV" bash "$V048"        # script under test, revoked tree: must be green
   local k v
   for k in PIN_BASE PIN_FINAL; do                      # unreachable pin: red, exit 2, never skip
@@ -126,16 +131,18 @@ ac1_fn() {
     expect_rc 2 "$C" "a1-dead-$k" bash "$T/048-dead.sh"
     has "a1-dead-$k" "FAIL: pinned commit deadbee not found"
   done
+  return 0
 }
 # ac1_widen : the c4 reads moved back to HEAD ($T instead of $T1) must redden on the revoked tree (the mutation AC1 names)
 ac1_widen() {
   echo "== AC1 mutation: c4 widened to HEAD reddens on the revoked branch"
   local C="$TMP/a1-wide"
-  mkclone "$C" "$BASE_SHA"; revoke "$C" >/dev/null || return; overlay "$C" "$HEADSHA" "$V048"
+  mkclone "$C" "$BASE_SHA" || return 1; revoke "$C" || return 1; overlay "$C" "$HEADSHA" "$V048" || return 1
   sed -i -e '/grep -n .SUSPENDED by Ludwig 2026-10-14/s#"\$T1/\$f"#"$T/$f"#' -e "/grep -n \"Ludwig's Claude Max subscription is shared\"/s#\"\$T1/\$f\"#\"\$T/\$f\"#" "$C/$V048"
   [ "$(grep -c 'ln[12]=.*"\$T/\$f"' "$C/$V048")" = 2 ] && ok "both c4 reads widened to \$T" || bad "widening mutation did not apply to both c4 lines"
   expect_red "$C" a1-wide bash "$V048"
   has a1-wide "FAIL c4: CLAUDE.md has no SUSPENDED marker"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC2
@@ -143,7 +150,7 @@ ac1_widen() {
 ac2_fn() {
   local R=$1 C="$TMP/a2-$1" rc
   echo "== AC2 079-verify.sh stays a live guard of the suspension marker"
-  mkclone "$C" "$HEADSHA"
+  mkclone "$C" "$HEADSHA" || return 1
   [ "$R" = STUB ] && { printf '#!/usr/bin/env bash\nexit 0\n' >"$C/$V079"; commit_all "$C" stub; }
   expect_rc 0 "$C" a2-clean bash "$V079"
   grep -q 'LIVE GUARD (task 090' "$C/$V079" && ok "079 carries the live-guard comment" || bad "079 lacks the live-guard comment"
@@ -160,6 +167,7 @@ ac2_fn() {
   expect_red "$C" a2-both bash "$V079"
   has a2-both "cannot locate anchors"
   echo "  named: $(grep -m2 -E 'FAIL|cannot locate' "$TMP/a2-both.out" | tr '\n' '|' | cut -c1-200)"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC3
@@ -169,7 +177,7 @@ ac3_fn() {
   echo "== AC3 072/080 pins cannot be overridden (scripts@${REV:0:7})"
   n=$( { sc "$REV" "$V072"; sc "$REV" "$V080"; } | grep -cE 'T072_(BASE|FINAL)|T080_' )
   [ "$n" = 0 ] && ok "grep T072_(BASE|FINAL)|T080_ -> 0 lines" || bad "grep T072_(BASE|FINAL)|T080_ -> $n lines (override still present)"
-  mkclone "$C" "$HEADSHA"; overlay "$C" "$REV" "$V072" "$V080"
+  mkclone "$C" "$HEADSHA" || return 1; overlay "$C" "$REV" "$V072" "$V080" || return 1
   local s v
   for s in 072 080; do
     if [ "$s" = 072 ]; then v=T072_BASE; else v=T080_BASE; fi
@@ -195,10 +203,12 @@ ac3_fn() {
   has a3-reg-subdir "is not a git repository"
   expect_red "$C" a3-reg-noorigin env "T072_REGISTRY=$TMP/norigin" bash "$T/072-verify.sh"
   has a3-reg-noorigin "origin/main does not resolve"
+  return 0
 }
 ac3_positive() {  # the grep matches in the OLD scripts (positive control: 4 override lines)
   local n; n=$( { sc "$BASE_SHA" "$V072"; sc "$BASE_SHA" "$V080"; } | grep -cE 'T072_(BASE|FINAL)|T080_' )
   [ "$n" = 4 ] && ok "AC3 positive control: the same grep matches $n lines in the old 072/080" || bad "AC3 positive control: expected 4 matches in old scripts, got $n"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC4
@@ -206,24 +216,26 @@ ac3_positive() {  # the grep matches in the OLD scripts (positive control: 4 ove
 ac4_fn() {
   local REV=$1 C="$TMP/a4-$1" line
   echo "== AC4 085-verify.sh@${REV:0:7}: nested control asserts the Last reviewed substitution"
-  mkclone "$C" "$HEADSHA"; overlay "$C" "$REV" "$V085"
+  mkclone "$C" "$HEADSHA" || return 1; overlay "$C" "$REV" "$V085" || return 1
   expect_rc 0 "$C" "a4-unbroken-$REV" bash "$V085"                        # unbroken script: green (positive control)
   line=$(grep -n 'cd "\$TMP/n" && sed -i' "$C/$V085" | head -1 | cut -d: -f1)
-  [ -n "$line" ] || { bad "cannot find the nested-control sed line in 085@$REV"; return; }
+  [ -n "$line" ] || { bad "cannot find the nested-control sed line in 085@$REV"; return 1; }
   sed -i "${line}s/(task 068)/(task 069)/" "$C/$V085"                    # break: the substitution can no longer match
-  git -C "$C" diff --quiet -- "$V085" && { bad "sed-break mutation was a no-op"; return; }
+  git -C "$C" diff --quiet -- "$V085" && { bad "sed-break mutation was a no-op"; return 1; }
   expect_red "$C" "a4-broken-$REV" bash "$V085"
   has "a4-broken-$REV" "FAIL nested: Last reviewed substitution applied"
+  return 0
 }
 # ac4_gap : the OLD 085 with the same break still passes (the gap that existed)
 ac4_gap() {
   echo "== AC4 red first: the OLD 085 with the broken nested sed passes (the gap)"
   local C="$TMP/a4-gap" line
-  mkclone "$C" "$BASE_SHA"
+  mkclone "$C" "$BASE_SHA" || return 1
   line=$(grep -n 'cd "\$TMP/n" && sed -i' "$C/$V085" | head -1 | cut -d: -f1)
   sed -i "${line}s/(task 068)/(task 069)/" "$C/$V085"
-  git -C "$C" diff --quiet -- "$V085" && { bad "gap mutation was a no-op"; return; }
+  git -C "$C" diff --quiet -- "$V085" && { bad "gap mutation was a no-op"; return 1; }
   expect_rc 0 "$C" a4-old-broken bash "$V085"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC5
@@ -231,31 +243,33 @@ ac4_gap() {
 ac5_fn() {
   local REV=$1 H="$TMP/a5h-$1" MG="$TMP/a5m-$1" s
   echo "== AC5 item 12: touched scripts@${REV:0:7} on HEAD and on the merge with a later branch"
-  mkclone "$H" "$HEADSHA"; overlay "$H" "$REV" "$V048" "$V072" "$V080" "$V085"
-  merge_clone "$MG" "$REV"
+  mkclone "$H" "$HEADSHA" || return 1; overlay "$H" "$REV" "$V048" "$V072" "$V080" "$V085" || return 1
+  merge_clone "$MG" "$REV" || return 1
   for s in 048 072 080 085; do
     expect_rc 0 "$H"  "a5-head-$s-$REV"  bash "$T/$s-verify.sh"
     expect_rc 0 "$MG" "a5-merge-$s-$REV" bash "$T/$s-verify.sh"
   done
   expect_rc 0 "$H" "a5-head-079-$REV" bash "$V079"
   expect_red "$MG" "a5-merge-079-$REV" bash "$V079"   # live guard reddens when the marker is revoked: intended (AC2 / Q1)
+  return 0
 }
 ac5_positive() {  # the unfixed 048 is red on the same merge
   echo "== AC5 positive control: the OLD 048 on the same merge"
   local MG="$TMP/a5m-old"
-  merge_clone "$MG" "$BASE_SHA"
+  merge_clone "$MG" "$BASE_SHA" || return 1
   expect_red "$MG" a5-merge-048-old bash "$V048"
   has a5-merge-048-old "FAIL c4: CLAUDE.md has no SUSPENDED marker"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC7
 ac7_fn() {
   local FINAL=$1 f r a expect
   echo "== AC7 scope: git diff --name-only ${BASE_SHA:0:7}..${FINAL:0:7} is a subset of File scope"
-  if [ "$FINAL" = "__FIN""AL__" ]; then bad "PIN_FINAL not recorded"; return; fi
-  git rev-parse --verify -q "$FINAL^{commit}" >/dev/null || { bad "PIN_FINAL $FINAL unreachable (never skip)"; return; }
+  if [ "$FINAL" = "__FIN""AL__" ]; then bad "PIN_FINAL not recorded"; return 1; fi
+  git rev-parse --verify -q "$FINAL^{commit}" >/dev/null || { bad "PIN_FINAL $FINAL unreachable (never skip)"; return 1; }
   local files; files=$(git diff --name-only "$BASE_SHA" "$FINAL")
-  [ -n "$files" ] || { bad "empty change set"; return; }
+  [ -n "$files" ] || { bad "empty change set"; return 1; }
   for f in $files; do printf '%s\n' $SCOPE | grep -qxF -- "$f" && ok "in scope: $f" || bad "out of scope: $f"; done
   echo "  hunks (git diff -U0):"; git diff -U0 "$BASE_SHA" "$FINAL" -- "$V048" "$V072" "$V079" "$V080" "$V085" | grep -E '^(\+\+\+|@@)' | cut -c1-120 | sed 's/^/    /'
   # exact removed/added line counts per edited script; everything else is byte-identical by construction (diff -U0 shows only these hunks)
@@ -280,13 +294,14 @@ ac7_fn() {
   # 072/080: removed lines are exactly the pin lines
   local b; b=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V072" "$V080" | grep '^-[^-]' | grep -vE '^-(BASE|FINAL)=\$\{T0(72|80)_(BASE|FINAL):-' || true)
   [ -z "$b" ] && ok "072/080: removed lines are only the BASE/FINAL pin lines" || bad "072/080: removed line outside the pins: $b"
+  return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC6 sweep
 ac6_sweep() {
   local d name label s others rc
   echo "== AC6 sweep: every closed platform script, one at a time, on HEAD and on the merge"
-  mkclone "$TMP/a6h" "$HEADSHA"; merge_clone "$TMP/a6m" "$HEADSHA"
+  mkclone "$TMP/a6h" "$HEADSHA" || return 1; merge_clone "$TMP/a6m" "$HEADSHA" || return 1
   for label in head merge; do
     if [ $label = head ]; then d="$TMP/a6h"; else d="$TMP/a6m"; fi
     for s in "$d"/$T/[0-9]*-verify.sh; do
@@ -300,39 +315,57 @@ ac6_sweep() {
       else bad "$label $name -> exit $rc"; tail -5 "$TMP/a6-$label-$name.out" | cut -c1-200; fi
     done
   done
+  return 0
 }
 
-# ------------------------------------------------------------------------------------------------------------ main
-ALL="$TMP/all.out"; : >"$ALL"
-section() { "$@" 2>&1 | tee -a "$ALL"; }
+ALL="$TMP/all.out"; : >"$ALL"; : >"$TMP/fails.txt"
+# section LABEL CMD... : run a check function, tee its output into $ALL, and print a sentinel only if it ran to its end (return 0).
+# A function that aborts on a setup failure returns 1, which is recorded as a FAIL; the final gate also requires every sentinel.
+section() {
+  local lbl=$1 rc; shift
+  { "$@"; echo $? >"$TMP/rc.$lbl"; } 2>&1 | tee -a "$ALL"
+  rc=$(cat "$TMP/rc.$lbl" 2>/dev/null || echo missing)
+  if [ "$rc" = 0 ]; then echo "  sentinel $lbl" | tee -a "$ALL"; else bad "section $lbl aborted (return code $rc)" | tee -a "$ALL"; fi
+}
 echo "== task 090 verify: HEAD ${HEADSHA:0:7}, base ${BASE_SHA:0:7}; mutate=$DO_MUTATE sweep=$DO_SWEEP"
-section ac1_pins
-AC1_REDFIRST=1 section ac1_fn "$HEADSHA"
-section ac2_fn HEAD
-section ac3_positive
-section ac3_fn "$HEADSHA"
-section ac4_gap
-section ac4_fn "$HEADSHA"
-section ac5_fn "$HEADSHA"
-section ac5_positive
-section ac7_fn "$PIN_FINAL"
-[ "$DO_SWEEP" = 1 ] && section ac6_sweep
+EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac7_fn"
+section ac1_pins ac1_pins
+AC1_REDFIRST=1 section ac1_fn ac1_fn "$HEADSHA"
+section ac2_fn ac2_fn HEAD
+section ac3_positive ac3_positive
+section ac3_fn ac3_fn "$HEADSHA"
+section ac4_gap ac4_gap
+section ac4_fn ac4_fn "$HEADSHA"
+section ac5_fn ac5_fn "$HEADSHA"
+section ac5_positive ac5_positive
+section ac7_fn ac7_fn "$PIN_FINAL"
+if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
 
 if [ "$DO_MUTATE" = 1 ]; then
-  echo "== mutations: each check function is run against a broken subject and must report at least one FAIL line"
-  MF=0
+  echo "== mutations: each check function is run against a broken subject and must report a FAIL line that includes the required text"
   # mexpect NAME REQUIRED CMD... : the function's output must contain a FAIL line that includes the fixed string REQUIRED (not just any FAIL)
-  mexpect() { local n=$1 req=$2; shift 2; "$@" >"$TMP/m-$n.out" 2>&1; if grep '^  FAIL' "$TMP/m-$n.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"; else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi; }
-  section mexpect "old 048 (c4 on HEAD) vs AC1" "FAIL a1-after-$BASE_SHA -> exit"   ac1_fn "$BASE_SHA"
-  section ac1_widen
-  section mexpect "old 072/080 (env overrides) vs AC3" "override still present" ac3_fn "$BASE_SHA"
-  section mexpect "old 085 (no nested assertion) vs AC4" "a4-broken-$BASE_SHA output lacks 'FAIL nested: Last reviewed substitution applied'" ac4_fn "$BASE_SHA"
-  section mexpect "old 048 on the merge vs AC5" "FAIL a5-merge-048-$BASE_SHA -> exit" ac5_fn "$BASE_SHA"
-  section mexpect "079 that never reddens vs AC2" "a2-claude -> exit 0 but must be red" ac2_fn STUB
-  section mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
+  mexpect() {
+    local n=$1 req=$2; shift 2
+    BADFILE="$TMP/m-$n.fails" "$@" >"$TMP/m-$n.out" 2>&1
+    if grep '^  FAIL' "$TMP/m-$n.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"
+    else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi
+    return 0
+  }
+  EXPECT="$EXPECT m1 m_widen m3 m4 m5 m6 m7"
+  section m1 mexpect "old 048 (c4 on HEAD) vs AC1" "FAIL a1-after-$BASE_SHA -> exit" ac1_fn "$BASE_SHA"
+  section m_widen ac1_widen
+  section m3 mexpect "old 072/080 (env overrides) vs AC3" "override still present" ac3_fn "$BASE_SHA"
+  section m4 mexpect "old 085 (no nested assertion) vs AC4" "a4-broken-$BASE_SHA output lacks 'FAIL nested: Last reviewed substitution applied'" ac4_fn "$BASE_SHA"
+  section m5 mexpect "old 048 on the merge vs AC5" "FAIL a5-merge-048-$BASE_SHA -> exit" ac5_fn "$BASE_SHA"
+  section m6 mexpect "079 that never reddens vs AC2" "a2-claude -> exit 0 but must be red" ac2_fn STUB
+  section m7 mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
 fi
 
-NF=$(grep -c '^  FAIL' "$ALL" || true)
-# the broken-subject FAIL lines inside mexpect go to $TMP/m-*.out, not to $ALL; only the verdict line mexpect prints (ok/FAIL) counts here
-echo "== 090-verify: $([ "$NF" = 0 ] && echo 'ALL CHECKS PASSED' || echo "$NF FAILED")"
-[ "$NF" = 0 ]
+# ---- final gate: no FAIL line in the output, none in the fail file, every expected section reached its end, and enough ok lines
+NF=$(grep -c '^  FAIL' "$ALL" || true); NFF=$(wc -l <"$TMP/fails.txt"); NOK=$(grep -c '^  ok ' "$ALL" || true); MISSING=""
+for e in $EXPECT; do grep -qx "  sentinel $e" "$ALL" || MISSING="$MISSING $e"; done
+[ -z "$MISSING" ] || { bad "sections that did not run to their end:$MISSING" | tee -a "$ALL"; NF=$((NF + 1)); }
+MINOK=60
+[ "$NOK" -ge "$MINOK" ] || { bad "only $NOK ok lines, expected at least $MINOK (a section ran short)" | tee -a "$ALL"; NF=$((NF + 1)); }
+echo "== 090-verify: ok lines $NOK, FAIL lines $NF, fail-file lines $NFF: $([ "$NF" = 0 ] && [ "$NFF" = 0 ] && echo 'ALL CHECKS PASSED' || echo FAILED)"
+[ "$NF" = 0 ] && [ "$NFF" = 0 ]
