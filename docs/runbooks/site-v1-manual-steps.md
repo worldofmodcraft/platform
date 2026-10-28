@@ -319,17 +319,24 @@ pull request yourself.
    designed around it, and without it a pull request that was green against an old `main` could merge.
 6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
    yet: stop, tell the manager, come back later.
-7. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
-   **Open choice, Ludwig decides; until then the box stays unticked as written** (security review S5): leaving everything else
-   unticked has two costs. Without **Require a pull request before merging**, an account with write access can push to `main`
-   directly and skip `gate` altogether. Without **Do not allow bypassing the above settings**, an administrator can merge past a
-   red `gate`. Ticking them closes both, at the price of an emergency path (see the last paragraph below). Tell the manager
-   which way you decide; the manager does not decide it for you.
+7. Also tick **Require a pull request before merging**. Leave every option that appears under it at its default (the page
+   shows them after you tick the box; this step names none to change). Leave **Do not allow bypassing the above settings**
+   **unticked**. Do not tick anything else. Click **Create** (new rule) or **Save changes** (existing rule).
+   **Decided, Ludwig 2026-10-27 (security review S5; mission log, "Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna"):**
+   tick the first, leave the second unticked. The reason is the two costs of the alternatives. Without **Require a pull request
+   before merging**, an account with write access can push to `main` directly and skip `gate` altogether, so it is ticked.
+   Without **Do not allow bypassing the above settings**, an administrator can merge past a red `gate`; that stays possible on
+   purpose, as the emergency path (see the last paragraph below).
 8. **Confirm the rule works before you call M9 done (live check L1, `[unverified]`: task 039 U1).** Open a real pull request
-   into `main` (the manager's infrastructure test PR is enough) and look at its merge box. `gate` must be listed with the word
+   into `main` and look at its merge box. Two pull requests are useful. (a) The manager's infrastructure test PR: `gate` must
+   be listed with the word
    **Required** next to it. Basis: the check is produced by a `pull_request_target` run, and whether GitHub counts that run as
    satisfying a required check on the PR head `[unverified]` has not been seen. If `gate` is missing, or is not marked
    "Required", or the box says it is "Expected" and waiting forever: **stop and tell the manager. M9 is not done.**
+   (b) The manager's open L3 pull request (invalid schema, so its `gate` is red): its merge button must be blocked (live check
+   L4). As an administrator you may be offered a bypass option instead `[unverified]`; that is expected, because bypassing stays
+   unticked on purpose. What must not happen is a normal merge: if the pull request can be merged normally, **stop and tell the
+   manager. M9 is not done.**
 
 *You should see:* on the Branches page the rule for `main` listing "Require status checks to pass" with `gate` under it.
 Then open any open pull request: the merge box says "Required" next to `gate`. Pull requests that touch nothing under
@@ -339,8 +346,8 @@ Then open any open pull request: the merge box says "Required" next to `gate`. P
 itself, so merging it needs a careful human read of the diff, every time; green means nothing there.
 `[unverified]` whether required status checks work on the Free plan for a public repository in an organisation: the
 documentation page read did not say. If the options are greyed out or ask for a paid plan, stop and tell the manager.
-Emergency path: ticking "Do not allow bypassing the above settings" means nobody, administrators included, can merge past a red
-`gate`, even in an emergency. That is the S5 choice in step 7; tell the manager which way you chose.
+Emergency path (kept, per the S5 decision in step 7): because **Do not allow bypassing the above settings** is left unticked, an
+administrator can still merge past a red `gate` in an emergency. Everyone else is blocked by the required check.
 
 ---
 

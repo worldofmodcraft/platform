@@ -30,3 +30,8 @@ Any other runbook step; M10/M11 text; the vault copy (refreshed by `tools/vault/
 ---
 # Task 093 log  (append-only)
 - 2026-10-28 manager (session 13): drafted and spec-approved; booked follow-up from session 12's handover (item 6).
+- 2026-10-28 doc-writer: verified the decision in the mission log ("### Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna", S5 = tick
+  "Require a pull request before merging", leave "Do not allow bypassing" unticked). Edited M9 only: step 7 (decision + cited, costs kept as
+  reason), step 8 (added (b) the open L3 PR, merge button must be blocked, live check L4), final "Emergency path" paragraph (now records the
+  decision). New UI labels: none; "bypass option" for an administrator in step 8 is marked `[unverified]`; "merge button" is descriptive, not a
+  quoted label. Sub-options of "Require a pull request before merging": "leave at defaults", none named. Criterion 5 (run after commit, below).
