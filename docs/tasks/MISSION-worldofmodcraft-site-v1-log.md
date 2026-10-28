@@ -2690,3 +2690,12 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   install choice; not separately verified]. Manager slip, harmless: a stray `git checkout --detach origin/main` in `~/registry` was reverted at
   once (clone back on `main`, clean).
   Next for Ludwig: **M11** (environments `signing`/`write-back`; delete repo-level copies of both keys) — before 008b goes live.
+- **M11 done (Ludwig, 2026-10-28, verbatim: "M11 done (notera att jag hade två .pem-filer, så valde den nyare, men kan ha varit en annan nyckel
+  än den jag tidigare hade i PIPELINE_APP_PRIVATE_KEY").** Manager verified via the API (names only): environments `signing` and
+  `write-back`, each with a `branch:main` deployment policy; `signing` holds `MINISIGN_SECRET_KEY` (14:36:25Z), `write-back` holds
+  `PIPELINE_APP_PRIVATE_KEY` (14:38:07Z); repository secrets are now only `REGISTRY_MEMBERSHIP_APP_ID` and `..._PRIVATE_KEY`. Earlier in the
+  step Ludwig found an `ssh-key-2026-04-03.key` in Downloads; the manager told him it is NOT the minisign key and pointed him to
+  `~/wom-keys/worldofmodcraft.key` (existence checked with `ls -l` only, 262 bytes, 2026-09-02; contents never read).
+  **[unverified] which App the chosen `.pem` belongs to:** a second key of `worldofmodcraft-pipeline` is valid; a key of another App (e.g. today's
+  `worldofmodcraft-membership`) would fail loudly at 008b's first token mint (no security exposure). Asked Ludwig for the file name; otherwise it
+  is proven by 008b-3b's first live run. Offline backup of the minisign key (Q-H) still unconfirmed; recommended to Ludwig.
