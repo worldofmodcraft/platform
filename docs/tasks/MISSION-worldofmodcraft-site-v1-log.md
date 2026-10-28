@@ -2751,3 +2751,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   running since 15:57Z, then L3. Machine stays reserved; handover items 1-2 wait for the driver to exit.
 - **090** (platform) dispatched to qa-engineer in **phase 1 only** (edits + written `090-verify.sh`, no verify runs): worktree `~/wt/task-090`,
   branch `task/090-closed-verify-sweep-platform`, base `4321d07`; log-entry baseline 2. Phase 2 joins the quiet-machine queue after 096 and 008b-1.
+- **090 phase 1 done** (`46a20c8` content = its PIN_FINAL, `ce8e2bc`, triage `1853230`; log check exit 0): 048 c4 pinned to `047bc41` (pins re-derived
+  from merge `c323460`, match the spec), 072/080 env pin overrides removed, 072 `REG` assertion, 085 nested `Last reviewed` check, 079 live-guard
+  comment; `090-verify.sh` (324 lines) written, not run. Two agent questions answered from the spec (in the 090 log). Phase-2 commands are in the
+  090 log. **Quiet-machine queue when the 089b driver exits:** 089b readout -> 096 phase 2 -> 008b-1 phase 2 -> 090 phase 2 (one at a time).
