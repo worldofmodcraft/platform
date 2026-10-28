@@ -2848,3 +2848,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   session counts as an agent. Not retried, not worked around. -> For Ludwig (one copy command, see below); booked: a projection change so `docs/design/*.md`
   is projected automatically (needs a contract change to `docs/tools/vault-projection.md`; Ludwig's call).
 - Manager slips, harmless: a git-guard fail-closed on an unbalanced-parenthesis heredoc (split into separate steps, PR body from a file).
+- **Task 100 merged** (platform #93 -> `5653515`; vault refreshed, `id_conflicts=0`): OPERATIONS.md session 14 gotchas (5), mbmludric = member/Read since
+  2026-10-26 (history kept), key-management.md rotation step for the 008b-2 workflow's public-key literal. Its Sonnet review was cut off again by the API
+  safeguard after "PASS, one LOW" (req_011CgVS3zJXsGNm2MySvyjCV); the manager reviewed the diff itself and fixed the one LOW found.
