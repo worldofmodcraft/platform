@@ -2703,3 +2703,7 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   jag gjort fel med första". -> The `write-back` secret holds a key of the **pipeline** App (from 2026-10-27; the App therefore has several
   active keys: 2026-10-15 and one or two from 2026-10-27). Valid while not deleted on the App page. **Booked hygiene follow-up:** after 008b-3b's
   first live token mint proves the secret, delete the pipeline App's unused private keys (Ludwig, on the App page) and keep one offline backup.
+- Ludwig, 2026-10-28: "Ok, kör vidare". Machine still held by 089b's chain (L1-fixed running), so new work runs in **phase 1** (implementation
+  + unit tests, no `*-verify.sh`, since 039a's quiet-wait counts verify processes): **008b-1** dispatched (registry `~/wt/registry-task-008b1`,
+  base `32c641b`, baseline 2); **096** (runbook M9-M11 ☑, M9 step 2 direct URL) specified and dispatched (platform `~/wt/task-096`, baseline 1).
+  094 waits for 008b-1 (both touch `docs/pipeline/build-pipeline.md`; sequenced, §6).
