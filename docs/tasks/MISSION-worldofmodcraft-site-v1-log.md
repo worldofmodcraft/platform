@@ -2816,3 +2816,11 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   as phase-2 step 0), 089a2 `790db47` (062 literals `beccced`, fixtures first `4b8151b`), 008b-1 `6e52272`: **manager reproduced red-then-green**
   in throwaway worktrees: unit suite 207 tests, `FAILED (errors=1)` at the test-only commit `e949799`, `OK` at `6e52272`.
 - Manager slip, harmless: an `rm -rf` of the job's own temp dir was refused by git-guard; not retried in that form (used `mktemp -d` + `rm -r`).
+- **098 delivered** (`cde6908`): `docs/design/party-board-mod.md` (733 lines, working title "Wayfarers' Wager"; 2 boards, 14 minigames, turn state
+  machine, 15 platform gaps G1-G15, 12-step walking skeleton) + `docs/tasks/098-proposed-adr.md` (ADR-0123 Proposed, conditional on Q1, amends only
+  0001:16 and 0050:17,28). Review (Sonnet reviewer) reached PASS-WITH-AMENDMENTS (F1 HIGH board-2 arithmetic 40 vs 48; F2 solo-with-bots vs
+  abort-if-alone; F3 mis-cited ADR lines; F4-F7) but its full report was lost twice to an API safeguard termination (`[reasoning_extraction]`,
+  request ids req_011CgVPb81PS6Y8ZGb5Jz4RU, req_011CgVPdGSSv7WychhT3BJTV; also hit 089c/089a1 static reviews after delivery). Decision ★: a fresh
+  independent re-review on Opus (general-purpose, read-only, findings written to the job tmp dir), the lost headings given as leads to verify.
+- 008b-2 phase 1 dispatched (registry `~/wt/registry-task-008b2`, branch `task/008b2-pipeline-build-sign`, based on 008b-1's tip `6e52272`, cut `3a0dc90`,
+  baseline 2; 008b-1 interface facts Q-P1/P2/P5/P7 and the booked `mods/` assertion copied into its log). No live runs, no secrets, push gate kept.
