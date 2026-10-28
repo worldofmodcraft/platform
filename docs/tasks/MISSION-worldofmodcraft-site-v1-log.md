@@ -2606,3 +2606,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **093 done**: fix round `545272a` (F1-F5 verbatim), manager delta read, log check exit 0; platform PR #88 opened. **The manager's
   `gh pr merge 88 --match-head-commit` was denied by the harness permission classifier ("Merge Without Review")**; not retried. #88 waits
   for Ludwig (merge it himself, or allow manager merges in the session's permission settings).
+- **008c implemented** (`15dfd08`, sole-writer agent; log check `check ... 6` exit 0). Manager re-runs in a fresh **GitHub** clone at
+  `15dfd08` (the agent's "fresh clone" was from the local git dir), 2026-10-28T09:25Z, quiet machine, `PYTHONDONTWRITEBYTECODE=1`:
+  `008c-verify.sh` exit 0 (suite 33 passed, 0 failed; scope ok, 5 files; `SUMMARY failed=0`); `--mutate` exit 0 (21 mutations red, real
+  tree byte-identical, `SUMMARY mutate failed=0`). Independent review dispatched.
