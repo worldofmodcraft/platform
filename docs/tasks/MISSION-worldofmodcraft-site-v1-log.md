@@ -2669,3 +2669,8 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   failed safely ("Head branch was modified": the manager had typed a guessed full SHA instead of reading it — its own error; the guard
   worked); the following `git rev-parse` to read the SHA was then denied by the classifier ("Merge Without Review"). Not retried. #89 is
   left for Ludwig. Lesson: read the SHA first, in a separate step, before composing the merge command.
+- Ludwig merged platform #89 (095) -> `3562c8f`; vault refreshed (written=6); worktrees task-093 and task-095 removed.
+- **Ludwig, 2026-10-28 (verbatim):** "\"Code planning and automation\" finns inte i sidebaren för M9 på registry/settings". Runbook M9 step 2's
+  sidebar heading is wrong for today's GitHub. Manager gave the direct URL `.../registry/settings/branches` and "look for **Branches** under any
+  heading (often 'Code and automation')", stop and describe if only Rulesets appear. **Booked:** small doc task after M9 to correct step 2 from
+  what Ludwig actually sees.
