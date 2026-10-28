@@ -2830,3 +2830,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   bonus stars). Decisions ★ (overnight; Ludwig may change): Stars earned by carrying the Lamplighter's lantern Pier -> Beacon; teams by standings
   (leader-vs-rest / last-place draft); a rising tide replaces final-rounds doubling; new economy numbers; at most 2 Honours of our own mechanics;
   renames for "Hearth"/"Stormwatch". Fix round 1 to the author (sole writer).
+- **008b-2 phase 1** (`6107b79`, checksum `9f6e1fb`): workflow (plan/build/sign/dry-run/summary, push gate on all jobs), `sign_built.py`, `handoff.py`,
+  `--no-sign`, `mods/` checkout assertion; 234 unit tests OK; verify script written, not run. **Manager answered Q-S/Q-R/Q-A with evidence**
+  (unauthenticated): minisign 0.12 tarball SHA-256 `9a599b48…7e73`, `.minisig` verified with the author's README key; `archive` repo public; all
+  action pins equal their tags. Q-D, Q-K ★ A. Static security review PASS-WITH-AMENDMENTS (secret exposure clean, no `${{` in run:); fix round for F1
+  (unset the secret before python parses untrusted bytes), F3, c25, F4 (result.json allow-list), F5. Booked: F6 (per-leg environment approvals, for
+  M11 if reviewers are added); key-management.md rotation must name the workflow's public-key literal (platform doc task).
