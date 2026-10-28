@@ -2774,3 +2774,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   approved solo under §2b as a small mechanical task of the umbrella pattern; (ii) A2's Q4 ★ A (ADR-0121 read at a pinned commit; fixture blob if no
   reachable history, logged). Note for merges: 089b's branch carries an older umbrella copy (pre-part-D/E); its copy is synced to the latest
   version before its PR (as with 092 in session 12).
+- **Phase 1 done, triaged (★), pushed; all wait for the quiet machine:** 089c `7e9534c`, 089d `4c2be63`, 089e `e042017`, 089a2 `3864277`
+  (Q4 fell to the fixture blob: registry history has no ADRs). 089a1 still running.
+- **097 done** (Ludwig's request, wowdecomp survey): `docs/research/wowdecomp-survey.md` (`c1f198d`). It is a decompilation of Blizzard's own
+  3.3.5a `Wow.exe` (build 12340), x64-first, Windows-only, no licence, ~90 % of functions ported (self-reported). WoWee is already 64-bit
+  (manager re-checked both READMEs). Decision ★ A: watch only; read none of its code, never link, ship or depend on it (ADR-0004/0007/0049).
