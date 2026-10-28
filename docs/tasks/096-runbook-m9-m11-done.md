@@ -60,3 +60,33 @@ Nothing else in the runbook changes.
      unless the runbook changes again), commit, `git push origin task/096-runbook-m9-m11-done`
   4. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/096-verify.sh` (fresh clone of origin; needs the branch pushed); paste the output in this log
   5. mutation checks for 096-verify (throw-away clones under $TMPDIR): range widened, unreachable pin -> exit non-zero, a runbook hunk outside M9-M11 -> red.
+- 2026-10-28 qa-engineer: fix round 1 (static review PASS-WITH-AMENDMENTS). Still PHASE 1: no `*-verify.sh` run, `bash -n` only (the check
+  functions were exercised in isolation on temp copies, not the script). Finding -> commit:
+  - F1 (MED) -> `5be2a0c`: runbook M9 step 2 now says "the manager gave Ludwig this direct URL on 2026-10-28; which route Ludwig then took is
+    `[unverified]`" (the mission log shows only that the manager gave the URL; his reply "Klart för M9 med gate" names no route). The Source line
+    of this file is corrected the same way.
+  - F2, F3 (MED, LOW-MED) -> `3b2cb89` (mutation fixtures FIRST, MANAGER.md §2c rule 5) then `354b3cb` (tightened). `3b2cb89` refactors the two
+    checks into functions of a file and adds a "== mutation" section: a temp copy with the step-2 sentence "which route Ludwig then took is
+    `[unverified]`" removed, and one with M11's "**Still unconfirmed:** ... (Q-H) ..." sentence removed; each expects the check RED. At `3b2cb89`
+    the OLD checks pass both mutations (the gap; shown in isolation: both exit 0), so a phase-2 run of `3b2cb89` would print two `GAP:` FAILs.
+    `354b3cb` restricts the step-2 check to the text from `^2\. ` to `^3\. ` inside M9 and requires the exact new sentence (the step also carries a
+    second `[unverified]`, so a bare token grep would still be too loose); the M11 check reads only the `**Status: done` paragraph (to its first
+    blank line) and requires the exact sentence. Isolated result at `354b3cb`: unmutated runbook step2=0 m11=0; step-2 mutation -> step2=1;
+    M11 mutation -> m11=1 (red where required).
+  - PIN_FINAL re-pinned to `354b3cb00656ee979d890ed06decbc5c9500fbec` (the content commit; the next commit only records the pin and this log).
+  - F4 (MED) expectation recorded, no re-pin expected: `068-verify.sh` reads the runbook only as the blob at its pinned FINAL (header lines 5-8;
+    `git show "$FINAL:$RBPATH"` at line 20; only the secret scan is live, on the working-tree file); `085-verify.sh` reads the runbook blob at
+    `PIN_FINAL` into `PINRB` (lines 78-81) and every marker check at lines 82-99 reads `PINRB` or `RED_SHA`, never HEAD (its HEAD uses at lines 36,
+    57, 101-103, 116, 122-124 are throw-away clones and the live 068 guard). So the M9-M11 flips should not redden either. ANY redden = STOP and report to
+    the manager before touching anything; do not re-pin.
+  - F5 (LOW) note: after this branch merges, `git diff --name-only origin/main...HEAD` (the pre-merge range check) is EMPTY by construction
+    (merge-base becomes the tip). Do not read an empty result on a post-merge rerun as a defect or as passing; `096-verify.sh` uses the pinned
+    BASE..PIN_FINAL range and reports an empty range as FAIL "vacuous", which is meant for pre-merge use.
+  **Phase 2 list (revised; machine released by the manager only; from `~/wt/task-096`, foreground, one at a time):**
+  1. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/068-verify.sh`; PASTE the actual exit code (expect 0). Any non-zero: stop and report.
+  2. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/085-verify.sh`; PASTE the actual exit code (expect 0). Any non-zero: stop and report, no re-pin.
+  3. PIN_FINAL is already set (`354b3cb`); push is done in fix round 1. Do not re-pin unless the runbook changes again.
+  4. Show the gap: check out `3b2cb89` in a throw-away clone, run its `096-verify.sh` (expect the two `GAP:` FAILs), paste; then
+     `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/096-verify.sh` at the branch tip (fresh clone of origin; expect ALL CHECKS PASSED incl. the two
+     mutation lines "red when ... removed"); paste the output and exit codes. Use pre-merge only (F5).
+  5. mutation checks for 096-verify as before: range widened, unreachable pin -> exit non-zero, a runbook hunk outside M9-M11 -> red.

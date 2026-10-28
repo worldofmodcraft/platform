@@ -7,7 +7,7 @@
 set -u
 export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PIN_FINAL="PENDING"
+PIN_FINAL="354b3cb00656ee979d890ed06decbc5c9500fbec"
 BRANCH="task/096-runbook-m9-m11-done"
 RB=docs/runbooks/site-v1-manual-steps.md
 LOGF=docs/tasks/096-runbook-m9-m11-done.md
