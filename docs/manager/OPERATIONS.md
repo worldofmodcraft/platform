@@ -433,8 +433,8 @@ git-guard answered `BLOCKED [vault]` to the manager copying files into the vault
 A long chained command containing a heredoc with parentheses was refused with "unbalanced parenthesis". Rule: split the work into separate
 steps, and give `gh pr create` its body with `--body-file` instead of an inline heredoc. (Mission log, session 14.)
 
-### Sonnet reviewer and doc agents were cut off mid-report by an API safeguard
-Reviewer and doc agents running on Sonnet were terminated mid-report with `[reasoning_extraction]` (request ids are in the mission log);
+### Sonnet reviewer agents were cut off mid-report by an API safeguard
+Reviewer agents running on Sonnet were terminated mid-report with `[reasoning_extraction]` (request ids are in the mission log);
 resuming them did not help. Working approach: dispatch a fresh, independent reviewer on Opus (general-purpose agent, model override) that
 writes its findings to a file in the job tmp dir; the manager reads that file. (Mission log, session 14.)
 

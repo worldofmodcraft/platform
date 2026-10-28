@@ -1,6 +1,6 @@
 # Task 100: OPERATIONS.md — session 14 gotchas and the mbmludric membership fact; key-management.md — rotation names the workflow's public-key literal
 
-- **Mission:** SITE-V1 (operations docs) — **Status:** spec-approved 2026-10-28 (manager, session 14; small, solo §2b; overnight ruling)
+- **Mission:** SITE-V1 (operations docs) — **Status:** done 2026-10-28 (spec-approved 2026-10-28 (manager, session 14; small, solo §2b; overnight ruling)
 - **Agent / model:** doc-writer — **Budget:** small
 - **Branch / worktree:** `task/100-ops-session14` / `~/wt/task-100` (platform)
 
@@ -59,3 +59,7 @@ $ grep -n '008b-2' docs/architecture/key-management.md
 78:7. **Applies once task 008b-2 is merged:** the registry workflow `.github/workflows/pipeline.yml` carries
 ```
   Remaining non-member lines: 23, 41, 46, 48 are history/how-to; line 39 states it is no longer one. AC3: text edits only, no credential read.
+- 2026-10-28 manager (session 14): independent review (Sonnet reviewer) said PASS with one LOW, then was cut off by the API safeguard before naming the LOW
+  (request id req_011CgVS3zJXsGNm2MySvyjCV). Manager review of the full diff against the checklist: facts match the mission log; history kept and
+  labelled; rotation step accurate against the 008b-2 workflow. One LOW fixed by the manager: only reviewer agents (not doc agents) were cut off —
+  heading and sentence corrected. Status done; merged on the manager's authority (§7, doc task).
