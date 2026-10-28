@@ -7,8 +7,8 @@
 ## Source (all in the mission log, session 13, 2026-10-28; quote from there)
 - M9: Ludwig "Klart för M9 med gate"; manager's API read of `branches/main/protection` (required `gate`, strict, PR required, 0 approvals,
   enforce_admins false); L4 (registry PR #26 `BLOCKED` after update-branch, closed unmerged).
-- M9 step 2: Ludwig "\"Code planning and automation\" finns inte i sidebaren"; he reached the page via the direct URL
-  `https://github.com/worldofmodcraft/registry/settings/branches`.
+- M9 step 2: Ludwig "\"Code planning and automation\" finns inte i sidebaren"; the manager gave him the direct URL
+  `https://github.com/worldofmodcraft/registry/settings/branches`; which route Ludwig took is `[unverified]` (his reply "Klart för M9 med gate" does not say). Fix round 1, F1.
 - M10: Ludwig "M10 klar, appen heter worldofmodcraft-membership"; secret names listed; live check registry PR #28 `MEMBERSHIP_STATUS: 204`.
 - M11: Ludwig "M11 done …"; manager's API read of both environments (`branch:main` policy, one secret each, timestamps) and of the repository
   secrets (only the two `REGISTRY_MEMBERSHIP_…` left); the `.pem` is a pipeline-App key from 2026-10-27 (Ludwig's file name).

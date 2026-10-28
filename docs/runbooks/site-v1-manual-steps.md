@@ -317,7 +317,7 @@ pull request yourself.
 
 1. Open `https://github.com/worldofmodcraft/registry` → **Settings**. (If you cannot see it, click the **...** menu, then
    **Settings**.)
-2. Open `https://github.com/worldofmodcraft/registry/settings/branches` directly (this is the route Ludwig used on 2026-10-28).
+2. Open `https://github.com/worldofmodcraft/registry/settings/branches` directly (the manager gave Ludwig this direct URL on 2026-10-28; which route Ludwig then took is `[unverified]`).
    Or, in the left sidebar of Settings, look for **Branches** under whichever heading holds it. The sidebar heading varies:
    Ludwig did not find "Code, planning, and automation" on 2026-10-28 (mission log, session 13: "\"Code planning and automation\"
    finns inte i sidebaren för M9 på registry/settings"), and what the heading is called today is `[unverified]` (the manager suggested
