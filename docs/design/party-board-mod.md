@@ -333,3 +333,298 @@ return {
 - 36 to 60 spaces; at most 8 forks; 4 to 8 star piers. Checked by `validate` (ADR-0051:14 says the validate step runs the same pipeline as the site).
 - A board is playable only if every space can reach every other space (graph strongly connected). `validate` rejects boards that fail this, with an error naming the space (error quality is a requirement; ADR-0051:13).
 
+---
+
+## e. Multiplayer and sessions
+
+### e.1 Who plays, and where
+- **2 to 4 human players** per game (question Q3). The platform's audience is a few friends on a self-hosted server (ADR-0002:13); other players on the server can watch (e.3) but not play.
+- **Everyone uses their own WoW character** as their pawn, since characters belong to the world and the mod cannot create new player models (ADR-0088:7 says a character is part of the world's save file). The companion (b.11) is a visual extra that is optional for v1.
+- **One game at a time** per server by default; setting `max_concurrent_games` (default 1, bound 1 to 4). Every game needs its own instances, and instance limits are settings with defaults safe for an ordinary PC (ADR-0024:9).
+- **Where the board lives:** in a private instance (ADR-0024:9). The mod does not need the players to be near each other in the open world. Version 1 uses the command `/wager host` and the lobby panel to create the game and carry the players over (gap G3); a physical "Game Table" object players walk up to is a later polish step (G6).
+
+### e.2 Lobby and joining
+1. A player with the permission `<ns>.wager.host` runs `/wager host` (commands are manifest-declared, namespaced, with permission levels and generated help; ADR-0082:7; permissions are namespaced strings with default roles; ADR-0031:8). Default role for `host`: `player` **[design proposal]**.
+2. The lobby panel shows the seats, the board, the length, bots on or off, and a Ready button per seat. Others join with `/wager join <host name>` or by clicking the entry in the panel.
+3. The host can kick a seat before start (`/wager kick <name>`). The permission for it is the same as `host`.
+4. When every seat presses Ready (or the host presses Start after 30 s, with fewer than all Ready), the game moves to SETUP (g.5).
+5. **Late joiners** cannot take a seat after start. They may join as spectators (e.3).
+6. A host with the permission `<ns>.wager.admin` (default role `admin`) can abort any game.
+
+### e.3 Spectators
+Any player may type `/wager watch`. Spectators receive the same overlay and UI updates as seated players for the board (not the arena). Spectating requires that the board's overlays be sent to named recipients (ADR-0083:7: elements are sent via RPC, so recipients are the mod's choice). Watching the arena while playing minigames is **[open]** (needs per-player visibility; ADR-0114:21 names phasing as a gap to be exposed).
+
+### e.4 Pacing, timers and AFK handling
+- Roll timer 30 s; choice timer 20 s (b.10). No timer is ever longer than the setting.
+- **AFK:** a player who lets a timer run out three turns in a row is marked *away*. Their turns are then played automatically: auto-roll, default choices, no item use, until they send any command or click.
+- **Waiting rule:** the longest a player waits between their own actions is the sum of the other seats' turn times plus a minigame cycle: about 90 s if everybody acts quickly.
+- Timers use the world clock (ADR-0025:14); a pause stops them. Pausing disconnects players anyway (ADR-0025:18) so a paused game is saved and resumes (e.5).
+
+### e.5 Disconnects, crashes, restarts
+The kernel gives the mod a `player.logout` event with a reason and `server.pre_restart` / `world.saving` events (these are listed as gap-review items 8, entering the IDL declarations; ADR-0114:24). The mod's rules **[design proposal]**:
+| Situation | Behaviour |
+|---|---|
+| A player disconnects on the board | Seat becomes *away* at once. Turn timer runs; if it is their turn they are auto-played. They can reconnect within 5 minutes (setting) and reclaim the seat with a full state snapshot (g.3). |
+| A player disconnects during a minigame | They keep the score they had; the minigame goes on; they return to the board on reconnect. |
+| 5 minutes pass | The seat becomes an **autopilot** seat (same as a board-only bot, e.6). Their Brass, Stars and items stay and count. |
+| Only one human is left | The game ends after the current round and the remaining human is declared the winner if ahead, otherwise normal scoring. Setting `abort_if_alone` (default on). |
+| Server restart queued (ADR-0103:7 countdown) | The mod finishes the current turn if there are under 60 s left, otherwise saves and aborts the minigame without payout (arena instances are destroyed; the minigame is repeated on resume). The game state is in KV (g.3) so it survives. |
+| Server crash | The game is resumed from the last saved turn boundary (g.3: the state is saved every turn; ADR-0074:7 gives a 30-60 s default save cadence plus "save now" tags). |
+| Mod removed | Players in the arena or board instance are moved to their last valid position (ADR-0092:7). |
+
+**Resume:** after a restart, the game is `PAUSED_RESUMABLE` until all human seats are online again (or 10 minutes pass; then autopilot as above) **[design proposal]**.
+
+### e.6 Bots for empty seats (question Q2)
+- **Option B (leaning):** *board-only bots*. A bot rolls, buys a Star whenever it can, takes the main path at forks, uses an item at random, and picks the nearest target for Duels and Pickpocket. In minigames a bot gets a **simulated score**: a placement drawn from a distribution weighted by a setting `bot_skill` (default 0.5; at 0.5 the expected place is the middle). Bots are labelled "(bot)". The simulated placement uses `kernel.rng` so it is reproducible (ADR-0091:7).
+- The same logic runs the **autopilot** for disconnected humans.
+- A bot is not a WoW character; it has no pawn in the arena. Board pawns for bots are overlay markers (ADR-0083:7) **[design proposal]**.
+- Real bot players in minigames are **not** planned. (`mc:playerbots` as an unsafe-tier plugin is an early ring-3 milestone for soak tests (ADR-0052:13); the mod does not depend on it.)
+
+### e.7 Fairness, trust and cheating
+- The client is trusted and anti-cheat is out of scope (ADR-0002:16). The server still decides every roll, payment and result, so a modified client cannot simply write itself Brass; **what a client controls is its own movement** in arenas. Reaction minigames use server timestamps (G12).
+- **Character differences:** a level-80 player has more speed and health than a level-10 one. In arenas everyone should have the same speed, no gear effects and no combat. That is gap G2 (open question Q18, `docs/open-questions.md:24`).
+- **Rule of least surprise:** all rules a player can see on the card (b) are the ones the server applies; the log shows the seed and every roll (ADR-0034:10, ADR-0091:7).
+
+---
+
+## f. Presentation
+
+### f.1 Camera
+- **Board camera:** a raised three-quarter "table view" that frames the active player and the next 10 spaces, looking down at about 55 degrees. It eases between turns and cuts to a wide shot for the Star purchase and the finale.
+- **Arena camera:** the player's normal third-person camera, except in minigames that need a top-down view (Tidal Tiles, Echo Pillars, Hearth Hold), which switch to a fixed overhead camera.
+- The platform names "camera" as a ring-2 client surface (ADR-0020:12) but gives no function list: gap G10.
+
+### f.2 UI (all in the client UI framework, ADR-0020:12; the framework is built after step 1, ADR-0029:12)
+```
++--------------------------------------------------------------------------+
+| P1 [portrait] 12 Brass  2 Star | P2 ... | P3 ... | P4 ...    Round 7/15   |
++--------------------------------------------------------------------------+
+|                                                                          |
+|                       (the board in the world view)                      |
+|                                                                          |
+|   [Item 1] [Item 2] [Item 3]                         [   ROLL  (d8)   ]  |
+|   Space info: "Pier - Star 20 Brass"                  Timer: 24 s        |
++--------------------------------------------------------------------------+
+```
+- **Player cards** (top): portrait, Brass, Stars, held items (small icons), an "away" badge.
+- **Roll button** (bottom right) with keyboard shortcut Space and the command `/wager roll` as a fallback (ADR-0082:7 says power users get commands).
+- **Choice dialogs:** fork arrows drawn as overlay (ADR-0083:7), buy-a-Star dialog with Yes/No, shop list, target picker.
+- **Announcement cards:** minigame title, goal and controls; result table; Honours reveal.
+- **Colour-blind safety:** every colour is paired with a symbol (Warm = flame icon, Cool = drop icon).
+- **Text:** English only (ADR-0030:30).
+- Whether mods can create *new* UI widgets or only use the framework's ones is **[open]** (ADR-0020:13 puts new widget types into ring 3; `docs/open-questions.md:7` Q1 is about UI ownership between mods).
+
+### f.3 The board in the world
+- The board is drawn with **overlays**: lines (paths), icons on each space, text labels, and an area highlight on the active player's reachable spaces (ADR-0083:7: "lines, areas, text, icons at positions"). A per-mod client toggle lets a player mute the overlays (ADR-0083:7 guardrail).
+- Props (trees, lighthouse, lanterns) are **models** shipped as glTF/GLB (ADR-0004:17). How placed model objects are created in an instance is gap G6.
+- **First version without models:** overlays and coloured ground markers only, so the board is playable before any model pipeline exists (section i, step 3).
+
+### f.4 Audio (ADR-0084:7: OGG files, UI sounds, positional audio, a music channel with ducking, triggered by the server via RPC; "v1 may be naive")
+- Music: one looped board track per board, one minigame loop per category, one result jingle. All original; no melody may be recognisable from another work (ADR-0061:7 applies the originality rule to AI-generated assets too).
+- Sounds (about 25): die rattle and land, hop step (varies in pitch with the Brass total), Lantern chime, Ember hiss, Wonder shimmer, Star fanfare (our own motif: three rising bell notes), countdown ticks, minigame start/stop, UI clicks.
+- Mix: music ducks under the Lamplighter's lines and the countdown.
+
+### f.5 Assets list and rules
+| Group | Count (v1) | Format (ADR-0004:17, 21 whitelist) |
+|---|---|---|
+| Board prop models (2 boards) | about 30 each | glTF/GLB |
+| Space icons and UI | about 40 | PNG |
+| Star lantern, Lamplighter | 2 | glTF/GLB |
+| Minigame arenas | 4 shared courtyards/arenas | glTF/GLB (or reused instance shells, G4) |
+| Music and sounds | 8 music, 25 sound effects | OGG |
+- **All original.** AI-generated art or audio is allowed under the originality rule (ADR-0061:7); the optional `ai_assisted` manifest flag can label it (ADR-0061:7). The uploader is responsible for rights (ADR-0061:7).
+- **No Blizzard assets are shipped** (ADR-0004:17); referencing existing paths in the player's own data is allowed (ADR-0004: Consequences, line 20 says mods can reference vanilla assets).
+- **No Nintendo lookalikes:** no plumber, no mushrooms, no five-point golden star, no pipes, no dice-block heads. The art direction note: warm lantern-light, brass, paper, small animals.
+
+---
+
+## g. Technical design on our platform
+
+This section says which platform surfaces the mod **uses**, cites the ADR for each, and lists the **gaps**: things the mod needs that no ADR defines yet. Gaps are requests the mod would make to the platform, not changes to ADRs. "Settled" means "an ADR decides it will exist", not "it is built".
+
+### g.1 Mod anatomy (folder layout per ADR-0030:12-25)
+```
+wayfarers-wager/
+  mod.lua                 manifest: id, version, depends, permissions (none outside the game), declares (hooks, rpc, record types, roles/permissions, tables), tags, ai_assisted
+  records/
+    boards/               lantern_isles.lua, clockwork_orchard.lua
+    spaces/ items/ events/ honours/ companions/
+    minigames/            one record per minigame (c.5)
+    arenas/               instance templates (g.4 G4)
+  server/
+    init.lua              wires events, commands, RPC handlers
+    engine/               turn state machine, dice, ledger, scoring (pure Lua, no game API: testable)
+    minigames/            one script per minigame (c.5)
+    bots.lua              board bots and autopilot (e.6)
+  client/
+    init.lua              UI, overlays, camera, audio hooks
+  assets/                 glTF/GLB, PNG, OGG only (ADR-0004:21)
+  config.schema.lua       every number in section b (ADR-0029:9)
+  tests/                  engine tests with a simulated client (ADR-0052:10)
+  AGENTS.md  README.md  LICENSE
+```
+The `declares` list is mandatory and checked by the site and by the kernel at run time (ADR-0030:28).
+
+**Design rule for the mod itself [design proposal]:** the *engine* (dice, movement along the graph, ledger, scoring, the turn state machine) is plain Lua with no calls into the game; the game API is touched only by a thin *adapter* layer (move a pawn, show an overlay, send RPC). That keeps the rules testable without a client (g.7) and portable to other front ends later.
+
+### g.2 Platform surfaces used (each with its ADR)
+| Need | Surface | ADR (file:line) | Status of the surface |
+|---|---|---|---|
+| Declare boards, items, minigames as data | Records + schemas, mod-defined record types | ADR-0008:13, :19; ADR-0030:26 (`record_types.defines`) | Decided |
+| Missing-mod safety for our record types | A placeholder record per type | ADR-0048:12 | Decided; the mod must ship one |
+| Game logic | Server Lua 5.4, own state per mod | ADR-0015:12, :14 | Decided |
+| Saved game state | Per-mod KV in world/account/character scope, write-through | ADR-0020:11; ADR-0023:9 | Decided |
+| Safe saves after a reload | Kernel-enforced restore-before-save barrier | ADR-0115:17 | Decided; the mod must run its restore phase on load |
+| Save cadence and "save now" | Aggressive in world-clock mode; mods may tag events | ADR-0074:7 | Decided |
+| Private board and arenas | `world.instance(map, { owner, persistent, template })` | ADR-0024:9 | Decided; open zones come later (ADR-0024:11) |
+| Dice, draws, bot scores | `kernel.rng` per-mod and per-instance streams, seed logged | ADR-0091:7 | Decided |
+| Commands `/wager ...` | Manifest-declared commands, namespaced | ADR-0082:7 | Decided |
+| Who may host/abort | Namespaced permissions with default roles | ADR-0031:8 | Decided |
+| Graceful denial | Denials are return values | ADR-0028:15 | Decided |
+| Every number tunable | Schema-driven config, scope client/server | ADR-0029:9, :13 | Decided; in-game UI after step 1 (ADR-0029:12) |
+| Client/server messages | RPC channels, versioned messages, server-side validation | ADR-0020:11; ADR-0066:7 | Decided (mod message typing: G13) |
+| Board drawing | World-anchored overlays: lines, areas, text, icons | ADR-0083:7 | Decided |
+| Sound | Mod audio API (OGG, music channel, server-triggered) | ADR-0084:7 | Decided; v1 may be naive |
+| HUD, dialogs | Client UI framework | ADR-0020:12; ADR-0029:12 | Named; contents open (G9) |
+| Camera, input | Client camera and input surfaces | ADR-0020:12; ADR-0028:9 (`client.input_hook` permission) | Named; contents open (G5, G10) |
+| Win rewards | Achievements: records + events, kernel tracks and shows | ADR-0096:9, :10 | Decided |
+| Other mods add minigames | `provides`/`wants` capability tags; `extends` wrapper | ADR-0032:8; ADR-0021:9 | Decided; the tag is a process step (c.5) |
+| Pack as modpack | Modpack type | ADR-0044:9 | Decided |
+| Group handling | Group create/invite/move/disband (gap review item 4) | ADR-0114:20 | Declared for the IDL, not defined |
+| Zones, proximity | `world.query(shape)` and `zone.on_enter/on_leave` (item 2) | ADR-0114:16 | Declared for the IDL, not defined |
+| Disconnects, restarts | `player.logout` with reason, `server.pre_restart`, `world.saving` (item 8) | ADR-0114:24 | Declared for the IDL, not defined |
+| Position safety | Safe reposition when an instance vanishes | ADR-0092:7 | Decided |
+| Timers | World clock `now()`, pause freezes time | ADR-0025:14, :18 | Decided |
+| Compute on observation | Store deadlines, compute at read | ADR-0080:7 | Principle |
+| Observability | Automatic attributed logging; counters measure outcomes | ADR-0034:10, :12; ADR-0115:8-14 | Decided |
+| Failure containment | A failing mod keeps running; admin throttle per player/mod | ADR-0090:7 | Decided |
+| Distribution | Registry first; hash and signature verified | ADR-0073:7 | Decided |
+| Backups | Mod-prefixed tables are part of world backups | ADR-0045:9 | Decided |
+| Testing | `modcraft test` with a simulated player (cannot walk) | ADR-0052:10 | Decided |
+| No paid content | Whole work distributed; funding links only | ADR-0104:7 | Decided; the mod is free |
+
+The mod needs **no outside-the-game permission** (ADR-0028:9: `fs.*`, `net.outbound`, `process.spawn`, `client.input_hook` etc.), except possibly `client.input_hook` if the platform's input surface (G5) requires it. A mod installed via a server profile has those permissions off by default (ADR-0028:13), so the design avoids needing them.
+
+### g.3 Data model sketch (KV store) — all keys are a **[design proposal]**
+KV acts like a table (`mod.state.games[id] = {...}` is saved by write-through, ADR-0023:9). Scope is chosen per key (ADR-0020:11).
+
+| Key (scope) | Fields | Notes |
+|---|---|---|
+| `games/<id>` (world) | `id`, `board`, `seed`, `rounds_total`, `round`, `phase` (state name, g.5), `active_seat`, `star_pier`, `star_price`, `festival_from`, `created_at`, `rules_version`, `honours = {3 ids}` | One row per game. `seed` makes the game replayable (ADR-0091:7). |
+| `games/<id>/seats/<n>` (world) | `character_guid`, `name`, `is_bot`, `companion`, `colour_group`, `space` (space id), `brass`, `stars`, `items[1..4]`, `connected`, `away`, `autopilot`, `stats = {earned, lost, moved, embers, duels, items_used, minigame_wins, coop_score}` | Counters feed Honours (b.9). |
+| `games/<id>/edges` (world) | The live edge list | Needed only for boards with a Gear Turn (d.2). |
+| `games/<id>/traps` (world) | `{space, owner}` | Tripwires. |
+| `games/<id>/ledger` (world) | Append-only list of `{n, seat, kind, delta, before, after, reason, round}` | Every Brass and Star change. Source for the conservation self-check (g.7). |
+| `games/<id>/log` (world, ring buffer) | Events: dice, moves, choices, minigame results | Mirror of what clients received. |
+| `profiles/<guid>` (character) | `games`, `wins`, `stars_total`, `best_minigame_scores`, `titles` | Lifetime stats; they also feed achievements (ADR-0096:10). |
+| `lobby/<host guid>` (world) | `seats`, `board`, `rounds`, `bots` | Dies when the game starts or after 10 minutes. |
+
+**Record types the mod defines** (each with a description and a placeholder, ADR-0034:12, ADR-0048:12): `wager:board`, `wager:space_kind`, `wager:item`, `wager:event`, `wager:honour`, `wager:companion`, `wager:minigame`, `wager:arena`.
+
+**Persistence discipline:** the engine writes the new state to KV **at every phase boundary** (not each tick), because the restore-before-save barrier refuses writes before restore has run (ADR-0115:17), and because aggressive saves are the platform default (ADR-0074:7). Game state is "in KV or gone" (ADR-0023:9). Read-after-write is never relied on across an async boundary (ADR-0115:38 says the persistence API makes it impossible or explicit).
+
+### g.4 Gaps: things the mod needs that no ADR defines yet
+Each is stated as a gap with the nearest ADR text. **None of these is an invented API.** Each is worded as "the mod needs this from the platform", for the manager to route to the platform's own backlog.
+
+| # | The mod needs | What the ADRs say | Impact if missing | Workaround for step 1 |
+|---|---|---|---|---|
+| G1 | **Scripted pawn movement:** move a player's character along a list of points, with a hop animation, while the server stays in control | "movement" appears in the ring-2 list (ADR-0020:12); no function is defined | The board's central animation | Teleport per space, with an overlay marker that animates |
+| G2 | **Standardise players in an arena:** equal speed, no gear effects, no combat, restore afterwards | Open question Q18, "player-state snapshot/restore primitive" (`docs/open-questions.md:24`) | Unequal characters make minigames unfair | Accept unfairness in v1; only use minigames that do not depend on speed (Echo Pillars, Quickdraw) first |
+| G3 | **Group teleport with guaranteed origin restore** | Open question Q17 (`docs/open-questions.md:23`); group management is gap item 4 (ADR-0114:20); safe reposition is decided (ADR-0092:7) | Carrying players to the board and arenas, and back | Record each player's position in KV and move them with ordinary teleport, relying on ADR-0092:7 for crashes |
+| G4 | **Instances on suitable maps:** step 1 supports only dungeon shells already in AzerothCore's instance system; open zones come in step 2; custom zones are an open question | ADR-0024:11; `docs/open-questions.md:18` (Q12) | The board and arenas must be built on borrowed maps | Use a flat shell map and draw everything with overlays; which shell maps are suitable is a survey item **[open]** |
+| G5 | **Mod-defined key binding / action button / pointer input** | "input" is a ring-2 client surface (ADR-0020:12); a `client.input_hook` permission exists (ADR-0028:9) | The `A` and `P` inputs (c.4) | Use UI buttons and the normal jump/movement keys; `/wager a` as a command fallback |
+| G6 | **Placing, moving, removing model objects (GameObjects) in an instance** from a mod, with a glTF/GLB model | glTF/GLB is the model format (ADR-0004:17); "loot & spawns" is in ring 2 (ADR-0020:12); placed objects are components in KV for housing (ADR-0018:17); no contract for models in instances | Props, the Game Table, carts, vanishing planks | Overlays only (f.3) |
+| G7 | **Player scale change** | Nothing | Giant's Garden | Defer that minigame; use Lighthouse Keeper for 1v3 |
+| G8 | **Per-player visibility** (spectators; each team sees its own markers) | Phasing is gap item 5 (ADR-0114:21) | Spectators and team-private info | All see everything |
+| G9 | **Client UI widgets:** panels, buttons, icon rows, tooltips, countdowns | UI framework is named (ADR-0020:12) and arrives after step 1 (ADR-0029:12); Q1 (`docs/open-questions.md:7`) | The HUD | Overlay text and chat output |
+| G10 | **Camera control from a mod:** set position, angle, ease, follow | "camera" named (ADR-0020:12) | The table view | Normal camera in v1 |
+| G11 | **Client-visible countdowns tied to the server clock** | `now()` is the adjusted clock (ADR-0025:14); nothing about sending server time to clients | Timers that look right to all clients | Send a duration in each RPC and count down locally; the server decides expiry |
+| G12 | **Latency fairness for reaction games** | Nothing; the client is trusted (ADR-0002:16) | Quickdraw, Bridge Builders | Server timestamps on receipt; accept ping differences; use only in games where a few hundred ms do not decide the result, or compensate by measuring each client's round trip in the mod **[open]** |
+| G13 | **Typed mod RPC messages:** how a mod declares message formats | RPC wire format is IDL-generated for the platform's packets (ADR-0066:7); mod declarations include `rpc` (ADR-0030:26) | The protocol in g.6 | Assume mod-declared channels carry typed tables; mark as an assumption until the surface is defined |
+| G14 | **Two clients on one PC for testing** | Reference machine specs not yet recorded (`docs/open-questions.md:27`, Q21; ADR-0081:7) | Testing multiplayer alone | Bots (e.6) plus a second client on the same PC when the machine allows |
+| G15 | **Headless test of movement-based minigames** | The simulated player cannot walk (ADR-0052:10) | Minigames are manual-test only | Engine and board logic are fully testable (g.7); minigames get scripted "scenario" tests that move players by teleport |
+
+### g.5 Turn state machine
+All transitions are decided by the server's engine. Each state names its **timer**, **what is saved to KV** and **who may act**.
+
+```
+LOBBY --start--> SETUP --> ROUND_START --> TURN_BEGIN(seat) --> ITEM_WINDOW --> ROLL
+   ^                                                                              |
+   |                                                                              v
+   |   TURN_END <-- RESOLVE_SPACE <-- LAND <-- MOVE (per step: PASS_CHECK, FORK_CHOICE)
+   |      |
+   |      +-- more seats? --> TURN_BEGIN(next seat)
+   |      +-- no --> MINIGAME_SELECT --> MINIGAME_ANNOUNCE --> TRANSPORT_OUT --> COUNTDOWN
+   |                                                                                |
+   |        ROUND_END <-- RETURN <-- PAYOUT <-- RESOLVE <-- PLAY <-----------------+
+   |           |
+   |           +-- rounds left --> ROUND_START
+   |           +-- no --> FINAL_HONOURS --> RESULTS --> ENDED
+   |
+   +-- any state --(pre_restart / all humans gone)--> PAUSED_RESUMABLE --(resume)--> the saved state
+   +-- any state --(admin abort / fatal error)-----> ABORTED
+```
+
+| State | Who acts | Timer | Entered when | Saved to KV |
+|---|---|---|---|---|
+| LOBBY | Host and players | 10 min idle | `/wager host` | `lobby/<host>` |
+| SETUP | Engine | none | All ready | `games/<id>`, seats; seed; seat order; star pier; Honours |
+| ROUND_START | Engine | none | New round | `round`; Festival flag |
+| TURN_BEGIN | Engine | none | Next seat | `active_seat` |
+| ITEM_WINDOW | Active seat | 20 s | After begin | item use, ledger |
+| ROLL | Active seat | 30 s | After items | roll value, seed position |
+| MOVE | Engine | about 0.4 s per space | After roll | `space` per step; fork asks |
+| FORK_CHOICE | Active seat | 20 s (default: main path) | Fork reached | choice |
+| PASS_CHECK | Engine and seat | 20 s | Active Star pier passed with Brass of at least the price | Brass, Stars, new pier |
+| LAND | Engine | none | Steps used | `space`, `colour_group` |
+| RESOLVE_SPACE | Engine and seat | 20 s per choice | After landing | Brass, items; sub-flows: SHOP, DUEL, EVENT, TIDE |
+| TURN_END | Engine | none | Space resolved | seat stats |
+| MINIGAME_SELECT | Engine | none | All seats done | `phase` |
+| MINIGAME_ANNOUNCE | Engine | 5 s | After select | minigame id |
+| TRANSPORT_OUT | Engine | up to 10 s | After announce | stored origin positions |
+| COUNTDOWN | Engine | 3 s | All in arena | none |
+| PLAY | Minigame script | 20 to 60 s | After countdown | none (transient) |
+| RESOLVE | Engine | none | Time or goal | validated result |
+| PAYOUT | Engine | none | After resolve | Brass, ledger, wins |
+| RETURN | Engine | up to 10 s | After payout | positions restored |
+| ROUND_END | Engine | none | All returned | `round + 1` |
+| FINAL_HONOURS | Engine | 8 s | Last round ended | Stars |
+| RESULTS | Players | 60 s | After honours | profiles, achievements |
+| ENDED | none | none | After results | game archived |
+| PAUSED_RESUMABLE | none | 10 min | Pre-restart or humans gone | everything |
+| ABORTED | none | none | Abort or fatal | log kept |
+
+**Invariants checked on every transition (and counted if they fail; ADR-0115:8-12):** Brass >= 0; Stars >= 0; total Stars equals the number of purchases plus Honours; exactly one Star pier; every seat's `space` exists in the board graph; one item used per turn.
+
+### g.6 Server and client responsibilities, and the message protocol
+
+**The server (authoritative)** owns: all state, the die and every random draw, movement along the graph, payments, item and event effects, timers, minigame selection and results, bots, saves. **The client** owns: input, drawing (overlays, models, UI), camera, audio, local countdown animation. The client never decides an outcome.
+
+**Version-1 protocol [design proposal; message typing is gap G13]** — one RPC channel `wager`, messages carry `game_id` and a sequence number:
+| Direction | Message | Content |
+|---|---|---|
+| client to server | `intent.roll` | seat |
+| client to server | `intent.choose` | `decision_id`, option (fork path, buy yes/no, shop item, target) |
+| client to server | `intent.use_item` | slot, parameters |
+| client to server | `intent.ready` | lobby ready toggle |
+| client to server | `intent.action` | minigame input: kind, client sequence number |
+| server to client | `snapshot` | the whole visible game state; sent on join, on reconnect, after any gap in sequence numbers |
+| server to client | `event` | `n`, type: `dice_rolled`, `pawn_moved`, `brass_changed(seat, before, after, reason)`, `star_moved`, `decision_request(id, kind, options, duration)`, `minigame_announce`, `minigame_result`, `game_over` ... |
+| server to client | `toast` | text and a sound id |
+
+- Every `decision_request` has an id; a reply with a stale id is rejected **and counted with its reason** ("late: timer already expired", "duplicate", "wrong seat"), as ADR-0115:11 requires for silent early returns.
+- The server validates every intent: sender is the seat's owner, state allows it, option is in the offered set (a server-side validation hook exists, ADR-0020:11).
+- Rate: roughly 1 to 3 messages per second per client on the board, up to 20 per second during minigames; an admin can throttle a player's channel if needed (ADR-0090:7).
+- The server may run with a **silent or garbage client** without crashing (ADR-0028:15: the site's smoke test runs mods with all permissions denied and rejects crashes; server mods tolerate a silent client).
+
+### g.7 Observability and testing
+**Counters (outcome, not intent; ADR-0115:8-14), per game and per session:** dice rolled (value histogram, with seed, input shown), Brass delta per cause with before/after read back from the ledger, Star purchases (price paid, balance after), early returns by reason (intent rejected, timer expired, item had no target in range), minigame durations, minigame errors, reconnects, autopilot turns. **Bookkeeping next to reality** (ADR-0115:13): the ledger total is compared with the seats' summed Brass each round; any difference is an error line naming the game and the last 5 ledger rows.
+**Self-check command:** `/wager doctor` runs the invariants (g.5), prints a pass/fail list, and is available in the console's command palette (ADR-0112:13: the players tab binds buttons to registered commands).
+
+**Tests (`modcraft test`, ADR-0052:10):** the simulated client can send and receive RPC but cannot walk, so:
+1. *Engine tests* (no game at all): 1,000 seeded games per board with bot seats; check invariants, game length, Star counts, and that a winner exists (g.5 invariants). The simulator also outputs the economy statistics in section i, step 4.
+2. *RPC tests:* a simulated client plays a scripted game over the `wager` channel, including stale, duplicate and garbage messages.
+3. *Disconnect tests:* simulate `player.logout`, `pre_restart`, and resume from KV.
+4. *Minigame scenario tests:* each minigame script is driven by a scripted `ctx` (positions set by the test, inputs injected) and must return a valid result; real movement is manual (G15).
+5. *Permissions-denied smoke test* runs on the site automatically (ADR-0028:15).
+
