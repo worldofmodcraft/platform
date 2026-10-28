@@ -2768,3 +2768,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   manager when §7's conditions hold (review PASS, criteria demonstrated, verify green in a fresh clone, docs, log). **Still excluded:** takedowns
   (absolute stop, §7/§8), credentials (rule 11), edits to `docs/decisions/` and mission specs (none planned). Expires at the morning handover;
   not a precedent.
+- **089 parts A1, A2, C, D, E cut and dispatched (phase 1, qa-engineer, in parallel; file sets disjoint)**, all from registry main `32c641b`, each with
+  a part task file and the latest umbrella copy (platform `4321d07`): 089a1 `b5f5062`, 089a2 `228a2a4`, 089c `8b0cdb4`, 089d `75eb9b0`, 089e `60ba327`
+  (log baselines 1). **Decisions (★, overnight ruling):** (i) the 008c-verify repin finding becomes **part E** (one file; A1 is at the 5-file cap),
+  approved solo under §2b as a small mechanical task of the umbrella pattern; (ii) A2's Q4 ★ A (ADR-0121 read at a pinned commit; fixture blob if no
+  reachable history, logged). Note for merges: 089b's branch carries an older umbrella copy (pre-part-D/E); its copy is synced to the latest
+  version before its PR (as with 092 in session 12).
