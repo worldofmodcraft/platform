@@ -1,6 +1,6 @@
 # Task 093: runbook M9 step 7 records Ludwig's S5 choice
 
-- **Mission:** SITE-V1 (runbook hygiene) — **Status:** spec-approved 2026-10-28 (manager, solo: small doc-only task; SPEC-CHECKLIST items checked in session)
+- **Mission:** SITE-V1 (runbook hygiene) — **Status:** done 2026-10-28 (spec-approved same day, manager solo)
 - **Agent / model:** doc-writer (model per its frontmatter) — **Budget:** small (1 agent-session)
 - **Branch / worktree:** `task/093-runbook-m9-s5` / `~/wt/task-093` — **platform** repo
 
@@ -43,3 +43,4 @@ Any other runbook step; M10/M11 text; the vault copy (refreshed by `tools/vault/
   Criterion 5 re-run on the committed branch: `git diff --name-only origin/main...HEAD` -> `docs/runbooks/site-v1-manual-steps.md`, `docs/tasks/093-runbook-m9-s5-choice.md`.
   `git diff -U0 origin/main...HEAD -- docs/runbooks/site-v1-manual-steps.md | grep '^@@'` -> new-side hunks start at lines 322, 335, 347, 354 (old 322, 329, 335, 342);
   `grep -n '^## ☐ M9\|^## ☐ M10'` -> M9 line 303, M10 line 359; all hunks inside 303-358 (M9 only).
+- 2026-10-28 manager (session 13): independent review PASS-WITH-AMENDMENTS (F1-F5); fix round 545272a applied all five verbatim; manager read the delta diff (M9 only, hunks 322-358); log check exit 0. Status done; PR opened and merged.
