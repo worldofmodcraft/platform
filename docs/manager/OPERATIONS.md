@@ -388,3 +388,22 @@ Ludwig, who switched the session to Manual mode and approved each edit himself, 
   processes) / END exit=N to `summary.txt`, and a background `until grep -q ...` waiter is boring and works. Monitors expire after 30 minutes.
 - **The registry CI gate is live (039b merged 2026-10-27).** First runs: PR #24 and #20 `gate` pass in 6-8 s on the infra route, comment
   posted. Runbook M9 can now be done (Ludwig's S5 choice: tick "Require a pull request before merging"; leave bypass unticked).
+
+## Four things session 13 paid for (2026-10-28)
+
+### The manager must not use `EnterWorktree`
+After `EnterWorktree`, the harness refused every git and shell command outside that worktree, for the manager **and** for agents it had
+already dispatched: a running 008c implementer was blocked in `~/wt/registry-task-008c`, and the manager could not commit there either.
+Use a plain `git worktree add ~/wt/session-NN -b session/NN origin/main` for the manager's own platform edits. (Mission log, session 13.)
+
+### `SendMessage` to a finished subagent resumes it
+A note sent to the first (stopped) 008c agent woke it up; it then worked in the same worktree as its re-dispatched successor — two
+writers, one worktree. It noticed and stopped; nothing was lost. Message only the live agent; never one whose task was re-dispatched.
+
+### The registry gate's schema step reports only the first schema error of a file
+Live check L3 (registry PR #26): an entry with two schema violations (`owner` an integer, `versions` a string) was rejected naming only
+`$.owner`. Not a defect (the PR is red either way), but a contributor fixing one error may meet the next on the following push.
+
+### `gh pr merge` chained with other commands was denied again
+`gh pr checks 88 …; gh pr merge 88 …; gh pr view 88 …` in one call was refused ("Merge Without Review"), exactly as the 2026-09-06
+section above says. Re-learned: run `gh pr merge` as its own bare command, then `tools/vault/refresh-main.sh`.

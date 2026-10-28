@@ -31,3 +31,4 @@ paid for four operational lessons that the next manager must not re-learn.
 ---
 # Task 095 log  (append-only)
 - 2026-10-28 manager (session 13): drafted and spec-approved.
+- 2026-10-28 manager (session 13): criterion 2 written by the manager itself (OPERATIONS.md gotchas are a manager handover duty, MANAGER.md §5.4b; agents' doctrine edits are classifier-denied, OPERATIONS.md 2026-10-14). Criterion 1 delegated to doc-writer.
