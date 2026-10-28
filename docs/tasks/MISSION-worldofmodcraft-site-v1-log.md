@@ -2824,3 +2824,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   independent re-review on Opus (general-purpose, read-only, findings written to the job tmp dir), the lost headings given as leads to verify.
 - 008b-2 phase 1 dispatched (registry `~/wt/registry-task-008b2`, branch `task/008b2-pipeline-build-sign`, based on 008b-1's tip `6e52272`, cut `3a0dc90`,
   baseline 2; 008b-1 interface facts Q-P1/P2/P5/P7 and the booked `mods/` assertion copied into its log). No live runs, no secrets, push gate kept.
+- **098 re-review (Opus, findings in the job tmp file)** PASS-WITH-AMENDMENTS, 33 findings (1 HIGH, 15 MED, 17 LOW); all seven lost headings
+  confirmed; 14/95 cites wrong or imprecise. **HIGH:** each rule generic, but together the core rules reproduce the published series' signature rule
+  set nearly number for number (start coins 10, star 20 at a relocating space, ±3 spaces, final-rounds doubling, space-colour team selection, three
+  bonus stars). Decisions ★ (overnight; Ludwig may change): Stars earned by carrying the Lamplighter's lantern Pier -> Beacon; teams by standings
+  (leader-vs-rest / last-place draft); a rising tide replaces final-rounds doubling; new economy numbers; at most 2 Honours of our own mechanics;
+  renames for "Hearth"/"Stormwatch". Fix round 1 to the author (sole writer).
