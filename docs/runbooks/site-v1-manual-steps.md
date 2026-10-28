@@ -320,14 +320,15 @@ pull request yourself.
 6. In the search box under it, type `gate` and click the entry named exactly `gate`. If nothing appears, the check has not run
    yet: stop, tell the manager, come back later.
 7. Also tick **Require a pull request before merging**. Then look at the options that appear under it. Directly under that
-   tick box, indented a little, there should be a line **Require approvals** with a small number list beside it showing `1`
+   tick box, indented a little, there should be a line **Require approvals** with a small box or drop-down beside it showing `1`
    `[unverified]` (placement and wording are from the manager's memory of GitHub's classic branch-protection page; Ludwig
-   confirms them when he does M9). If **Require approvals** is ticked, **untick it** (decided, Ludwig 2026-10-28; mission log,
+   confirms them when he does M9). If **Require approvals** is ticked, **untick it** (Ludwig's choice A, 2026-10-28; mission log,
    "Ludwig, 2026-10-28 (verbatim)"). If it is not ticked, change nothing under it. If the page looks different (for example it is
    called Rulesets), or you cannot find that line, **stop before you click Create or Save changes and tell the manager**.
    Whether GitHub pre-ticks it is `[unverified]`.
    Why it matters: a required approval must come from an account other than the pull request's author that has write access, and
-   the project has no such account today `[unverified]`, so it could block every normal merge. Leave **Do not allow bypassing the above settings** **unticked**. Do not tick anything else.
+   the project has no such account today `[unverified]`, so it could block every normal merge.
+   Leave **Do not allow bypassing the above settings** **unticked**. Do not tick anything else.
    Click **Create** (new rule) or **Save changes** (existing rule).
    **Decided, Ludwig 2026-10-27 (security review S5; mission log, "Ludwig, 2026-10-27 ~15:00 (verbatim)": "1. Kör på stjärna"):**
    tick the first, leave the second unticked. The reason is the two costs of the alternatives. Without **Require a pull request

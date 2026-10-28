@@ -392,18 +392,21 @@ Ludwig, who switched the session to Manual mode and approved each edit himself, 
 ## Four things session 13 paid for (2026-10-28)
 
 ### The manager must not use `EnterWorktree`
-After `EnterWorktree`, the harness refused every git and shell command outside that worktree, for the manager **and** for agents it had
-already dispatched: a running 008c implementer was blocked in `~/wt/registry-task-008c`, and the manager could not commit there either.
+After `EnterWorktree`, the harness refused every git and shell command outside that worktree, for the manager and its agents; the running 008c
+implementer (in `~/wt/registry-task-008c`) stopped with no change. Same pin seen on 2026-10-25 (mission log): a re-learned lesson.
 Use a plain `git worktree add ~/wt/session-NN -b session/NN origin/main` for the manager's own platform edits. (Mission log, session 13.)
 
 ### `SendMessage` to a finished subagent resumes it
 A note sent to the first (stopped) 008c agent woke it up; it then worked in the same worktree as its re-dispatched successor — two
-writers, one worktree. It noticed and stopped; nothing was lost. Message only the live agent; never one whose task was re-dispatched.
+writers, one worktree. It noticed and stopped; nothing was pushed, and the re-dispatched agent treated its commits as unreviewed input.
+Message only the live agent; never one whose task was re-dispatched. (Mission log, session 13.)
 
 ### The registry gate's schema step reports only the first schema error of a file
-Live check L3 (registry PR #26): an entry with two schema violations (`owner` an integer, `versions` a string) was rejected naming only
-`$.owner`. Not a defect (the PR is red either way), but a contributor fixing one error may meet the next on the following push.
+Live check L3 (registry PR #26): an entry with two schema violations (`owner` an integer, `versions` a string: the probe file
+`mods/womcraft.l3-probe/entry.json` on PR #26) was rejected naming only `$.owner`. Recorded as an observation (booked), not yet
+classified as a defect: the PR is red either way, but a contributor fixing one error may meet the next on the following push.
+(Mission log, session 13.)
 
 ### `gh pr merge` chained with other commands was denied again
-`gh pr checks 88 …; gh pr merge 88 …; gh pr view 88 …` in one call was refused ("Merge Without Review"), exactly as the 2026-09-06
-section above says. Re-learned: run `gh pr merge` as its own bare command, then `tools/vault/refresh-main.sh`.
+`gh pr checks 88`, `gh pr merge 88` and `gh pr view 88` chained in one call were refused ("Merge Without Review"), exactly as the 2026-09-06
+section above says. Re-learned: run `gh pr merge` as its own bare command, then `tools/vault/refresh-main.sh`. (Mission log, session 13.)
