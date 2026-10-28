@@ -2787,3 +2787,15 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   branches) started 21:22Z; expected ~03:00Z. Decision ★: meanwhile, **static pre-phase-2 reviews** (reviewer agents, read-only, no verify runs)
   of the eight phase-1 branches (090, 096, 008b-1, 089a1, 089a2, 089c, 089d, 089e), so harness bugs are found before the quiet-machine runs;
   the formal review after phase 2 is then a delta review.
+- **Ludwig, 2026-10-28 (verbatim):** "En sak till, vet att rogue like mod är satt som en ”vertical slice” som första mod, men vill att den första
+  modden ska vara en Mario Party-liknande mod där man går omkring på ett spelbräde och samlar stjärnor och spelar mini games med andra spelare"
+  and "Ge mig ett detaljrikt designdolument för det tills imorgon, sparas i vault", then "Nej, lägg designdokumentet under Project World of
+  Modcraft i vuultet". -> **Task 098** (platform `task/098-first-mod-party-board`, doc-writer): ADR **proposal** (supersedes/amends ADR-0001 et al.;
+  nothing under `docs/decisions/` until Ludwig approves the text) + detailed design doc `docs/design/party-board-mod.md` (original game in the genre;
+  no Nintendo IP, ADR-0004). Vault: the manager copies the doc to the vault folder root `Project World of Modcraft/` (Ludwig's placement), under a
+  name that cannot collide with projected notes; the projection has no design-doc notes yet (follow-up booked).
+- **Static reviews:** 096 PASS-WITH-AMENDMENTS (F1 MED runbook claims "the route Ludwig used" — not in the log; F2 MED, F3 LOW-MED vacuous greps in
+  096-verify; F4 MED no stated expectation for 068/085; F5 LOW note). 089a2 RETURN: **F1 BLOCKING** — full-SHA 057 pins break `062-verify.sh:496-498`
+  mutation literals (closed-script coupling); F2-F4 minor. Decision ★ for F1: extend 089a2's scope by `062-verify.sh` (those mutation literals only;
+  4 source files, within cap) rather than keep short pins (umbrella criterion 2 requires full SHAs), plus a cross-script check in 089a2-verify.sh.
+  Fix rounds dispatched (phase 1, red-first fixtures written per §2c rule 5, shown red in phase 2).
