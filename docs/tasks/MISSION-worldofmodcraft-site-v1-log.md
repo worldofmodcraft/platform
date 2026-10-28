@@ -2574,3 +2574,173 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 4. Items 5-6 of the handover entry stand (Ludwig's M9/M10/M11; booked follow-ups). Before M9: the manager runs live check L3 (an
    invalid-schema registry PR shows `gate` red, then close it).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-27 (session 12, final) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 13 — 2026-10-28 (manager: session "WLS-World-of-Modcraft-26-10-28")
+- Start: session 12 (`WLS-World of Modcraft Continue 2026-10-26`) idle, no verify scripts running; told by cross-session message that
+  session 13 has taken over. Context at start ~6 % (HUD cache). Token guard suspended (Ludwig, 2026-10-14).
+- Registry clone `~/registry` local main fast-forwarded to origin/main `e2f7fe3` (was 181 behind).
+- **Manager harness error, caught:** after dispatching 008c the manager entered a harness-isolated worktree (`EnterWorktree`), which
+  then refused every agent shell command outside it; the 008c agent stopped cleanly with no change (logged in the 008c task file). The
+  manager left the isolated worktree and works in `~/wt/session-13` (branch `session/13`) instead. Gotcha for OPERATIONS.md: the manager
+  must not use `EnterWorktree`; it blocks git in other worktrees (registry, `~/wt/*`) for the manager and its agents.
+- **008c** dispatched (registry `task/008c-pipeline-write-back`, `~/wt/registry-task-008c`, base `e2f7fe3`; baseline 6 log entries).
+- **089 part D** added (post-TIP merge-into-branch defect, `092-verify.sh` only); independent spec review PASS-WITH-AMENDMENTS (9 findings,
+  2 HIGH), folded in; Q6 ★ A (local-ref definition of a merge from main); part D spec-approved (`e149c42`).
+- **093** (runbook M9 step 7 records Ludwig's S5 choice; step 8 names the L3 PR for L4) drafted, spec-approved, done by doc-writer
+  (`32cec74`, log check exit 0); independent review running.
+- **Live check L3 done:** registry PR #26 (`task/039-l3-invalid-schema`, `mods/womcraft.l3-probe/entry.json`): `gate` fail (9 s), `comment`
+  pass, comment "Registry CI: rejected" (schema, append-only, ownership R5/R6 rejected; classify accepted). The probe's `owner` was also
+  the wrong shape (integer, schema needs an object), so schema rejected on `owner`; it reports only that first schema error (observation,
+  booked). **#26 stays open** for Ludwig's M9 step 8 and L4, then it is closed unmerged and the branch deleted.
+- **Manager error 2 (two writers in one worktree), contained:** the manager's post-TIP warning, sent by `SendMessage` to the *first*
+  (already stopped) 008c agent, **resumed** it; it then worked in `~/wt/registry-task-008c` in parallel with the re-dispatched agent. It
+  noticed the foreign edits, stopped, and committed `fa4d6ad` (write_back.py), `e3b18c5` (captured the other agent's suite), `77a18ec`
+  (build-pipeline.md section), `1fb83b0` (log), plus an uncommitted `008c-verify.sh`; nothing pushed. Not an absolute stop (same worktree,
+  no file outside it). The re-dispatched agent was told it is the sole writer and must treat those commits as unreviewed input (adopt or
+  replace, logged). Its Q2 answered from the spec (AC2): reserved namespace -> `WriteBackRefused("reserved-namespace")`.
+  Gotcha for OPERATIONS.md: **`SendMessage` to a finished subagent resumes it.** Never message a stopped agent whose task was re-dispatched;
+  message only the live one.
+- **093 review** PASS-WITH-AMENDMENTS (F1 MAJOR: "defaults" under "Require a pull request" unverified; GitHub may pre-tick "Require approvals",
+  which could block every normal merge; F2 MAJOR: step 8 must say not to click an admin merge-anyway option on L3; F3-F5 minor). Fix round
+  dispatched (baseline 3). Question booked for Ludwig (see For Ludwig at session end).
+- **093 done**: fix round `545272a` (F1-F5 verbatim), manager delta read, log check exit 0; platform PR #88 opened. **The manager's
+  `gh pr merge 88 --match-head-commit` was denied by the harness permission classifier ("Merge Without Review")**; not retried. #88 waits
+  for Ludwig (merge it himself, or allow manager merges in the session's permission settings).
+- **008c implemented** (`15dfd08`, sole-writer agent; log check `check ... 6` exit 0). Manager re-runs in a fresh **GitHub** clone at
+  `15dfd08` (the agent's "fresh clone" was from the local git dir), 2026-10-28T09:25Z, quiet machine, `PYTHONDONTWRITEBYTECODE=1`:
+  `008c-verify.sh` exit 0 (suite 33 passed, 0 failed; scope ok, 5 files; `SUMMARY failed=0`); `--mutate` exit 0 (21 mutations red, real
+  tree byte-identical, `SUMMARY mutate failed=0`). Independent review dispatched.
+- **008c review** PASS-WITH-AMENDMENTS, no HIGH: (1 MED) Python `\d` accepts non-ASCII digits -> `re.ASCII`; (2 LOW) stray keys on the
+  pending version -> new refusal `pending-shape` (manager ★, strict tightening); (3 LOW) AC3 multi-path condition near-vacuous; (4 LOW)
+  docs "RFC 3339 UTC" too narrow; (5 MED) the scope check's "tolerates merges from main" claim is false (fixed base) -> merge-base with
+  origin/main, absent = FAIL. Fix round dispatched (baseline 11), red-first per §2c rule 5.
+  **Booked follow-up:** 008a's `build_version` likely has the same `\d` Unicode-digit gap (reviewer inference, not checked) -> its own task.
+- **008c fix round 1** (`84a236b`): manager re-run in a fresh GitHub clone green (suite 40, 24 mutations red, scope self-test 4/4). Delta
+  review PASS-WITH-AMENDMENTS, one MED: `re.ASCII` also made `\S` accept Unicode whitespace (NBSP, U+2028) that ECMA rejects — a weakening.
+  Not booked away: fix round 2 dispatched (★ option B: translate `\d` -> `[0-9]`, no ASCII flag; red-first NBSP/U+2028 tests; baseline 14).
+- **008c ready to merge:** fix round 2 (`3227c5c`: `\d` -> `[0-9]` translation, no ASCII flag; NBSP/U+2028 red-first), manager decision on the
+  residual `\s` differences (accepted + booked as **094**, draft), delta review 2 **PASS**, manager re-run in a fresh GitHub clone at `6651b5a`
+  (43 tests, 27 mutations red). Registry PR **#27** (`7810e70`), `gate` pass (8 s). Not merged: see For Ludwig 1.
+- **089b** (part B: findings 8-12, S4) cut from the umbrella and dispatched to qa-engineer (`~/wt/registry-task-089b`, base `e2f7fe3`,
+  baseline 1). Long quiet-machine runs; nothing else may run verify scripts meanwhile.
+
+## SESSION STATUS — 2026-10-28 (session 13, interim) — context ~20 %
+### Done
+- 093 (runbook M9 step 7/8) done, platform PR #88. 008c done, registry PR #27. L3 observed (registry #26, kept open for M9/L4).
+- 089 part D specified and spec-approved. 094 drafted. Two manager errors caught and logged (EnterWorktree isolation; SendMessage resumed a
+  stopped agent).
+### In progress
+- 089b (qa-engineer, background; long runs).
+### For Ludwig
+1. **Two reviewed, green PRs wait for a merge; the manager's merge command was denied by Claude Code's permission classifier.**
+   platform #88 (task 093, runbook) and registry #27 (task 008c). ★ A: you merge them (open each link, click "Merge pull request", then
+   "Confirm merge"): https://github.com/worldofmodcraft/platform/pull/88 and https://github.com/worldofmodcraft/registry/pull/27 .
+   B: allow the manager to merge by adding a permission rule (the manager can set it up with the update-config skill on your word).
+   C: leave them for now. Nothing else depends on #88; 008b-1 and task 094 wait for #27.
+2. **M9, "Require approvals":** when you tick "Require a pull request before merging", GitHub may also tick "Require approvals" (1)
+   `[unverified]`. A required approval must come from another account with write access to the PR's author; today none exists, so every
+   normal merge would be blocked. ★ A: untick "Require approvals" (gate + PR requirement stay; you still read and merge every PR yourself).
+   B: keep 1 approval (needs a second write-capable account, e.g. giving mbmludric write access — a change to the M6 setup).
+   C: tell the manager what the page shows first. Runbook step 7 tells you to stop and ask if it is ticked.
+3. **Manual steps due:** M9 (runbook `docs/runbooks/site-v1-manual-steps.md`, after #88 merges for the updated text; step 8 uses L3 PR
+   registry #26 — do NOT click any admin "merge anyway" on it; tell the manager "L4 blocked"), then M10, then M11.
+### Next session starts here
+1. Pick up 089b's report from its task log (`~/wt/registry-task-089b/docs/tasks/089b-closed-verify-sweep-registry-b.md`); independent review.
+2. After #27 merges: spec review of 094 draft; dispatch 008b-1 (planner).
+3. 089 parts A1, A2, C, D one at a time after 089b (quiet machine); 090 (platform).
+4. After M9: close L3 PR #26 unmerged, delete branch `task/039-l3-invalid-schema`; then Ludwig's M10, M11.
+5. OPERATIONS.md gotchas to add (small doc task): manager must not use EnterWorktree; SendMessage to a finished subagent resumes it; schema
+   step reports only the first schema error (L3 observation).
+
+### Ludwig, 2026-10-28 (verbatim): "1. Är klar. 2. Vet inte var jag kryssar ur den."
+(1) Ludwig merged platform #88 (093) -> `465835a` and registry #27 (008c) -> `32c641b` (confirmed with `gh pr view`). (2) Read as choice
+**A** (untick "Require approvals"); the manager gave click-by-click directions from memory of GitHub's classic branch-protection UI,
+marked unverified to him, with "stop and describe what you see" if the page differs. Runbook M9 step 7 to record choice A in a later doc task.
+- **Correction to For Ludwig 1 (interim status):** the denied `gh pr merge 88` was the manager's own error: it was chained with `gh pr checks`
+  and `gh pr view` in one call, which OPERATIONS.md (2026-09-06, "`gh pr merge` must be run as a BARE command") already says the classifier
+  refuses. Not a missing permission; option B (a permission rule) was never needed. Vault refreshed after Ludwig's merges
+  (`tools/vault/refresh-main.sh`: written=5).
+- **089b** qa-engineer stopped at its 80-turn cap (§8: budget stop, no silent retry). Work through `2d8063c` pushed, log check exit 0; its
+  detached long-run driver (`/tmp/w089b/long-driver.sh`, one sequential chain: L1 065 unfixed/fixed on the 039b merge, L2 whole 039a on HEAD,
+  L3 whole 039a on HEAD + four synthetic later branches) continues, est. 12-16 h; the machine is reserved for it. Manager watches
+  `/tmp/w089b/long/status.txt`; a fresh qa-engineer will read the outputs into the log afterwards.
+- **095** (runbook M9 step 7 records Ludwig's choice A; OPERATIONS.md gains session 13's four gotchas, written by the manager) in progress.
+- **095 done** (review PASS-WITH-AMENDMENTS, applied; `4986689`), platform PR **#89**. The manager's bare `gh pr merge 89 --match-head-commit`
+  failed safely ("Head branch was modified": the manager had typed a guessed full SHA instead of reading it — its own error; the guard
+  worked); the following `git rev-parse` to read the SHA was then denied by the classifier ("Merge Without Review"). Not retried. #89 is
+  left for Ludwig. Lesson: read the SHA first, in a separate step, before composing the merge command.
+- Ludwig merged platform #89 (095) -> `3562c8f`; vault refreshed (written=6); worktrees task-093 and task-095 removed.
+- **Ludwig, 2026-10-28 (verbatim):** "\"Code planning and automation\" finns inte i sidebaren för M9 på registry/settings". Runbook M9 step 2's
+  sidebar heading is wrong for today's GitHub. Manager gave the direct URL `.../registry/settings/branches` and "look for **Branches** under any
+  heading (often 'Code and automation')", stop and describe if only Rulesets appear. **Booked:** small doc task after M9 to correct step 2 from
+  what Ludwig actually sees.
+- **M9 done (Ludwig, 2026-10-28: "Klart för M9 med gate").** Manager verified via `gh api .../branches/main/protection`: required check
+  `gate` (app 15368), `strict: true` (up to date), PR required with `required_approving_review_count: 0` (choice A), `enforce_admins: false`
+  (S5 emergency path). **L4 done:** PR #26 was `BEHIND` (not decisive), so the manager updated its branch via the REST `update-branch`
+  endpoint (installed `gh` lacks `pr update-branch`); `gate` re-ran red and `mergeStateStatus` became `BLOCKED` (head `e37c243`). Bonus
+  observation: "Update branch" re-triggers `gate`. #26 closed unmerged with a comment; remote branch deleted; local worktree removed. The
+  local branch `task/039-l3-invalid-schema` in `~/registry` stays (git-guard refuses `branch -D`; harmless; Ludwig may delete it).
+  Next for Ludwig: **M10** (membership-read App; L1 and L3 have passed), then M11.
+- **M10 done (Ludwig, 2026-10-28: "M10 klar, appen heter worldofmodcraft-membership").** Secret names verified (`gh secret list`, names
+  only): `REGISTRY_MEMBERSHIP_APP_ID` 12:35:45Z, `REGISTRY_MEMBERSHIP_APP_PRIVATE_KEY` 12:36:07Z. **Live check (task 039 U6) passed:** registry
+  PR #28 (`mods/test.m10-probe/entry.json`, owner = the org, from `womcraft`): App present, token minted (`owner: worldofmodcraft`,
+  `permission-members: read`), run log `MEMBERSHIP_STATUS: 204` (no redirect), `gate` pass, comment "all checks pass" with the reserved-namespace
+  note. Closed unmerged, branch deleted, worktree removed. Observation: the token action logs "Creating token for all repositories owned by
+  worldofmodcraft" (no `repositories` input); the App is installed on `registry` only (Ludwig, step 8), so the scope is that one repo [per the
+  install choice; not separately verified]. Manager slip, harmless: a stray `git checkout --detach origin/main` in `~/registry` was reverted at
+  once (clone back on `main`, clean).
+  Next for Ludwig: **M11** (environments `signing`/`write-back`; delete repo-level copies of both keys) — before 008b goes live.
+- **M11 done (Ludwig, 2026-10-28, verbatim: "M11 done (notera att jag hade två .pem-filer, så valde den nyare, men kan ha varit en annan nyckel
+  än den jag tidigare hade i PIPELINE_APP_PRIVATE_KEY").** Manager verified via the API (names only): environments `signing` and
+  `write-back`, each with a `branch:main` deployment policy; `signing` holds `MINISIGN_SECRET_KEY` (14:36:25Z), `write-back` holds
+  `PIPELINE_APP_PRIVATE_KEY` (14:38:07Z); repository secrets are now only `REGISTRY_MEMBERSHIP_APP_ID` and `..._PRIVATE_KEY`. Earlier in the
+  step Ludwig found an `ssh-key-2026-04-03.key` in Downloads; the manager told him it is NOT the minisign key and pointed him to
+  `~/wom-keys/worldofmodcraft.key` (existence checked with `ls -l` only, 262 bytes, 2026-09-02; contents never read).
+  **[unverified] which App the chosen `.pem` belongs to:** a second key of `worldofmodcraft-pipeline` is valid; a key of another App (e.g. today's
+  `worldofmodcraft-membership`) would fail loudly at 008b's first token mint (no security exposure). Asked Ludwig for the file name; otherwise it
+  is proven by 008b-3b's first live run. Offline backup of the minisign key (Q-H) still unconfirmed; recommended to Ludwig.
+- Ludwig, 2026-10-28 (verbatim): "Filen hette worldofmodcraft-pipeline.2026-10-27.private-key.pem(1), så skapade en ny efter för att jag trodde
+  jag gjort fel med första". -> The `write-back` secret holds a key of the **pipeline** App (from 2026-10-27; the App therefore has several
+  active keys: 2026-10-15 and one or two from 2026-10-27). Valid while not deleted on the App page. **Booked hygiene follow-up:** after 008b-3b's
+  first live token mint proves the secret, delete the pipeline App's unused private keys (Ludwig, on the App page) and keep one offline backup.
+- Ludwig, 2026-10-28: "Ok, kör vidare". Machine still held by 089b's chain (L1-fixed running), so new work runs in **phase 1** (implementation
+  + unit tests, no `*-verify.sh`, since 039a's quiet-wait counts verify processes): **008b-1** dispatched (registry `~/wt/registry-task-008b1`,
+  base `32c641b`, baseline 2); **096** (runbook M9-M11 ☑, M9 step 2 direct URL) specified and dispatched (platform `~/wt/task-096`, baseline 1).
+  094 waits for 008b-1 (both touch `docs/pipeline/build-pipeline.md`; sequenced, §6).
+- **096 phase 1 done** (`74cdea2`; content commit `60a7ef6`; log check exit 0): M9-M11 ☑ with status paragraphs, M9 step 2 direct URL; hunks only
+  in M9-M11; `096-verify.sh` written (PIN_FINAL pending), not run. **Phase-2 queue** (when 089b's chain ends; one at a time): 068-verify, 085-verify,
+  pin + 096-verify + its mutations; then independent review and PR.
+- **008b-1 phase 1 done** (`c4c143a`, log check exit 0): planner + 49 checks (suite 206/206 before the last three test edits); `008b1-verify.sh`
+  written, not run (23 mutations, emulated red outside the repo — not evidence). Q-P1..Q-P7 triaged by the manager (no Ludwig item); 094's scope
+  gains `plan_pending.py`. Phase 2 queued behind 089b's chain.
+
+## SESSION STATUS — 2026-10-28 (session 13, handover) — context 31 % (over the 30 % soft line; supersedes the interim entry above)
+### Done (session 13)
+- Merged (by Ludwig): platform #88 (093 runbook M9 S5), #89 (095 runbook Require-approvals + OPERATIONS gotchas); registry #27 (**008c**
+  write-back, `32c641b`). Vault refreshed after each.
+- Ludwig's manual steps **M9, M10, M11 all done** and manager-verified via the API (names/settings only); live checks **L3, L4** (PR #26) and
+  **M10/U6** (PR #28, `MEMBERSHIP_STATUS: 204`) passed; both probe PRs closed unmerged.
+- Specs: 089 part D spec-approved; 094 spec-approved (scope + `plan_pending.py`); 096 spec-approved.
+### In progress (state on disk)
+- **089b** (registry `~/wt/registry-task-089b`, `2b7785a`): agent stopped at its turn cap; its detached long-run driver
+  (`/tmp/w089b/long-driver.sh`, PID 3956671) continues: L1-unfixed exit 0 (13:14Z), **L1-fixed running since 13:14Z**, then L2, L3 (whole 039a
+  sweeps; hours each). Status: `cat /tmp/w089b/long/status.txt` (a step without an `exit` line is not finished); outputs `/tmp/w089b/long/*.out`.
+  **The machine stays reserved until the driver exits** (`kill -0 3956671` fails). Do not kill it.
+- **008b-1** phase 1 done (`5625fd1`; Q-P1..P7 triaged). Phase 2 pending.
+- **096** phase 1 done (`74cdea2`). Phase 2 pending.
+### Next session starts here
+1. Check the 089b driver. When it has exited: a fresh qa-engineer reads `/tmp/w089b/long/*.out` into the 089b log (criteria 9, 10; L1-unfixed
+   exit 0 = the 039b agent's 065 failure **not reproduced**), then independent review, PR.
+2. Then, one at a time on the quiet machine: 096 phase 2 (068-verify, 085-verify, pin + 096-verify + mutations; commands in its log) -> review ->
+   PR; 008b-1 phase 2 (`./docs/tasks/008b1-verify.sh`, `--mutate`, fresh GitHub clone) -> independent review (check Q-P3's extra faults) -> PR.
+3. Then 094 (after 008b-1 merges; re-check its delta at dispatch), then 008b-2 (copy 008b-1's Q-P1/P2/P5/P7 interface facts into it), 008b-3a
+   (merge needs Ludwig: CI security), 008b-3b (M11 done, so its gate removal is unblocked). 089 parts A1, A2, C, D (+ the 008c-verify repin
+   finding), 090.
+4. Merging: run `gh pr merge N --repo … --merge --match-head-commit <SHA>` as a BARE command, with the SHA read in a separate earlier step
+   (OPERATIONS.md); then `tools/vault/refresh-main.sh`.
+5. Booked: pipeline App unused-key cleanup after 008b-3b's first live run (Ludwig); minisign offline backup (Q-H) unconfirmed; local branch
+   `task/039-l3-invalid-schema` in `~/registry` (git-guard refuses `branch -D`; Ludwig may delete it); 091 LOW 2; 039b S2; 092 Q2; 065 Q2 stale
+   contract texts; R11 identity task; OPERATIONS.md still calls mbmludric a non-member; old waiter loops and /tmp dirs.
+### For Ludwig
+Nothing open. (Optional: delete the local branch above in your own terminal: `cd ~/registry && git branch -D task/039-l3-invalid-schema`.)
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-28 (session 13, handover) i missionsloggen och fortsätt med 'Next session starts here'."
