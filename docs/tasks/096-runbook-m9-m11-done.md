@@ -35,3 +35,28 @@ Nothing else in the runbook changes.
 ---
 # Task 096 log  (append-only)
 - 2026-10-28 manager (session 13): written from the mission log's session 13 entries; phase 1 dispatched.
+- 2026-10-28 qa-engineer: phase 1 done (no `*-verify.sh` run, per criterion 3; `bash -n` only). Content commit = `60a7ef6459eb92fbe201f1ec2fda5893c4d3c212`
+  (base = platform `origin/main` `3562c8f`). M9, M10, M11 headings flipped ☐ -> ☑, each with a "Status: done (Ludwig, 2026-10-28)." paragraph
+  quoting the mission log (session 13); M9 step 2 now gives `https://github.com/worldofmodcraft/registry/settings/branches` first and marks the
+  sidebar heading naming `[unverified]`; M11 records the pipeline-App key hygiene item and Q-H backup unconfirmed. `096-verify.sh` written,
+  executable, `PIN_FINAL="PENDING"` (fails until pinned in phase 2).
+  `git diff --name-only origin/main...HEAD` (at the content commit):
+  ```
+  docs/runbooks/site-v1-manual-steps.md
+  docs/tasks/096-runbook-m9-m11-done.md
+  docs/tasks/096-verify.sh
+  ```
+  `git diff -U0 origin/main...HEAD -- docs/runbooks/site-v1-manual-steps.md | grep '^@@'` (hunk counts only):
+  ```
+  @@ -303 +303 @@   @@ -307,0 +308,7 @@   @@ -313 +320,5 @@   @@ -363 +374 @@   @@ -370,0 +382,7 @@   @@ -406 +424 @@   @@ -413,0 +432,11 @@
+  ```
+  Headings now: M9 line 303, M10 line 374, M11 line 424, R11 line 481 (R11 was 452 in the base; all hunks lie in base lines 303-413, i.e. M9-M11).
+  Out-of-scope observation: the other `## ` headings are untouched; no marker check in 068/085-verify.sh mentions M9-M11 (grep), so a re-pin is not
+  expected, but that is unproven until they run.
+  **Phase 2 remaining** (only when the manager releases the machine; from `~/wt/task-096`, foreground, one at a time):
+  1. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/068-verify.sh` (expect exit 0)
+  2. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/085-verify.sh` (expect exit 0; if a marker check reddens on these flips, stop and report before re-pinning)
+  3. set `PIN_FINAL` in `docs/tasks/096-verify.sh` to the final content commit (`git rev-parse HEAD` of the commit before the pin commit; here `60a7ef6`
+     unless the runbook changes again), commit, `git push origin task/096-runbook-m9-m11-done`
+  4. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/096-verify.sh` (fresh clone of origin; needs the branch pushed); paste the output in this log
+  5. mutation checks for 096-verify (throw-away clones under $TMPDIR): range widened, unreachable pin -> exit non-zero, a runbook hunk outside M9-M11 -> red.
