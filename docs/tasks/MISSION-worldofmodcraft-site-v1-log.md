@@ -2699,3 +2699,7 @@ marked unverified to him, with "stop and describe what you see" if the page diff
   **[unverified] which App the chosen `.pem` belongs to:** a second key of `worldofmodcraft-pipeline` is valid; a key of another App (e.g. today's
   `worldofmodcraft-membership`) would fail loudly at 008b's first token mint (no security exposure). Asked Ludwig for the file name; otherwise it
   is proven by 008b-3b's first live run. Offline backup of the minisign key (Q-H) still unconfirmed; recommended to Ludwig.
+- Ludwig, 2026-10-28 (verbatim): "Filen hette worldofmodcraft-pipeline.2026-10-27.private-key.pem(1), så skapade en ny efter för att jag trodde
+  jag gjort fel med första". -> The `write-back` secret holds a key of the **pipeline** App (from 2026-10-27; the App therefore has several
+  active keys: 2026-10-15 and one or two from 2026-10-27). Valid while not deleted on the App page. **Booked hygiene follow-up:** after 008b-3b's
+  first live token mint proves the secret, delete the pipeline App's unused private keys (Ludwig, on the App page) and keep one offline backup.
