@@ -2810,3 +2810,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   089a1 PASS, 089c PWN, 089d PWN, 089e PASS. Fix rounds dispatched for all eight (phase 1; fixtures before fixes; authors resumed where they were
   this session's; 008b-1 implementer and 096 qa-engineer fresh). Two review agents (089c, 089a1) ended on an API safeguard error after delivering
   their full reports (request ids in the transcript); reports were complete and used.
+- **Fix rounds after static review, all done, pushed, log checks exit 0 (still phase 1, nothing run except unit tests):** 089c `ac6a823`, 089a1
+  `47eb055`, 089e `d50e7d8`, 089d `70c3ead` (second mutant `--no-merges`-alone also flips b5/b5b — accepted ★, sound), 096 `7923684` (gap fixtures
+  `3b2cb89` before tightening `354b3cb`), 090 `2153546` (Part A assertions `1dadce7`, Part B setup hardening `4ead9b9`; finding-1 red/green planned
+  as phase-2 step 0), 089a2 `790db47` (062 literals `beccced`, fixtures first `4b8151b`), 008b-1 `6e52272`: **manager reproduced red-then-green**
+  in throwaway worktrees: unit suite 207 tests, `FAILED (errors=1)` at the test-only commit `e949799`, `OK` at `6e52272`.
+- Manager slip, harmless: an `rm -rf` of the job's own temp dir was refused by git-guard; not retried in that form (used `mktemp -d` + `rm -r`).
