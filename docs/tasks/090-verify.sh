@@ -16,7 +16,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 
 BASE_SHA="4321d079e4273d20bd448edadce72e36d56b5f24"
-PIN_FINAL="46a20c84f8308cd2f4ac5243b70578e1859387ce"
+PIN_FINAL="2f71ac9f39691b4917ef23bba1245d7fcbdd142f"
 M048="c323460b9898e44a7c487c310f0b3707f4bce2e8"        # merge of task 048 (PR #50)
 P048_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"   # merge-base(M^1, M^2)
 P048_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"  # M^2
@@ -287,7 +287,7 @@ ac7_fn() {
   for f in $files; do printf '%s\n' $SCOPE | grep -qxF -- "$f" && ok "in scope: $f" || bad "out of scope: $f"; done
   echo "  hunks (git diff -U0):"; git diff -U0 "$BASE_SHA" "$FINAL" -- "$V048" "$V072" "$V079" "$V080" "$V085" | grep -E '^(\+\+\+|@@)' | cut -c1-120 | sed 's/^/    /'
   # exact removed/added line counts per edited script; everything else is byte-identical by construction (diff -U0 shows only these hunks)
-  for expect in "$V048:7:8" "$V072:2:5" "$V079:0:1" "$V080:2:3" "$V085:0:1"; do
+  for expect in "$V048:7:8" "$V072:2:5" "$V079:0:1" "$V080:2:3" "$V085:1:2"; do
     f=${expect%%:*}; r=${expect#*:}; a=${r#*:}; r=${r%%:*}
     local gr ga; gr=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$f" | grep -c '^-[^-]'); ga=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$f" | grep -c '^+[^+]')
     [ "$gr" = "$r" ] && [ "$ga" = "$a" ] && ok "$f: -$gr/+$ga lines as expected" || bad "$f: -$gr/+$ga lines, expected -$r/+$a"
@@ -302,6 +302,11 @@ ac7_fn() {
   # 072/080: ADDED lines are exactly the fixed pins, the comment and (072) the REG assertions
   local ad; ad=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V072" "$V080" | grep '^+[^+]' | grep -vE '^\+# Task 090: (BASE/FINAL are fixed pins|fixed pins)|^\+BASE=(d9d48de|29b3424fc97ba919f598531e9f4f154acc2a0619)$|^\+FINAL=(7df8a50979cc834918871ba948aa9ed7e9eb4352|f173739800707d44a32fe495e96a39022c0c84bb)$|^\+\[ -d "\$REG" \]|^\+git -C "\$REG" rev-parse --verify -q "origin/main' || true)
   [ -z "$ad" ] && ok "072/080: added lines are only the fixed pins, the comment and the REG assertions" || bad "072/080: added line outside the allowed set: $ad"
+  # 085: exactly the nested-fixture block: removed = the old commit line; added = that line with --allow-empty and the new named check
+  local r85 a85
+  r85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^-[^-]' | grep -vF 'commit -q -m "throw-away later task: M4 done, Last reviewed moved"' || true)
+  a85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^+[^+]' | grep -vF -e 'commit -q --allow-empty -m "throw-away later task: M4 done, Last reviewed moved"' -e "nested: Last reviewed substitution applied" || true)
+  [ -z "$r85" ] && [ -z "$a85" ] && ok "085: changed lines are only the nested fixture commit line and the new named check" || bad "085: change outside the nested fixture block: $r85 $a85"
   # after FINAL only this task's own log and script may change (HEAD = FINAL + the recording commit)
   local late; late=$(git diff --name-only "$FINAL" "$HEADSHA" | grep -vxF -e "$T/090-closed-verify-sweep-platform.md" -e "$T/090-verify.sh" || true)
   [ -z "$late" ] && ok "FINAL..HEAD touches only the 090 task file and 090-verify.sh" || bad "later change out of scope: $late"
