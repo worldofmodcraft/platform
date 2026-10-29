@@ -2919,3 +2919,31 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
    (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
 5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) — supersedes the handover entry above for "Ready" and "Next"
+### Since the handover entry
+- **090 merged** (platform #96 -> `35c0e12`): final re-run green (red-first `4638399`; default 86, mutate 96, sweep 122); manager fresh-clone re-runs green; delta 2
+  PASS (one LOW comment recorded). Vault refreshed.
+- **008b-2**: fix round 2 red/green reproduced by the manager (238 tests: FAILED (failures=2) at `2f32c80`, OK at `2595c09`); phase-2 re-run green at `a9aa5f1`
+  (author and manager: verify exit 0, `--mutate` 41 red). **Registry PR #30 open, not merged** — For Ludwig 3 below still applies.
+- **089d phase 2** running (author; ends with a standalone 039a run, hours).
+### Next session starts here (replaces the list above)
+1. 089d: read its log; if green -> manager re-run, short delta check, PR, merge (gate must pass).
+2. On Ludwig's answer to For Ludwig 3: merge registry #30 and dispatch one dry run (live criteria 7, 10, 11), or follow his choice.
+3. Queue, one at a time: 089a2, 064 re-run on the L3 frame (089b Q10), then 089a1/089c/089e after For Ludwig 1; then 094, 008b-3a, 008b-3b.
+4. Booked items unchanged (066 C3b full output; 089 part F; design-doc projection; 008b-2 "verify before key write").
+### For Ludwig
+1. **Stale processes block three verify runs; the manager is not allowed to kill them** (classifier denied "Interfere With Workloads"; not retried). Ten shell
+   loops from 2026-10-19 wait forever, and an agent left one no-op loop. In your terminal (or type `!` + the command here):
+   `kill 5463 122219 181593 294242 356095 480855 543330 1940781 2870181 2929169; pkill -f 'until false; do sleep 1000'`
+   Then tell the manager "loopar dödade". Until then 089a1/089c/089e cannot run phase 2.
+2. **Design doc into the vault** (git-guard forbids the manager to write there): `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
+   Read it there; its section j.1 lists the five overnight rulings you can overturn (Stars carried by lantern, teams by standings, Rising Tide, economy numbers, two Honours).
+3. **008b-2 (signing workflow) merge — registry PR #30 is open, green, not merged.** Two context sentences: its live criteria can only be shown by real runs after merge (dry-run dispatch, then a real
+   pending version); the push gate keeps every job off on push until 008b-3b. ★ A: the manager merges once the re-run is green, then dispatches one dry run and
+   records it. B: you merge it yourself after reading the PR. C: wait for 008b-3b and merge both together.
+4. **ADR-0123 questions (task 098)**, in `docs/design/party-board-mod-proposed-adr.md`: Q1 should the party mod become the reference mod that drives the platform build order
+   (★ A yes, amend only 0001:16 and 0050:17,28; B no ADR change; C both reference mods); Q2 bots (★ B board-only bots); Q3 player count (★ A 2-4); Q4 length
+   (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
+5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) i missionsloggen och fortsätt med 'Next session starts here'."
