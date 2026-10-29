@@ -2851,3 +2851,11 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Task 100 merged** (platform #93 -> `5653515`; vault refreshed, `id_conflicts=0`): OPERATIONS.md session 14 gotchas (5), mbmludric = member/Read since
   2026-10-26 (history kept), key-management.md rotation step for the 008b-2 workflow's public-key literal. Its Sonnet review was cut off again by the API
   safeguard after "PASS, one LOW" (req_011CgVS3zJXsGNm2MySvyjCV); the manager reviewed the diff itself and fixed the one LOW found.
+- **089b driver exited 02:40Z.** L1-unfixed exit 0, L1-fixed exit 0, L2 exit 0 (ALL CHECKS PASSED), **L3 (039a on HEAD + four synthetic later branches)
+  exit 2, 2 FAILs**: (a) `064-verify.sh` -> nested 070 -> `066-verify.sh` AC2.066 and `062-verify.sh` C3b red on the later branch (looks like two further
+  own-change-on-HEAD defects outside parts A-E); (b) `089b-verify.sh` "cannot build the later-branch merge" (likely wrong-reason: the frame already holds
+  the same synthetic edits). Fresh qa-engineer reads the outputs into the 089b log (no runs; baseline 10).
+- **Stale waiter loops:** ten `bash -c 'while pgrep -f "...070-verify.sh..."'` loops from 2026-10-19 (session 9-10) still run forever (pgrep matches its own
+  parent). The manager's `kill` was **denied by the permission classifier** ("Interfere With Workloads"); not retried. Effect checked per script: filters
+  that drop lines containing `grep` (090, 089a2, 039a, 039b; 096/008b-1/008b-2/089d have none) are unaffected; **089a1, 089c, 089e** count them (would wait
+  6 h then FAIL) -> their phase 2 waits for Ludwig (For Ludwig). Phase-2 order now: 096 (running, its author, baseline 3), 008b-1, 090, 089a2, 089d, 008b-2.
