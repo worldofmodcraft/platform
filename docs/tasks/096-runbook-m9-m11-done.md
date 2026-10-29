@@ -1,6 +1,6 @@
 # Task 096: runbook — mark M9, M10 and M11 done; correct M9 step 2's sidebar path
 
-- **Mission:** SITE-V1 — **Status:** review (phase 2 green, 2026-10-29; was spec-approved, manager solo gate 2026-10-28)
+- **Mission:** SITE-V1 — **Status:** done (phase 2 green, 2026-10-29; was spec-approved, manager solo gate 2026-10-28)
 - **Repo:** platform. **Agent / model:** qa-engineer (§3.5). **Budget:** small (≤ 1 agent-session, in two phases)
 - **Branch / worktree:** `task/096-runbook-m9-m11-done` / `~/wt/task-096`, cut from platform `origin/main` `3562c8f`
 
@@ -106,3 +106,7 @@ Nothing else in the runbook changes.
      ("hunk outside M9..M11: @@ -1 +1 @@", "@@ -576,0 +606 @@"; "2 hunk(s) outside"). Note: my first b/c attempts were red for the wrong reason
      (the clone's origin lacked the new commit); redone with origin = the clone and a local main, and the reasons above are the real ones.
   Status set to review. Nothing was fixed or re-pinned in phase 2; the only file changes in this commit are this task file.
+- 2026-10-29 manager (session 14): manager re-run in a fresh GitHub clone at `5136690`: `096-verify.sh` exit 0, "ALL CHECKS PASSED". Independent delta review
+  (Opus, read-only) **PASS**: F1-F5 fixed; gap fixtures shown to exercise the old weakness; no unsupported runbook claim; hunks only in M9-M11. Two optional
+  LOWs recorded, not applied (each would need a new phase-2 run): the 096-verify.sh header should say "pre-merge use only" (post-merge it fails "empty
+  range", by design, F5); the label at line ~80 is out of date. Status done; merged on the manager's authority (§7; overnight ruling).
