@@ -17,6 +17,7 @@ cd "$HERE" || exit 2
 
 BASE_SHA="4321d079e4273d20bd448edadce72e36d56b5f24"
 PIN_FINAL="2f71ac9f39691b4917ef23bba1245d7fcbdd142f"
+PIN_TIP="__TIP__"   # last commit that may touch 090's own files; recorded in the commit after it
 M048="c323460b9898e44a7c487c310f0b3707f4bce2e8"        # merge of task 048 (PR #50)
 P048_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"   # merge-base(M^1, M^2)
 P048_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"  # M^2
@@ -35,9 +36,12 @@ trap 'rm -rf -- "$TMP"' EXIT
 # --mutate points BADFILE elsewhere while it runs a deliberately broken subject, so expected failures do not count against the run
 bad() { echo "  FAIL $*"; echo "$*" >>"${BADFILE:-$TMP/fails.txt}"; }
 GITID=(-c user.name=qa -c user.email=qa@example.invalid -c commit.gpgsign=false)
-HEADSHA="$(git rev-parse HEAD)"
+# Every fixture (clones, overlays, merges) is built from TREE = PIN_FINAL, the content commit of this task, never from HEAD: HEAD may be a
+# later merge (item 12), and 090's own-change checks must not read it. HEAD is used only for the clean-tree check and the banner.
+TREE="$PIN_FINAL"
+REALHEAD="$(git rev-parse HEAD)"
 git diff --quiet HEAD -- . || { echo "FAIL: working tree is dirty; run from a clean (fresh) clone"; exit 2; }
-for c in "$BASE_SHA" "$M048" "$P048_BASE" "$P048_FINAL"; do
+for c in "$BASE_SHA" "$M048" "$P048_BASE" "$P048_FINAL" "$PIN_FINAL"; do
   git rev-parse --verify -q "$c^{commit}" >/dev/null || { echo "FAIL: pinned commit $c unreachable (run: git fetch)"; exit 2; }
 done
 
@@ -86,11 +90,11 @@ merge_clone() {
   git -C "$1" checkout -q -b later || { bad "setup: cannot create branch 'later' in $1"; return 1; }
   revoke "$1" || { bad "setup: revoke commit failed in $1"; return 1; }
   runbook_edit "$1" || { bad "setup: runbook commit failed in $1"; return 1; }
-  git -C "$1" checkout -q --detach "$HEADSHA" || { bad "setup: cannot check out HEAD $HEADSHA in $1"; return 1; }
+  git -C "$1" checkout -q --detach "$TREE" || { bad "setup: cannot check out HEAD $TREE in $1"; return 1; }
   git -C "$1" "${GITID[@]}" merge -q --no-edit later >"$TMP/merge.err" 2>&1 || { bad "setup: merge of the later branch failed (conflict?): $(head -3 "$TMP/merge.err" | tr '\n' ' ')"; return 1; }
   grep -q 'REVOKED by Ludwig 2026-11-01' "$1/CLAUDE.md" && grep -q '^## ☑ M4 ' "$1/$RB" && [ "$(git -C "$1" rev-list --parents -n1 HEAD | wc -w)" = 3 ] \
     || { bad "setup: merge fixture check failed in $1"; return 1; }
-  [ "$2" = "$HEADSHA" ] || overlay "$1" "$2" "$V048" "$V072" "$V080" "$V085" || { bad "setup: overlay failed in $1"; return 1; }
+  [ "$2" = "$TREE" ] || overlay "$1" "$2" "$V048" "$V072" "$V080" "$V085" || { bad "setup: overlay failed in $1"; return 1; }
   return 0
 }
 
@@ -106,7 +110,7 @@ ac1_pins() {
   for f in CLAUDE.md docs/manager/MANAGER.md; do   # positive control: the marker c4 reads exists at the pin
     git show "$P048_FINAL:$f" | grep -q 'SUSPENDED by Ludwig 2026-10-14' && ok "marker present in $f at the pin" || bad "marker absent in $f at the pin"
   done
-  grep -q "^PIN_BASE=\"$P048_BASE\"" "$V048" && grep -q "^PIN_FINAL=\"$P048_FINAL\"" "$V048" && ok "048-verify.sh carries exactly these pins" || bad "048-verify.sh pins differ from the derived ones"
+  sc "$TREE" "$V048" | grep -q "^PIN_BASE=\"$P048_BASE\"" && sc "$TREE" "$V048" | grep -q "^PIN_FINAL=\"$P048_FINAL\"" && ok "048-verify.sh carries exactly these pins" || bad "048-verify.sh pins differ from the derived ones"
   return 0
 }
 # ac1_fn REV : 048 at REV is green before and after the revocation; the unreachable pin is red (exit 2), never skip
@@ -137,7 +141,7 @@ ac1_fn() {
 ac1_widen() {
   echo "== AC1 mutation: c4 widened to HEAD reddens on the revoked branch"
   local C="$TMP/a1-wide"
-  mkclone "$C" "$BASE_SHA" || return 1; revoke "$C" || return 1; overlay "$C" "$HEADSHA" "$V048" || return 1
+  mkclone "$C" "$BASE_SHA" || return 1; revoke "$C" || return 1; overlay "$C" "$TREE" "$V048" || return 1
   sed -i -e '/grep -n .SUSPENDED by Ludwig 2026-10-14/s#"\$T1/\$f"#"$T/$f"#' -e "/grep -n \"Ludwig's Claude Max subscription is shared\"/s#\"\$T1/\$f\"#\"\$T/\$f\"#" "$C/$V048"
   [ "$(grep -c 'ln[12]=.*"\$T/\$f"' "$C/$V048")" = 2 ] && ok "both c4 reads widened to \$T" || bad "widening mutation did not apply to both c4 lines"
   expect_red "$C" a1-wide bash "$V048"
@@ -150,12 +154,12 @@ ac1_widen() {
 ac2_fn() {
   local R=$1 C="$TMP/a2-$1" rc
   echo "== AC2 079-verify.sh stays a live guard of the suspension marker"
-  mkclone "$C" "$HEADSHA" || return 1
+  mkclone "$C" "$TREE" || return 1
   [ "$R" = STUB ] && { printf '#!/usr/bin/env bash\nexit 0\n' >"$C/$V079"; commit_all "$C" stub; }
   expect_rc 0 "$C" a2-clean bash "$V079"
   grep -q 'LIVE GUARD (task 090' "$C/$V079" && ok "079 carries the live-guard comment" || bad "079 lacks the live-guard comment"
   local added removed
-  added=$(git diff -U0 "$BASE_SHA" "$HEADSHA" -- "$V079" | grep -c '^+[^+]'); removed=$(git diff -U0 "$BASE_SHA" "$HEADSHA" -- "$V079" | grep -c '^-[^-]')
+  added=$(git diff -U0 "$BASE_SHA" "$TREE" -- "$V079" | grep -c '^+[^+]'); removed=$(git diff -U0 "$BASE_SHA" "$TREE" -- "$V079" | grep -c '^-[^-]')
   [ "$removed" = 0 ] && [ "$added" = 1 ] && ok "079 diff vs base: 1 comment line added, 0 removed" || bad "079 diff vs base is +$added/-$removed, expected +1/-0"
   # marker removed from CLAUDE.md only, then from both files
   ( cd "$C" && sed -i '/SUSPENDED by Ludwig 2026-10-14/d' CLAUDE.md ) && ! grep -q 'SUSPENDED by Ludwig 2026-10-14' "$C/CLAUDE.md" || bad "CLAUDE.md marker removal did not apply"
@@ -177,7 +181,7 @@ ac3_fn() {
   echo "== AC3 072/080 pins cannot be overridden (scripts@${REV:0:7})"
   n=$( { sc "$REV" "$V072"; sc "$REV" "$V080"; } | grep -cE 'T072_(BASE|FINAL)|T080_' )
   [ "$n" = 0 ] && ok "grep T072_(BASE|FINAL)|T080_ -> 0 lines" || bad "grep T072_(BASE|FINAL)|T080_ -> $n lines (override still present)"
-  mkclone "$C" "$HEADSHA" || return 1; overlay "$C" "$REV" "$V072" "$V080" || return 1
+  mkclone "$C" "$TREE" || return 1; overlay "$C" "$REV" "$V072" "$V080" || return 1
   local s v
   for s in 072 080; do
     if [ "$s" = 072 ]; then v=T072_BASE; else v=T080_BASE; fi
@@ -216,7 +220,7 @@ ac3_positive() {  # the grep matches in the OLD scripts (positive control: 4 ove
 ac4_fn() {
   local REV=$1 C="$TMP/a4-$1" line
   echo "== AC4 085-verify.sh@${REV:0:7}: nested control asserts the Last reviewed substitution"
-  mkclone "$C" "$HEADSHA" || return 1; overlay "$C" "$REV" "$V085" || return 1
+  mkclone "$C" "$TREE" || return 1; overlay "$C" "$REV" "$V085" || return 1
   expect_rc 0 "$C" "a4-unbroken-$REV" bash "$V085"                        # unbroken script: green (positive control)
   line=$(grep -n 'cd "\$TMP/n" && sed -i' "$C/$V085" | head -1 | cut -d: -f1)
   [ -n "$line" ] || { bad "cannot find the nested-control sed line in 085@$REV"; return 1; }
@@ -243,7 +247,7 @@ ac4_gap() {
 ac5_fn() {
   local REV=$1 H="$TMP/a5h-$1" MG="$TMP/a5m-$1" s
   echo "== AC5 item 12: touched scripts@${REV:0:7} on HEAD and on the merge with a later branch"
-  mkclone "$H" "$HEADSHA" || return 1; overlay "$H" "$REV" "$V048" "$V072" "$V080" "$V085" || return 1
+  mkclone "$H" "$TREE" || return 1; overlay "$H" "$REV" "$V048" "$V072" "$V080" "$V085" || return 1
   merge_clone "$MG" "$REV" || return 1
   for s in 048 072 080 085; do
     expect_rc 0 "$H"  "a5-head-$s-$REV"  bash "$T/$s-verify.sh"
@@ -280,14 +284,15 @@ ac5_idem_fn() {  # 085@REV must be green on that tree
 # The nested run sets WOM090_NESTED so this cell does not recurse.
 ac_selfmerge() {
   echo "== item 12 for 090 itself: 090-verify.sh on HEAD merged with a later branch"
-  merge_clone "$TMP/selfmerge" "$HEADSHA" || return 1
+  merge_clone "$TMP/selfmerge" "$TREE" || return 1
+  overlay "$TMP/selfmerge" "$REALHEAD" "$T/090-verify.sh" || return 1   # the clone holds the OLD 090 from PIN_FINAL; test the current one
   expect_rc 0 "$TMP/selfmerge" selfmerge env WOM090_NESTED=1 bash "$T/090-verify.sh"
   return 0
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC7
 ac7_fn() {
-  local FINAL=$1 f r a expect
+  local FINAL=$1 TIP=$2 f r a expect
   echo "== AC7 scope: git diff --name-only ${BASE_SHA:0:7}..${FINAL:0:7} is a subset of File scope"
   if [ "$FINAL" = "__FIN""AL__" ]; then bad "PIN_FINAL not recorded"; return 1; fi
   git rev-parse --verify -q "$FINAL^{commit}" >/dev/null || { bad "PIN_FINAL $FINAL unreachable (never skip)"; return 1; }
@@ -316,9 +321,12 @@ ac7_fn() {
   r85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^-[^-]' | grep -vF 'commit -q -m "throw-away later task: M4 done, Last reviewed moved"' || true)
   a85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^+[^+]' | grep -vF -e 'commit -q --allow-empty -m "throw-away later task: M4 done, Last reviewed moved"' -e "nested: Last reviewed substitution applied" || true)
   [ -z "$r85" ] && [ -z "$a85" ] && ok "085: changed lines are only the nested fixture commit line and the new named check" || bad "085: change outside the nested fixture block: $r85 $a85"
-  # after FINAL only this task's own log and script may change (HEAD = FINAL + the recording commit)
-  local late; late=$(git diff --name-only "$FINAL" "$HEADSHA" | grep -vxF -e "$T/090-closed-verify-sweep-platform.md" -e "$T/090-verify.sh" || true)
-  [ -z "$late" ] && ok "FINAL..HEAD touches only the 090 task file and 090-verify.sh" || bad "later change out of scope: $late"
+  # after FINAL only this task's own log and script may change, up to PIN_TIP (the last commit that may touch 090's own files);
+  # nothing here reads HEAD, so a later merge cannot redden it
+  if [ "$TIP" = "__TI""P__" ]; then bad "PIN_TIP not recorded"; return 1; fi
+  git rev-parse --verify -q "$TIP^{commit}" >/dev/null || { bad "PIN_TIP $TIP unreachable (never skip)"; return 1; }
+  local late; late=$(git diff --name-only "$FINAL" "$TIP" | grep -vxF -e "$T/090-closed-verify-sweep-platform.md" -e "$T/090-verify.sh" || true)
+  [ -z "$late" ] && ok "FINAL..PIN_TIP touches only the 090 task file and 090-verify.sh" || bad "later change out of scope: $late"
   # 072/080: removed lines are exactly the pin lines
   local b; b=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V072" "$V080" | grep '^-[^-]' | grep -vE '^-(BASE|FINAL)=\$\{T0(72|80)_(BASE|FINAL):-' || true)
   [ -z "$b" ] && ok "072/080: removed lines are only the BASE/FINAL pin lines" || bad "072/080: removed line outside the pins: $b"
@@ -329,7 +337,9 @@ ac7_fn() {
 ac6_sweep() {
   local d name label s others rc kids
   echo "== AC6 sweep: every closed platform script, one at a time, on HEAD and on the merge"
-  mkclone "$TMP/a6h" "$HEADSHA" || return 1; merge_clone "$TMP/a6m" "$HEADSHA" || return 1
+  mkclone "$TMP/a6h" "$TREE" || return 1; merge_clone "$TMP/a6m" "$TREE" || return 1
+  # PIN_FINAL holds an older 090-verify.sh (076 runs 090 as a child): lay the current one over both trees
+  overlay "$TMP/a6h" "$REALHEAD" "$T/090-verify.sh" || return 1; overlay "$TMP/a6m" "$REALHEAD" "$T/090-verify.sh" || return 1
   for label in head merge; do
     if [ $label = head ]; then d="$TMP/a6h"; else d="$TMP/a6m"; fi
     for s in "$d"/$T/[0-9]*-verify.sh; do
@@ -359,21 +369,21 @@ section() {
   rc=$(cat "$TMP/rc.$lbl" 2>/dev/null || echo missing)
   if [ "$rc" = 0 ]; then echo "  sentinel $lbl" | tee -a "$ALL"; else bad "section $lbl aborted (return code $rc)" | tee -a "$ALL"; fi
 }
-echo "== task 090 verify: HEAD ${HEADSHA:0:7}, base ${BASE_SHA:0:7}; mutate=$DO_MUTATE sweep=$DO_SWEEP"
+echo "== task 090 verify: HEAD ${REALHEAD:0:7}, fixtures from PIN_FINAL ${TREE:0:7}, base ${BASE_SHA:0:7}; mutate=$DO_MUTATE sweep=$DO_SWEEP"
 EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac5_idem_old ac5_idem_fn ac7_fn"
 section ac1_pins ac1_pins
-AC1_REDFIRST=1 section ac1_fn ac1_fn "$HEADSHA"
+AC1_REDFIRST=1 section ac1_fn ac1_fn "$TREE"
 section ac2_fn ac2_fn HEAD
 section ac3_positive ac3_positive
-section ac3_fn ac3_fn "$HEADSHA"
+section ac3_fn ac3_fn "$TREE"
 section ac4_gap ac4_gap
-section ac4_fn ac4_fn "$HEADSHA"
-section ac5_fn ac5_fn "$HEADSHA"
+section ac4_fn ac4_fn "$TREE"
+section ac5_fn ac5_fn "$TREE"
 section ac5_positive ac5_positive
 section ac5_idem_old ac5_idem_old
-section ac5_idem_fn ac5_idem_fn "$HEADSHA"
+section ac5_idem_fn ac5_idem_fn "$TREE"
 [ -n "${WOM090_NESTED:-}" ] || { EXPECT="$EXPECT ac_selfmerge"; section ac_selfmerge ac_selfmerge; }
-section ac7_fn ac7_fn "$PIN_FINAL"
+section ac7_fn ac7_fn "$PIN_FINAL" "$PIN_TIP"
 if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
 
 if [ "$DO_MUTATE" = 1 ]; then
@@ -395,7 +405,7 @@ if [ "$DO_MUTATE" = 1 ]; then
   section m5 mexpect "old 048 on the merge vs AC5" "FAIL a5-merge-048-$BASE_SHA -> exit" ac5_fn "$BASE_SHA"
   section m6 mexpect "079 that never reddens vs AC2" "a2-claude -> exit 0 but must be red" ac2_fn STUB
   section m8 mexpect "old 085 on an already-edited tree vs AC5 idempotence" "FAIL a5i-085-$BASE_SHA -> exit 2, expected 0" ac5_idem_fn "$BASE_SHA"
-  section m7 mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
+  section m7 mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")" "$PIN_TIP"
 fi
 
 # ---- final gate: no FAIL line in the output, none in the fail file, every expected section reached its end, and enough ok lines
