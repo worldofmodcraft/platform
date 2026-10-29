@@ -2965,3 +2965,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   parts' AC11 "TIP..HEAD touches only own files" checks (green pre-merge, red on main after the next commit), 096-verify (pre-merge only by its own F5 note).
   090 already uses fixed SHAs only (FINAL..PIN_TIP) and is not affected. The overnight ★ ruling expired at the morning handover; this is a design decision
   (how verify scripts behave after merge) -> asked Ludwig; no further merges until answered.
+- **Ludwig, 2026-10-29 (AskUserQuestion answer): "A: fixed SHAs only".** Every own-change check reads only fixed commits (the 090 shape). Plan: task **101**
+  (registry) re-pin `008b1-verify.sh` to its merged range (M = `dd7da2d`) — first, it turns registry main green; task **102** (platform) the same for
+  `096-verify.sh`; fix rounds before any merge for 089a1, a2, c, d, e, 089b and 008b-2 (its scope check uses the merge-base with current main too).
