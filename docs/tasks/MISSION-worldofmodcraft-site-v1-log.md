@@ -2972,3 +2972,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   `~/wt/task-102`, re-pin 096-verify to M=`885e1f0`; write-only first); write-only fixed-SHA fix rounds to the authors of 089a1, 089a2, 089c, 089d, 089e,
   008b-2 (PR #30 stays unmerged) and 089b (plus umbrella-copy sync). Phase-2 order afterwards: 101 merge (main green) -> 089e -> 089d (039a) -> 089c, 089a1,
   089a2, 089b -> 102 -> 008b-2. No merge of any 089 part before its fixed-SHA round is verified.
+- **Decision-A write-only rounds done** (all pushed; log entries grew; nothing run): 089d `d6fb046` (already fixed-SHA; later-commit checks added, no red cell
+  invented), 089e `fdc6f88` (AC11.5b dropped deliberately: it measured the future; AC12 red-first), 008b-2 `ab613bb` (fixed range dd7da2d..fc712d9 = its 8 files),
+  089c `233aefe`, 089a1 `b0ee1da` (red cell on a squash-style main, since a descendant still satisfies TIP<=HEAD; standing assumption: the project merges with
+  real merge commits, `gh pr merge --merge`), 089a2 `eaf900a` (also AC0.9 `git log --all` -> at PIN_FINAL), 089b `535bbac` (umbrella copy synced; AC0.12 HEAD
+  read -> PIN_FIX; `mk_later` fixture accepts a HEAD already carrying the edit — the L3 wrong-reason fix; reviewer to confirm it hides nothing).
+  Waiting: 101 (phases 1+2, holds the machine), 102 (write-only).
