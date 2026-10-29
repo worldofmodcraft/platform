@@ -334,8 +334,28 @@ ac7_fn() {
 }
 
 # ------------------------------------------------------------------------------------------------------------ AC6 sweep
+# chk076 OUTFILE RC : 076 aggregates the live 079 guard BY DESIGN, so on a revoking merge it is red; judged here from its output
+chk076() {
+  local f=$1 rc=$2 kids
+  kids=$(grep -E '^ *FAIL docs/tasks/' "$f" || true)
+  if [ -n "$kids" ] && [ "$(printf '%s\n' "$kids" | wc -l)" = 1 ] && printf '%s' "$kids" | grep -q 'docs/tasks/079-verify.sh'; then ok "merge 076-verify.sh -> exit $rc, its only failing child is 079-verify.sh"
+  else bad "merge 076-verify.sh -> exit $rc with failing children other than (or besides) 079: $kids"; fi
+}
+# ac076_fn : the 076 judgement itself must be able to fail (rule 2) on synthetic 076 outputs
+ac076_fn() {
+  echo "== AC6 the 076 merge-cell judgement on synthetic outputs"
+  local g="$TMP/o076-good" b="$TMP/o076-extra" n="$TMP/o076-none" v
+  printf 'PASS x\n  FAIL docs/tasks/079-verify.sh exit 1\n076 verify: 1 FAIL\n' >"$g"
+  printf 'PASS x\n  FAIL section 7 takedown paragraph located\n  FAIL docs/tasks/079-verify.sh exit 1\n076 verify: 2 FAIL\n' >"$b"
+  printf 'PASS x\n076 verify: 0 FAIL\n' >"$n"
+  v=$(BADFILE="$TMP/f076.fails" chk076 "$g" 1); printf '%s' "$v" | grep -q '^  ok' && ok "076 judgement: only-079 output accepted (control)" || bad "076 judgement rejected the only-079 control output"
+  v=$(BADFILE="$TMP/f076.fails" chk076 "$b" 1); printf '%s' "$v" | grep -q '^  FAIL' && ok "076 judgement: extra own-check FAIL plus 079 judged red" || bad "076 judgement accepted an output with an extra own-check FAIL"
+  v=$(BADFILE="$TMP/f076.fails" chk076 "$n" 1); printf '%s' "$v" | grep -q '^  FAIL' && ok "076 judgement: no 079 line judged red" || bad "076 judgement accepted an output without the 079 child line"
+  return 0
+}
+
 ac6_sweep() {
-  local d name label s others rc kids
+  local d name label s others rc
   echo "== AC6 sweep: every closed platform script, one at a time, on HEAD and on the merge"
   mkclone "$TMP/a6h" "$TREE" || return 1; merge_clone "$TMP/a6m" "$TREE" || return 1
   # PIN_FINAL holds an older 090-verify.sh (076 runs 090 as a child): lay the current one over both trees
@@ -351,9 +371,7 @@ ac6_sweep() {
       if [ "$rc" = 0 ]; then ok "$label $name -> exit 0"
       elif [ "$label" = merge ] && [ "$name" = 079-verify.sh ]; then ok "merge 079-verify.sh -> exit $rc (live guard, red by design on a revocation)"
       elif [ "$label" = merge ] && [ "$name" = 076-verify.sh ]; then   # 076 aggregates the live 079 guard by design: red ONLY because of 079
-        kids=$(grep -E '^ *FAIL docs/tasks/' "$TMP/a6-merge-076-verify.sh.out" || true)
-        if [ -n "$kids" ] && [ "$(printf '%s\n' "$kids" | wc -l)" = 1 ] && printf '%s' "$kids" | grep -q 'docs/tasks/079-verify.sh'; then ok "merge 076-verify.sh -> exit $rc, its only failing child is 079-verify.sh"
-        else bad "merge 076-verify.sh -> exit $rc with failing children other than (or besides) 079: $kids"; fi
+        chk076 "$TMP/a6-merge-076-verify.sh.out" "$rc"
       else bad "$label $name -> exit $rc"; tail -5 "$TMP/a6-$label-$name.out" | cut -c1-200; fi
     done
   done
@@ -370,7 +388,7 @@ section() {
   if [ "$rc" = 0 ]; then echo "  sentinel $lbl" | tee -a "$ALL"; else bad "section $lbl aborted (return code $rc)" | tee -a "$ALL"; fi
 }
 echo "== task 090 verify: HEAD ${REALHEAD:0:7}, fixtures from PIN_FINAL ${TREE:0:7}, base ${BASE_SHA:0:7}; mutate=$DO_MUTATE sweep=$DO_SWEEP"
-EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac5_idem_old ac5_idem_fn ac7_fn"
+EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac5_idem_old ac5_idem_fn ac076_fn ac7_fn"
 section ac1_pins ac1_pins
 AC1_REDFIRST=1 section ac1_fn ac1_fn "$TREE"
 section ac2_fn ac2_fn HEAD
@@ -383,6 +401,7 @@ section ac5_positive ac5_positive
 section ac5_idem_old ac5_idem_old
 section ac5_idem_fn ac5_idem_fn "$TREE"
 [ -n "${WOM090_NESTED:-}" ] || { EXPECT="$EXPECT ac_selfmerge"; section ac_selfmerge ac_selfmerge; }
+section ac076_fn ac076_fn
 section ac7_fn ac7_fn "$PIN_FINAL" "$PIN_TIP"
 if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
 
