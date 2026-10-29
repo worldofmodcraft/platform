@@ -17,7 +17,7 @@ cd "$HERE" || exit 2
 
 BASE_SHA="4321d079e4273d20bd448edadce72e36d56b5f24"
 PIN_FINAL="2f71ac9f39691b4917ef23bba1245d7fcbdd142f"
-PIN_TIP="__TIP__"   # last commit that may touch 090's own files; recorded in the commit after it
+PIN_TIP="9e7c09544fe9e41fd393e18ea8b0dccd3f053efe"   # last commit that may touch 090's own files; recorded in the commit after it
 M048="c323460b9898e44a7c487c310f0b3707f4bce2e8"        # merge of task 048 (PR #50)
 P048_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"   # merge-base(M^1, M^2)
 P048_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"  # M^2
