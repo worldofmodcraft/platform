@@ -2866,3 +2866,10 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   Q10 ★ A (re-run 064 alone on the L3 frame twice, quiet), Q11 ★ A + booked 066 C3b full-output follow-up, Q12 ★ A. Criterion 9 half-met; finding 8 not reproduced.
 - **008b-1 phase 2 run (1) red:** `FAIL recovery text missing` — the verify script's fixed-string docs grep cannot match a phrase wrapped across
   build-pipeline.md:314-315 (planner and 50 tests green). ★ fix the check (whitespace-normalised match + positive control), not the prose; author re-running.
+- **008b-1 merged** (registry #29 -> `dd7da2d`; `gate` pass): phase 2 green by its author at `cfc46b7` after the wrapped-phrase docs-check fix `d6e7546`
+  (default + `--mutate`, 27 mutations red); manager fresh-clone re-runs green at `cfc46b7` (both modes) and `2f179d0` (default, after doc-only LOW fixes);
+  Opus delta review PASS-WITH-AMENDMENTS (two doc LOWs, fixed). `origin/main` merged into 008b-2's branch (`ae128d3`, clean; diff vs main = its 8 files).
+  094 is now unblocked by 008b-1 but stays behind 008b-2 (both edit `build-pipeline.md`).
+- **090 phase-2 red** (`a5-merge-085 -> exit 2`): 085's nested item-12 fixture aborted on a tree already carrying its edits ("nested setup failed"). ★ A:
+  scope amended to make that block idempotent (`--allow-empty`, post-state checks kept); red-first cell `86255e9`, fix `2f71ac9` (= PIN_FINAL), `7fdcac8`.
+  Full phase-2 re-run running (author).
