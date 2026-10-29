@@ -2883,3 +2883,39 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   Diagnosis beyond the manager's hypothesis: every fixture cloned HEAD -> now built from PIN_FINAL; FINAL..HEAD -> FINAL..PIN_TIP. Manager re-run and Opus
   delta review running. **The agent reports a stray no-op background loop it started (`until false; do sleep 1000; done`); its own kill was denied by the
   classifier; the manager does NOT kill it on the agent's behalf (that would launder the denial) -> For Ludwig.**
+- **008b-2 phase 2 green** (author, fresh clone at `ae128d3`, head `9a17879`; manager fresh-clone re-run identical: verify exit 0, `--mutate` exit 0, 39
+  mutations red). Opus delta review PASS-WITH-AMENDMENTS (1 MED: F4 checked keys not values -> `scan` validated by 008a's own validator, `built_at` by
+  its pattern; 2 LOW exact pre-unset lines; 3 residual key file on disk documented + "verify before key write" booked; 4 docs). Fix round 2 `2f32c80`
+  (tests first) / `2595c09`; its red/green unit runs and the phase-2 re-run wait for the machine. **Not merged tonight (★):** its [live] criteria 7, 8,
+  10, 11 need real runs after merge, and §7 requires all criteria demonstrated -> For Ludwig 3.
+
+## SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover)
+### Done overnight (merged)
+- platform: **098** design doc "Wayfarers' Wager" + conditional ADR-0123 proposal (#91), **099** vault id-clash fix (#92), **100** OPERATIONS/key-management (#93),
+  **096** runbook M9-M11 done (#94). registry: **008b-1** pipeline planner (#29). **097** wowdecomp survey (on `session/14`; ★ A watch only).
+- Vault refreshed after every merge (`id_conflicts=0`).
+### Ready, waiting
+- **090** (platform): phase 2 green at `35869bc`; delta-review fixes `c7cde12`; final re-run (red demo at `4638399`, default, mutate, sweep) running at handover time — check its log.
+- **008b-2** (registry): phase 2 green at `9a17879`; fix round 2 `2595c09` needs unit red/green + phase-2 re-run, then PR (merge = For Ludwig 3).
+- **089 parts a1, a2, c, d, e** (registry): phase 1 + static review + fix rounds done; phase 2 pending (a2, d unblocked; a1, c, e blocked by For Ludwig 1).
+- **089b**: readout done; Q10 ★ A (re-run 064 alone on the L3 frame twice, quiet) pending; criterion 9 half-met.
+### Next session starts here
+1. Read 090's log; if green -> manager re-run default, delta check, PR, merge, vault refresh.
+2. 008b-2: unit red/green at `2f32c80`/`2595c09`, phase-2 re-run, PR; merge after Ludwig's answer (For Ludwig 3), then the dry-run dispatch for live criteria.
+3. Quiet-machine queue, one at a time: 089d, 089a2, 064 re-run (Q10), then 089a1/089c/089e once For Ludwig 1 is done; then 094, 008b-3a, 008b-3b.
+4. Booked: 066 C3b prints 062's full output (089b Q11 B); 089 part F (008a section-2 greps); vault projection for `docs/design/*.md`; 008b-2 "verify before key write".
+### For Ludwig
+1. **Stale processes block three verify runs; the manager is not allowed to kill them** (classifier denied "Interfere With Workloads"; not retried). Ten shell
+   loops from 2026-10-19 wait forever, and an agent left one no-op loop. In your terminal (or type `!` + the command here):
+   `kill 5463 122219 181593 294242 356095 480855 543330 1940781 2870181 2929169; pkill -f 'until false; do sleep 1000'`
+   Then tell the manager "loopar dödade". Until then 089a1/089c/089e cannot run phase 2.
+2. **Design doc into the vault** (git-guard forbids the manager to write there): `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
+   Read it there; its section j.1 lists the five overnight rulings you can overturn (Stars carried by lantern, teams by standings, Rising Tide, economy numbers, two Honours).
+3. **008b-2 (signing workflow) merge.** Two context sentences: its live criteria can only be shown by real runs after merge (dry-run dispatch, then a real
+   pending version); the push gate keeps every job off on push until 008b-3b. ★ A: the manager merges once the re-run is green, then dispatches one dry run and
+   records it. B: you merge it yourself after reading the PR. C: wait for 008b-3b and merge both together.
+4. **ADR-0123 questions (task 098)**, in `docs/design/party-board-mod-proposed-adr.md`: Q1 should the party mod become the reference mod that drives the platform build order
+   (★ A yes, amend only 0001:16 and 0050:17,28; B no ADR change; C both reference mods); Q2 bots (★ B board-only bots); Q3 player count (★ A 2-4); Q4 length
+   (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
+5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover) i missionsloggen och fortsätt med 'Next session starts here'."
