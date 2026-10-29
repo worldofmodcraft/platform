@@ -2926,7 +2926,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   PASS (one LOW comment recorded). Vault refreshed.
 - **008b-2**: fix round 2 red/green reproduced by the manager (238 tests: FAILED (failures=2) at `2f32c80`, OK at `2595c09`); phase-2 re-run green at `a9aa5f1`
   (author and manager: verify exit 0, `--mutate` 41 red). **Registry PR #30 open, not merged** — For Ludwig 3 below still applies.
-- **089d phase 2** running (author; ends with a standalone 039a run, hours).
+- **089d phase 2**: everything green (089d default/mutate/own-only, 092 default 188 PASS, `--live-selftest` 205 PASS; harness fix `70c7513`)
+  except the standalone 039a run, held until FAIL by the stray no-op loop (pid 2864176; For Ludwig 1). Head `ac8a998`. Re-run 039a after item 1.
 ### Next session starts here (replaces the list above)
 1. 089d: read its log; if green -> manager re-run, short delta check, PR, merge (gate must pass).
 2. On Ludwig's answer to For Ludwig 3: merge registry #30 and dispatch one dry run (live criteria 7, 10, 11), or follow his choice.
@@ -2935,7 +2936,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 ### For Ludwig
 1. **Stale processes block three verify runs; the manager is not allowed to kill them** (classifier denied "Interfere With Workloads"; not retried). Ten shell
    loops from 2026-10-19 wait forever, and an agent left one no-op loop. In your terminal (or type `!` + the command here):
-   `kill 5463 122219 181593 294242 356095 480855 543330 1940781 2870181 2929169; pkill -f 'until false; do sleep 1000'`
+   `pkill -f 'while pgrep -f'; pkill -f 'until false; do sleep 1000'`
+   (the first ends every leftover `while pgrep -f` waiter loop from 2026-10-19 — 22 of them, not ten; the second ends the no-op loop an agent left at
+   04:52Z, pid 2864176, which also kept 089d's standalone 039a run waiting until it FAILed.)
    Then tell the manager "loopar dödade". Until then 089a1/089c/089e cannot run phase 2.
 2. **Design doc into the vault** (git-guard forbids the manager to write there): `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
    Read it there; its section j.1 lists the five overnight rulings you can overturn (Stars carried by lantern, teams by standings, Rising Tide, economy numbers, two Honours).
