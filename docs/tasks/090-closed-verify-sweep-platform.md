@@ -1,6 +1,6 @@
 # Task 090: platform closed scripts — move the remaining own-change check to its pinned FINAL and close the pin-override and nested-control gaps
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** review (all criteria demonstrated by 090-verify.sh in a fresh clone, 2026-10-29); was spec-approved 2026-10-26 (manager, after independent spec review; fixes mechanical); dispatch after the open PRs merge
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (all criteria demonstrated by 090-verify.sh in a fresh clone, 2026-10-29); was spec-approved 2026-10-26 (manager, after independent spec review; fixes mechanical); dispatch after the open PRs merge
 - **Agent / model:** qa-engineer / sonnet (§3.5; model per its agent frontmatter)
 - **Budget:** small (one agent-session)
 - **Branch / worktree:** `task/090-closed-verify-sweep-platform` / `~/wt/task-090`, cut from platform `origin/main` after the open PRs below merge
@@ -137,3 +137,8 @@ Edited scripts as in File scope; `090-verify.sh` with the red fixtures, mutation
   - (1) fresh clone at c7cde12, default: EXIT=0, "ok lines 86, FAIL lines 0, fail-file lines 0: ALL CHECKS PASSED" (MINOK 75). New lines: "ok selfmerge -> exit 0", "ok selfmerge output names 'note: ac_selfmerge skipped (--nested run)'", "ok 076 judgement: only-079 output accepted (control)", "ok 076 judgement: extra own-check FAIL plus 079 judged red", "ok 076 judgement: no 079 line judged red".
   - (2) --mutate: EXIT=0, "ok lines 96, FAIL lines 0" (MINOK 85).
   - (3) --sweep: EXIT=0, "ok lines 122, FAIL lines 0" (MINOK 107); "ok merge 076-verify.sh -> exit 1, its only FAIL line is the 079-verify.sh child"; "ok merge 079-verify.sh -> exit 1 (live guard, red by design on a revocation: 'cannot locate anchors')".
+- 2026-10-29 manager (session 14): manager fresh-clone re-runs green — at `35869bc` default 81 ok and `--mutate` 91 ok; at `63f9824` default 86 ok ("ALL CHECKS
+  PASSED"). Reviews: static PASS-WITH-AMENDMENTS (2 HIGH harness, fixed red-first), delta 1 PASS-WITH-AMENDMENTS (1 MED: inexact 076 merge cell; fixed red-first
+  at `4638399` -> `c6949ea`), delta 2 **PASS** (one LOW recorded, not applied: the comment near line 442 still gives the old ok counts 81/91/117; runs now log
+  86/96/122 — changing it would need another full run). Scope: File scope plus the manager-approved 085 nested-fixture amendment. Status done; merged on the
+  manager's authority (§7; overnight ruling).
