@@ -2953,3 +2953,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Ludwig, 2026-10-29 (verbatim, a pasted command):** "pkill -f 'while [p]grep -f'; pkill -f 'until fals[e]; do sleep 1000'". Run by the manager on that instruction;
   verified: 0 `while pgrep` waiter loops, 0 stray loops, 0 processes matching the quiet filters. For Ludwig 1 done. Queue restarted: 089d standalone 039a re-run
   (its author), then 089a1, 089c, 089e phase 2, one at a time.
+- **089d standalone 039a re-run red** (quiet-wait passed this time): `FAIL 008c-verify.sh exit 1 on HEAD: FAIL out of scope: docs/tasks/089-closed-verify-sweep-registry.md`
+  — exactly the finding part E (089e) fixes (008c's scope check reads the merge-base with *current* main, so any later branch adding files reds it). Every 089
+  branch carries extra files, so no part's 039a can be green before 089e lands. 089d's other criteria green (head `a4ce2f7`). ★ A: **089e phase 2 now**, merge
+  it, then merge main into 089d (and the others) and re-run their 039a. The 089d agent's own `pkill` of its 039a was denied (it used TaskStop instead); not retried.
