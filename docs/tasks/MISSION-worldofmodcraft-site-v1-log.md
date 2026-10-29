@@ -2878,3 +2878,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   `--sweep` red on the merge tree: `076-verify.sh` (aggregates every script mentioning `docs/manager`) -> children 079 (red by design, live guard) and **090
   itself**. ★ C then A (narrow): diagnose 090 on a merge tree (manager hypothesis: the finding-3 AC7 check reads `PIN_FINAL..HEAD`, an own-change read of
   HEAD), pin such checks to a recorded TIP red-first, and assert the 076 merge cell is red with 079 as its ONLY failing child. Re-run of all four steps follows.
+- **090 phase 2 green** (author, fresh clone at `8756efe`; head `35869bc`, Status review): default 81 ok (incl. `selfmerge`), `--mutate` 7/7 red, `--sweep` 117 ok
+  (every closed script green on HEAD and merge; 076 merge cell red with 079 as its only failing child; 079 red by design), `048 --mutate` all red.
+  Diagnosis beyond the manager's hypothesis: every fixture cloned HEAD -> now built from PIN_FINAL; FINAL..HEAD -> FINAL..PIN_TIP. Manager re-run and Opus
+  delta review running. **The agent reports a stray no-op background loop it started (`until false; do sleep 1000; done`); its own kill was denied by the
+  classifier; the manager does NOT kill it on the agent's behalf (that would launder the denial) -> For Ludwig.**
