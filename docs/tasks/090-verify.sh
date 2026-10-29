@@ -3,21 +3,21 @@
 #   docs/tasks/090-verify.sh             AC1-AC5 and AC7: red fixtures, controls, pins (everything mutating happens in throw-away clones)
 #   docs/tasks/090-verify.sh --mutate    additionally breaks each check's subject (old scripts, a widened c4, a stub 079, a wrong scope pin)
 #                                        and requires the matching check function to report FAIL (rule 2: the artefact must be able to fail)
-#   docs/tasks/090-verify.sh --sweep     additionally AC6: every closed docs/tasks/*-verify.sh, one at a time, on HEAD and on the merge
-#                                        (ps logged before each; refuses to count a run on a machine where another *-verify.sh is running)
+#   docs/tasks/090-verify.sh --sweep     additionally AC6: every closed docs/tasks/*-verify.sh, one at a time, on the PIN_FINAL tree (== HEAD for every non-090 file, which AC7 asserts; the current 090 script is laid
+#                                        over it) and on its merge with a later branch (ps logged before each; refuses to count a run on a machine where another *-verify.sh is running)
 # Flags combine. Own-change checks use FIXED SHAs (REVIEW-CHECKLIST item 12): BASE_SHA = platform origin/main before this task;
 # PIN_FINAL = this task's content commit (the commit after it only records it and the log). No env overrides, no credentials.
 # Every check function takes REV (the commit whose scripts are under test) so --mutate can run the SAME check on the OLD scripts
 # (REV=BASE_SHA) and require red. Output is judged by its "  ok" / "  FAIL" lines.
 set -u
 export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
-unset WOM085_NESTED
+unset WOM085_NESTED WOM090_NESTED   # no environment switch can remove a check; the one skip is the explicit, announced --nested flag
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 
 BASE_SHA="4321d079e4273d20bd448edadce72e36d56b5f24"
 PIN_FINAL="2f71ac9f39691b4917ef23bba1245d7fcbdd142f"
-PIN_TIP="9e7c09544fe9e41fd393e18ea8b0dccd3f053efe"   # last commit that may touch 090's own files; recorded in the commit after it
+PIN_TIP="9e7c09544fe9e41fd393e18ea8b0dccd3f053efe"   # last commit before the pin-recording commit; FINAL..TIP may touch only the 090 task file and 090-verify.sh
 M048="c323460b9898e44a7c487c310f0b3707f4bce2e8"        # merge of task 048 (PR #50)
 P048_BASE="8a5f32dfcebfe6eda328066b43eb60204ef3a5ac"   # merge-base(M^1, M^2)
 P048_FINAL="047bc41cac555cc125f2650d1b5cc3159f2f17a9"  # M^2
@@ -26,8 +26,8 @@ V048=$T/048-verify.sh; V072=$T/072-verify.sh; V079=$T/079-verify.sh; V080=$T/080
 RB=docs/runbooks/site-v1-manual-steps.md
 SCOPE="$V048 $V072 $V079 $V080 $V085 $T/090-closed-verify-sweep-platform.md $T/090-verify.sh"
 
-DO_MUTATE=0; DO_SWEEP=0
-for a in "$@"; do case "$a" in --mutate) DO_MUTATE=1;; --sweep) DO_SWEEP=1;; *) echo "usage: $0 [--mutate] [--sweep]"; exit 2;; esac; done
+DO_MUTATE=0; DO_SWEEP=0; DO_NESTED=0   # --nested is internal: the self-merge cell runs 090 inside a merge tree and must not recurse
+for a in "$@"; do case "$a" in --mutate) DO_MUTATE=1;; --sweep) DO_SWEEP=1;; --nested) DO_NESTED=1;; *) echo "usage: $0 [--mutate] [--sweep]"; exit 2;; esac; done
 
 ok()  { echo "  ok   $*"; }
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/wom090-XXXXXX")"
@@ -57,7 +57,7 @@ mkclone() {
 }
 commit_all() { git -C "$1" add -A && git -C "$1" "${GITID[@]}" commit -q --allow-empty -m "$2"; }
 # overlay DIR REV PATH... : write the scripts as they are at REV into the clone and commit them
-overlay() { local d=$1 r=$2 p; shift 2; for p in "$@"; do sc "$r" "$p" >"$d/$p"; chmod +x "$d/$p"; done; commit_all "$d" "overlay $r"; }
+overlay() { local d=$1 r=$2 p; shift 2; for p in "$@"; do sc "$r" "$p" >"$d/$p" && [ -s "$d/$p" ] || { bad "setup: overlay of $p@$r failed or empty"; return 1; }; chmod +x "$d/$p"; done; commit_all "$d" "overlay $r"; }
 # revoke DIR : the throw-away "later task": Ludwig revokes the suspension (the marker text disappears from both files)
 revoke() {
   ( cd "$1" && sed -i 's/SUSPENDED by Ludwig 2026-10-14/REVOKED by Ludwig 2026-11-01/' CLAUDE.md docs/manager/MANAGER.md ) || return 1
@@ -255,6 +255,7 @@ ac5_fn() {
   done
   expect_rc 0 "$H" "a5-head-079-$REV" bash "$V079"
   expect_red "$MG" "a5-merge-079-$REV" bash "$V079"   # live guard reddens when the marker is revoked: intended (AC2 / Q1)
+  has "a5-merge-079-$REV" "cannot locate anchors"      # ... and for its named reason, not a crash
   return 0
 }
 ac5_positive() {  # the unfixed 048 is red on the same merge
@@ -281,12 +282,13 @@ ac5_idem_fn() {  # 085@REV must be green on that tree
 }
 
 # item 12 for 090 itself: its own checks must be green on a tree that already carries a later merge (marker revoked, M4, Last reviewed).
-# The nested run sets WOM090_NESTED so this cell does not recurse.
+# The nested run is started with --nested, which skips only this cell and says so; the outer cell requires that announcement.
 ac_selfmerge() {
   echo "== item 12 for 090 itself: 090-verify.sh on HEAD merged with a later branch"
   merge_clone "$TMP/selfmerge" "$TREE" || return 1
   overlay "$TMP/selfmerge" "$REALHEAD" "$T/090-verify.sh" || return 1   # the clone holds the OLD 090 from PIN_FINAL; test the current one
-  expect_rc 0 "$TMP/selfmerge" selfmerge env WOM090_NESTED=1 bash "$T/090-verify.sh"
+  expect_rc 0 "$TMP/selfmerge" selfmerge bash "$T/090-verify.sh" --nested
+  has selfmerge "note: ac_selfmerge skipped (--nested run)"
   return 0
 }
 
@@ -318,9 +320,14 @@ ac7_fn() {
   [ -z "$ad" ] && ok "072/080: added lines are only the fixed pins, the comment and the REG assertions" || bad "072/080: added line outside the allowed set: $ad"
   # 085: exactly the nested-fixture block: removed = the old commit line; added = that line with --allow-empty and the new named check
   local r85 a85
-  r85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^-[^-]' | grep -vF 'commit -q -m "throw-away later task: M4 done, Last reviewed moved"' || true)
-  a85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^+[^+]' | grep -vF -e 'commit -q --allow-empty -m "throw-away later task: M4 done, Last reviewed moved"' -e "nested: Last reviewed substitution applied" || true)
-  [ -z "$r85" ] && [ -z "$a85" ] && ok "085: changed lines are only the nested fixture commit line and the new named check" || bad "085: change outside the nested fixture block: $r85 $a85"
+  cat >"$TMP/allow85" <<'ALLOW85'
+-  && git add -A && git "${GITID[@]}" commit -q -m "throw-away later task: M4 done, Last reviewed moved" ) || { echo "nested setup failed"; exit 2; }
++  && git add -A && git "${GITID[@]}" commit -q --allow-empty -m "throw-away later task: M4 done, Last reviewed moved" ) || { echo "nested setup failed"; exit 2; }  # --allow-empty (task 090): idempotent when HEAD already carries these edits; the post-state is asserted by the three checks below
++grep -qF 'Last reviewed: 2026-10-15 (task 068)' "$TMP/n/$RB" && bad "nested: Last reviewed substitution applied (old string still present)" || { grep -qF 'Last reviewed: 2026-11-01 (task 999)' "$TMP/n/$RB" && ok "nested: Last reviewed substitution applied" || bad "nested: Last reviewed substitution applied (new string absent)"; }
+ALLOW85
+  r85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^-[^-]' | grep -vxFf "$TMP/allow85" || true)
+  a85=$(git diff -U0 "$BASE_SHA" "$FINAL" -- "$V085" | grep '^+[^+]' | grep -vxFf "$TMP/allow85" || true)
+  [ -z "$r85" ] && [ -z "$a85" ] && ok "085: changed lines are exactly the nested fixture commit line and the new named check" || bad "085: change outside the nested fixture block: $r85 $a85"
   # after FINAL only this task's own log and script may change, up to PIN_TIP (the last commit that may touch 090's own files);
   # nothing here reads HEAD, so a later merge cannot redden it
   if [ "$TIP" = "__TI""P__" ]; then bad "PIN_TIP not recorded"; return 1; fi
@@ -337,9 +344,9 @@ ac7_fn() {
 # chk076 OUTFILE RC : 076 aggregates the live 079 guard BY DESIGN, so on a revoking merge it is red; judged here from its output
 chk076() {
   local f=$1 rc=$2 kids
-  kids=$(grep -E '^ *FAIL docs/tasks/' "$f" || true)
-  if [ -n "$kids" ] && [ "$(printf '%s\n' "$kids" | wc -l)" = 1 ] && printf '%s' "$kids" | grep -q 'docs/tasks/079-verify.sh'; then ok "merge 076-verify.sh -> exit $rc, its only failing child is 079-verify.sh"
-  else bad "merge 076-verify.sh -> exit $rc with failing children other than (or besides) 079: $kids"; fi
+  kids=$(grep -E '^ *FAIL' "$f" || true)   # EVERY FAIL line of 076, not only its docs/tasks children
+  if [ "$(printf '%s\n' "$kids" | grep -c .)" = 1 ] && printf '%s' "$kids" | grep -qx ' *FAIL docs/tasks/079-verify.sh exit [0-9]*' && grep -qx '076 verify: 1 FAIL' "$f"; then ok "merge 076-verify.sh -> exit $rc, its only FAIL line is the 079-verify.sh child"
+  else bad "merge 076-verify.sh -> exit $rc with FAIL lines other than (or besides) the single 079 child: $kids"; fi
 }
 # ac076_fn : the 076 judgement itself must be able to fail (rule 2) on synthetic 076 outputs
 ac076_fn() {
@@ -356,12 +363,12 @@ ac076_fn() {
 
 ac6_sweep() {
   local d name label s others rc
-  echo "== AC6 sweep: every closed platform script, one at a time, on HEAD and on the merge"
+  echo "== AC6 sweep: every closed platform script, one at a time, on the PIN_FINAL tree (current 090 laid over it) and on its merge"
   mkclone "$TMP/a6h" "$TREE" || return 1; merge_clone "$TMP/a6m" "$TREE" || return 1
   # PIN_FINAL holds an older 090-verify.sh (076 runs 090 as a child): lay the current one over both trees
   overlay "$TMP/a6h" "$REALHEAD" "$T/090-verify.sh" || return 1; overlay "$TMP/a6m" "$REALHEAD" "$T/090-verify.sh" || return 1
-  for label in head merge; do
-    if [ $label = head ]; then d="$TMP/a6h"; else d="$TMP/a6m"; fi
+  for label in pinned merge; do
+    if [ $label = pinned ]; then d="$TMP/a6h"; else d="$TMP/a6m"; fi
     for s in "$d"/$T/[0-9]*-verify.sh; do
       name=$(basename "$s"); [ "$name" = 090-verify.sh ] && continue
       others=$(ps -eo pid=,args= | grep -E '[0-9]{3}[a-z]?-verify\.sh' | grep -v 'grep' | grep -v '090-verify.sh' || true)
@@ -369,7 +376,8 @@ ac6_sweep() {
       echo "  ps: no other *-verify.sh process before $label/$name"
       rc=$(run "$d" "a6-$label-$name" bash "$T/$name")
       if [ "$rc" = 0 ]; then ok "$label $name -> exit 0"
-      elif [ "$label" = merge ] && [ "$name" = 079-verify.sh ]; then ok "merge 079-verify.sh -> exit $rc (live guard, red by design on a revocation)"
+      elif [ "$label" = merge ] && [ "$name" = 079-verify.sh ]; then
+        if grep -q 'cannot locate anchors' "$TMP/a6-merge-079-verify.sh.out"; then ok "merge 079-verify.sh -> exit $rc (live guard, red by design on a revocation: 'cannot locate anchors')"; else bad "merge 079-verify.sh -> exit $rc without its named reason 'cannot locate anchors'"; fi
       elif [ "$label" = merge ] && [ "$name" = 076-verify.sh ]; then   # 076 aggregates the live 079 guard by design: red ONLY because of 079
         chk076 "$TMP/a6-merge-076-verify.sh.out" "$rc"
       else bad "$label $name -> exit $rc"; tail -5 "$TMP/a6-$label-$name.out" | cut -c1-200; fi
@@ -400,7 +408,7 @@ section ac5_fn ac5_fn "$TREE"
 section ac5_positive ac5_positive
 section ac5_idem_old ac5_idem_old
 section ac5_idem_fn ac5_idem_fn "$TREE"
-[ -n "${WOM090_NESTED:-}" ] || { EXPECT="$EXPECT ac_selfmerge"; section ac_selfmerge ac_selfmerge; }
+if [ "$DO_NESTED" = 1 ]; then echo "  note: ac_selfmerge skipped (--nested run)"; else EXPECT="$EXPECT ac_selfmerge"; section ac_selfmerge ac_selfmerge; fi
 section ac076_fn ac076_fn
 section ac7_fn ac7_fn "$PIN_FINAL" "$PIN_TIP"
 if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
@@ -431,7 +439,8 @@ fi
 NF=$(grep -c '^  FAIL' "$ALL" || true); NFF=$(wc -l <"$TMP/fails.txt"); NOK=$(grep -c '^  ok ' "$ALL" || true); MISSING=""
 for e in $EXPECT; do grep -qx "  sentinel $e" "$ALL" || MISSING="$MISSING $e"; done
 [ -z "$MISSING" ] || { bad "sections that did not run to their end:$MISSING" | tee -a "$ALL"; NF=$((NF + 1)); }
-MINOK=60
+# backstop per mode (observed 81 default / 91 mutate / 117 sweep, 80 nested; margins of 6-7): the sentinels are the primary gate
+MINOK=75; [ "$DO_MUTATE" = 1 ] && MINOK=$((MINOK + 10)); [ "$DO_SWEEP" = 1 ] && MINOK=$((MINOK + 32))
 [ "$NOK" -ge "$MINOK" ] || { bad "only $NOK ok lines, expected at least $MINOK (a section ran short)" | tee -a "$ALL"; NF=$((NF + 1)); }
 echo "== 090-verify: ok lines $NOK, FAIL lines $NF, fail-file lines $NFF: $([ "$NF" = 0 ] && [ "$NFF" = 0 ] && echo 'ALL CHECKS PASSED' || echo FAILED)"
 [ "$NF" = 0 ] && [ "$NFF" = 0 ]
