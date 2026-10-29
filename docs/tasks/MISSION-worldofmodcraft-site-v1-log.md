@@ -2968,3 +2968,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Ludwig, 2026-10-29 (AskUserQuestion answer): "A: fixed SHAs only".** Every own-change check reads only fixed commits (the 090 shape). Plan: task **101**
   (registry) re-pin `008b1-verify.sh` to its merged range (M = `dd7da2d`) — first, it turns registry main green; task **102** (platform) the same for
   `096-verify.sh`; fix rounds before any merge for 089a1, a2, c, d, e, 089b and 008b-2 (its scope check uses the merge-base with current main too).
+- Dispatched on decision A: **101** (registry `~/wt/registry-task-101`, re-pin 008b1-verify to M=`dd7da2d`; phases 1+2, holds the machine); **102** (platform
+  `~/wt/task-102`, re-pin 096-verify to M=`885e1f0`; write-only first); write-only fixed-SHA fix rounds to the authors of 089a1, 089a2, 089c, 089d, 089e,
+  008b-2 (PR #30 stays unmerged) and 089b (plus umbrella-copy sync). Phase-2 order afterwards: 101 merge (main green) -> 089e -> 089d (039a) -> 089c, 089a1,
+  089a2, 089b -> 102 -> 008b-2. No merge of any 089 part before its fixed-SHA round is verified.
