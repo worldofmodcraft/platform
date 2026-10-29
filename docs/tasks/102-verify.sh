@@ -18,7 +18,7 @@ PIN_M1="5653515816fb5d028ad0a6d68aa1af944b2ac4b3"     # M^1
 PIN_M2="b8970a3f194ff960c6fe68088fa53077749acc98"     # M^2 == 096's FINAL
 PIN_BASE="3562c8f519a8f957d1c3b2649dc7f774105dbfd8"   # merge-base(M^1, M^2) == 096's BASE
 OLD_BLOB="f0241ac6493c2b47cafa6b264b878170c9a85352"   # 096-verify.sh blob at M (the unfixed script)
-PIN_FIX="PENDING"                                     # commit that fixes 096-verify.sh (set in the pin-recording commit)
+PIN_FIX="ac038b622c49f544b79afe617f857f670daf68c9"                                     # commit that fixes 096-verify.sh (set in the pin-recording commit)
 V=docs/tasks/096-verify.sh; ME=docs/tasks/102-verify.sh; LOGF=docs/tasks/102-repin-096-verify.md
 RB=docs/runbooks/site-v1-manual-steps.md
 BR=task/096-runbook-m9-m11-done
