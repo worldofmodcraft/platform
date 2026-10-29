@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # Task 096 verification (MANAGER.md section 2c). Run from any directory, foreground, ONLY on a quiet machine (phase 2).
 #   docs/tasks/096-verify.sh    AC1: M9/M10/M11 headings done at the pinned FINAL SHA, step-2 URL, scope = M9..M11 only.
-# Own-change checks read git blobs at the fixed PIN_FINAL (REVIEW-CHECKLIST item 12), never the moving HEAD.
-# It clones the repository fresh from GitHub (origin URL) into a temp dir and checks there; this tree is never written to.
-# PIN_FINAL is set after the content commit exists (phase 2); "PENDING" fails, it never skips.
+# Own-change checks read git blobs and ranges at FIXED SHAs only (REVIEW-CHECKLIST item 12; Ludwig 2026-10-29 "fixed SHAs only"), never the moving HEAD
+# or origin/main. The pins are 096's merged range: PIN_MERGE = platform merge 885e1f0 (PR #94); PIN_BASE = merge-base(M^1, M^2); PIN_FINAL = M^2.
+# Task 102 re-pinned this script so it stays green on main after the merge (it was pre-merge only, see the F5 note in the 096 task file).
+# It clones the repository fresh from GitHub (origin URL, default branch) into a temp dir and checks there; this tree is never written to.
+# An unreachable or "PENDING" pin fails, it never skips.
 set -u
 export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PIN_FINAL="354b3cb00656ee979d890ed06decbc5c9500fbec"
-BRANCH="task/096-runbook-m9-m11-done"
+PIN_MERGE="885e1f01d1f0ba63d705c87ceef9e949cbecab1e"   # merge of task 096 (platform PR #94)
+PIN_BASE="3562c8f519a8f957d1c3b2649dc7f774105dbfd8"    # merge-base(M^1, M^2)
+PIN_FINAL="b8970a3f194ff960c6fe68088fa53077749acc98"   # M^2, the branch tip that was merged
 RB=docs/runbooks/site-v1-manual-steps.md
 LOGF=docs/tasks/096-runbook-m9-m11-done.md
 VER=docs/tasks/096-verify.sh
@@ -30,18 +33,25 @@ chk_m11_qh() { # file; 0 when M11's "**Status: done" paragraph carries the exact
 }
 
 URL="$(git -C "$HERE" remote get-url origin 2>/dev/null)" || { echo "FAIL no origin remote"; exit 2; }
-echo "== fresh clone of $URL (branch $BRANCH)"
-git clone -q --no-hardlinks --branch "$BRANCH" "$URL" "$TMP/c" 2>"$TMP/clone.err" || { echo "FAIL fresh clone"; cat "$TMP/clone.err"; exit 2; }
+echo "== fresh clone of $URL (default branch)"
+git clone -q --no-hardlinks "$URL" "$TMP/c" 2>"$TMP/clone.err" || { echo "FAIL fresh clone"; cat "$TMP/clone.err"; exit 2; }
 C="$TMP/c"
 
-echo "== pin"
-if [ "$PIN_FINAL" = "PENDING" ]; then bad "PIN_FINAL not set (phase 2 pins it)"; fi
-git -C "$C" cat-file -e "$PIN_FINAL^{commit}" 2>/dev/null && ok "PIN_FINAL resolves in the fresh clone" || bad "PIN_FINAL unreachable in the fresh clone"
-git -C "$C" merge-base --is-ancestor "$PIN_FINAL" HEAD 2>/dev/null && ok "PIN_FINAL is an ancestor of the branch tip" || bad "PIN_FINAL not an ancestor of HEAD"
+echo "== pin (fixed SHAs; each must resolve and agree with the merge)"
+for k in PIN_MERGE PIN_BASE PIN_FINAL; do
+  v="${!k}"
+  if [ "$v" = "PENDING" ]; then bad "$k not set (PENDING)"; continue; fi
+  git -C "$C" cat-file -e "$v^{commit}" 2>/dev/null && ok "$k resolves in the fresh clone" || bad "$k $v unreachable in the fresh clone"
+done
+d1="$(git -C "$C" rev-parse "$PIN_MERGE^1" 2>/dev/null)"; d2="$(git -C "$C" rev-parse "$PIN_MERGE^2" 2>/dev/null)"
+db=""; [ -n "$d1" ] && [ -n "$d2" ] && db="$(git -C "$C" merge-base "$d1" "$d2" 2>/dev/null)"
+[ -n "$d2" ] && [ "$d2" = "$PIN_FINAL" ] && ok "PIN_FINAL == PIN_MERGE^2" || bad "PIN_FINAL is not PIN_MERGE^2 ('$d2')"
+[ -n "$db" ] && [ "$db" = "$PIN_BASE" ] && ok "PIN_BASE == merge-base(PIN_MERGE^1, PIN_MERGE^2)" || bad "PIN_BASE is not the merge-base of the merge parents ('$db')"
+git -C "$C" merge-base --is-ancestor "$PIN_FINAL" HEAD 2>/dev/null && ok "PIN_FINAL is an ancestor of the cloned tip (main)" || bad "PIN_FINAL not an ancestor of HEAD"
 
-echo "== scope (merge-base with origin/main; absent = FAIL)"
-BASE="$(git -C "$C" merge-base origin/main "$PIN_FINAL" 2>/dev/null)"
-if [ -z "$BASE" ]; then bad "no merge-base with origin/main"; else
+echo "== scope (fixed PIN_BASE..PIN_FINAL; empty or unreachable = FAIL)"
+BASE="$PIN_BASE"; git -C "$C" cat-file -e "$BASE^{commit}" 2>/dev/null || BASE=""
+if [ -z "$BASE" ]; then bad "PIN_BASE unreachable, no scope range"; else
   ok "base = $(echo "$BASE" | cut -c1-7)"
   files="$(git -C "$C" diff --name-only "$BASE" "$PIN_FINAL")"
   [ -n "$files" ] && ok "range changes files" || bad "empty range (vacuous)"
