@@ -2873,3 +2873,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **090 phase-2 red** (`a5-merge-085 -> exit 2`): 085's nested item-12 fixture aborted on a tree already carrying its edits ("nested setup failed"). ★ A:
   scope amended to make that block idempotent (`--allow-empty`, post-state checks kept); red-first cell `86255e9`, fix `2f71ac9` (= PIN_FINAL), `7fdcac8`.
   Full phase-2 re-run running (author).
+- **090 phase 2, rounds 2-3:** 085 fix proven (default 80 ok; idempotence cells green; m8 red). `--mutate` red once on the harness itself (a mutation name
+  with "/" broke `mexpect`'s output path) -> name sanitised (`bf430af`, `da2d812`); then default and `--mutate` green (90 ok; 7 mutations red at their text).
+  `--sweep` red on the merge tree: `076-verify.sh` (aggregates every script mentioning `docs/manager`) -> children 079 (red by design, live guard) and **090
+  itself**. ★ C then A (narrow): diagnose 090 on a merge tree (manager hypothesis: the finding-3 AC7 check reads `PIN_FINAL..HEAD`, an own-change read of
+  HEAD), pin such checks to a recorded TIP red-first, and assert the 076 merge cell is red with 079 as its ONLY failing child. Re-run of all four steps follows.
