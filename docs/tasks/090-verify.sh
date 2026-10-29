@@ -276,6 +276,15 @@ ac5_idem_fn() {  # 085@REV must be green on that tree
   return 0
 }
 
+# item 12 for 090 itself: its own checks must be green on a tree that already carries a later merge (marker revoked, M4, Last reviewed).
+# The nested run sets WOM090_NESTED so this cell does not recurse.
+ac_selfmerge() {
+  echo "== item 12 for 090 itself: 090-verify.sh on HEAD merged with a later branch"
+  merge_clone "$TMP/selfmerge" "$HEADSHA" || return 1
+  expect_rc 0 "$TMP/selfmerge" selfmerge env WOM090_NESTED=1 bash "$T/090-verify.sh"
+  return 0
+}
+
 # ------------------------------------------------------------------------------------------------------------ AC7
 ac7_fn() {
   local FINAL=$1 f r a expect
@@ -318,7 +327,7 @@ ac7_fn() {
 
 # ------------------------------------------------------------------------------------------------------------ AC6 sweep
 ac6_sweep() {
-  local d name label s others rc
+  local d name label s others rc kids
   echo "== AC6 sweep: every closed platform script, one at a time, on HEAD and on the merge"
   mkclone "$TMP/a6h" "$HEADSHA" || return 1; merge_clone "$TMP/a6m" "$HEADSHA" || return 1
   for label in head merge; do
@@ -331,6 +340,10 @@ ac6_sweep() {
       rc=$(run "$d" "a6-$label-$name" bash "$T/$name")
       if [ "$rc" = 0 ]; then ok "$label $name -> exit 0"
       elif [ "$label" = merge ] && [ "$name" = 079-verify.sh ]; then ok "merge 079-verify.sh -> exit $rc (live guard, red by design on a revocation)"
+      elif [ "$label" = merge ] && [ "$name" = 076-verify.sh ]; then   # 076 aggregates the live 079 guard by design: red ONLY because of 079
+        kids=$(grep -E '^ *FAIL docs/tasks/' "$TMP/a6-merge-076-verify.sh.out" || true)
+        if [ -n "$kids" ] && [ "$(printf '%s\n' "$kids" | wc -l)" = 1 ] && printf '%s' "$kids" | grep -q 'docs/tasks/079-verify.sh'; then ok "merge 076-verify.sh -> exit $rc, its only failing child is 079-verify.sh"
+        else bad "merge 076-verify.sh -> exit $rc with failing children other than (or besides) 079: $kids"; fi
       else bad "$label $name -> exit $rc"; tail -5 "$TMP/a6-$label-$name.out" | cut -c1-200; fi
     done
   done
@@ -359,6 +372,7 @@ section ac5_fn ac5_fn "$HEADSHA"
 section ac5_positive ac5_positive
 section ac5_idem_old ac5_idem_old
 section ac5_idem_fn ac5_idem_fn "$HEADSHA"
+[ -n "${WOM090_NESTED:-}" ] || { EXPECT="$EXPECT ac_selfmerge"; section ac_selfmerge ac_selfmerge; }
 section ac7_fn ac7_fn "$PIN_FINAL"
 if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
 
