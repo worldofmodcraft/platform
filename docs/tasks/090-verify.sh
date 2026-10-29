@@ -370,7 +370,7 @@ if [ "$DO_MUTATE" = 1 ]; then
     f="$TMP/m-$(printf '%s' "$n" | tr -c 'A-Za-z0-9._-' '_')"   # file name sanitised: a mutation name may contain "/" or spaces
     BADFILE="$f.fails" "$@" >"$f.out" 2>&1
     if grep '^  FAIL' "$f.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"
-    else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi
+    else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$f.out" | cut -c1-160; fi
     return 0
   }
   EXPECT="$EXPECT m1 m_widen m3 m4 m5 m6 m7 m8"
