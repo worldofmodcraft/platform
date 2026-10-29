@@ -2957,3 +2957,11 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   — exactly the finding part E (089e) fixes (008c's scope check reads the merge-base with *current* main, so any later branch adding files reds it). Every 089
   branch carries extra files, so no part's 039a can be green before 089e lands. 089d's other criteria green (head `a4ce2f7`). ★ A: **089e phase 2 now**, merge
   it, then merge main into 089d (and the others) and re-run their 039a. The 089d agent's own `pkill` of its 039a was denied (it used TaskStop instead); not retried.
+- **089e phase 2 green** (author; manager fresh-clone re-run green: 089e default + `--mutate` ALL CHECKS PASSED, plain `008c-verify.sh` SUMMARY failed=0; delta check
+  PASS). **Not merged — stopped on a systemic finding:**
+- **Manager error, found 2026-10-29 ~20:00Z: `008b1-verify.sh` is red on registry main** (fresh clone at `dd7da2d`: exit 1, `FAIL no changes since base (broken search)`).
+  008b-1's scope check uses the merge-base with the *current* main, so after its own merge the range is empty — the same defect the umbrella booked for 008c
+  (part E). The manager merged #29 without checking post-merge behaviour. Consequence: registry main's full 039a sweep is red until fixed. Same class: the 089
+  parts' AC11 "TIP..HEAD touches only own files" checks (green pre-merge, red on main after the next commit), 096-verify (pre-merge only by its own F5 note).
+  090 already uses fixed SHAs only (FINAL..PIN_TIP) and is not affected. The overnight ★ ruling expired at the morning handover; this is a design decision
+  (how verify scripts behave after merge) -> asked Ludwig; no further merges until answered.
