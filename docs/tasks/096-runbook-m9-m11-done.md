@@ -1,6 +1,6 @@
 # Task 096: runbook — mark M9, M10 and M11 done; correct M9 step 2's sidebar path
 
-- **Mission:** SITE-V1 — **Status:** spec-approved (manager, solo gate, 2026-10-28; the 085 shape)
+- **Mission:** SITE-V1 — **Status:** review (phase 2 green, 2026-10-29; was spec-approved, manager solo gate 2026-10-28)
 - **Repo:** platform. **Agent / model:** qa-engineer (§3.5). **Budget:** small (≤ 1 agent-session, in two phases)
 - **Branch / worktree:** `task/096-runbook-m9-m11-done` / `~/wt/task-096`, cut from platform `origin/main` `3562c8f`
 
@@ -21,6 +21,7 @@ hygiene item (delete the pipeline App's unused keys after 008b-3b's first live r
 Nothing else in the runbook changes.
 
 ## Acceptance criteria
+*(Phase 2 done 2026-10-29: criteria 1, 2, 3 demonstrated, see the last log entry; phase 1 constraint for 3 was honoured.)*
 1. Content as in Objective; every claim cites its source above; nothing outside M9, M10, M11 changes (`git diff -U0` hunks inside those three
    sections only).
 2. **Phase 2 (only when the manager releases the machine):** `068-verify.sh` and `085-verify.sh` (pinned) exit 0 on the branch; if any
@@ -90,3 +91,18 @@ Nothing else in the runbook changes.
      `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/096-verify.sh` at the branch tip (fresh clone of origin; expect ALL CHECKS PASSED incl. the two
      mutation lines "red when ... removed"); paste the output and exit codes. Use pre-merge only (F5).
   5. mutation checks for 096-verify as before: range widened, unreachable pin -> exit non-zero, a runbook hunk outside M9-M11 -> red.
+- 2026-10-29 qa-engineer: PHASE 2 (machine released by the manager). Before every run `ps -eo pid,etime,args | grep -E '[0-9]{3}[a-z]?-verify\.sh'`
+  returned no lines (the stale pgrep loops did not match; nothing to count). Outputs were kept under a mktemp dir. Branch tip = `79236843`.
+  1. `068-verify.sh`: **exit 0** ("ALL PASS"; incl. "no secret-looking value (live)").
+  2. `085-verify.sh`: **exit 0** ("085-verify: ALL CHECKS PASSED"; nested -> 0, pinmut/pinunr -> 1 as required). No re-pin needed (F4 expectation held).
+  3. PIN_FINAL `354b3cb` unchanged.
+  4. Gap at `3b2cb89` (fresh clone of origin/platform branch; PIN_FINAL set to `3b2cb89` in the throw-away copy only): **exit 1**, exactly
+     "FAIL GAP: step-2 marker check passes with the step-2 [unverified] removed" and "FAIL GAP: M11 Q-H check passes with the status paragraph's Q-H sentence removed"
+     ("2 FAILED"). Tip run, fresh clone of https://github.com/worldofmodcraft/platform at the branch (HEAD `79236843`): **exit 0**, "096-verify: ALL CHECKS PASSED";
+     base 3562c8f, only the three files changed, hunks inside M9..M11 (base lines 303..451), M9/M10/M11 ☑ + done status, R11 ⏸, URL first in step 2, old sidebar path
+     gone, both new mutation lines ok ("red when ... removed"), no secret-looking value.
+  5. Script mutations (throw-away clones, origin pointed at the clone itself): unreachable pin -> **exit 1** ("PIN_FINAL unreachable", "not an ancestor");
+     range widened (extra.txt commit as FINAL) -> **exit 1** ("files outside scope: extra.txt"); runbook hunks outside M9-M11 -> **exit 1**
+     ("hunk outside M9..M11: @@ -1 +1 @@", "@@ -576,0 +606 @@"; "2 hunk(s) outside"). Note: my first b/c attempts were red for the wrong reason
+     (the clone's origin lacked the new commit); redone with origin = the clone and a local main, and the reasons above are the real ones.
+  Status set to review. Nothing was fixed or re-pinned in phase 2; the only file changes in this commit are this task file.
