@@ -261,6 +261,20 @@ ac5_positive() {  # the unfixed 048 is red on the same merge
   has a5-merge-048-old "FAIL c4: CLAUDE.md has no SUSPENDED marker"
   return 0
 }
+# AC5 idempotence cell (task 090 scope amendment, 085 nested fixture): 085 on a tree that ALREADY carries the M4 / Last reviewed edits
+ac5_idem_old() {  # red first: the OLD 085 aborts at its own nested setup (sed changes nothing, nothing to commit)
+  echo "== AC5 idempotence red first: the OLD 085 on a tree that already carries the M4 / Last reviewed edits"
+  merge_clone "$TMP/a5i-old" "$BASE_SHA" || return 1
+  expect_rc 2 "$TMP/a5i-old" a5i-old-085 bash "$V085"
+  has a5i-old-085 "nested setup failed"
+  return 0
+}
+ac5_idem_fn() {  # 085@REV must be green on that tree
+  echo "== AC5 idempotence: 085@${1:0:7} on a tree that already carries the M4 / Last reviewed edits"
+  merge_clone "$TMP/a5i-$1" "$1" || return 1
+  expect_rc 0 "$TMP/a5i-$1" "a5i-085-$1" bash "$V085"
+  return 0
+}
 
 # ------------------------------------------------------------------------------------------------------------ AC7
 ac7_fn() {
@@ -328,7 +342,7 @@ section() {
   if [ "$rc" = 0 ]; then echo "  sentinel $lbl" | tee -a "$ALL"; else bad "section $lbl aborted (return code $rc)" | tee -a "$ALL"; fi
 }
 echo "== task 090 verify: HEAD ${HEADSHA:0:7}, base ${BASE_SHA:0:7}; mutate=$DO_MUTATE sweep=$DO_SWEEP"
-EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac7_fn"
+EXPECT="ac1_pins ac1_fn ac2_fn ac3_positive ac3_fn ac4_gap ac4_fn ac5_fn ac5_positive ac5_idem_old ac5_idem_fn ac7_fn"
 section ac1_pins ac1_pins
 AC1_REDFIRST=1 section ac1_fn ac1_fn "$HEADSHA"
 section ac2_fn ac2_fn HEAD
@@ -338,6 +352,8 @@ section ac4_gap ac4_gap
 section ac4_fn ac4_fn "$HEADSHA"
 section ac5_fn ac5_fn "$HEADSHA"
 section ac5_positive ac5_positive
+section ac5_idem_old ac5_idem_old
+section ac5_idem_fn ac5_idem_fn "$HEADSHA"
 section ac7_fn ac7_fn "$PIN_FINAL"
 if [ "$DO_SWEEP" = 1 ]; then EXPECT="$EXPECT ac6_sweep"; section ac6_sweep ac6_sweep; fi
 
@@ -351,13 +367,14 @@ if [ "$DO_MUTATE" = 1 ]; then
     else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi
     return 0
   }
-  EXPECT="$EXPECT m1 m_widen m3 m4 m5 m6 m7"
+  EXPECT="$EXPECT m1 m_widen m3 m4 m5 m6 m7 m8"
   section m1 mexpect "old 048 (c4 on HEAD) vs AC1" "FAIL a1-after-$BASE_SHA -> exit" ac1_fn "$BASE_SHA"
   section m_widen ac1_widen
   section m3 mexpect "old 072/080 (env overrides) vs AC3" "override still present" ac3_fn "$BASE_SHA"
   section m4 mexpect "old 085 (no nested assertion) vs AC4" "a4-broken-$BASE_SHA output lacks 'FAIL nested: Last reviewed substitution applied'" ac4_fn "$BASE_SHA"
   section m5 mexpect "old 048 on the merge vs AC5" "FAIL a5-merge-048-$BASE_SHA -> exit" ac5_fn "$BASE_SHA"
   section m6 mexpect "079 that never reddens vs AC2" "a2-claude -> exit 0 but must be red" ac2_fn STUB
+  section m8 mexpect "old 085 on an already-edited tree vs AC5 idempotence" "FAIL a5i-085-$BASE_SHA -> exit 2, expected 0" ac5_idem_fn "$BASE_SHA"
   section m7 mexpect "FINAL = an out-of-scope commit vs AC7" "FAIL out of scope:" ac7_fn "$(git rev-parse "$BASE_SHA^1")"
 fi
 
