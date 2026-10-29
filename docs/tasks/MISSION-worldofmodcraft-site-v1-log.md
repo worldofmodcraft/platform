@@ -2744,3 +2744,178 @@ marked unverified to him, with "stop and describe what you see" if the page diff
 ### For Ludwig
 Nothing open. (Optional: delete the local branch above in your own terminal: `cd ~/registry && git branch -D task/039-l3-invalid-schema`.)
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-28 (session 13, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 14 — 2026-10-28 (manager; worktree `~/wt/session-14`, branch `session/14`)
+- Start 16:33Z: context ~8 % (HUD cache, session "WSL-WorldofModcraft-26-10-28-continue_1"). Token guard suspended (Ludwig, 2026-10-14).
+- **089b driver still running** (PID 3956671 alive): L1-065-unfixed exit 0 (13:14Z), **L1-065-fixed exit 0 (15:57Z)**, L2-039a-full-on-HEAD
+  running since 15:57Z, then L3. Machine stays reserved; handover items 1-2 wait for the driver to exit.
+- **090** (platform) dispatched to qa-engineer in **phase 1 only** (edits + written `090-verify.sh`, no verify runs): worktree `~/wt/task-090`,
+  branch `task/090-closed-verify-sweep-platform`, base `4321d07`; log-entry baseline 2. Phase 2 joins the quiet-machine queue after 096 and 008b-1.
+- **090 phase 1 done** (`46a20c8` content = its PIN_FINAL, `ce8e2bc`, triage `1853230`; log check exit 0): 048 c4 pinned to `047bc41` (pins re-derived
+  from merge `c323460`, match the spec), 072/080 env pin overrides removed, 072 `REG` assertion, 085 nested `Last reviewed` check, 079 live-guard
+  comment; `090-verify.sh` (324 lines) written, not run. Two agent questions answered from the spec (in the 090 log). Phase-2 commands are in the
+  090 log. **Quiet-machine queue when the 089b driver exits:** 089b readout -> 096 phase 2 -> 008b-1 phase 2 -> 090 phase 2 (one at a time).
+### Ludwig's ruling, 2026-10-28 evening (verbatim): "Vill att du kör hela natten tills imorgonbitti. Du har rätt att ignorera context limit, alla beslut kommer vara stjärna (men loggför besluten som vanligt), endast saker där min input verkligen behövs och du inte kan göra det själv skickas till mig imorgonbitti"
+- Manager's reading (logged per §8b): overnight run until the morning of 2026-10-29. §5 planned-handover thresholds suspended for tonight only
+  (compaction caution §5.5 still applies: verify against disk after any compaction). Every manager decision takes the ★ option and is logged
+  as usual; §8 "two consecutive stop-and-ask" halt does not apply to ★-resolved items. Items that truly need Ludwig are parked under
+  "For Ludwig" and delivered in the morning; independent chains continue.
+- **Not read into the ruling (stays Ludwig-only, §7):** merges touching CI security checks (e.g. 008b-3a), signing/keys, `docs/decisions/`,
+  mission specs, doctrine, takedowns; credentials (rule 11). Ordinary task PRs merge on the manager's authority when §7's conditions hold.
+  Expires at the morning handover; not a precedent.
+- **Ludwig, 2026-10-28 evening (verbatim), added to the ruling above:** "Du får merga allt som behövs på egen hand". Manager's reading: for
+  tonight the §7 Ludwig-only merge classes (CI security checks, signing/keys code such as 008b-2's signing job, doctrine) may be merged by the
+  manager when §7's conditions hold (review PASS, criteria demonstrated, verify green in a fresh clone, docs, log). **Still excluded:** takedowns
+  (absolute stop, §7/§8), credentials (rule 11), edits to `docs/decisions/` and mission specs (none planned). Expires at the morning handover;
+  not a precedent.
+- **089 parts A1, A2, C, D, E cut and dispatched (phase 1, qa-engineer, in parallel; file sets disjoint)**, all from registry main `32c641b`, each with
+  a part task file and the latest umbrella copy (platform `4321d07`): 089a1 `b5f5062`, 089a2 `228a2a4`, 089c `8b0cdb4`, 089d `75eb9b0`, 089e `60ba327`
+  (log baselines 1). **Decisions (★, overnight ruling):** (i) the 008c-verify repin finding becomes **part E** (one file; A1 is at the 5-file cap),
+  approved solo under §2b as a small mechanical task of the umbrella pattern; (ii) A2's Q4 ★ A (ADR-0121 read at a pinned commit; fixture blob if no
+  reachable history, logged). Note for merges: 089b's branch carries an older umbrella copy (pre-part-D/E); its copy is synced to the latest
+  version before its PR (as with 092 in session 12).
+- **Phase 1 done, triaged (★), pushed; all wait for the quiet machine:** 089c `7e9534c`, 089d `4c2be63`, 089e `e042017`, 089a2 `3864277`
+  (Q4 fell to the fixture blob: registry history has no ADRs). 089a1 still running.
+- **097 done** (Ludwig's request, wowdecomp survey): `docs/research/wowdecomp-survey.md` (`c1f198d`). It is a decompilation of Blizzard's own
+  3.3.5a `Wow.exe` (build 12340), x64-first, Windows-only, no licence, ~90 % of functions ported (self-reported). WoWee is already 64-bit
+  (manager re-checked both READMEs). Decision ★ A: watch only; read none of its code, never link, ship or depend on it (ADR-0004/0007/0049).
+- **089a1 phase 1 done** (`69da39a`, triage `see 089a1 log`): finding 4 confirmed vacuous, now anchored on a positive line. **New finding booked**
+  (from its Q5): `008a-verify.sh` section 2 greps `build-pipeline.md`/`manifest-reader.md` headings at HEAD (possibly own-change) -> a later
+  umbrella part F. All six 089 parts are now phase-1 complete; the quiet-machine queue is 089b readout, 096, 008b-1, 090, 089e, 089c, 089d,
+  089a2, 089a1 (short scripts first).
+- **089b driver:** L2-039a-full-on-HEAD **exit 0, ALL CHECKS PASSED** (15:57Z-21:22Z, 5.4 h). L3 (whole 039a on HEAD + four synthetic later
+  branches) started 21:22Z; expected ~03:00Z. Decision ★: meanwhile, **static pre-phase-2 reviews** (reviewer agents, read-only, no verify runs)
+  of the eight phase-1 branches (090, 096, 008b-1, 089a1, 089a2, 089c, 089d, 089e), so harness bugs are found before the quiet-machine runs;
+  the formal review after phase 2 is then a delta review.
+- **Ludwig, 2026-10-28 (verbatim):** "En sak till, vet att rogue like mod är satt som en ”vertical slice” som första mod, men vill att den första
+  modden ska vara en Mario Party-liknande mod där man går omkring på ett spelbräde och samlar stjärnor och spelar mini games med andra spelare"
+  and "Ge mig ett detaljrikt designdolument för det tills imorgon, sparas i vault", then "Nej, lägg designdokumentet under Project World of
+  Modcraft i vuultet". -> **Task 098** (platform `task/098-first-mod-party-board`, doc-writer): ADR **proposal** (supersedes/amends ADR-0001 et al.;
+  nothing under `docs/decisions/` until Ludwig approves the text) + detailed design doc `docs/design/party-board-mod.md` (original game in the genre;
+  no Nintendo IP, ADR-0004). Vault: the manager copies the doc to the vault folder root `Project World of Modcraft/` (Ludwig's placement), under a
+  name that cannot collide with projected notes; the projection has no design-doc notes yet (follow-up booked).
+- **Static reviews:** 096 PASS-WITH-AMENDMENTS (F1 MED runbook claims "the route Ludwig used" — not in the log; F2 MED, F3 LOW-MED vacuous greps in
+  096-verify; F4 MED no stated expectation for 068/085; F5 LOW note). 089a2 RETURN: **F1 BLOCKING** — full-SHA 057 pins break `062-verify.sh:496-498`
+  mutation literals (closed-script coupling); F2-F4 minor. Decision ★ for F1: extend 089a2's scope by `062-verify.sh` (those mutation literals only;
+  4 source files, within cap) rather than keep short pins (umbrella criterion 2 requires full SHAs), plus a cross-script check in 089a2-verify.sh.
+  Fix rounds dispatched (phase 1, red-first fixtures written per §2c rule 5, shown red in phase 2).
+- **Ludwig (verbatim):** "Såhär, tänker att min Mario Party-mod inte bör påverka några ADRs som så eftersom hela tanken med mod API-upplägget är
+  att kunna göra moddar på detta sättet helt fristående från varandra". Manager check: no ADR holds mod content; but ADR-0001:16 ("the reference
+  implementation that drives the kernel API from real needs") and ADR-0050:17, :28 ("Step 1 — first real roguelike feature", "Breadth, driven by the
+  roguelike") make the roguelike the platform's build-order driver. Decision ★: 098's design doc is the main deliverable, framed as a standalone mod
+  on the mod API; the ADR proposal shrinks to a conditional amendment of only those 0001/0050 sentences, pending Ludwig's answer (A ★ party mod
+  becomes the reference mod; B no ADR change, roguelike stays reference; C both). 098 agent redirected.
+- **Static reviews complete (8/8):** 090 PASS-WITH-AMENDMENTS (2 HIGH harness: silent setup failures can end "ALL CHECKS PASSED"; mutations count
+  any FAIL as red), 096 PWA, 008b-1 PWA (F1 MED: deeply nested entry.json -> RecursionError crashes the whole planner), 089a2 RETURN (062 coupling),
+  089a1 PASS, 089c PWN, 089d PWN, 089e PASS. Fix rounds dispatched for all eight (phase 1; fixtures before fixes; authors resumed where they were
+  this session's; 008b-1 implementer and 096 qa-engineer fresh). Two review agents (089c, 089a1) ended on an API safeguard error after delivering
+  their full reports (request ids in the transcript); reports were complete and used.
+- **Fix rounds after static review, all done, pushed, log checks exit 0 (still phase 1, nothing run except unit tests):** 089c `ac6a823`, 089a1
+  `47eb055`, 089e `d50e7d8`, 089d `70c3ead` (second mutant `--no-merges`-alone also flips b5/b5b — accepted ★, sound), 096 `7923684` (gap fixtures
+  `3b2cb89` before tightening `354b3cb`), 090 `2153546` (Part A assertions `1dadce7`, Part B setup hardening `4ead9b9`; finding-1 red/green planned
+  as phase-2 step 0), 089a2 `790db47` (062 literals `beccced`, fixtures first `4b8151b`), 008b-1 `6e52272`: **manager reproduced red-then-green**
+  in throwaway worktrees: unit suite 207 tests, `FAILED (errors=1)` at the test-only commit `e949799`, `OK` at `6e52272`.
+- Manager slip, harmless: an `rm -rf` of the job's own temp dir was refused by git-guard; not retried in that form (used `mktemp -d` + `rm -r`).
+- **098 delivered** (`cde6908`): `docs/design/party-board-mod.md` (733 lines, working title "Wayfarers' Wager"; 2 boards, 14 minigames, turn state
+  machine, 15 platform gaps G1-G15, 12-step walking skeleton) + `docs/tasks/098-proposed-adr.md` (ADR-0123 Proposed, conditional on Q1, amends only
+  0001:16 and 0050:17,28). Review (Sonnet reviewer) reached PASS-WITH-AMENDMENTS (F1 HIGH board-2 arithmetic 40 vs 48; F2 solo-with-bots vs
+  abort-if-alone; F3 mis-cited ADR lines; F4-F7) but its full report was lost twice to an API safeguard termination (`[reasoning_extraction]`,
+  request ids req_011CgVPb81PS6Y8ZGb5Jz4RU, req_011CgVPdGSSv7WychhT3BJTV; also hit 089c/089a1 static reviews after delivery). Decision ★: a fresh
+  independent re-review on Opus (general-purpose, read-only, findings written to the job tmp dir), the lost headings given as leads to verify.
+- 008b-2 phase 1 dispatched (registry `~/wt/registry-task-008b2`, branch `task/008b2-pipeline-build-sign`, based on 008b-1's tip `6e52272`, cut `3a0dc90`,
+  baseline 2; 008b-1 interface facts Q-P1/P2/P5/P7 and the booked `mods/` assertion copied into its log). No live runs, no secrets, push gate kept.
+- **098 re-review (Opus, findings in the job tmp file)** PASS-WITH-AMENDMENTS, 33 findings (1 HIGH, 15 MED, 17 LOW); all seven lost headings
+  confirmed; 14/95 cites wrong or imprecise. **HIGH:** each rule generic, but together the core rules reproduce the published series' signature rule
+  set nearly number for number (start coins 10, star 20 at a relocating space, ±3 spaces, final-rounds doubling, space-colour team selection, three
+  bonus stars). Decisions ★ (overnight; Ludwig may change): Stars earned by carrying the Lamplighter's lantern Pier -> Beacon; teams by standings
+  (leader-vs-rest / last-place draft); a rising tide replaces final-rounds doubling; new economy numbers; at most 2 Honours of our own mechanics;
+  renames for "Hearth"/"Stormwatch". Fix round 1 to the author (sole writer).
+- **008b-2 phase 1** (`6107b79`, checksum `9f6e1fb`): workflow (plan/build/sign/dry-run/summary, push gate on all jobs), `sign_built.py`, `handoff.py`,
+  `--no-sign`, `mods/` checkout assertion; 234 unit tests OK; verify script written, not run. **Manager answered Q-S/Q-R/Q-A with evidence**
+  (unauthenticated): minisign 0.12 tarball SHA-256 `9a599b48…7e73`, `.minisig` verified with the author's README key; `archive` repo public; all
+  action pins equal their tags. Q-D, Q-K ★ A. Static security review PASS-WITH-AMENDMENTS (secret exposure clean, no `${{` in run:); fix round for F1
+  (unset the secret before python parses untrusted bytes), F3, c25, F4 (result.json allow-list), F5. Booked: F6 (per-leg environment approvals, for
+  M11 if reviewers are added); key-management.md rotation must name the workflow's public-key literal (platform doc task).
+- **008b-2 fix round 1** (red `ef248f5`, fix `162d791`; log check exit 0): F1 secret unset before python, F3 no `${{` in any run:, c25 exact `if:` per
+  job, F4 result.json allow-list (`result/shape` refusal -> exit_code 2), F5 single REJECTED line. **Manager reproduced red-then-green** in throwaway
+  worktrees: 236 unit tests, `FAILED (failures=3)` at `ef248f5`, `OK` at `162d791`. Verify script and its mutations still phase 2.
+- **098 merged** (platform #91 -> `1a2dc0a`): review chain Opus re-review (33) -> round 1 -> delta (3 MED, 10 LOW) -> round 2 -> delta 2 (4 LOW) -> L1-L3
+  fixed, L4 decided. **Post-merge vault refresh FAILED** ("two task files share the id 098": the proposal file `docs/tasks/098-proposed-adr.md` matched the
+  projection's `NNN-*.md` task-file rule; manager's naming slip). **Task 099** (manager, doc move): proposal moved to
+  `docs/design/party-board-mod-proposed-adr.md`; projection test mode in a `mktemp -d` vault red on main, `id_conflicts=0` on the branch; #92 -> `849a22b`;
+  `refresh-main.sh` then `planned=228 written=5 ... id_conflicts=0`. Vault current.
+- **Design doc into the vault folder root: blocked for the manager by git-guard** (`BLOCKED [vault]: an agent's Bash command mentions the vault`); this
+  session counts as an agent. Not retried, not worked around. -> For Ludwig (one copy command, see below); booked: a projection change so `docs/design/*.md`
+  is projected automatically (needs a contract change to `docs/tools/vault-projection.md`; Ludwig's call).
+- Manager slips, harmless: a git-guard fail-closed on an unbalanced-parenthesis heredoc (split into separate steps, PR body from a file).
+- **Task 100 merged** (platform #93 -> `5653515`; vault refreshed, `id_conflicts=0`): OPERATIONS.md session 14 gotchas (5), mbmludric = member/Read since
+  2026-10-26 (history kept), key-management.md rotation step for the 008b-2 workflow's public-key literal. Its Sonnet review was cut off again by the API
+  safeguard after "PASS, one LOW" (req_011CgVS3zJXsGNm2MySvyjCV); the manager reviewed the diff itself and fixed the one LOW found.
+- **089b driver exited 02:40Z.** L1-unfixed exit 0, L1-fixed exit 0, L2 exit 0 (ALL CHECKS PASSED), **L3 (039a on HEAD + four synthetic later branches)
+  exit 2, 2 FAILs**: (a) `064-verify.sh` -> nested 070 -> `066-verify.sh` AC2.066 and `062-verify.sh` C3b red on the later branch (looks like two further
+  own-change-on-HEAD defects outside parts A-E); (b) `089b-verify.sh` "cannot build the later-branch merge" (likely wrong-reason: the frame already holds
+  the same synthetic edits). Fresh qa-engineer reads the outputs into the 089b log (no runs; baseline 10).
+- **Stale waiter loops:** ten `bash -c 'while pgrep -f "...070-verify.sh..."'` loops from 2026-10-19 (session 9-10) still run forever (pgrep matches its own
+  parent). The manager's `kill` was **denied by the permission classifier** ("Interfere With Workloads"); not retried. Effect checked per script: filters
+  that drop lines containing `grep` (090, 089a2, 039a, 039b; 096/008b-1/008b-2/089d have none) are unaffected; **089a1, 089c, 089e** count them (would wait
+  6 h then FAIL) -> their phase 2 waits for Ludwig (For Ludwig). Phase-2 order now: 096 (running, its author, baseline 3), 008b-1, 090, 089a2, 089d, 008b-2.
+- **096 merged** (platform #94 -> `885e1f0`; vault refreshed): phase 2 green by its author (068/085 exit 0; gap red at `3b2cb89`; tip green; 3 mutations red);
+  manager fresh-clone re-run exit 0; Opus delta review PASS (2 optional LOWs recorded).
+- **089b readout** (`c8d42e8`; triage `eaffbb9`): L3 (b) is wrong-reason (the frame already held 089b's fixture edits); L3 (a) 064-chain red not tied to any
+  synthetic edit (062/066/070 green when run directly on the same frame) -> likely transient/load; manager disclosed it ran ~40 s unit suites during L3.
+  Q10 ★ A (re-run 064 alone on the L3 frame twice, quiet), Q11 ★ A + booked 066 C3b full-output follow-up, Q12 ★ A. Criterion 9 half-met; finding 8 not reproduced.
+- **008b-1 phase 2 run (1) red:** `FAIL recovery text missing` — the verify script's fixed-string docs grep cannot match a phrase wrapped across
+  build-pipeline.md:314-315 (planner and 50 tests green). ★ fix the check (whitespace-normalised match + positive control), not the prose; author re-running.
+- **008b-1 merged** (registry #29 -> `dd7da2d`; `gate` pass): phase 2 green by its author at `cfc46b7` after the wrapped-phrase docs-check fix `d6e7546`
+  (default + `--mutate`, 27 mutations red); manager fresh-clone re-runs green at `cfc46b7` (both modes) and `2f179d0` (default, after doc-only LOW fixes);
+  Opus delta review PASS-WITH-AMENDMENTS (two doc LOWs, fixed). `origin/main` merged into 008b-2's branch (`ae128d3`, clean; diff vs main = its 8 files).
+  094 is now unblocked by 008b-1 but stays behind 008b-2 (both edit `build-pipeline.md`).
+- **090 phase-2 red** (`a5-merge-085 -> exit 2`): 085's nested item-12 fixture aborted on a tree already carrying its edits ("nested setup failed"). ★ A:
+  scope amended to make that block idempotent (`--allow-empty`, post-state checks kept); red-first cell `86255e9`, fix `2f71ac9` (= PIN_FINAL), `7fdcac8`.
+  Full phase-2 re-run running (author).
+- **090 phase 2, rounds 2-3:** 085 fix proven (default 80 ok; idempotence cells green; m8 red). `--mutate` red once on the harness itself (a mutation name
+  with "/" broke `mexpect`'s output path) -> name sanitised (`bf430af`, `da2d812`); then default and `--mutate` green (90 ok; 7 mutations red at their text).
+  `--sweep` red on the merge tree: `076-verify.sh` (aggregates every script mentioning `docs/manager`) -> children 079 (red by design, live guard) and **090
+  itself**. ★ C then A (narrow): diagnose 090 on a merge tree (manager hypothesis: the finding-3 AC7 check reads `PIN_FINAL..HEAD`, an own-change read of
+  HEAD), pin such checks to a recorded TIP red-first, and assert the 076 merge cell is red with 079 as its ONLY failing child. Re-run of all four steps follows.
+- **090 phase 2 green** (author, fresh clone at `8756efe`; head `35869bc`, Status review): default 81 ok (incl. `selfmerge`), `--mutate` 7/7 red, `--sweep` 117 ok
+  (every closed script green on HEAD and merge; 076 merge cell red with 079 as its only failing child; 079 red by design), `048 --mutate` all red.
+  Diagnosis beyond the manager's hypothesis: every fixture cloned HEAD -> now built from PIN_FINAL; FINAL..HEAD -> FINAL..PIN_TIP. Manager re-run and Opus
+  delta review running. **The agent reports a stray no-op background loop it started (`until false; do sleep 1000; done`); its own kill was denied by the
+  classifier; the manager does NOT kill it on the agent's behalf (that would launder the denial) -> For Ludwig.**
+- **008b-2 phase 2 green** (author, fresh clone at `ae128d3`, head `9a17879`; manager fresh-clone re-run identical: verify exit 0, `--mutate` exit 0, 39
+  mutations red). Opus delta review PASS-WITH-AMENDMENTS (1 MED: F4 checked keys not values -> `scan` validated by 008a's own validator, `built_at` by
+  its pattern; 2 LOW exact pre-unset lines; 3 residual key file on disk documented + "verify before key write" booked; 4 docs). Fix round 2 `2f32c80`
+  (tests first) / `2595c09`; its red/green unit runs and the phase-2 re-run wait for the machine. **Not merged tonight (★):** its [live] criteria 7, 8,
+  10, 11 need real runs after merge, and §7 requires all criteria demonstrated -> For Ludwig 3.
+
+## SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover)
+### Done overnight (merged)
+- platform: **098** design doc "Wayfarers' Wager" + conditional ADR-0123 proposal (#91), **099** vault id-clash fix (#92), **100** OPERATIONS/key-management (#93),
+  **096** runbook M9-M11 done (#94). registry: **008b-1** pipeline planner (#29). **097** wowdecomp survey (on `session/14`; ★ A watch only).
+- Vault refreshed after every merge (`id_conflicts=0`).
+### Ready, waiting
+- **090** (platform): phase 2 green at `35869bc`; delta-review fixes `c7cde12`; final re-run (red demo at `4638399`, default, mutate, sweep) running at handover time — check its log.
+- **008b-2** (registry): phase 2 green at `9a17879`; fix round 2 `2595c09` needs unit red/green + phase-2 re-run, then PR (merge = For Ludwig 3).
+- **089 parts a1, a2, c, d, e** (registry): phase 1 + static review + fix rounds done; phase 2 pending (a2, d unblocked; a1, c, e blocked by For Ludwig 1).
+- **089b**: readout done; Q10 ★ A (re-run 064 alone on the L3 frame twice, quiet) pending; criterion 9 half-met.
+### Next session starts here
+1. Read 090's log; if green -> manager re-run default, delta check, PR, merge, vault refresh.
+2. 008b-2: unit red/green at `2f32c80`/`2595c09`, phase-2 re-run, PR; merge after Ludwig's answer (For Ludwig 3), then the dry-run dispatch for live criteria.
+3. Quiet-machine queue, one at a time: 089d, 089a2, 064 re-run (Q10), then 089a1/089c/089e once For Ludwig 1 is done; then 094, 008b-3a, 008b-3b.
+4. Booked: 066 C3b prints 062's full output (089b Q11 B); 089 part F (008a section-2 greps); vault projection for `docs/design/*.md`; 008b-2 "verify before key write".
+### For Ludwig
+1. **Stale processes block three verify runs; the manager is not allowed to kill them** (classifier denied "Interfere With Workloads"; not retried). Ten shell
+   loops from 2026-10-19 wait forever, and an agent left one no-op loop. In your terminal (or type `!` + the command here):
+   `kill 5463 122219 181593 294242 356095 480855 543330 1940781 2870181 2929169; pkill -f 'until false; do sleep 1000'`
+   Then tell the manager "loopar dödade". Until then 089a1/089c/089e cannot run phase 2.
+2. **Design doc into the vault** (git-guard forbids the manager to write there): `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
+   Read it there; its section j.1 lists the five overnight rulings you can overturn (Stars carried by lantern, teams by standings, Rising Tide, economy numbers, two Honours).
+3. **008b-2 (signing workflow) merge.** Two context sentences: its live criteria can only be shown by real runs after merge (dry-run dispatch, then a real
+   pending version); the push gate keeps every job off on push until 008b-3b. ★ A: the manager merges once the re-run is green, then dispatches one dry run and
+   records it. B: you merge it yourself after reading the PR. C: wait for 008b-3b and merge both together.
+4. **ADR-0123 questions (task 098)**, in `docs/design/party-board-mod-proposed-adr.md`: Q1 should the party mod become the reference mod that drives the platform build order
+   (★ A yes, amend only 0001:16 and 0050:17,28; B no ADR change; C both reference mods); Q2 bots (★ B board-only bots); Q3 player count (★ A 2-4); Q4 length
+   (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
+5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover) i missionsloggen och fortsätt med 'Next session starts here'."
