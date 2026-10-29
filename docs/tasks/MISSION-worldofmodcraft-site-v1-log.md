@@ -2936,7 +2936,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 ### For Ludwig
 1. **Stale processes block three verify runs; the manager is not allowed to kill them** (classifier denied "Interfere With Workloads"; not retried). Ten shell
    loops from 2026-10-19 wait forever, and an agent left one no-op loop. In your terminal (or type `!` + the command here):
-   `pkill -f 'while pgrep -f'; pkill -f 'until false; do sleep 1000'`
+   `pkill -f 'while [p]grep -f'; pkill -f 'until fals[e]; do sleep 1000'`  (the brackets stop the pattern from matching the shell that runs it)
    (the first ends every leftover `while pgrep -f` waiter loop from 2026-10-19 — 22 of them, not ten; the second ends the no-op loop an agent left at
    04:52Z, pid 2864176, which also kept 089d's standalone 039a run waiting until it FAILed.)
    Then tell the manager "loopar dödade". Until then 089a1/089c/089e cannot run phase 2.
