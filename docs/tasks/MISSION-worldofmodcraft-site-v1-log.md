@@ -2950,3 +2950,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
    (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
 5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) i missionsloggen och fortsätt med 'Next session starts here'."
+- **Ludwig, 2026-10-29 (verbatim, a pasted command):** "pkill -f 'while [p]grep -f'; pkill -f 'until fals[e]; do sleep 1000'". Run by the manager on that instruction;
+  verified: 0 `while pgrep` waiter loops, 0 stray loops, 0 processes matching the quiet filters. For Ludwig 1 done. Queue restarted: 089d standalone 039a re-run
+  (its author), then 089a1, 089c, 089e phase 2, one at a time.
