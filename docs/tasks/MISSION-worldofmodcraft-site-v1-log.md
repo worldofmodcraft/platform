@@ -2919,3 +2919,18 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
    (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
 5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, overnight, morning handover) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) — supersedes the handover entry above for "Ready" and "Next"
+### Since the handover entry
+- **090 merged** (platform #96 -> `35c0e12`): final re-run green (red-first `4638399`; default 86, mutate 96, sweep 122); manager fresh-clone re-runs green; delta 2
+  PASS (one LOW comment recorded). Vault refreshed.
+- **008b-2**: fix round 2 red/green reproduced by the manager (238 tests: FAILED (failures=2) at `2f32c80`, OK at `2595c09`); phase-2 re-run green at `a9aa5f1`
+  (author and manager: verify exit 0, `--mutate` 41 red). **Registry PR #30 open, not merged** — For Ludwig 3 below still applies.
+- **089d phase 2** running (author; ends with a standalone 039a run, hours).
+### Next session starts here (replaces the list above)
+1. 089d: read its log; if green -> manager re-run, short delta check, PR, merge (gate must pass).
+2. On Ludwig's answer to For Ludwig 3: merge registry #30 and dispatch one dry run (live criteria 7, 10, 11), or follow his choice.
+3. Queue, one at a time: 089a2, 064 re-run on the L3 frame (089b Q10), then 089a1/089c/089e after For Ludwig 1; then 094, 008b-3a, 008b-3b.
+4. Booked items unchanged (066 C3b full output; 089 part F; design-doc projection; 008b-2 "verify before key write").
+### For Ludwig — unchanged from the handover entry above (items 1-5): loops to kill, design-doc copy, 008b-2 merge (PR #30), ADR-0123 questions, wowdecomp FYI.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) i missionsloggen och fortsätt med 'Next session starts here'."
