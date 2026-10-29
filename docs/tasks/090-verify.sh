@@ -366,9 +366,10 @@ if [ "$DO_MUTATE" = 1 ]; then
   echo "== mutations: each check function is run against a broken subject and must report a FAIL line that includes the required text"
   # mexpect NAME REQUIRED CMD... : the function's output must contain a FAIL line that includes the fixed string REQUIRED (not just any FAIL)
   mexpect() {
-    local n=$1 req=$2; shift 2
-    BADFILE="$TMP/m-$n.fails" "$@" >"$TMP/m-$n.out" 2>&1
-    if grep '^  FAIL' "$TMP/m-$n.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"
+    local n=$1 req=$2 f; shift 2
+    f="$TMP/m-$(printf '%s' "$n" | tr -c 'A-Za-z0-9._-' '_')"   # file name sanitised: a mutation name may contain "/" or spaces
+    BADFILE="$f.fails" "$@" >"$f.out" 2>&1
+    if grep '^  FAIL' "$f.out" | grep -qF -- "$req"; then ok "mutation '$n' -> check red at '$req'"
     else bad "mutation '$n' did NOT turn its check red at '$req'"; grep -m3 '^  FAIL' "$TMP/m-$n.out" | cut -c1-160; fi
     return 0
   }
