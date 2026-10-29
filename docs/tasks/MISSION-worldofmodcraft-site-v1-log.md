@@ -2982,3 +2982,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   `aa6e382`: `008b1-verify.sh` exit 0 (SUMMARY failed=0), `101-verify.sh --own-only` exit 0 — the new script survives its own merge (decision A in practice).
   Review PWA (AC2.2 HEAD search -> fixed `$E_BASE`) applied; manager re-runs green at `e9aa831` and `a5d4000`.
 - 089e phase 2 dispatched on its branch with origin/main merged in (a live test that fixed-SHA checks survive a main merge).
+- **089e merged** (registry #32 -> `f30dfbd`; `gate` pass): 008c-verify.sh re-pinned. Phase 2 on the main-merged head green (the merge reddened nothing: decision A
+  holds in practice); manager re-run green; delta 2 PWA, 4 LOW booked (AC5.0 tautology alone; AC12 OLD leg "every FAIL is AC11.5"; cosmetics). On main after merge:
+  008c-verify, 008b1-verify exit 0; 089e-verify --own-only exit 0. 089d phase 2 (main merged in, then the full list incl. standalone 039a) dispatched.
