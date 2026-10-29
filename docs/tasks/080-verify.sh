@@ -17,8 +17,9 @@ while IFS=: read -r file line rest; do
 done < <(grep -rnE '[A-Za-z0-9_./-]+:docs/[A-Za-z0-9_./-]+' docs/architecture)
 echo "branch:path cites checked: $n"
 # Own-change checks pinned to fixed SHAs (REVIEW-CHECKLIST item 12). Unreachable pin = fail.
-BASE=${T080_BASE:-29b3424fc97ba919f598531e9f4f154acc2a0619}
-FINAL=${T080_FINAL:-f173739800707d44a32fe495e96a39022c0c84bb}
+# Task 090: fixed pins, no environment override (078/085 rule).
+BASE=29b3424fc97ba919f598531e9f4f154acc2a0619
+FINAL=f173739800707d44a32fe495e96a39022c0c84bb
 for c in "$BASE" "$FINAL"; do git cat-file -e "$c^{commit}" 2>/dev/null || { echo "FAIL pin $c unreachable"; fail=1; }; done
 if [ "$fail" = 0 ]; then
   git show "$FINAL:docs/decisions/0121-version-lifecycle-pending.md" >/dev/null 2>&1 && echo "PASS ADR-0121 path exists at FINAL" || { echo "FAIL ADR-0121 path at FINAL"; fail=1; }

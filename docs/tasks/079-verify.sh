@@ -25,6 +25,7 @@ echo "== AC2 mutations"
 C=CLAUDE.md; R=docs/manager/rule0.reference.md
 s=$(grep -n '^0\. \*\*THE TOKEN GUARD' $C | cut -d: -f1); e=$(grep -n '^1\. \*\*English everywhere' $C | cut -d: -f1)
 m=$(grep -n -x -F '<!-- RULE0-REFERENCE-BEGIN -->' $R | cut -d: -f1)
+# LIVE GUARD (task 090, decided): these anchors read HEAD on purpose. This script guards the CURRENT suspension marker; it must redden the day it is revoked or lost (048 c4 is the pinned own-change copy).
 sus=$(grep -n 'SUSPENDED by Ludwig' $C | cut -d: -f1)
 [ -n "$s" ] && [ -n "$e" ] && [ -n "$m" ] && [ -n "$sus" ] || { echo "  FAIL cannot locate anchors"; exit 1; }
 want 0 "unmutated copies" $C $R
