@@ -115,7 +115,7 @@ if [ -z "${WOM085_NESTED:-}" ]; then   # the nested runs below must not recurse
 echo "== item 12: a later change to the live runbook does not redden 085; a change to the PINNED content does"
 mkclone "$TMP/n" "$(git rev-parse HEAD)"; cp "$HERE/docs/tasks/085-verify.sh" "$TMP/n/docs/tasks/085-verify.sh"
 ( cd "$TMP/n" && sed -i -e 's/^## ☐ M4 /## ☑ M4 /' -e 's/^\*\*Last reviewed: 2026-10-15 (task 068)\./**Last reviewed: 2026-11-01 (task 999)./' "$RB" \
-  && git add -A && git "${GITID[@]}" commit -q -m "throw-away later task: M4 done, Last reviewed moved" ) || { echo "nested setup failed"; exit 2; }
+  && git add -A && git "${GITID[@]}" commit -q --allow-empty -m "throw-away later task: M4 done, Last reviewed moved" ) || { echo "nested setup failed"; exit 2; }  # --allow-empty (task 090): idempotent when HEAD already carries these edits; the post-state is asserted by the three checks below
 grep -q '^## ☑ M4 ' "$TMP/n/$RB" && ok "later commit on top of HEAD ticked M4 and moved Last reviewed (throw-away)" || bad "nested later setup did not apply"
 grep -qF 'Last reviewed: 2026-10-15 (task 068)' "$TMP/n/$RB" && bad "nested: Last reviewed substitution applied (old string still present)" || { grep -qF 'Last reviewed: 2026-11-01 (task 999)' "$TMP/n/$RB" && ok "nested: Last reviewed substitution applied" || bad "nested: Last reviewed substitution applied (new string absent)"; }
 expect_green nested "$TMP/n" docs/tasks/085-verify.sh
