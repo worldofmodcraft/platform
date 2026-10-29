@@ -2978,3 +2978,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   real merge commits, `gh pr merge --merge`), 089a2 `eaf900a` (also AC0.9 `git log --all` -> at PIN_FINAL), 089b `535bbac` (umbrella copy synced; AC0.12 HEAD
   read -> PIN_FIX; `mk_later` fixture accepts a HEAD already carrying the edit — the L3 wrong-reason fix; reviewer to confirm it hides nothing).
   Waiting: 101 (phases 1+2, holds the machine), 102 (write-only).
+- **101 merged** (registry #31 -> `aa6e382`; `gate` pass): `008b1-verify.sh` re-pinned to 008b-1's merged range. **Registry main green again:** fresh clone at
+  `aa6e382`: `008b1-verify.sh` exit 0 (SUMMARY failed=0), `101-verify.sh --own-only` exit 0 — the new script survives its own merge (decision A in practice).
+  Review PWA (AC2.2 HEAD search -> fixed `$E_BASE`) applied; manager re-runs green at `e9aa831` and `a5d4000`.
+- 089e phase 2 dispatched on its branch with origin/main merged in (a live test that fixed-SHA checks survive a main merge).
