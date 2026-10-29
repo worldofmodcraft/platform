@@ -2859,3 +2859,10 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   parent). The manager's `kill` was **denied by the permission classifier** ("Interfere With Workloads"); not retried. Effect checked per script: filters
   that drop lines containing `grep` (090, 089a2, 039a, 039b; 096/008b-1/008b-2/089d have none) are unaffected; **089a1, 089c, 089e** count them (would wait
   6 h then FAIL) -> their phase 2 waits for Ludwig (For Ludwig). Phase-2 order now: 096 (running, its author, baseline 3), 008b-1, 090, 089a2, 089d, 008b-2.
+- **096 merged** (platform #94 -> `885e1f0`; vault refreshed): phase 2 green by its author (068/085 exit 0; gap red at `3b2cb89`; tip green; 3 mutations red);
+  manager fresh-clone re-run exit 0; Opus delta review PASS (2 optional LOWs recorded).
+- **089b readout** (`c8d42e8`; triage `eaffbb9`): L3 (b) is wrong-reason (the frame already held 089b's fixture edits); L3 (a) 064-chain red not tied to any
+  synthetic edit (062/066/070 green when run directly on the same frame) -> likely transient/load; manager disclosed it ran ~40 s unit suites during L3.
+  Q10 ★ A (re-run 064 alone on the L3 frame twice, quiet), Q11 ★ A + booked 066 C3b full-output follow-up, Q12 ★ A. Criterion 9 half-met; finding 8 not reproduced.
+- **008b-1 phase 2 run (1) red:** `FAIL recovery text missing` — the verify script's fixed-string docs grep cannot match a phrase wrapped across
+  build-pipeline.md:314-315 (planner and 50 tests green). ★ fix the check (whitespace-normalised match + positive control), not the prose; author re-running.
