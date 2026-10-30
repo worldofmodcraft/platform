@@ -2985,3 +2985,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **089e merged** (registry #32 -> `f30dfbd`; `gate` pass): 008c-verify.sh re-pinned. Phase 2 on the main-merged head green (the merge reddened nothing: decision A
   holds in practice); manager re-run green; delta 2 PWA, 4 LOW booked (AC5.0 tautology alone; AC12 OLD leg "every FAIL is AC11.5"; cosmetics). On main after merge:
   008c-verify, 008b1-verify exit 0; 089e-verify --own-only exit 0. 089d phase 2 (main merged in, then the full list incl. standalone 039a) dispatched.
+- **Ludwig, 2026-10-30 (verbatim):** "Ok, kör vidare". Status at 21:29Z: 089d's standalone 039a (main merged in, head `ea2567e`) has run 6h51m and sits in its
+  nested `039b-verify.sh` (started 6h47m ago): the S4/Q7 deadlock 089b found — on main 039a runs 039b without `--no-closed`, so 039b's AC12 sweep waits for its
+  parent 039a up to 21600 s and FAILs. The fix lives in 089b's branch (unmerged). Consequence: no standalone 039a can pass on main before 089b merges.
+  New order: 089b phase 2 next (its branch has the fix), merge it, then re-run 089d's 039a on main, then 089c, 089a1, 089a2, 102, 008b-2.
