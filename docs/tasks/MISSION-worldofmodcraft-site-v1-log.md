@@ -2989,3 +2989,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   nested `039b-verify.sh` (started 6h47m ago): the S4/Q7 deadlock 089b found — on main 039a runs 039b without `--no-closed`, so 039b's AC12 sweep waits for its
   parent 039a up to 21600 s and FAILs. The fix lives in 089b's branch (unmerged). Consequence: no standalone 039a can pass on main before 089b merges.
   New order: 089b phase 2 next (its branch has the fix), merge it, then re-run 089d's 039a on main, then 089c, 089a1, 089a2, 102, 008b-2.
+- **Ludwig, 2026-10-31 (verbatim):** "Ok, kör vidare". 089d's stuck 039a stopped by its own agent (TaskStop; no kill): 59 PASS / 0 FAIL before the 039b deadlock;
+  006, 007a, 007b, 008a, 008b1, 008c, 032, 034 green on the main-merged head `ea2567e` (the 008c blocker is gone). 089d's other criteria green there; head `b3570a1`.
+  **089b phase 2 dispatched** (main merged in, then default/own-only/mutate and the whole 039a; its branch has the --no-closed fix).
