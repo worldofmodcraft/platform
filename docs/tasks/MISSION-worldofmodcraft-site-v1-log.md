@@ -3021,3 +3021,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **089c merged** (registry #35 -> `99b62c0`; `gate` pass): phase 2 green after a quiet_wait self-count fix (transitive exclusion) and 089b's scope pattern (Q4 A);
   manager re-run green (own-only, default, mutate); delta review PWA, 3 LOW booked. **089a1 phase 2 dispatched** with the 089b/089c lessons (no TIP re-pin after the
   main merge; no fixtures on HEAD; npm ci + absolute paths).
+- **089a1 merged** (registry #36 -> `4eca251`; `gate` pass): phase 2 green on the main-merged head; manager re-run green (089a1 three modes; 007a/007b/008a);
+  delta review PASS (4 LOW, 2 INFO booked: AC11 does not measure the commits that ship the current script; no red-first cell for the frame switch; one inaccurate
+  log claim; merge-commit precondition unstated). **089a2 phase 2 dispatched**: first move its HEAD-text later-branch fixtures to PIN_FINAL (089b review HIGH),
+  merge main, adopt 089b's scope pattern for the post-merge change, then the full list incl. whole 057, 062, 070.
