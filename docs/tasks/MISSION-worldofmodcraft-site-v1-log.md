@@ -3025,3 +3025,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   delta review PASS (4 LOW, 2 INFO booked: AC11 does not measure the commits that ship the current script; no red-first cell for the frame switch; one inaccurate
   log claim; merge-commit precondition unstated). **089a2 phase 2 dispatched**: first move its HEAD-text later-branch fixtures to PIN_FINAL (089b review HIGH),
   merge main, adopt 089b's scope pattern for the post-merge change, then the full list incl. whole 057, 062, 070.
+- **Manager error, found by 089a2's phase 2 (2026-11-02): registry main red since 089a1's merge.** Fresh clone at `4eca251`: `062-verify.sh` exit 1, `FAIL AC6L.008a`
+  — 089a1 rewrote the two labels of 008a's README check, and closed script 062 guards that 008a's check ids never disappear. The manager's pre-merge re-run of
+  089a1 ran its own scripts but not 062 or a whole 039a sweep (criterion 9 limited to own scripts by Q6 A), so the cross-script coupling slipped through.
+  **Fix: task 103** (restore the two label strings exactly; keep the pinned-blob behaviour; 062 untouched). **Lesson / rule from now on:** before merging any change
+  to a closed `*-verify.sh`, run 062 (and 070, which runs it) or a whole 039a sweep on the merge result. 089a2 waits for 103 (its 062 red is this).
