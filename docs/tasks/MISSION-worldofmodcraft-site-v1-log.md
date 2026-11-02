@@ -2998,3 +2998,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   on main (breaks decision A); fix round: fixtures on PIN_TIP/PIN_FINAL, revert the `mk_later` tolerance (Q12 ★ A stands), AC13 reads the committed script,
   AC13.2 strict. INFO for Ludwig (non-blocking, manager reading): Q8-A makes 039a red if a pinned 039a test is renamed/removed — the manager classifies that as a
   deliberate live guard (removing 039a's tests needs a task that updates 039a), not an own-change check.
+- **089b p3** (head `1fe3c1b`): red-first shown (RED commit: AC14.1 "13 fixture line(s) ... on $HEADREV" red); head: AC14.1, AC14.2, AC13.2b green, `--mutate`
+  ALL CHECKS PASSED, but default 1 FAIL — **AC11.5: BASE..TIP spans the branch's merge of origin/main**, so main's files (008b-1, 101, 089e) look out of scope.
+  Fix ★ (same definition as part D / Q6 ★ A): a first-parent merge whose second parent is an ancestor of a pinned main commit contributes only its `--cc` files.
+  **Rule for the remaining parts (089c, 089a1, 089a2, 008b-2):** keep TIP pinned before any merge of main, or apply that definition; 089d and 089e passed after
+  merging main only because their TIP predates the merge.
