@@ -3011,3 +3011,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   (default + --mutate) — after a **manager slip**: a first re-run without `npm ci --prefix tools/dev` showed 9+1 FAILs (the script needs tools/dev/node_modules
   and fails loudly without it); not a defect. Another slip: an `rm -r "$(cat …)"` was refused by the safety check (target from a substitution); re-done with the
   literal path. 089d dispatched: merge main, standalone 039a.
+- **089d merged** (registry #34 -> `903b546`; `gate` pass): standalone 039a on the main-merged head green (77 PASS, 0 FAIL, 039b once with --no-closed; raw output
+  read by the manager); manager re-run green; delta review PASS (3 LOW booked; latent take-ours hole in 092's post-TIP rule booked — live exposure nil).
+  **089c phase 2 dispatched** (merge main, PIN_TIP stays pre-merge, full list).
