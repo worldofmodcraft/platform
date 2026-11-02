@@ -3003,3 +3003,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   Fix ★ (same definition as part D / Q6 ★ A): a first-parent merge whose second parent is an ancestor of a pinned main commit contributes only its `--cc` files.
   **Rule for the remaining parts (089c, 089a1, 089a2, 008b-2):** keep TIP pinned before any merge of main, or apply that definition; 089d and 089e passed after
   merging main only because their TIP predates the merge.
+- **089b** green at `84f0d95` (default 73 PASS, --mutate 4/4); delta check (Opus) PWA: HIGH closed; MEDIUM — a `-s ours` merge from main can revert a main
+  file without diff-tree --cc listing it -> AC11.5c (`PIN_MAINMERGED..PIN_TIP` within scope) + AC15.4 fixture; real history clean. **Booked: the same check for
+  089d** (its fixed range predates its main merge, so its exposure is only via a future main merge). One more 089b round, then merge.
