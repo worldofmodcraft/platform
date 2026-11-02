@@ -2992,3 +2992,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Ludwig, 2026-10-31 (verbatim):** "Ok, kör vidare". 089d's stuck 039a stopped by its own agent (TaskStop; no kill): 59 PASS / 0 FAIL before the 039b deadlock;
   006, 007a, 007b, 008a, 008b1, 008c, 032, 034 green on the main-merged head `ea2567e` (the 008c blocker is gone). 089d's other criteria green there; head `b3570a1`.
   **089b phase 2 dispatched** (main merged in, then default/own-only/mutate and the whole 039a; its branch has the --no-closed fix).
+- 2026-11-02: **manager slip** — 089b's driver finished green 2026-10-31T16:59Z but its agent never wrote the log and the manager waited for a report instead of
+  following up; the machine sat idle ~2 days. Caught at Ludwig's status request; agent resumed, log written (`036420f`). 089b review (Opus) PASS-WITH-AMENDMENTS:
+  **HIGH** fixtures built on HEAD match literal text that announced later changes (R11 configured; 008b ownership carve-out) will alter -> 089b-verify would go red
+  on main (breaks decision A); fix round: fixtures on PIN_TIP/PIN_FINAL, revert the `mk_later` tolerance (Q12 ★ A stands), AC13 reads the committed script,
+  AC13.2 strict. INFO for Ludwig (non-blocking, manager reading): Q8-A makes 039a red if a pinned 039a test is renamed/removed — the manager classifies that as a
+  deliberate live guard (removing 039a's tests needs a task that updates 039a), not an own-change check.
