@@ -3014,3 +3014,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **089d merged** (registry #34 -> `903b546`; `gate` pass): standalone 039a on the main-merged head green (77 PASS, 0 FAIL, 039b once with --no-closed; raw output
   read by the manager); manager re-run green; delta review PASS (3 LOW booked; latent take-ours hole in 092's post-TIP rule booked — live exposure nil).
   **089c phase 2 dispatched** (merge main, PIN_TIP stays pre-merge, full list).
+- **089c phase 2 stopped on a harness defect:** `quiet_wait` excluded only its direct parent, so the nested subshell of 089c-verify.sh itself counted as "another
+  verify script" (never quiet; first time the function ran — phase 1 was write-only). RED-commit run red as designed; merged head `--own-only` green. Q4 answered by
+  the manager from the 089b precedent: option A — transitive exclusion (089e's `others()` shape), content commit after the main merge with 089b's scope pattern
+  (`--cc` for merges from a pinned main commit + AC11.5c net delta + take-ours fixture). Re-run dispatched.
