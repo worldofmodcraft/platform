@@ -3030,3 +3030,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   089a1 ran its own scripts but not 062 or a whole 039a sweep (criterion 9 limited to own scripts by Q6 A), so the cross-script coupling slipped through.
   **Fix: task 103** (restore the two label strings exactly; keep the pinned-blob behaviour; 062 untouched). **Lesson / rule from now on:** before merging any change
   to a closed `*-verify.sh`, run 062 (and 070, which runs it) or a whole 039a sweep on the merge result. 089a2 waits for 103 (its 062 red is this).
+- **103 merged** (registry #37 -> `7a049d0`; `gate` pass): 008a's two README check labels restored exactly. Manager diff review + fresh-clone re-run (008a, 062 whole,
+  103 all exit 0). **Registry main green again:** fresh clone at `7a049d0`: `062-verify.sh` exit 0, 0 FAIL. 089a2 re-dispatched (merge main; 062 whole and
+  --mutate; 070 whole).
