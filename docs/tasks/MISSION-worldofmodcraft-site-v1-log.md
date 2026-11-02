@@ -3018,3 +3018,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   verify script" (never quiet; first time the function ran — phase 1 was write-only). RED-commit run red as designed; merged head `--own-only` green. Q4 answered by
   the manager from the 089b precedent: option A — transitive exclusion (089e's `others()` shape), content commit after the main merge with 089b's scope pattern
   (`--cc` for merges from a pinned main commit + AC11.5c net delta + take-ours fixture). Re-run dispatched.
+- **089c merged** (registry #35 -> `99b62c0`; `gate` pass): phase 2 green after a quiet_wait self-count fix (transitive exclusion) and 089b's scope pattern (Q4 A);
+  manager re-run green (own-only, default, mutate); delta review PWA, 3 LOW booked. **089a1 phase 2 dispatched** with the 089b/089c lessons (no TIP re-pin after the
+  main merge; no fixtures on HEAD; npm ci + absolute paths).
