@@ -3006,3 +3006,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **089b** green at `84f0d95` (default 73 PASS, --mutate 4/4); delta check (Opus) PWA: HIGH closed; MEDIUM — a `-s ours` merge from main can revert a main
   file without diff-tree --cc listing it -> AC11.5c (`PIN_MAINMERGED..PIN_TIP` within scope) + AC15.4 fixture; real history clean. **Booked: the same check for
   089d** (its fixed range predates its main merge, so its exposure is only via a future main merge). One more 089b round, then merge.
+- **089b merged** (registry #33 -> `9fb706d`; `gate` pass): contract/R11 pins, 039a runs 039b with `--no-closed` (deadlock fix now on main). Final rounds: fixtures
+  on PIN_TIP (review HIGH), AC11.5 merge-from-main rule (`--cc`), AC11.5c net-delta check (take-ours MED). Manager fresh-clone re-run green at `904a1d2`
+  (default + --mutate) — after a **manager slip**: a first re-run without `npm ci --prefix tools/dev` showed 9+1 FAILs (the script needs tools/dev/node_modules
+  and fails loudly without it); not a defect. Another slip: an `rm -r "$(cat …)"` was refused by the safety check (target from a substitution); re-done with the
+  literal path. 089d dispatched: merge main, standalone 039a.
