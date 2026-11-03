@@ -3047,3 +3047,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **104 written** (`50c536a`): `docs/decisions/0123-reference-mod-chosen-by-task-file.md` (Accepted 2026-11-03; amendment text byte-identical to the proposal), one
   Amended-by header line each in 0001 and 0050 (manager checked), README index line, INDEX.json regenerated; manager re-ran `tools/adr/build_index.py --check`:
   "CHECK OK". Merge waits for every platform `*-verify.sh` on 104's head (cross-script rule; 010a and 080 read docs/decisions) — after the registry 039a sweep.
+- **Ludwig (verbatim):** "ADR-0123 har fortfarande inte synkat med vault" — it is not merged (the vault projects main). Fast path: the two platform verify scripts that
+  read docs/decisions (010a, 080) run on 104's head: both exit 0. PR #100 opened; its CI "check" **fails: `test_real_corpus_has_119_adrs_and_is_clean` (123 != 119)** —
+  **pre-existing:** platform main's "ADR index" workflow has failed on every run since 2026-09-02 (it pins 119 ADRs; ADR-0120 broke it; the path filter hid it). Not
+  merged past a red check. **Task 105** (qa-engineer): the real-corpus tests derive their counts from the files; then 104 merges and the vault syncs.
+- Also seen: the registry 039a sweep on main (started ~07:43Z) has been ~9 h inside its child `089a1-verify.sh` — likely 089a1's quiet-wait counts its parent 039a
+  (the 039b-class deadlock). To investigate after 104.
