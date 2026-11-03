@@ -3037,3 +3037,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   AC4.057 applying, 070 whole); manager re-run green **incl. 062 and 070 whole on the head that merges**; delta PWA (wording LOW booked). On main after merge:
   062-verify exit 0, 0 FAIL. **The 089 sweep (parts A1, A2, B, C, D, E) is complete on registry main.** Next: 102 phase 2 (platform), then a whole 039a sweep on
   registry main as the final proof, then 008b-2 phase 2 (PR #30 stays for Ludwig).
+- **102 merged** (platform #99 -> `30f7258`; vault refreshed): 096-verify re-pinned to its merged range. Phase 2 green incl. all 21 platform `*-verify.sh` on the head
+  (the platform form of the cross-script rule; the manager first pointed the agent at `090 --sweep`, which sweeps 090's own pinned tree — corrected to a loop over
+  every script). Manager diff review + fresh-clone re-run green. On platform main after merge: 096-verify and 102-verify exit 0 ALL CHECKS PASSED.
+- **Final proof of the 089 sweep started:** whole standalone `039a-verify.sh` on registry main `2939bef` (manager, fresh clone, `npm ci`), ~6 h. Then 008b-2 phase 2.
