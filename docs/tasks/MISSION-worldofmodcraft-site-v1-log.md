@@ -3068,3 +3068,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **107 merged** (platform #102; CI check pass): **ADR-0124 accepted** — the remaining roguelike platform-role lines (0001 design-kit line, 0051, 0097, 0098, 0113,
   0115) name "the reference mod" per ADR-0123; one Amended-by header line each. Manager checks: readings vs approved meaning, index CHECK OK, header diff, 010a/080
   verify and ADR tests green on the head. Vault refreshed (ADR-0124 projected).
+- **Ludwig ran the vault copy himself (2026-11-03, via `!`):** `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
+  -> completed with no output (success). For Ludwig item "design doc into the vault" done. (Static copy: later edits to the design doc do not reach the vault unless
+  copied again or the projection learns `docs/design/` — offered as a task, not started.)
