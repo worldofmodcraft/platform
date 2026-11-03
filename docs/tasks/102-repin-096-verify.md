@@ -1,6 +1,6 @@
 # Task 102: re-pin `096-verify.sh` so it stays green on platform main after its merge
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** review (phase 2 green 2026-11-03; was spec-approved 2026-10-29, manager, session 14; Ludwig's decision "A: fixed SHAs only", 2026-10-29))
+- **Mission:** SITE-V1 (verification integrity) — **Status:** done (phase 2 green 2026-11-03; was spec-approved 2026-10-29, manager, session 14; Ludwig's decision "A: fixed SHAs only", 2026-10-29))
 - **Agent / model:** qa-engineer — **Budget:** small
 - **Branch / worktree:** `task/102-repin-096-verify` / `~/wt/task-102`, from platform main
 
@@ -61,3 +61,7 @@ main and on main + a later commit touching the runbook outside M9-M11. 6. Quiet 
   4. Cross-script sweep (coordinator correction: every docs/tasks/*-verify.sh, plain invocation, one at a time, in the same clone; none skipped; none needed an argument or network beyond 080's ls-remote):
      010a, 048, 049, 051, 052, 053, 056, 058, 059, 061, 063, 068, 072, 076, 078, 079, 080, 085, 090, 096, 102: **all exit 0, FAIL count 0** (21 scripts). (090 was run plain, not --sweep, per the correction.)
   Acceptance criteria 1-7: done (1 steps 1-2; 2 pins asserted; 3 deadbee cells; 4 mutation lines; 5 fixed 096 exit 0 on main and on main + later commit; 6 quiet machine, ps logged; 7 scope = three files, other 096 sections byte-identical). Status: review.
+- 2026-11-03 manager (session 14): diff read by the manager (096-verify's pins are 096's merged range, re-derived from M and cross-checked; default-branch clone;
+  fixed PIN_BASE..PIN_FINAL scope; the remaining HEAD read is "PIN_FINAL is an ancestor of main", stable under merge commits). Manager fresh-clone re-run at
+  `ab4cd0e`: 102-verify and 096-verify exit 0, ALL CHECKS PASSED. All 21 platform verify scripts green on the head (author's table). Small repair task; manager
+  review against the checklist (§2b small). Status done; merged on the manager's authority (§7).
