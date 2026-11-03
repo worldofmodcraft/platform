@@ -3075,3 +3075,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   contract); the caveat was only that a manual copy does not follow later repo edits. Then **"Ja"** to automatic design-doc notes -> **task 108** (platform
   `~/wt/task-108`, implementer, phase 1): the projection writes `docs/design/<stem>.md` as `<stem>.md` at the vault folder root (Ludwig's placement), mirroring 061.
   Ludwig may delete his manual copy `Party Board Mod - Design.md` once the projected `party-board-mod.md` appears (the tool never deletes).
+- **106 merged** (registry #39 -> `0ac4d89`; `gate` pass): 089a1/089a2 quiet filters exclude self/descendants/ancestors (089e shape). The author's whole 039a on the
+  branch reported all 32 closed scripts green + 373 tests, but kept no output file; manager re-ran 106-verify and both `--own-only` (green) and **started the whole
+  039a on registry main `0ac4d89` itself, output kept in the job tmp dir** — the final proof of the 089 sweep. Task 108 (vault design notes) phase 1 done (`b0ec084`);
+  its phase 2 and 008b-2's phase 2 wait for this 039a.
