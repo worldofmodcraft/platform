@@ -33,5 +33,5 @@ No change to `tools/adr/build_index.py` or any ADR.
   - Criterion 2: this branch (122 ADRs): `Ran 32 tests in 0.069s` / `OK`. Throw-away clone with `task/104-accept-adr-0123` merged (123 ADR files): `Ran 32 tests in 0.098s` / `OK`.
   - Criterion 3 (temp corpus copies, helpers called against them): baseline copy clean PASS, touches PASS. Copy + one valid synthetic ADR 0950 (no Touches) with README row:
     derived (123, 117), clean PASS, touches PASS (counts follow). Synthetic ADR without README row: clean FAIL (`README.md index is missing a row for ADR-0950`), i.e. completeness check still bites.
-    Copy + `0951-Bad_Name.md` (glob sees it, bi skips it as fatal): clean FAIL `122 != 123`; touches PASS (file is tagged-agnostic: bi skipped it, but it has a Touches line? not asserted).
+    Copy + `0951-Bad_Name.md` (glob sees it, bi skips it as fatal): clean FAIL `122 != 123`; touches PASS (expected: the copy of 0119 carries a Touches line, so it adds no untagged file on either side).
   - Scope: tests/adr/test_build_index.py and this file only.
