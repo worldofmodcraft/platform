@@ -1,6 +1,6 @@
 # Task 105: ADR tooling tests derive the real-corpus counts instead of pinning 119 / 116
 
-- **Mission:** none (CI repair) — **Status:** spec-approved 2026-11-03 (manager, session 14; small, solo §2b; blocks task 104 / ADR-0123's merge)
+- **Mission:** none (CI repair) — **Status:** done 2026-11-03 (manager, session 14; small, solo §2b; blocks task 104 / ADR-0123's merge)
 - **Agent / model:** qa-engineer (tests are qa-owned) — **Budget:** small
 - **Branch / worktree:** `task/105-adr-test-derived-counts` / `~/wt/task-105` (platform)
 
@@ -35,3 +35,5 @@ No change to `tools/adr/build_index.py` or any ADR.
     derived (123, 117), clean PASS, touches PASS (counts follow). Synthetic ADR without README row: clean FAIL (`README.md index is missing a row for ADR-0950`), i.e. completeness check still bites.
     Copy + `0951-Bad_Name.md` (glob sees it, bi skips it as fatal): clean FAIL `122 != 123`; touches PASS (expected: the copy of 0119 carries a Touches line, so it adds no untagged file on either side).
   - Scope: tests/adr/test_build_index.py and this file only.
+- 2026-11-03 manager (session 14): diff read (both helpers derive counts from the files independently of build_index; the other assertions unchanged). Manager run of
+  `python3 -B -m unittest discover -s tests/adr` with task 104 (123 ADRs) merged into this branch: Ran 32 tests, OK. Status done; merged on the manager's authority.
