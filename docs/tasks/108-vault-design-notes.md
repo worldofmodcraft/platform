@@ -29,3 +29,11 @@ paragraph) in the same branch.
 ---
 # Task 108 log
 - 2026-11-03 manager (session 14): created on Ludwig's "Ja"; dispatched (phase 1).
+- 2026-11-03 implementer, PHASE 1 (code + unit tests; no `*-verify.sh` run, per instruction):
+  - Red first: `test_vault_108.py` written before the tool change; on the unmodified tool 28 failures out of 16 tests (every AC1-AC5 and the never-deletes/hand-written-target tests; only the "nothing to write" and check-regression tests pass, as expected).
+  - Implemented `render_design_docs` (+ `planned_design_names`) in `tools/vault/wom_vault.py`; `check` gained `--repo`/`--ref` (default `.`/`main`) to learn the planned design names, with a stderr note and compare-everything fallback if the ref is unresolvable. Collision test is NFC+casefold against all planned root names; extra: "Mission Log" is rejected earlier by the stem rule (space).
+  - Green: `test_vault_108` 16 OK; `test_vault` 32 OK; `test_vault_053` 14 OK; `test_vault_061` 13 OK (run directly with `python3 -B -m unittest`).
+  - Mutations (10, `mutate108.py`) were exercised by hand against only their tests: all killed. `108-verify.sh` and its mutations are written, `bash -n` clean, NOT run.
+  - Deviation for the manager: the spec's `check` AC was met by giving `check` a repo/ref (names are not a fixed pattern); existing callers are unaffected because they run inside the repo.
+  - PHASE 2 commands (when the machine is free), from `~/wt/task-108`:
+    `docs/tasks/108-verify.sh` then `docs/tasks/108-verify.sh --mutate` (the latter also re-runs 051/053/061 --mutate; long). The script includes the red-first run against the pre-108 tool (base 001418f).

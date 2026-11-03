@@ -60,6 +60,9 @@ ADR_FILE_RE = re.compile(r"^docs/decisions/([0-9]{4}-[^/]+)\.md$")
 RUNBOOK_DIR = "docs/runbooks"
 RUNBOOK_FILE_RE = re.compile(r"^docs/runbooks/([^/]+\.md)$")
 RUNBOOK_STEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+DESIGN_DIR = "docs/design"
+DESIGN_FILE_RE = re.compile(r"^docs/design/([^/]+\.md)$")
+DESIGN_STEM_RE = RUNBOOK_STEM_RE  # same stem rule as runbooks (task 108)
 JOURNAL_TZ = "Europe/Stockholm"
 PLANNED_TOP_LEVEL = frozenset(AGGREGATE_NOTES + tuple(n for n, _ in VERBATIM_NOTES) + (DECISIONS_NOTE,))
 PLANNED_TASK_NOTE_RE = re.compile(r"^Tasks/[0-9]{3}\.md$")
@@ -318,6 +321,7 @@ def render_main(repo, ref_name, sha):
         notes["Status.md"] = notes["Status.md"].replace(
             "\n\n## Open tasks\n\n", "\n\nRunbooks: %s\n\n## Open tasks\n\n" % links, 1)  # CHECK:status-runbooks
     notes.update(runbooks)
+    notes.update(render_design_docs(repo, ref_name, sha, set(notes)))
     notes.update(render_journal(repo, ref_name, sha))
     return notes, skipped, counters
 
@@ -386,6 +390,46 @@ def render_runbooks(repo, ref_name, sha):
         commit = last_commit(repo, sha, [path])
         notes["Runbooks/%s.md" % stem] = frontmatter(ref_name, repo, commit, [path]) + body
     return notes
+
+
+def render_design_docs(repo, ref_name, sha, planned):
+    """<stem>.md at the vault root for every docs/design/*.md on the ref (task 108).  Body verbatim under 051's frontmatter."""
+    raw = git(repo, "ls-tree", "-r", "-z", sha, "--", DESIGN_DIR).stdout.decode("utf-8", "strict")
+    taken = {unicodedata.normalize("NFC", n).casefold() for n in PLANNED_TOP_LEVEL | set(planned)}
+    notes = {}
+    for entry in sorted(e for e in raw.split("\0") if e):
+        meta, path = entry.split("\t", 1)
+        m = DESIGN_FILE_RE.match(path)
+        if not m:
+            continue  # other file types and nested directories are not design docs
+        stem = m.group(1)[:-len(".md")]
+        if not DESIGN_STEM_RE.match(stem):
+            raise WomError("design doc %s has a name the vault projection does not accept" % path)
+        folded = unicodedata.normalize("NFC", stem + ".md").casefold()
+        if folded in FORBIDDEN_NAMES:
+            raise WomError("forbidden target name: design doc %s is a hand-written note's name" % path)
+        if folded in taken:  # CHECK:design-collision
+            raise WomError("design doc %s collides with the planned vault note %s.md" % (path, stem))
+        if meta.split()[0] not in ("100644", "100755"):
+            raise WomError("design doc %s is not a regular file in git (mode %s)" % (path, meta.split()[0]))
+        body = read_blob(repo, sha, path)
+        if body.lstrip("\ufeff").startswith("---"):  # CHECK:design-frontmatter
+            raise WomError("%s starts with '---'; a design doc with its own frontmatter would merge two blocks" % path)
+        commit = last_commit(repo, sha, [path])
+        notes["%s.md" % stem] = frontmatter(ref_name, repo, commit, [path]) + body
+    return notes
+
+
+def planned_design_names(repo, ref):
+    """Root note names `write --ref REF` would produce for docs/design (names only; used by `check`)."""
+    sha = resolve_commit(repo, ref)
+    raw = git(repo, "ls-tree", "-r", "-z", "--name-only", sha, "--", DESIGN_DIR).stdout.decode("utf-8", "strict")
+    names = set()
+    for path in raw.split("\0"):
+        m = DESIGN_FILE_RE.match(path)
+        if m and DESIGN_STEM_RE.match(m.group(1)[:-len(".md")]):
+            names.add(m.group(1))
+    return names
 
 
 def render_journal(repo, ref_name, sha):
@@ -598,7 +642,7 @@ def cmd_write(args):
     return 0
 
 
-def stat_tree(vault):
+def stat_tree(vault, design_names=frozenset()):
     entries = {}
     stack = [""]
     while stack:
@@ -609,7 +653,7 @@ def stat_tree(vault):
                 if e.is_dir(follow_symlinks=False):
                     stack.append(rel)
                     continue
-                if (rel in PLANNED_TOP_LEVEL or PLANNED_TASK_NOTE_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
+                if (rel in PLANNED_TOP_LEVEL or rel in design_names or PLANNED_TASK_NOTE_RE.match(rel) or PLANNED_ADR_NOTE_RE.match(rel)
                         or PLANNED_RUNBOOK_NOTE_RE.match(rel) or PLANNED_JOURNAL_NOTE_RE.match(rel)):
                     continue
                 st = e.stat(follow_symlinks=False)
@@ -619,7 +663,12 @@ def stat_tree(vault):
 
 def cmd_check(args):
     vault, _, _ = resolve_vault()
-    now = stat_tree(vault)
+    try:
+        design_names = planned_design_names(os.path.abspath(args.repo), args.ref)
+    except WomError as exc:
+        print("wom-vault: note: planned design notes unknown (%s); root notes are compared as written" % exc, file=sys.stderr)
+        design_names = frozenset()
+    now = stat_tree(vault, design_names)
     if args.save_baseline:
         with open(args.save_baseline, "w", encoding="utf-8") as fh:
             json.dump(now, fh, sort_keys=True, indent=1)
@@ -652,6 +701,8 @@ def main(argv=None):
     w.add_argument("--note", action="append", help="restrict to this note (may repeat)")
     w.add_argument("--repo", default=".")
     c = sub.add_parser("check")
+    c.add_argument("--repo", default=".")
+    c.add_argument("--ref", default="main", help="ref whose docs/design names are treated as planned notes")
     g = c.add_mutually_exclusive_group(required=True)
     g.add_argument("--save-baseline")
     g.add_argument("--baseline")
