@@ -3044,3 +3044,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Ludwig, 2026-11-03 (verbatim):** "Party mos becomes the reference mod. Star on all questions" -> ADR-0123 approved: Q1 A, Q2 B, Q3 A, Q4 B, Q5 A. **Task 104**
   (platform `~/wt/task-104`) adds it to `docs/decisions/` exactly as proposed, the Amended-by lines in 0001/0050, the index; design doc questions marked answered.
   Booked for Ludwig: the five ADR lines that still give the roguelike a platform role (0051:16, 0113:14, 0097, 0098:15, 0115:44).
+- **104 written** (`50c536a`): `docs/decisions/0123-reference-mod-chosen-by-task-file.md` (Accepted 2026-11-03; amendment text byte-identical to the proposal), one
+  Amended-by header line each in 0001 and 0050 (manager checked), README index line, INDEX.json regenerated; manager re-ran `tools/adr/build_index.py --check`:
+  "CHECK OK". Merge waits for every platform `*-verify.sh` on 104's head (cross-script rule; 010a and 080 read docs/decisions) — after the registry 039a sweep.
