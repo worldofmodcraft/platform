@@ -3053,3 +3053,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   merged past a red check. **Task 105** (qa-engineer): the real-corpus tests derive their counts from the files; then 104 merges and the vault syncs.
 - Also seen: the registry 039a sweep on main (started ~07:43Z) has been ~9 h inside its child `089a1-verify.sh` — likely 089a1's quiet-wait counts its parent 039a
   (the 039b-class deadlock). To investigate after 104.
+- **Manager error 2 (same class): the whole 039a on registry main deadlocked in `089a1-verify.sh`** — its quiet filter excludes only its own name, so it counts its
+  parent 039a (6 h wait, then again in its nested run); 089a2 has the same filter. Both were merged after the last whole 039a sweep, so never exercised as 039a
+  children. Stopped (TaskStop, own job). **Task 106** (registry): transitive ancestor exclusion in both (089e shape), red-first, then the whole 039a on the branch.
+  Rule reinforced: a change to any closed script is not "verified" until a whole 039a (registry) / all-scripts loop (platform) has run on the merge result.
