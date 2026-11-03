@@ -5,6 +5,7 @@
 - **Area:** Developer experience
 - **Related:** ADR-0017, ADR-0023, ADR-0030, ADR-0053
 - **Amended by:** ADR-0115 (validate lint additions)
+- **Amended by:** ADR-0124 (the reference-mod line names "the reference mod", not the roguelike)
 
 ## Decision
 Target: from "I want to make a mod" to "my change is visible in game" in **under one hour** for a records+Lua mod. Both experienced developers (primary) and less experienced people (possibly using AI tools) are audiences.

@@ -2,6 +2,7 @@
 
 - **Status:** Accepted · **Date:** 2026-09-02 · **Area:** DevEx / Documentation
 - **Related:** ADR-0020, ADR-0051, ADR-0053, ADR-0065, ADR-0097
+- **Amended by:** ADR-0124 (example chain (c) is "the reference mod", not the roguelike)
 
 ## Context
 Poor API documentation is the most common cause of death for modding platforms (Eluna: an API list without examples or context, learned by reading other people's code and guessing). For a project whose entire purpose is turning WoW into a mod API, documentation is not support material — it is the product's front door.

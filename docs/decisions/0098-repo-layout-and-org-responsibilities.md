@@ -2,6 +2,7 @@
 
 - **Status:** Accepted · **Date:** 2026-09-02 · **Area:** Repo / Architecture
 - **Related:** ADR-0049, ADR-0063, ADR-0079
+- **Amended by:** ADR-0124 (mods/ comment names "the reference mod(s)", not the roguelike)
 
 ## Decision
 The platform monorepo layout is fixed now:
