@@ -1,6 +1,6 @@
 # Task 102: re-pin `096-verify.sh` so it stays green on platform main after its merge
 
-- **Mission:** SITE-V1 (verification integrity) — **Status:** spec-approved 2026-10-29 (manager, session 14; Ludwig's decision "A: fixed SHAs only", 2026-10-29)
+- **Mission:** SITE-V1 (verification integrity) — **Status:** review (phase 2 green 2026-11-03; was spec-approved 2026-10-29, manager, session 14; Ludwig's decision "A: fixed SHAs only", 2026-10-29))
 - **Agent / model:** qa-engineer — **Budget:** small
 - **Branch / worktree:** `task/102-repin-096-verify` / `~/wt/task-102`, from platform main
 
@@ -48,3 +48,16 @@ main and on main + a later commit touching the runbook outside M9-M11. 6. Quiet 
   4. `PYTHONDONTWRITEBYTECODE=1 bash docs/tasks/096-verify.sh; echo "exit=$?"` at the branch head (this is the real GitHub main clone): expect ALL CHECKS PASSED incl. both "red when ... removed" lines, exit 0. Paste.
   5. Item-12 on real main plus a later commit: covered by the f-out and f-in cells of step 3 (local stand-ins for main + commit); if a literal run is wanted, in a clone: `git checkout -q 47c9938 && git commit --allow-empty -m x`, then run 096-verify.sh from the branch against that clone's path as origin (the cells do exactly this).
   6. Any red in step 3 or 4: stop, report file:line, expected vs actual; do not edit a test or pin to pass.
+- 2026-11-03 qa-engineer: PHASE 2 (machine released by the manager). Fresh clone of https://github.com/worldofmodcraft/platform, branch `task/102-repin-096-verify`.
+  `origin/main` had NOT moved (still `47c9938`, same as PIN_MAIN); `git merge --no-edit origin/main` -> "Already up to date", so no merge commit and no range spans a main merge.
+  All fixtures are built from PIN_MAIN / fixed SHAs (never HEAD text); no re-pin after the merge step.
+  **Finding in my own test (fixed, not a product bug):** first run of 102-verify.sh at `1686ac8` exit 1, 3 FAIL: the "fixed script carries PIN_x" cells used `grep -qxF`
+  (whole line) but the pins carry trailing comments. The fixed 096-verify.sh was correct (every other cell ok). Cell changed to a line-prefix match in `f2f1cc5`
+  (only 102-verify.sh touched; not a weakening: the check still requires the exact `PIN_x="<full sha>"` at line start, and AC3/AC3b prove wrong pins are red).
+  Runs below at head `f2f1cc585689457708951e3274bd0ddfa5178a66`, PYTHONDONTWRITEBYTECODE=1, `ps` showing no other *-verify.sh before each (21 of 21 sweep entries: 0 others):
+  1. Red state at `33b725be` (throw-away clone): `102-verify.sh` exit **1**, 2 FAIL ("PIN_FIX not recorded (PENDING)", "fixed-script cells cannot run"); unfixed-blob cells ok (exit 1, "empty range (vacuous)", on main and on main + later commit).
+  2. `102-verify.sh` at head: exit **0**, "102-verify: ALL CHECKS PASSED" (fixed 096 exit 0 on main, main+commit outside M9-M11, main+commit inside M9; deadbee on all three pins red; wrong pins red; both mutation lines ok; scope and byte-identical sections ok).
+  3. `096-verify.sh` at head against the real GitHub clone: exit **0**, 0 FAIL, "ok step-2 marker check red when the marker is removed", "ok M11 Q-H check red when the status sentence is removed", ALL CHECKS PASSED.
+  4. Cross-script sweep (coordinator correction: every docs/tasks/*-verify.sh, plain invocation, one at a time, in the same clone; none skipped; none needed an argument or network beyond 080's ls-remote):
+     010a, 048, 049, 051, 052, 053, 056, 058, 059, 061, 063, 068, 072, 076, 078, 079, 080, 085, 090, 096, 102: **all exit 0, FAIL count 0** (21 scripts). (090 was run plain, not --sweep, per the correction.)
+  Acceptance criteria 1-7: done (1 steps 1-2; 2 pins asserted; 3 deadbee cells; 4 mutation lines; 5 fixed 096 exit 0 on main and on main + later commit; 6 quiet machine, ps logged; 7 scope = three files, other 096 sections byte-identical). Status: review.
