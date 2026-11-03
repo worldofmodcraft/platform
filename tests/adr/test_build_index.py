@@ -495,22 +495,43 @@ class RealRepoTests(unittest.TestCase):
         if not self.decisions_dir.is_dir():
             self.skipTest("docs/decisions not found -- not running inside the World of Modcraft repo")
 
-    def test_real_corpus_has_119_adrs_and_is_clean(self):
-        result = bi.analyze(self.decisions_dir)
-        self.assertEqual(result.scanned_count, 119)
-        self.assertEqual(len(result.adrs), 119)
+    def _derive_expected(self, directory):
+        # Independent of build_index: file count by glob, and untagged count by
+        # scanning raw lines for a "- **Touches:**" header (no use of `bi`).
+        files = sorted(directory.glob("[0-9][0-9][0-9][0-9]-*.md"))
+        untagged = [
+            f for f in files
+            if not any(
+                line.startswith("- **Touches:**")
+                for line in f.read_text(encoding="utf-8").splitlines()
+            )
+        ]
+        return len(files), len(untagged)
+
+    def _check_clean_counts(self, directory):
+        expected_total, _ = self._derive_expected(directory)
+        result = bi.analyze(directory)
+        self.assertEqual(result.scanned_count, expected_total)
+        self.assertEqual(len(result.adrs), expected_total)
         self.assertEqual(result.fatal_issues, [])
         self.assertEqual(result.completeness_issues, [])
         self.assertEqual(result.amend_issues, [])
         self.assertTrue(result.ok)
 
-    def test_real_corpus_touches_coverage_matches_task_004_input(self):
-        # Snapshot of the corpus as of task 003 (docs/tasks/003-adr-index-generator.md
-        # criterion 5): 116 of 119 ADRs lack a Touches: line. This number is
-        # expected to change once task 004 tags the remaining ADRs -- when it
-        # does, update this assertion as part of that task.
-        result = bi.analyze(self.decisions_dir)
-        self.assertEqual(len(result.touches_missing), 116)
+    def _check_touches_counts(self, directory):
+        _, expected_untagged = self._derive_expected(directory)
+        result = bi.analyze(directory)
+        self.assertEqual(len(result.touches_missing), expected_untagged)
+
+    def test_real_corpus_counts_match_files_and_is_clean(self):
+        # Protects: the real corpus parses fully and cleanly, with the expected
+        # count derived from the files on disk rather than a time-bound snapshot.
+        self._check_clean_counts(self.decisions_dir)
+
+    def test_real_corpus_touches_coverage_matches_files_without_touches_header(self):
+        # Protects: build_index's untagged-ADR count agrees with an independent
+        # raw-line scan of the "Touches:" header across the real corpus.
+        self._check_touches_counts(self.decisions_dir)
 
     def test_real_lookup_registry_matches_adr_0116_section_4_example(self):
         # ADR-0116 section 4's worked example: a task touching a topic looks
