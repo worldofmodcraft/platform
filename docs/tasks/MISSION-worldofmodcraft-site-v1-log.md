@@ -3071,3 +3071,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Ludwig ran the vault copy himself (2026-11-03, via `!`):** `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
   -> completed with no output (success). For Ludwig item "design doc into the vault" done. (Static copy: later edits to the design doc do not reach the vault unless
   copied again or the projection learns `docs/design/` — offered as a task, not started.)
+- **Ludwig (verbatim):** "Allt som skrivs till vault ska ju redan synas mellan alla enheter?" — yes (the vault syncs via Obsidian LiveSync per the projection
+  contract); the caveat was only that a manual copy does not follow later repo edits. Then **"Ja"** to automatic design-doc notes -> **task 108** (platform
+  `~/wt/task-108`, implementer, phase 1): the projection writes `docs/design/<stem>.md` as `<stem>.md` at the vault folder root (Ludwig's placement), mirroring 061.
+  Ludwig may delete his manual copy `Party Board Mod - Design.md` once the projected `party-board-mod.md` appears (the tool never deletes).
