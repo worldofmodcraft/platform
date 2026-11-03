@@ -1,5 +1,5 @@
 {
-  "count": 122,
+  "count": 123,
   "adrs": [
     {
       "number": 1,
@@ -15,7 +15,9 @@
         50
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        123
+      ]
     },
     {
       "number": 2,
@@ -821,7 +823,9 @@
         54
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        123
+      ]
     },
     {
       "number": 51,
@@ -2054,6 +2058,29 @@
       ],
       "amends": [
         41
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 123,
+      "filename": "0123-reference-mod-chosen-by-task-file.md",
+      "title": "The reference mod that drives the kernel API is chosen by task, not by this log",
+      "status": "Accepted (2026-11-03, accepted by Ludwig)",
+      "date": "2026-11-03",
+      "area": "Process",
+      "touches": [
+        "process/build-order",
+        "vision"
+      ],
+      "related": [
+        1,
+        50,
+        51,
+        97
+      ],
+      "amends": [
+        1,
+        50
       ],
       "amended_by": []
     }

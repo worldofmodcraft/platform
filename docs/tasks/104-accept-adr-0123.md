@@ -32,3 +32,19 @@ minigames a simulated score; with a bot seated only free-for-all and duel miniga
 ---
 # Task 104 log
 - 2026-11-03 manager (session 14): created on Ludwig's approval; dispatched.
+- 2026-11-03 doc-writer: executed deliverables 1-5 (verify scripts not run, per brief).
+  - Created `docs/decisions/0123-reference-mod-chosen-by-task-file.md`: proposal text, banner removed, Status Accepted, Date 2026-11-03, Decision = option A with Ludwig's words verbatim, Questions replaced by "Answers" (Q1 A, Q2 B, Q3 A, Q4 B, Q5 A). Quote kept as written ("Party mos"; "mos" noted in the ADR).
+  - Headers of 0001 and 0050: one added line each; README index line added under "Process & developer experience"; INDEX.json regenerated (123 entries); design docs updated (banner pointer; status line; last reviewed 2026-11-03; e.6, b.1, h.3a, j.1 table with answers, j.3 item 3).
+  - AC1: `python3 tools/adr/build_index.py --check` exit 0. Final line: "CHECK OK: INDEX.json matches the ADR files and both invariants hold." Header: "Scanned 123 ADR file(s)... Parsed OK: 123. Skipped (fatal): 0. Touches coverage: 7/123" (the 116 "missing Touches" lines are the pre-existing advisory list, not failures).
+  - AC2: `git diff origin/main...HEAD -- docs/decisions/0001-*.md docs/decisions/0050-*.md` (after commit) is the two added lines:
+```
+--- a/docs/decisions/0001-platform-is-the-goal.md
++++ b/docs/decisions/0001-platform-is-the-goal.md
++- **Amended by:** ADR-0123 (the driving reference mod is named by task file, not fixed to the roguelike)
+--- a/docs/decisions/0050-build-order-walking-skeleton.md
++++ b/docs/decisions/0050-build-order-walking-skeleton.md
++- **Amended by:** ADR-0123 (step 1 and step 8 name "the reference mod", not the roguelike)
+```
+  - AC3: Context, Options, Amendments, Consequences and Impact sections of 0123 compared with the proposal at HEAD (`git show HEAD:docs/design/party-board-mod-proposed-adr.md`) via `diff`: no output, i.e. byte-identical (amendment text for 0001:16, 0050:17, 0050:28 included).
+  - Deliverable 6 (booked, not done; follow-up question for Ludwig): ADR lines that still give the roguelike a platform role: 0051:16 (reference mod = roguelike, every API function used there), 0113:14 (example chain level c), 0097:1,7 (roguelike kit re-audit gate before step 1), 0098:15 (repo-layout comment "roguelike (reference mod)"), 0115:44 ("reference mod v17 will be English-commented"). Also ADR-0001 title and :19 still say "first mod" = roguelike (titles are never edited). Options for Ludwig: A amend these by a further ADR; B leave them (roguelike is a planned mod, lines read as its own kit); C amend only 0097 and 0051.
+  - Note: the party-board-mod-proposed-adr.md "Status: Proposed" metadata line was left as is (brief asked only for the banner replacement).
