@@ -103,6 +103,7 @@ ADR silently — propose a superseding ADR instead.
 - [0053](0053-ai-ready-tooling.md) AI-ready mod development
 - [0054](0054-documentation-first-and-manager-model.md) Documentation first; survey first; manager model
 - [0055](0055-wowee-defects-tracked.md) WoWee polish tracked
+- [0123](0123-reference-mod-chosen-by-task-file.md) The reference mod that drives the kernel API is chosen by task file
 
 
 ### Rounds 3–6 (development practice, runtime reality, product surfaces)

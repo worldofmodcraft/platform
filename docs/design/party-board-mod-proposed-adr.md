@@ -1,12 +1,6 @@
 # ADR-0123: The reference mod that drives the kernel API is chosen by task, not by this log
 
-> **PROPOSAL, not accepted.** Lives in `docs/tasks/` until Ludwig approves it; only then does the
-> manager add it to `docs/decisions/` (MANAGER.md section 3.1). **It is conditional on Ludwig's
-> answer to Question 1 below.** If the answer is B, this proposal is void and nothing changes.
-> Ludwig's redirect of 2026-10-28 (task log): the party mod must not affect ADRs; mods are
-> built standalone on the mod API. This proposal therefore touches **no mod content and names no
-> mod inside any ADR text**; it only says that the mod driving the platform build order is named
-> in a task file, not fixed in the ADRs.
+> Accepted as ADR-0123 on 2026-11-03: see docs/decisions/0123-reference-mod-chosen-by-task-file.md
 
 - **Status:** Proposed
 - **Date:** 2026-10-28

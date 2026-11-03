@@ -4,6 +4,7 @@
 - **Date:** 2026-08-31
 - **Area:** Vision
 - **Related:** ADR-0002, ADR-0044, ADR-0050
+- **Amended by:** ADR-0123 (the driving reference mod is named by task file, not fixed to the roguelike)
 
 ## Context
 The project began as a roguelike / Vampire Survivors-style WoW server on AzerothCore. During brainstorming it became clear that the desired outcome is a general modding platform for WoW ("Forge/Fabric for Minecraft", "Skyrim modding for WoW"), where the roguelike is one of many possible experiences.

@@ -1,7 +1,7 @@
 # Design: "Wayfarers' Wager" — a party board game mod
 
-- **Status:** Draft — rests on the proposed ADR in `docs/design/party-board-mod-proposed-adr.md`; not accepted. (The design itself needs no ADR change: the mod is built only on the platform's mod API. The proposed ADR only decides whether this mod drives the platform build order.)
-- **Last reviewed:** 2026-10-28
+- **Status:** Draft — the design itself is not yet accepted. The ADR that makes this mod the reference mod, ADR-0123, was accepted by Ludwig on 2026-11-03 (`docs/decisions/0123-reference-mod-chosen-by-task-file.md`); it is a build-order decision and changes no mod content. Ludwig's answers to Q1-Q5 (2026-11-03) are recorded in section j.1.
+- **Last reviewed:** 2026-11-03
 - **Author:** doc-writer, task 098, for Ludwig
 - **Working title:** Wayfarers' Wager (a placeholder; renaming is free). Mod id: `<ns>:wayfarers-wager`, namespace **[open]** (a personal namespace follows the GitHub username, ADR-0030:30; `mc:` is reserved for platform core mods, ADR-0003:10, ADR-0119:30-34).
 - **Reading guide:** sections a to j follow the brief. Every statement about what the platform provides carries an ADR `file:line`. Anything the ADRs do not settle is marked **[design proposal]** (my suggestion) or **[open]** (nobody has decided). Nothing here claims that code exists: the platform is at the documentation stage, and "the ADR decides X" never means "X is built".
@@ -11,7 +11,7 @@
 - **What it is:** a party board game for 2 to 4 friends (or 1 human with bots). You roll a die, walk a 48-space board, fetch **lanterns** from lit Piers and carry them to the **Beacon** to earn **Stars**, and play a short **minigame** at the end of every round. Most Stars after 15 rounds wins.
 - **The twists that are our own:** a carried lantern can be dropped, robbed (Tripwire, Snatch, Lantern Hook) or burn out; teams for the minigame come from the standings (leader against the rest, or a draft by the player in last place); in the last five rounds a **Rising Tide** floods the board; two game-specific bonus Stars (Lantern Courier, Snare Master). Details: section b.
 - **Built only on the platform's mod API.** It changes no ADR. Where the API lacks something, section g.4 lists it as a gap (15 gaps, G1-G15).
-- **Decided vs open:** every rule number is a **[design proposal]** to be tuned by simulation. Five questions need Ludwig (j.1: Q1 reference-mod role, Q2 bots, Q3 player count, Q4 game length, Q5 arcade mod relation), plus five rulings made overnight that he can overturn (j.1).
+- **Decided vs open:** every rule number is a **[design proposal]** to be tuned by simulation. Five questions (j.1: Q1 reference-mod role, Q2 bots, Q3 player count, Q4 game length, Q5 arcade mod relation) were answered by Ludwig on 2026-11-03 (A, B, A, B, A); five rulings made overnight that he can overturn (j.1).
 - **First build step:** "press Roll": one record type, one command, one RPC pair, one client panel, saved position, one counter (section i, step 1).
 
 ---
@@ -70,9 +70,9 @@ Warm, cosy, a bit mischievous: lantern-light, paper maps, brass gadgets, small a
 All numbers are **[design proposal]** and are to be tuned by a headless simulator (a run with no graphics, only the rules) before play-testing (section i, step 4). They are all `config.schema` entries with bounds (ADR-0029:9). The rules were revised in fix round 1 on the manager's overnight ruling so that the rule set is our own (see b.13); Ludwig can change any of those choices in the morning (section j.1, "Rulings awaiting Ludwig").
 
 ### b.1 Players, seats, turn order
-- 1 to 4 human players, 2 to 4 seats in total (questions Q2 and Q3 in the ADR proposal). A game with one human needs bots (e.6). Seats are numbered 1 to 4. With bots enabled, empty seats are filled up to a host-chosen minimum of 3 [design proposal].
+- 1 to 4 human players, 2 to 4 seats in total (Q2 and Q3, answered by Ludwig 2026-11-03: board-only bots; 2 to 4 players). A game with one human needs bots (e.6). Seats are numbered 1 to 4. With bots enabled, empty seats are filled up to a host-chosen minimum of 3 [design proposal].
 - **Turn order:** at the start the seats are shuffled with `kernel.rng` (ADR-0091:7). No ties are possible. The order stays fixed for the whole game.
-- **Game length:** 10, 15 or 20 rounds (default 15; bounds 5 to 30; question Q4).
+- **Game length:** 10, 15 or 20 rounds (default 15; bounds 5 to 30; Q4, answered B by Ludwig 2026-11-03).
 
 ### b.2 The dice
 - The **Wayfarer die** is an 8-sided die (1 to 8, uniform), rolled on the server with the mod's own `kernel.rng` stream, so the same seed replays the same game (ADR-0091:7). `math.random` is forbidden in server Lua (`validate` warns; ADR-0091:7).
@@ -385,7 +385,7 @@ return {
 ## e. Multiplayer and sessions
 
 ### e.1 Who plays, and where
-- **1 to 4 human players** per game, 2 to 4 seats in total (questions Q2 and Q3). With bots off, at least 2 humans are needed. The platform's audience is "mostly single-player or with a few friends" (ADR-0002:13), so bots (e.6) decide whether most users can play at all. Other players on the server can watch (e.3) but not play.
+- **1 to 4 human players** per game, 2 to 4 seats in total (Q2 and Q3, answered by Ludwig 2026-11-03). With bots off, at least 2 humans are needed. The platform's audience is "mostly single-player or with a few friends" (ADR-0002:13), so bots (e.6) decide whether most users can play at all. Other players on the server can watch (e.3) but not play.
 - **Everyone uses their own WoW character** as their pawn, since a character is part of the world's save file (ADR-0088:7). That the mod cannot create new player models is this document's own reasoning, not an ADR statement. The companion (b.11) is a visual extra that is optional for v1.
 - **One game at a time** per server by default; setting `max_concurrent_games` (default 1, bound 1 to 4). Every game needs its own instances, and instance limits are settings with defaults safe for an ordinary PC (ADR-0024:9).
 - **Where the board lives:** in a private instance (ADR-0024:9). The mod does not need the players to be near each other in the open world. Version 1 uses the command `/wager host` and the lobby panel to create the game and carry the players over (gap G3); a physical "Game Table" object players walk up to is a later polish step (G6).
@@ -423,8 +423,8 @@ The kernel gives the mod a `player.logout` event with a reason and `server.pre_r
 
 **Resume:** after a restart, the game is `PAUSED_RESUMABLE` until all human seats are online again (or 10 minutes pass; then autopilot as above) **[design proposal]**.
 
-### e.6 Bots for empty seats (question Q2)
-- **Option B (leaning):** *board-only bots*. A bot rolls; picks up a lantern whenever it can pay the fee and keep 5 Brass spare; carries it by the shortest path to the Beacon; Snatches when it stands on a carrier's space; takes the shortest path at forks; uses an item at random; and picks the nearest target for Duels and Pickpocket. In minigames a bot gets a **simulated score**: a placement drawn from a distribution weighted by a setting `bot_skill` (default 0.5; at 0.5 the expected place is the middle). Bots are labelled "(bot)". The simulated placement uses `kernel.rng` so it is reproducible (ADR-0091:7).
+### e.6 Bots for empty seats (question Q2, answered B by Ludwig 2026-11-03)
+- **Decided (option B):** *board-only bots*. A bot rolls; picks up a lantern whenever it can pay the fee and keep 5 Brass spare; carries it by the shortest path to the Beacon; Snatches when it stands on a carrier's space; takes the shortest path at forks; uses an item at random; and picks the nearest target for Duels and Pickpocket. In minigames a bot gets a **simulated score**: a placement drawn from a distribution weighted by a setting `bot_skill` (default 0.5; at 0.5 the expected place is the middle). Bots are labelled "(bot)". The simulated placement uses `kernel.rng` so it is reproducible (ADR-0091:7).
 - The same logic runs the **autopilot** for disconnected humans.
 - **Bots in team and co-op minigames [design proposal]:** while any bot is seated, the Hunt and Draft rules of c.1 do not apply (Free-for-all is drawn instead), so no human is ever teamed with a bot. In All Hands (co-op) rounds only humans play, the tier thresholds are scaled by (humans / seats), and bots receive the tier payout the humans reached (so the ledger stays balanced). Duels need two humans or a bot with a simulated result.
 - A bot is not a WoW character; it has no pawn in the arena. Board pawns for bots are overlay markers (ADR-0083:7) **[design proposal]**.
@@ -727,7 +727,7 @@ These are stated plainly. The party mod does **not** exercise, and so does not p
 - **A very large content mod with many interacting systems**, which is the context in which the reference-mod rule (ADR-0051:16) was written.
 
 ### h.3a The arcade driver mod
-The ADRs name three driver mods: roguelike, housing and arcade (ADR-0114:7). The arcade mod already pulls teams (ADR-0114:20), a clean match abort on restart (ADR-0114:24), zones and countdowns (ADR-0083:7), and open questions Q17 (group teleport) and Q18 (player-state snapshot) are scheduled "with the arcade/housing driver mods" and "when a minigame/arena mod demands it" (`docs/open-questions.md:23-24`). The party mod's minigames need the same surfaces (G2, G3, G8). Whether the party mod's minigame layer and the arcade mod share code, or are the same mod, is **[open]**; this document assumes they are separate mods that both build on the platform's surfaces.
+The ADRs name three driver mods: roguelike, housing and arcade (ADR-0114:7). The arcade mod already pulls teams (ADR-0114:20), a clean match abort on restart (ADR-0114:24), zones and countdowns (ADR-0083:7), and open questions Q17 (group teleport) and Q18 (player-state snapshot) are scheduled "with the arcade/housing driver mods" and "when a minigame/arena mod demands it" (`docs/open-questions.md:23-24`). The party mod's minigames need the same surfaces (G2, G3, G8). Ludwig decided on 2026-11-03 (Q5, option A) that they are separate mods that both build on the platform's surfaces; some minigame plumbing may therefore be duplicated, and each mod stays standalone.
 
 ### h.4 What the party mod proves that the roguelike would prove less of
 Multi-client play from the first week; instancing as a daily tool, not an exotic one; the overlay and UI client surfaces under real use; mod-to-mod extension (minigame packs) in a record-type-defining mod; the restore barrier and resume after restart under a game state that has several actors. None of this changes an ADR.
@@ -759,14 +759,15 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 
 ## j. Risks and open questions
 
-### j.1 Questions for Ludwig (the same five as in the ADR proposal, `docs/design/party-board-mod-proposed-adr.md`), and overnight rulings awaiting him
-| # | Question | Effect on this document |
-|---|---|---|
-| Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? | None on the design. Only decides whether ADR-0123 exists. |
-| Q2 | Bots for empty seats: none (A), board-only bots (B, leaning), full bots (C)? | Section e.6 and build step 5 |
-| Q3 | Player count: 2 to 4 (A, leaning), up to 6 (B), up to 8 (C)? | Sections b.1, c.1, c.2, b.4 (lit-lantern count) |
-| Q4 | Default length: 10 (A), 15 (B, leaning), 20 (C) rounds? | Sections a, b.1, b.10 |
-| Q5 | Relation to the planned arcade driver mod (ADR-0114:7): separate mods (A, leaning), the party mod's minigame layer becomes the arcade mod (B), decide later (C)? | Sections h.3a and c.5 |
+### j.1 Questions for Ludwig (the same five as in the ADR proposal, `docs/design/party-board-mod-proposed-adr.md`; all answered 2026-11-03), and overnight rulings awaiting him
+Ludwig, 2026-11-03: "Party mos becomes the reference mod. Star on all questions" (the starred option of each). The Q1 decision is recorded as ADR-0123 (`docs/decisions/0123-reference-mod-chosen-by-task-file.md`).
+| # | Question | Answer (Ludwig, 2026-11-03) | Effect on this document |
+|---|---|---|---|
+| Q1 | Does the party mod become the reference/first mod that drives the platform build order (A), stay a plain mod (B), or share that role with the roguelike (C)? | **A.** The party mod is the reference mod; the roguelike stays planned. ADR-0123. | None on the design. |
+| Q2 | Bots for empty seats: none (A), board-only bots (B), full bots (C)? | **B** | Section e.6 and build step 5 |
+| Q3 | Player count: 2 to 4 (A), up to 6 (B), up to 8 (C)? | **A** | Sections b.1, c.1, c.2, b.4 (lit-lantern count) |
+| Q4 | Default length: 10 (A), 15 (B), 20 (C) rounds? | **B** | Sections a, b.1, b.10 |
+| Q5 | Relation to the planned arcade driver mod (ADR-0114:7): separate mods (A), the party mod's minigame layer becomes the arcade mod (B), decide later (C)? | **A** | Sections h.3a and c.5 |
 
 **Rulings made overnight by the manager (not by Ludwig); he can change any of them in the morning.** They were made so that the rule set is our own and does not reproduce a published game's signature rules.
 | # | Ruling | If Ludwig overturns it |
@@ -794,7 +795,7 @@ Steps 1 to 4 need **no** client features beyond a button, so they can start as s
 ### j.3 Open points (each marked [open] above)
 1. Mod namespace and the final name of the mod (title page).
 2. Which AzerothCore shell maps are suitable for the board and arenas (G4): a survey item.
-3. Whether the party mod's minigame layer shares code with the arcade driver mod (h.3a).
+3. ~~Whether the party mod's minigame layer shares code with the arcade driver mod (h.3a).~~ Answered 2026-11-03 (Q5, A): separate mods.
 4. Scaled variants of 1v3 minigames for 3 players (c.1).
 5. A star-stealing event (b.4), spectating arenas (e.3), and reaction-time compensation (G12).
 6. Whether mods may define new client UI widgets (f.2).
