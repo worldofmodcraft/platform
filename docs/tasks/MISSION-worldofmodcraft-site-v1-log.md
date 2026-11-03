@@ -3057,3 +3057,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   parent 039a (6 h wait, then again in its nested run); 089a2 has the same filter. Both were merged after the last whole 039a sweep, so never exercised as 039a
   children. Stopped (TaskStop, own job). **Task 106** (registry): transitive ancestor exclusion in both (089e shape), red-first, then the whole 039a on the branch.
   Rule reinforced: a change to any closed script is not "verified" until a whole 039a (registry) / all-scripts loop (platform) has run on the merge result.
+- **105 merged** (platform #101; CI "check" pass — the ADR index workflow green for the first time since 2026-09-02). **104 merged** (platform #100 -> `a26b778`;
+  main merged in first; CI check pass ×2): **ADR-0123 accepted on main** (`docs/decisions/0123-reference-mod-chosen-by-task-file.md`), Amended-by lines in 0001/0050,
+  index; `refresh-main.sh`: written=9, id_conflicts=0 — ADR-0123 is now projected into the vault (answer to Ludwig's "har fortfarande inte synkat").
+- 106 running (registry: quiet-wait ancestor fix, then whole 039a).
