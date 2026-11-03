@@ -103,7 +103,7 @@ if [ "$FIXOK" != 1 ]; then bad "fixed-script cells cannot run: PIN_FIX not usabl
   done
   echo "== AC2 the fixed script carries exactly the re-derived pins and no moving reference"
   for kv in "PIN_MERGE=$PIN_M" "PIN_BASE=$PIN_BASE" "PIN_FINAL=$PIN_M2"; do
-    grep -qxF "${kv%%=*}=\"${kv#*=}\"" "$TMP/new.sh" && ok "fixed script pins ${kv%%=*}" || bad "fixed script lacks ${kv%%=*}=\"${kv#*=}\""
+    grep -q "^${kv%%=*}=\"${kv#*=}\"" "$TMP/new.sh" && ok "fixed script pins ${kv%%=*}" || bad "fixed script lacks ${kv%%=*}=\"${kv#*=}\""
   done
   grep -q '354b3cb' "$TMP/new.sh" && bad "fixed script still mentions the old pin 354b3cb" || ok "old pin 354b3cb gone"
   grep -qE 'merge-base origin/main|--branch|origin/main\.\.\.HEAD' "$TMP/new.sh" && bad "fixed script still reads a moving ref (merge-base origin/main / --branch)" || ok "no moving ref in the fixed script"
