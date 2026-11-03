@@ -1,6 +1,6 @@
 # Task 104: accept ADR-0123 (the reference mod is chosen by task file) and record Ludwig's answers to Q1-Q5
 
-- **Mission:** none (decision record) — **Status:** spec-approved 2026-11-03 (manager, session 14; Ludwig's approval, verbatim: "Party mos becomes the reference mod. Star on all questions")
+- **Mission:** none (decision record) — **Status:** done 2026-11-03 (manager, session 14; Ludwig's approval, verbatim: "Party mos becomes the reference mod. Star on all questions")
 - **Agent / model:** doc-writer — **Budget:** small
 - **Branch / worktree:** `task/104-accept-adr-0123` / `~/wt/task-104` (platform)
 
@@ -48,3 +48,6 @@ minigames a simulated score; with a bot seated only free-for-all and duel miniga
   - AC3: Context, Options, Amendments, Consequences and Impact sections of 0123 compared with the proposal at HEAD (`git show HEAD:docs/design/party-board-mod-proposed-adr.md`) via `diff`: no output, i.e. byte-identical (amendment text for 0001:16, 0050:17, 0050:28 included).
   - Deliverable 6 (booked, not done; follow-up question for Ludwig): ADR lines that still give the roguelike a platform role: 0051:16 (reference mod = roguelike, every API function used there), 0113:14 (example chain level c), 0097:1,7 (roguelike kit re-audit gate before step 1), 0098:15 (repo-layout comment "roguelike (reference mod)"), 0115:44 ("reference mod v17 will be English-commented"). Also ADR-0001 title and :19 still say "first mod" = roguelike (titles are never edited). Options for Ludwig: A amend these by a further ADR; B leave them (roguelike is a planned mod, lines read as its own kit); C amend only 0097 and 0051.
   - Note: the party-board-mod-proposed-adr.md "Status: Proposed" metadata line was left as is (brief asked only for the banner replacement).
+- 2026-11-03 manager (session 14): `tools/adr/build_index.py --check` re-run: CHECK OK. The two Amended-by lines checked (one each, exactly the proposal's metadata).
+  Cross-script check: the platform `*-verify.sh` that read docs/decisions (010a, 080) run on this head in a fresh clone: 010a exit 0 (ALL OK), 080 exit 0. Ludwig's
+  approval is the task's spec line. Status done; merged by the manager on Ludwig's approval of the ADR (2026-11-03).
