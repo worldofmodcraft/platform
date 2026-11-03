@@ -1,5 +1,5 @@
 {
-  "count": 122,
+  "count": 124,
   "adrs": [
     {
       "number": 1,
@@ -15,7 +15,10 @@
         50
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        123,
+        124
+      ]
     },
     {
       "number": 2,
@@ -821,7 +824,9 @@
         54
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        123
+      ]
     },
     {
       "number": 51,
@@ -839,7 +844,8 @@
       ],
       "amends": [],
       "amended_by": [
-        115
+        115,
+        124
       ]
     },
     {
@@ -1580,7 +1586,9 @@
         51
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        124
+      ]
     },
     {
       "number": 98,
@@ -1596,7 +1604,9 @@
         79
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        124
+      ]
     },
     {
       "number": 99,
@@ -1846,7 +1856,9 @@
         97
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        124
+      ]
     },
     {
       "number": 114,
@@ -1890,7 +1902,9 @@
         65,
         106
       ],
-      "amended_by": []
+      "amended_by": [
+        124
+      ]
     },
     {
       "number": 116,
@@ -2054,6 +2068,53 @@
       ],
       "amends": [
         41
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 123,
+      "filename": "0123-reference-mod-chosen-by-task-file.md",
+      "title": "The reference mod that drives the kernel API is chosen by task, not by this log",
+      "status": "Accepted (2026-11-03, accepted by Ludwig)",
+      "date": "2026-11-03",
+      "area": "Process",
+      "touches": [
+        "process/build-order",
+        "vision"
+      ],
+      "related": [
+        1,
+        50,
+        51,
+        97
+      ],
+      "amends": [
+        1,
+        50
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 124,
+      "filename": "0124-remaining-roguelike-platform-role-lines.md",
+      "title": "The remaining ADR lines that gave the roguelike a platform role name \"the reference mod\"",
+      "status": "Accepted (2026-11-03, accepted by Ludwig)",
+      "date": "2026-11-03",
+      "area": "Process",
+      "touches": [
+        "process/build-order",
+        "docs/reference-mod"
+      ],
+      "related": [
+        123
+      ],
+      "amends": [
+        1,
+        51,
+        97,
+        98,
+        113,
+        115
       ],
       "amended_by": []
     }

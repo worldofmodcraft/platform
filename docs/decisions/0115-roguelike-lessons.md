@@ -3,6 +3,7 @@
 - **Status:** Accepted · **Date:** 2026-09-02 · **Area:** Observability / Kernel / Process
 - **Amends:** ADR-0020, ADR-0023, ADR-0034, ADR-0035, ADR-0040, ADR-0051, ADR-0052, ADR-0065, ADR-0106
 - **Source:** the WoW Roguelike project's field-verified documentation (CLAUDE.md 14 rules, design/15 debugging + measurement standard, design/16 Claude integration, design/19 with 18+ verified platform deviations A1–A20, VERSIONS.md, living-docs mechanics). Everything below was paid for in real debugging sessions, 2026-08-12 → 2026-08-23.
+- **Amended by:** ADR-0124 (the English-commented line names "the reference mod(s)" and the roguelike kit v17)
 
 ## 1. Measurement standard → amends ADR-0034 (observability contract)
 Five bugs in one day were hidden not by bad code but by **bad counters** (procs reported "84 damage" while dealing zero — the platform discarded it; splash reported hits while damaging the player herself). Every counter in the kernel and in the generated observability surfaces MUST follow:

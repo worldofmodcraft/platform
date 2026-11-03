@@ -4,6 +4,7 @@
 - **Date:** 2026-09-01
 - **Area:** Process
 - **Related:** ADR-0001, ADR-0012, ADR-0016, ADR-0054
+- **Amended by:** ADR-0123 (step 1 and step 8 name "the reference mod", not the roguelike)
 
 ## Context
 We know the shape of the framework; we do not know the insides of WoWee (8 000+ commits) or AzerothCore (15 years). Building everything before one end-to-end test would deliver all integration failures at once. A hobby project also dies when nothing runs for months.
