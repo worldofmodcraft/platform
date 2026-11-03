@@ -3061,3 +3061,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   main merged in first; CI check pass ×2): **ADR-0123 accepted on main** (`docs/decisions/0123-reference-mod-chosen-by-task-file.md`), Amended-by lines in 0001/0050,
   index; `refresh-main.sh`: written=9, id_conflicts=0 — ADR-0123 is now projected into the vault (answer to Ludwig's "har fortfarande inte synkat").
 - 106 running (registry: quiet-wait ancestor fix, then whole 039a).
+- **Ludwig, 2026-11-03 (verbatim):** "1. Please copy it for me. 2. Merge. 3. Amend them all". (1) The manager cannot: git-guard blocks every manager/agent command
+  that touches the vault; not worked around; Ludwig given the `! cp …` one-liner and offered a projection task for `docs/design/`. (2) PR #30 (008b-2) to be merged
+  after its unrun fixed-SHA round is verified (phase 2 after task 106 frees the machine), then one dry-run dispatch (the ★ A he chose). (3) **ADR-0124** (task 107):
+  amend 0051:16, 0113:14, 0097 (lines 1, 7), 0098:15, 0115:44 and 0001:19 the same way as 0123 (the reference mod, named by task file).
