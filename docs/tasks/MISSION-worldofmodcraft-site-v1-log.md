@@ -3041,3 +3041,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   (the platform form of the cross-script rule; the manager first pointed the agent at `090 --sweep`, which sweeps 090's own pinned tree — corrected to a loop over
   every script). Manager diff review + fresh-clone re-run green. On platform main after merge: 096-verify and 102-verify exit 0 ALL CHECKS PASSED.
 - **Final proof of the 089 sweep started:** whole standalone `039a-verify.sh` on registry main `2939bef` (manager, fresh clone, `npm ci`), ~6 h. Then 008b-2 phase 2.
+- **Ludwig, 2026-11-03 (verbatim):** "Party mos becomes the reference mod. Star on all questions" -> ADR-0123 approved: Q1 A, Q2 B, Q3 A, Q4 B, Q5 A. **Task 104**
+  (platform `~/wt/task-104`) adds it to `docs/decisions/` exactly as proposed, the Amended-by lines in 0001/0050, the index; design doc questions marked answered.
+  Booked for Ludwig: the five ADR lines that still give the roguelike a platform role (0051:16, 0113:14, 0097, 0098:15, 0115:44).
