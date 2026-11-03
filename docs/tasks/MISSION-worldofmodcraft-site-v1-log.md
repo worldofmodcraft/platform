@@ -3065,3 +3065,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   that touches the vault; not worked around; Ludwig given the `! cp …` one-liner and offered a projection task for `docs/design/`. (2) PR #30 (008b-2) to be merged
   after its unrun fixed-SHA round is verified (phase 2 after task 106 frees the machine), then one dry-run dispatch (the ★ A he chose). (3) **ADR-0124** (task 107):
   amend 0051:16, 0113:14, 0097 (lines 1, 7), 0098:15, 0115:44 and 0001:19 the same way as 0123 (the reference mod, named by task file).
+- **107 merged** (platform #102; CI check pass): **ADR-0124 accepted** — the remaining roguelike platform-role lines (0001 design-kit line, 0051, 0097, 0098, 0113,
+  0115) name "the reference mod" per ADR-0123; one Amended-by header line each. Manager checks: readings vs approved meaning, index CHECK OK, header diff, 010a/080
+  verify and ADR tests green on the head. Vault refreshed (ADR-0124 projected).
