@@ -3033,3 +3033,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **103 merged** (registry #37 -> `7a049d0`; `gate` pass): 008a's two README check labels restored exactly. Manager diff review + fresh-clone re-run (008a, 062 whole,
   103 all exit 0). **Registry main green again:** fresh clone at `7a049d0`: `062-verify.sh` exit 0, 0 FAIL. 089a2 re-dispatched (merge main; 062 whole and
   --mutate; 070 whole).
+- **089a2 merged** (registry #38 -> `2939bef`; `gate` pass): phase 2 green on the main-merged head (089a2 own-only/default/mutate, 057 whole, 062 whole + --mutate with
+  AC4.057 applying, 070 whole); manager re-run green **incl. 062 and 070 whole on the head that merges**; delta PWA (wording LOW booked). On main after merge:
+  062-verify exit 0, 0 FAIL. **The 089 sweep (parts A1, A2, B, C, D, E) is complete on registry main.** Next: 102 phase 2 (platform), then a whole 039a sweep on
+  registry main as the final proof, then 008b-2 phase 2 (PR #30 stays for Ludwig).
