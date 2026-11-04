@@ -29,3 +29,18 @@
 ---
 # Task 110 log
 - 2026-11-04 manager (session 14): created on Ludwig's decision; dispatched.
+- 2026-11-04 doc-writer: wrote ADR-0125 (`docs/decisions/0125-fast-mode-until-phase-two.md`), README line, INDEX.json regenerated, and "**Until phase two (ADR-0125):**" notes: CLAUDE.md (asking-beats-assuming section, rule 4), MANAGER.md (§2, §3.1, §7, §8 stop-and-ask bullet, §8b). Each note names the exceptions (takedowns; credentials/secrets/keys) and the expiry.
+  Assumption flagged: the MANAGER.md §8 note says only exception events count toward the two-stop-and-ask halt; this is my reading of "takes ★ instead of asking", not Ludwig's words. Also, the verbatim quote was taken from the session-14 worktree's mission log (it is not yet in this worktree's copy).
+  Not run by me: any `*-verify.sh`.
+  - `python3 tools/adr/build_index.py --write`: "Wrote .../INDEX.json (125 entries)."
+  - `python3 tools/adr/build_index.py --check`: "CHECK OK: INDEX.json matches the ADR files and both invariants hold." (the 116 "Missing Touches" lines are pre-existing ADRs; ADR-0125 is not listed)
+  - `PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/adr`: "Ran 32 tests in 0.066s / OK"
+  - AC2: `git diff origin/main...HEAD -- CLAUDE.md docs/manager/MANAGER.md | grep '^-[^-]'` printed nothing (run after commit; same check on the staged diff before commit also printed nothing). Diff stat: see below.
+  - diff stat (staged, before commit):
+     CLAUDE.md                                        |  3 ++
+     docs/decisions/0125-fast-mode-until-phase-two.md | 65 ++++++++++++++++++++++++
+     docs/decisions/INDEX.json                        | 23 ++++++++-
+     docs/decisions/README.md                         |  1 +
+     docs/manager/MANAGER.md                          |  8 +++
+     docs/tasks/110-adr-0125-fast-mode.md             |  7 +++
+     6 files changed, 106 insertions(+), 1 deletion(-)
