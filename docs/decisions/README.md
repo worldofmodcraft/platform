@@ -105,6 +105,7 @@ ADR silently — propose a superseding ADR instead.
 - [0055](0055-wowee-defects-tracked.md) WoWee polish tracked
 - [0123](0123-reference-mod-chosen-by-task-file.md) The reference mod that drives the kernel API is chosen by task file
 - [0124](0124-remaining-roguelike-platform-role-lines.md) The remaining roguelike platform-role lines name "the reference mod"
+- [0125](0125-fast-mode-until-phase-two.md) Fast mode until phase two: the manager merges green work and takes the ★ option
 
 
 ### Rounds 3–6 (development practice, runtime reality, product surfaces)

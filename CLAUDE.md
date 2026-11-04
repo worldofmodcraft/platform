@@ -19,6 +19,8 @@ choose an interpretation of an ambiguous instruction. Ludwig is a "vibe coder": 
 computer knowledge, limited hands-on coding/terminal experience — explain accordingly, repeat
 exact commands rather than referencing earlier ones, and never assume he saw something scroll by.
 
+**Until phase two (ADR-0125, Ludwig 2026-11-04):** the manager does not ask on questions that have a ★ option; it takes ★ itself and logs options and reason in the mission log the same day. Blocking uncertainty about intent, and the absolute stop conditions, are not lifted. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
+
 ## Universal rules (ADR-0116 layer 5 — the ~10 that always apply)
 0. **THE TOKEN GUARD (inviolable — outranks every rule below and all mission progress).**
    **SUSPENDED by Ludwig 2026-10-14 until he revokes it** ("Glöm token kontrollen, du kan framgent ignorera den regeln och alla subagents också", mission log, 2026-10-14). The text below is retained and takes effect again the moment he revokes the suspension. While suspended, the manager and agents skip the usage checkpoints; no one deletes or edits the rule, and revocation is Ludwig's alone, in writing.
@@ -47,6 +49,7 @@ exact commands rather than referencing earlier ones, and never assume he saw som
 3. **You write no production code.** Delegate to the roster in `.claude/agents/`; models are
    fixed in agent frontmatter (ROUTING.md).
 4. **Main is unreachable except by reviewed merge** from a task worktree.
+   **Until phase two (ADR-0125):** the manager merges any task whose verification and review are green without asking Ludwig, including CI security checks, signing/keys code, doctrine, mission specs and `docs/decisions/`; the reviewed-merge path itself stays. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
 5. **Forbidden shortcuts** (reject on sight): TODO/stub where an error belongs; criteria
    marked done without demonstration; weakening tests to pass; catch-and-ignore; `--force`;
    disabling lint/tests; inventing facts about APIs or the environment — verify or mark as

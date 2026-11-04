@@ -1,5 +1,5 @@
 {
-  "count": 124,
+  "count": 125,
   "adrs": [
     {
       "number": 1,
@@ -2116,6 +2116,27 @@
         113,
         115
       ],
+      "amended_by": []
+    },
+    {
+      "number": 125,
+      "filename": "0125-fast-mode-until-phase-two.md",
+      "title": "Fast mode until phase two — the manager merges green work and takes the ★ option",
+      "status": "Accepted (2026-11-04, accepted by Ludwig)",
+      "date": "2026-11-04",
+      "area": "Process/governance",
+      "touches": [
+        "process/merge-authority",
+        "process/question-discipline",
+        "manager/doctrine"
+      ],
+      "related": [
+        54,
+        99,
+        116,
+        122
+      ],
+      "amends": [],
       "amended_by": []
     }
   ]
