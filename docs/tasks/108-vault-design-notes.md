@@ -1,6 +1,6 @@
 # Task 108: the vault projection also writes `docs/design/*.md` as notes at the vault folder root
 
-- **Mission:** SITE-V1 (operations tooling) — **Status:** spec-approved 2026-11-03 (manager, session 14; Ludwig's request: design docs follow the repo automatically,
+- **Mission:** SITE-V1 (operations tooling) — **Status:** review (phase 2 green 2026-11-04); was spec-approved 2026-11-03 (manager, session 14; Ludwig's request: design docs follow the repo automatically,
   "Ja", 2026-11-03; placement at the folder root, not a subfolder: Ludwig 2026-10-28 "Nej, lägg designdokumentet under Project World of Modcraft i vaultet")
 - **Agent / model:** implementer — **Budget:** small
 - **Branch / worktree:** `task/108-vault-design-notes` / `~/wt/task-108` (platform)
@@ -37,3 +37,10 @@ paragraph) in the same branch.
   - Deviation for the manager: the spec's `check` AC was met by giving `check` a repo/ref (names are not a fixed pattern); existing callers are unaffected because they run inside the repo.
   - PHASE 2 commands (when the machine is free), from `~/wt/task-108`:
     `docs/tasks/108-verify.sh` then `docs/tasks/108-verify.sh --mutate` (the latter also re-runs 051/053/061 --mutate; long). The script includes the red-first run against the pre-108 tool (base 001418f).
+- 2026-11-04 implementer, PHASE 2 (fresh clone of worldofmodcraft/platform at b0ec084, main had not moved so no merge; plain invocations, PYTHONDONTWRITEBYTECODE=1, `ps` checked before each: only worldserver/authserver busy, no other verifier):
+  - `docs/tasks/108-verify.sh` -> exit 0, "108-verify: ALL CHECKS PASSED" (includes red-first on the pre-108 tool: 27 failing; 051/053/061/052 re-runs green).
+  - `docs/tasks/108-verify.sh --mutate` -> exit 0, ALL CHECKS PASSED, no "MUTANT SURVIVED"; 81 `ok: mutant` lines across 108's 10 mutations plus the nested 051/053/061 mutation runs.
+  - Cross-script sweep, every `docs/tasks/*-verify.sh` one at a time on that head (script / exit / FAIL lines): 010a 0/0, 048 0/0, 049 1/1 (see below), 051 0/0, 052 0/0, 053 0/0, 056 0/0, 058 0/0, 059 0/0, 061 0/0, 063 0/0, 068 0/0, 072 0/0, 076 0/0, 078 0/0, 079 0/0, 080 0/0, 085 0/0, 090 0/0, 096 0/0, 102 0/0, 108 0/0.
+  - 049 red explained, not a code defect: `FAIL: HYGIENE-pyc` listed two `tools/vault/tests/__pycache__/*.pyc` in the tree under test. They were left in MY clone by the earlier 108 runs (a nested verifier/test import wrote bytecode despite the env var), and 049 checks the tree for stray bytecode. After `rm -r tools/vault/tests/__pycache__` in the clone, `049-verify.sh` -> exit 0, 0 FAIL, ALL CHECKS PASSED. Worth a follow-up: some vault verifier path still writes bytecode into the tests dir (059's territory); not fixed here (out of scope).
+  - Callers of `wom_vault.py check` with the new `--repo/--ref` (defaults `.`/`main`): grep of tools/vault shows `wom_vault.py` invoked only with `write` by `refresh-main.sh:22`, `git-hooks/post-merge:30`, `git-hooks/post-commit:30`; `install-git-hooks.sh:28-49` only copies the file (`git show main:...`). None call `check`. Remaining `check` uses are docs (`docs/tools/vault-projection.md` lines 143/145, `docs/manager/COMMANDS.md` lines 10/12), run from inside the repo, where `main` resolves, so unchanged behaviour; outside a repo `check` prints a stderr note and compares every root file. The old 051 tests of `check` stay green (test_vault 32 OK, and 051-verify green).
+  - Acceptance: AC1 done (16 tests), AC2 done (verify, mutations, red-first, 051/053/061 green), AC3 done (test mode, temp vaults only; real refresh after merge is the manager's), AC4 done.
