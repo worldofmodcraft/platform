@@ -42,3 +42,28 @@ Creating any remote, pushing, tagging on a remote, opening a PR, publishing anyt
 ---
 # Task 010b log
 - 2026-11-04 manager (session 15): spec written, gate passed solo. Baseline for `check-log-entry.sh` recorded at dispatch.
+- 2026-11-04 doc-writer (010b): **done** -- `docs/runbooks/first-publish.md` (new; Part 1 = M4 steps 1.1-1.16, Parts 2-5 written from registry `main` `428df02`), M4 section of `docs/runbooks/site-v1-manual-steps.md` rewritten (name `mbmludric/wom-test-hello-world`, public, points at Part 1, status key stays ☐, no other section touched), `docs/tasks/010b-verify.sh` plus `docs/tasks/010b-fixtures/**` (checker `check_runbook.py`, four observation transcripts, a credential positive-control file).
+  **Rehearsal (criterion 4):** Part 1 steps 1.1-1.10 and 1.13-1.15 were run verbatim as commands in a `mktemp -d` area with `HOME` pointed at it: `~/wom` was a clone of this worktree (so `origin/main` = `24d9141`), and a git `url.insteadOf` rule mapped `https://github.com/mbmludric/` to a local bare repository, so the push commands ran unchanged against a folder. Part 2 steps 2.3 and 2.4 ran against a clone of registry `main` `428df02` with a local bare "fork". Transcripts: `docs/tasks/010b-fixtures/rehearsal-part{1,2,4,5}-observed.txt`; the verify script asserts that every line of the observed "You should see" blocks appears in them (hashes, short hashes and the init path normalised). Steps 1.10 and 5.1 are real unauthenticated requests to api.github.com (404 for the new repository name; 302 for the `womcraft` membership question).
+  **Observed vs not observed per step:** observed = 1.1 (empty output), 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.15, 2.3, 4.2 (the edit on disk), 5.1. Observed against a local bare repository only, GitHub side not observed = 1.13, 1.14, 2.4. Not observed at all (talk to GitHub, change `gh` login state, or need unbuilt parts) = 1.11, 1.12, 1.16, 2.1, 2.2, 2.5, 2.6, 2.7, 3.1-3.3 (write-back is 008b-3b), 4.1, 4.3, 4.4, 5.2.
+  **Not rehearsed on principle (rule 11):** `gh auth status` and `gh auth switch` were not run by the agent; no credential file was read; no remote was created; nothing was pushed to GitHub.
+  **Remaining:** (1) Ludwig runs Part 1 (M4) and reports the 40-hex commit; (2) task 010c re-rehearses Parts 2-5 after 008b-3b and removes the markers; (3) 010 criterion 10 (his end-to-end run) stays open; (4) the header stamp of `site-v1-manual-steps.md` was left alone (file scope is the M4 section only), the M4 section carries its own review date.
+  **Findings:** (a) the machine's global git config has a name but no email, so a plain commit in the new folder would fail or guess; Part 1 therefore sets a folder-local identity using GitHub's noreply address form `37807560+mbmludric@users.noreply.github.com` (id from OPERATIONS.md; the form is GitHub's convention, not verified by a request). (b) The global git config already routes `https://github.com` through `gh auth git-credential`, so a push needs no password; step 1.13 says to stop if git asks for one. (c) The registry has no `mods/` directory yet, so step 2.3 needs `mkdir -p` (observed: plain `mkdir` failed in the first rehearsal). (d) INCIDENT: during the first Part 2 rehearsal the clone of `/home/ludwig/registry` had that checkout as its `origin`, and a push created a local branch `add-test-hello-world` (at `428df02`, equal to `main`) inside `/home/ludwig/registry`. Nothing reached GitHub. Deleting it with the forced-delete form was refused by the git-guard hook; I did not retry or work around it. The manager should delete that branch (the non-forced delete is enough because it equals `main`). The rehearsal was redone against a bare clone and the transcripts above come from that second run.
+  UNVERIFIED-LIST 010b (one line per marker in the runbook; the verify script compares this list with the file, step by step):
+  - U1 step 1.11
+  - U2 step 1.12
+  - U3 step 1.13
+  - U4 step 1.14
+  - U5 step 1.16
+  - U6 step 2.1
+  - U7 step 2.2
+  - U8 step 2.4
+  - U9 step 2.5
+  - U10 step 2.6
+  - U11 step 2.7
+  - U12 step 3.1
+  - U13 step 3.2
+  - U14 step 3.3
+  - U15 step 4.1
+  - U16 step 4.3
+  - U17 step 4.4
+  - U18 step 5.2
