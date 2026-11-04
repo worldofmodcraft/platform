@@ -3125,3 +3125,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
   changed ADRs, mission scope) becomes a manager decision on ★, logged in this mission log (projected to the vault). Until phase two (server/client) starts.
   -> **Task 110: ADR-0125** + time-bound notes in MANAGER.md / CLAUDE.md (retained text, as with the token-guard suspension). **Task 111** (test runs, option C:
   measure, de-duplicate nested sweeps, then path-filtered pre-merge + nightly full sweep in CI per ADR-0099) after 008b-2.
+- **Task 110 written** (`de4b1de`): `docs/decisions/0125-fast-mode-until-phase-two.md` + "Until phase two (ADR-0125)" notes in CLAUDE.md and MANAGER.md §2, §3.1, §7,
+  §8, §8b (additions only). **★ decisions under the new mode (logged):** (1) §8's two-stop-and-ask halt counts only events that remain Ludwig's — follows from "★
+  instead of asking"; (2) deletion of user data is kept as Ludwig's although not in his exception list — ★ the conservative option because it is irreversible and
+  CLAUDE.md treats data as ask-first; Ludwig can lift it in one sentence. Cross-script check (every platform verify script on 110's head) running.
