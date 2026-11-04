@@ -1,6 +1,6 @@
 # Task 110: ADR-0125 — fast mode until phase two (manager merges green work and decides on ★; Ludwig keeps takedowns and secrets)
 
-- **Mission:** none (governance) — **Status:** spec-approved 2026-11-04 (manager, session 14; Ludwig's decision, verbatim in the mission log 2026-11-04: "...du får
+- **Mission:** none (governance) — **Status:** done 2026-11-04 (manager, session 14; Ludwig's decision, verbatim in the mission log 2026-11-04: "...du får
   mergea allt som blir grönt självt utan min input? Samt att utgångspunkten är att du tar stjärna på alla förslag (men loggar allt i vault)? ... tills vi kommer till
   fas två och ska börja med server / client"; exceptions chosen: "Takedowns, Nycklar och hemligheter")
 - **Agent / model:** doc-writer — **Budget:** small
@@ -44,3 +44,6 @@
      docs/manager/MANAGER.md                          |  8 +++
      docs/tasks/110-adr-0125-fast-mode.md             |  7 +++
      6 files changed, 106 insertions(+), 1 deletion(-)
+- 2026-11-04 manager (session 14): `build_index.py --check` CHECK OK; CLAUDE.md/MANAGER.md diff removes 0 lines. Every platform verify script on `de4b1de`: 21 exit 0;
+  `102-verify.sh` exit 1 with its only FAIL "machine not quiet (another *-verify.sh is running)" (008b-2's registry 039a was running) — all of 102's content checks ok.
+  ★ (ADR-0125 itself, logged): merge now; re-run 102 on main once the machine is quiet. Status done; merged by the manager.
