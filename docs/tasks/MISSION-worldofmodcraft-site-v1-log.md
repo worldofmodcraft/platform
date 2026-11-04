@@ -3082,3 +3082,7 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **Final proof of the 089 sweep: whole standalone `039a-verify.sh` on registry main `0ac4d89` — exit 0, ALL CHECKS PASSED, 82 PASS, 0 FAIL** (manager's own run,
   2026-11-03T23:29Z -> 2026-11-04T06:07Z; output kept at the path in `$CLAUDE_JOB_DIR/tmp/039afinal.dir`). Every closed registry script is green on main.
   Next: 108 phase 2, then 008b-2 phase 2 -> merge #30 -> one dry-run dispatch.
+- **108 phase 2** green per author (108-verify + --mutate, 22 platform scripts after cleaning its clone). Manager fresh-clone re-run: 108-verify exit 0 **but 049-verify
+  exit 1 afterwards** (stray `tools/vault/tests/__pycache__`) — reproduces. Independent review (Opus) PWA: MED 2 explains it (108-verify runs python with `-I`, which
+  ignores PYTHONDONTWRITEBYTECODE, and no `-B`; 053/061 share the pattern), MED 1 `check` can go blind to a hand-written note; LOWs (case collisions, folder-name
+  stems ★ refuse, --note, check tests, contract wording). Not merged; fix round to the author. Booked: `-B` for 053/061-verify.
