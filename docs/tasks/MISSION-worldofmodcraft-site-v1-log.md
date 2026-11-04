@@ -3118,3 +3118,40 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 ### For Ludwig
 Nothing blocking. Optional: delete your manual vault copy `Party Board Mod - Design.md` (the projected `party-board-mod.md` replaces it).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+- **Ludwig, 2026-11-04 (verbatim):** "Behåll den här, kör klart 008b-2" — this session continues: finish 008b-2, merge #30, one dry run.
+- **Ludwig, 2026-11-04 (verbatim):** "C, kör på det. Kan vi även uppdatera ADR så att du får mergea allt som blir grönt självt utan min input? Samt att utgångspunkten
+  är att du tar stjärna på alla förslag (men loggar allt i vault)? Vill snabba upp utvecklingsprocessen lite tills vi kommer till fas två och ska börja med server /
+  client". Exceptions (AskUserQuestion answer): **"Takedowns, Nycklar och hemligheter"** stay Ludwig's; everything else (merges of anything green, accepting new or
+  changed ADRs, mission scope) becomes a manager decision on ★, logged in this mission log (projected to the vault). Until phase two (server/client) starts.
+  -> **Task 110: ADR-0125** + time-bound notes in MANAGER.md / CLAUDE.md (retained text, as with the token-guard suspension). **Task 111** (test runs, option C:
+  measure, de-duplicate nested sweeps, then path-filtered pre-merge + nightly full sweep in CI per ADR-0099) after 008b-2.
+- **Task 110 written** (`de4b1de`): `docs/decisions/0125-fast-mode-until-phase-two.md` + "Until phase two (ADR-0125)" notes in CLAUDE.md and MANAGER.md §2, §3.1, §7,
+  §8, §8b (additions only). **★ decisions under the new mode (logged):** (1) §8's two-stop-and-ask halt counts only events that remain Ludwig's — follows from "★
+  instead of asking"; (2) deletion of user data is kept as Ludwig's although not in his exception list — ★ the conservative option because it is irreversible and
+  CLAUDE.md treats data as ask-first; Ludwig can lift it in one sentence. Cross-script check (every platform verify script on 110's head) running.
+- **110 merged** (platform #106; CI check pass): **ADR-0125 fast mode is in force** (until the phase-two mission is issued). Vault refreshed. Booked: re-run 102-verify on platform main once the machine is quiet.
+- **008b-2 merged** (registry #30 -> `428df02`; `gate` pass; Ludwig's "Merge"): manager fresh-clone re-run green (verify failed=0; --mutate 41 red); author's whole 039a
+  on the merged head 83 PASS / 0 FAIL. The merge started no pipeline run (push gate works; `gh run list --workflow pipeline.yml` empty). 102-verify re-run on
+  platform main: ALL CHECKS PASSED (the earlier red was only "machine not quiet").
+- **Dry run blocked on M4:** no public mod repository exists (`mbmludric/wom-test-hello-world` and `womcraft/...` both absent); M4 (Ludwig's `test:hello-world` repo)
+  waits for task 010 (first-publish runbook + staging tree; 010a's contents are on main). ★ (ADR-0125): next work = task 111 (test-run speed, option C) and task 010.
+
+## SESSION STATUS — 2026-11-04 (session 14, final) — supersedes the handover entry above; context 93 % (hard handover)
+### Since the handover entry
+- **ADR-0125 fast mode is in force** (platform #106): until the phase-two mission is issued, the manager merges green work and takes ★ on every question, logging each
+  decision here the same day. Ludwig keeps: takedowns, anything touching credentials/secrets/keys; manager ★ also kept user-data deletion as Ludwig's (logged).
+- **008b-2 merged** (registry #30 -> `428df02`): pipeline workflow (plan/build/sign/dry-run/summary) on main, push-gated; verification and reviews green.
+- Ludwig chose option **C** for the long test runs (task 111, not started).
+### Next session starts here
+1. **Task 111 (test-run speed, Ludwig's option C):** (a) measure — time every closed registry script inside one whole 039a and record the top costs; (b) de-duplicate:
+   each closed script runs exactly once per sweep (nested sweeps in 064/066/070 and the like stop re-running others when called from 039a, as 039b's `--no-closed`
+   does); (c) per ADR-0099: pre-merge runs only the scripts that read the changed files (a file->script map, generated, with a test) + a **nightly whole sweep in
+   GitHub Actions** (parallel jobs, stop-the-line on red). Update OPERATIONS.md's cross-script rule accordingly. Spec it first (task file), then dispatch.
+2. **Task 010 (D4 first-publish runbook + staging tree for `test:hello-world`; 010a contents are on main):** spec-approve it (★ under ADR-0125), dispatch, merge.
+   Then **For Ludwig: M4** (create the repo on `mbmludric` and push, per the runbook). Then the 008b-2 **dry-run dispatch** (live criteria 7, 10, 11) using that repo.
+3. Then **094**, **008b-3a**, **008b-3b** (removes the push gate), then the D4/§7 live walkthrough with Ludwig.
+4. Booked follow-ups: as in the handover entry above, plus: `-B` in 053/061-verify (108 review); the 008b-2 worktree is removed; registry worktrees `task-039`,
+   `task-065`, `task-084` and platform ones listed above are old — check each before removing.
+### For Ludwig
+Nothing blocking right now. Coming: **M4** once task 010 is merged (the next session will give you exact click/commands).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, final) i missionsloggen och fortsätt med 'Next session starts here'."
