@@ -441,3 +441,42 @@ writes its findings to a file in the job tmp dir; the manager reads that file. (
 ### The vault projection's test mode needs its temporary vault under the system temp dir
 With `WOM_VAULT_TEST=1`, create the temporary vault with `mktemp -d` (the system temp dir), not inside the job tmp dir. (Mission log,
 session 14; task 099 used this form.)
+
+## What the rest of session 14 paid for (2026-11-02 .. 2026-11-04)
+
+### A change to a closed `*-verify.sh` is not verified until every closed script has run on the merge result
+089a1 renamed two check labels in `008a-verify.sh`; closed script 062 guards those ids, so registry main went red (fixed by task 103). 089a1 and
+089a2 were merged after the last whole sweep and deadlocked the next one (fixed by task 106). Rule: before merging a change to any closed verify
+script, run the whole `039a-verify.sh` (registry) or every platform `docs/tasks/*-verify.sh` one at a time (platform) on the merge result. Note:
+`090-verify.sh --sweep` sweeps 090's own pinned tree, not the head under test. (Mission log, session 14.)
+
+### Own-change checks read fixed SHAs only (Ludwig's decision A, 2026-10-29)
+A check that reads HEAD, `TIP..HEAD` or the merge-base with the current main is green on its branch and red on main after its merge or the next
+commit (008b1-verify was red on main until task 101). Pin BASE/FINAL/TIP; do not re-pin TIP after merging main into the branch; if the script must
+change after such a merge, use 089b's pattern: `scope_files` along the first-parent chain (a merge from a pinned main commit contributes only its
+`diff-tree --cc` files) plus a net-delta check `PIN_MAINMERGED..PIN_TIP` against take-ours merges. Build fixtures on fixed SHAs, never on HEAD text
+that a later change could alter (089b review HIGH). (Mission log; tasks 089b, 101.)
+
+### A quiet-machine wait must exclude the script's whole process tree
+A filter that excludes only its own name counts its parent `039a-verify.sh` as "another verify run" and waits 6 h, then repeats in a nested run
+(039b before task 089b; 089a1/089a2 before task 106; 089c's own nested subshell). Use 089e's `others()` shape: skip this PID, its descendants and its
+ancestors by PID/PPID; an unrelated run still counts. (Tasks 089b, 089c, 106.)
+
+### `python3 -I` ignores PYTHONDONTWRITEBYTECODE
+Use `python3 -I -B`. Without `-B`, test imports leave `__pycache__` in the tree and `049-verify.sh` fails HYGIENE-pyc afterwards (task 108;
+053/061-verify still have the pattern, booked). (Task 108.)
+
+### Long agent runs: watch them yourself
+An agent whose driver finished green never wrote its log, and the machine sat idle for two days (089b, 2026-10-31..11-02). After releasing the
+machine, start an own background watch (wait until no `docs/tasks/*-verify.sh` runs for 10-15 minutes) and nudge the agent to log when it fires.
+(Mission log, session 14.)
+
+### Small traps
+- Registry scripts that run Ajv/062/067/070 need `npm ci --prefix tools/dev` and an absolute node_modules path; without it a fresh clone shows a false
+  red (manager slip, 089b).
+- The safety check refuses `rm -r "$(cat …)"` (a removal target from a command substitution); print the path first, then remove the literal path.
+- Killing processes is denied to the manager ("Interfere With Workloads"); Ludwig runs it (`pkill -f 'while [p]grep -f'` — the bracket stops the
+  pattern matching the shell that runs it).
+- A test that pins a corpus size (the ADR tests pinned 119) turns red the day the corpus grows and hides behind a path-filtered CI workflow: platform
+  main's "ADR index" check was red from 2026-09-02 until task 105. Derive such counts from the files.
+- Design docs are projected into the vault root since task 108; a hand-placed file with a planned note's name blocks the whole refresh.
