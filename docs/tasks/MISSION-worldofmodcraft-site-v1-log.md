@@ -2950,3 +2950,171 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
    (★ B 15 rounds); Q5 the arcade driver mod. Nothing in `docs/decisions/` changes until you answer.
 5. For information: **wowdecomp** (task 097) is a decompilation of Blizzard's own client, without licence; WoWee is already 64-bit. ★ A: watch only, never use its code.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-29 (session 14, morning update 05:30Z) i missionsloggen och fortsätt med 'Next session starts here'."
+- **Ludwig, 2026-10-29 (verbatim, a pasted command):** "pkill -f 'while [p]grep -f'; pkill -f 'until fals[e]; do sleep 1000'". Run by the manager on that instruction;
+  verified: 0 `while pgrep` waiter loops, 0 stray loops, 0 processes matching the quiet filters. For Ludwig 1 done. Queue restarted: 089d standalone 039a re-run
+  (its author), then 089a1, 089c, 089e phase 2, one at a time.
+- **089d standalone 039a re-run red** (quiet-wait passed this time): `FAIL 008c-verify.sh exit 1 on HEAD: FAIL out of scope: docs/tasks/089-closed-verify-sweep-registry.md`
+  — exactly the finding part E (089e) fixes (008c's scope check reads the merge-base with *current* main, so any later branch adding files reds it). Every 089
+  branch carries extra files, so no part's 039a can be green before 089e lands. 089d's other criteria green (head `a4ce2f7`). ★ A: **089e phase 2 now**, merge
+  it, then merge main into 089d (and the others) and re-run their 039a. The 089d agent's own `pkill` of its 039a was denied (it used TaskStop instead); not retried.
+- **089e phase 2 green** (author; manager fresh-clone re-run green: 089e default + `--mutate` ALL CHECKS PASSED, plain `008c-verify.sh` SUMMARY failed=0; delta check
+  PASS). **Not merged — stopped on a systemic finding:**
+- **Manager error, found 2026-10-29 ~20:00Z: `008b1-verify.sh` is red on registry main** (fresh clone at `dd7da2d`: exit 1, `FAIL no changes since base (broken search)`).
+  008b-1's scope check uses the merge-base with the *current* main, so after its own merge the range is empty — the same defect the umbrella booked for 008c
+  (part E). The manager merged #29 without checking post-merge behaviour. Consequence: registry main's full 039a sweep is red until fixed. Same class: the 089
+  parts' AC11 "TIP..HEAD touches only own files" checks (green pre-merge, red on main after the next commit), 096-verify (pre-merge only by its own F5 note).
+  090 already uses fixed SHAs only (FINAL..PIN_TIP) and is not affected. The overnight ★ ruling expired at the morning handover; this is a design decision
+  (how verify scripts behave after merge) -> asked Ludwig; no further merges until answered.
+- **Ludwig, 2026-10-29 (AskUserQuestion answer): "A: fixed SHAs only".** Every own-change check reads only fixed commits (the 090 shape). Plan: task **101**
+  (registry) re-pin `008b1-verify.sh` to its merged range (M = `dd7da2d`) — first, it turns registry main green; task **102** (platform) the same for
+  `096-verify.sh`; fix rounds before any merge for 089a1, a2, c, d, e, 089b and 008b-2 (its scope check uses the merge-base with current main too).
+- Dispatched on decision A: **101** (registry `~/wt/registry-task-101`, re-pin 008b1-verify to M=`dd7da2d`; phases 1+2, holds the machine); **102** (platform
+  `~/wt/task-102`, re-pin 096-verify to M=`885e1f0`; write-only first); write-only fixed-SHA fix rounds to the authors of 089a1, 089a2, 089c, 089d, 089e,
+  008b-2 (PR #30 stays unmerged) and 089b (plus umbrella-copy sync). Phase-2 order afterwards: 101 merge (main green) -> 089e -> 089d (039a) -> 089c, 089a1,
+  089a2, 089b -> 102 -> 008b-2. No merge of any 089 part before its fixed-SHA round is verified.
+- **Decision-A write-only rounds done** (all pushed; log entries grew; nothing run): 089d `d6fb046` (already fixed-SHA; later-commit checks added, no red cell
+  invented), 089e `fdc6f88` (AC11.5b dropped deliberately: it measured the future; AC12 red-first), 008b-2 `ab613bb` (fixed range dd7da2d..fc712d9 = its 8 files),
+  089c `233aefe`, 089a1 `b0ee1da` (red cell on a squash-style main, since a descendant still satisfies TIP<=HEAD; standing assumption: the project merges with
+  real merge commits, `gh pr merge --merge`), 089a2 `eaf900a` (also AC0.9 `git log --all` -> at PIN_FINAL), 089b `535bbac` (umbrella copy synced; AC0.12 HEAD
+  read -> PIN_FIX; `mk_later` fixture accepts a HEAD already carrying the edit — the L3 wrong-reason fix; reviewer to confirm it hides nothing).
+  Waiting: 101 (phases 1+2, holds the machine), 102 (write-only).
+- **101 merged** (registry #31 -> `aa6e382`; `gate` pass): `008b1-verify.sh` re-pinned to 008b-1's merged range. **Registry main green again:** fresh clone at
+  `aa6e382`: `008b1-verify.sh` exit 0 (SUMMARY failed=0), `101-verify.sh --own-only` exit 0 — the new script survives its own merge (decision A in practice).
+  Review PWA (AC2.2 HEAD search -> fixed `$E_BASE`) applied; manager re-runs green at `e9aa831` and `a5d4000`.
+- 089e phase 2 dispatched on its branch with origin/main merged in (a live test that fixed-SHA checks survive a main merge).
+- **089e merged** (registry #32 -> `f30dfbd`; `gate` pass): 008c-verify.sh re-pinned. Phase 2 on the main-merged head green (the merge reddened nothing: decision A
+  holds in practice); manager re-run green; delta 2 PWA, 4 LOW booked (AC5.0 tautology alone; AC12 OLD leg "every FAIL is AC11.5"; cosmetics). On main after merge:
+  008c-verify, 008b1-verify exit 0; 089e-verify --own-only exit 0. 089d phase 2 (main merged in, then the full list incl. standalone 039a) dispatched.
+- **Ludwig, 2026-10-30 (verbatim):** "Ok, kör vidare". Status at 21:29Z: 089d's standalone 039a (main merged in, head `ea2567e`) has run 6h51m and sits in its
+  nested `039b-verify.sh` (started 6h47m ago): the S4/Q7 deadlock 089b found — on main 039a runs 039b without `--no-closed`, so 039b's AC12 sweep waits for its
+  parent 039a up to 21600 s and FAILs. The fix lives in 089b's branch (unmerged). Consequence: no standalone 039a can pass on main before 089b merges.
+  New order: 089b phase 2 next (its branch has the fix), merge it, then re-run 089d's 039a on main, then 089c, 089a1, 089a2, 102, 008b-2.
+- **Ludwig, 2026-10-31 (verbatim):** "Ok, kör vidare". 089d's stuck 039a stopped by its own agent (TaskStop; no kill): 59 PASS / 0 FAIL before the 039b deadlock;
+  006, 007a, 007b, 008a, 008b1, 008c, 032, 034 green on the main-merged head `ea2567e` (the 008c blocker is gone). 089d's other criteria green there; head `b3570a1`.
+  **089b phase 2 dispatched** (main merged in, then default/own-only/mutate and the whole 039a; its branch has the --no-closed fix).
+- 2026-11-02: **manager slip** — 089b's driver finished green 2026-10-31T16:59Z but its agent never wrote the log and the manager waited for a report instead of
+  following up; the machine sat idle ~2 days. Caught at Ludwig's status request; agent resumed, log written (`036420f`). 089b review (Opus) PASS-WITH-AMENDMENTS:
+  **HIGH** fixtures built on HEAD match literal text that announced later changes (R11 configured; 008b ownership carve-out) will alter -> 089b-verify would go red
+  on main (breaks decision A); fix round: fixtures on PIN_TIP/PIN_FINAL, revert the `mk_later` tolerance (Q12 ★ A stands), AC13 reads the committed script,
+  AC13.2 strict. INFO for Ludwig (non-blocking, manager reading): Q8-A makes 039a red if a pinned 039a test is renamed/removed — the manager classifies that as a
+  deliberate live guard (removing 039a's tests needs a task that updates 039a), not an own-change check.
+- **089b p3** (head `1fe3c1b`): red-first shown (RED commit: AC14.1 "13 fixture line(s) ... on $HEADREV" red); head: AC14.1, AC14.2, AC13.2b green, `--mutate`
+  ALL CHECKS PASSED, but default 1 FAIL — **AC11.5: BASE..TIP spans the branch's merge of origin/main**, so main's files (008b-1, 101, 089e) look out of scope.
+  Fix ★ (same definition as part D / Q6 ★ A): a first-parent merge whose second parent is an ancestor of a pinned main commit contributes only its `--cc` files.
+  **Rule for the remaining parts (089c, 089a1, 089a2, 008b-2):** keep TIP pinned before any merge of main, or apply that definition; 089d and 089e passed after
+  merging main only because their TIP predates the merge.
+- **089b** green at `84f0d95` (default 73 PASS, --mutate 4/4); delta check (Opus) PWA: HIGH closed; MEDIUM — a `-s ours` merge from main can revert a main
+  file without diff-tree --cc listing it -> AC11.5c (`PIN_MAINMERGED..PIN_TIP` within scope) + AC15.4 fixture; real history clean. **Booked: the same check for
+  089d** (its fixed range predates its main merge, so its exposure is only via a future main merge). One more 089b round, then merge.
+- **089b merged** (registry #33 -> `9fb706d`; `gate` pass): contract/R11 pins, 039a runs 039b with `--no-closed` (deadlock fix now on main). Final rounds: fixtures
+  on PIN_TIP (review HIGH), AC11.5 merge-from-main rule (`--cc`), AC11.5c net-delta check (take-ours MED). Manager fresh-clone re-run green at `904a1d2`
+  (default + --mutate) — after a **manager slip**: a first re-run without `npm ci --prefix tools/dev` showed 9+1 FAILs (the script needs tools/dev/node_modules
+  and fails loudly without it); not a defect. Another slip: an `rm -r "$(cat …)"` was refused by the safety check (target from a substitution); re-done with the
+  literal path. 089d dispatched: merge main, standalone 039a.
+- **089d merged** (registry #34 -> `903b546`; `gate` pass): standalone 039a on the main-merged head green (77 PASS, 0 FAIL, 039b once with --no-closed; raw output
+  read by the manager); manager re-run green; delta review PASS (3 LOW booked; latent take-ours hole in 092's post-TIP rule booked — live exposure nil).
+  **089c phase 2 dispatched** (merge main, PIN_TIP stays pre-merge, full list).
+- **089c phase 2 stopped on a harness defect:** `quiet_wait` excluded only its direct parent, so the nested subshell of 089c-verify.sh itself counted as "another
+  verify script" (never quiet; first time the function ran — phase 1 was write-only). RED-commit run red as designed; merged head `--own-only` green. Q4 answered by
+  the manager from the 089b precedent: option A — transitive exclusion (089e's `others()` shape), content commit after the main merge with 089b's scope pattern
+  (`--cc` for merges from a pinned main commit + AC11.5c net delta + take-ours fixture). Re-run dispatched.
+- **089c merged** (registry #35 -> `99b62c0`; `gate` pass): phase 2 green after a quiet_wait self-count fix (transitive exclusion) and 089b's scope pattern (Q4 A);
+  manager re-run green (own-only, default, mutate); delta review PWA, 3 LOW booked. **089a1 phase 2 dispatched** with the 089b/089c lessons (no TIP re-pin after the
+  main merge; no fixtures on HEAD; npm ci + absolute paths).
+- **089a1 merged** (registry #36 -> `4eca251`; `gate` pass): phase 2 green on the main-merged head; manager re-run green (089a1 three modes; 007a/007b/008a);
+  delta review PASS (4 LOW, 2 INFO booked: AC11 does not measure the commits that ship the current script; no red-first cell for the frame switch; one inaccurate
+  log claim; merge-commit precondition unstated). **089a2 phase 2 dispatched**: first move its HEAD-text later-branch fixtures to PIN_FINAL (089b review HIGH),
+  merge main, adopt 089b's scope pattern for the post-merge change, then the full list incl. whole 057, 062, 070.
+- **Manager error, found by 089a2's phase 2 (2026-11-02): registry main red since 089a1's merge.** Fresh clone at `4eca251`: `062-verify.sh` exit 1, `FAIL AC6L.008a`
+  — 089a1 rewrote the two labels of 008a's README check, and closed script 062 guards that 008a's check ids never disappear. The manager's pre-merge re-run of
+  089a1 ran its own scripts but not 062 or a whole 039a sweep (criterion 9 limited to own scripts by Q6 A), so the cross-script coupling slipped through.
+  **Fix: task 103** (restore the two label strings exactly; keep the pinned-blob behaviour; 062 untouched). **Lesson / rule from now on:** before merging any change
+  to a closed `*-verify.sh`, run 062 (and 070, which runs it) or a whole 039a sweep on the merge result. 089a2 waits for 103 (its 062 red is this).
+- **103 merged** (registry #37 -> `7a049d0`; `gate` pass): 008a's two README check labels restored exactly. Manager diff review + fresh-clone re-run (008a, 062 whole,
+  103 all exit 0). **Registry main green again:** fresh clone at `7a049d0`: `062-verify.sh` exit 0, 0 FAIL. 089a2 re-dispatched (merge main; 062 whole and
+  --mutate; 070 whole).
+- **089a2 merged** (registry #38 -> `2939bef`; `gate` pass): phase 2 green on the main-merged head (089a2 own-only/default/mutate, 057 whole, 062 whole + --mutate with
+  AC4.057 applying, 070 whole); manager re-run green **incl. 062 and 070 whole on the head that merges**; delta PWA (wording LOW booked). On main after merge:
+  062-verify exit 0, 0 FAIL. **The 089 sweep (parts A1, A2, B, C, D, E) is complete on registry main.** Next: 102 phase 2 (platform), then a whole 039a sweep on
+  registry main as the final proof, then 008b-2 phase 2 (PR #30 stays for Ludwig).
+- **102 merged** (platform #99 -> `30f7258`; vault refreshed): 096-verify re-pinned to its merged range. Phase 2 green incl. all 21 platform `*-verify.sh` on the head
+  (the platform form of the cross-script rule; the manager first pointed the agent at `090 --sweep`, which sweeps 090's own pinned tree — corrected to a loop over
+  every script). Manager diff review + fresh-clone re-run green. On platform main after merge: 096-verify and 102-verify exit 0 ALL CHECKS PASSED.
+- **Final proof of the 089 sweep started:** whole standalone `039a-verify.sh` on registry main `2939bef` (manager, fresh clone, `npm ci`), ~6 h. Then 008b-2 phase 2.
+- **Ludwig, 2026-11-03 (verbatim):** "Party mos becomes the reference mod. Star on all questions" -> ADR-0123 approved: Q1 A, Q2 B, Q3 A, Q4 B, Q5 A. **Task 104**
+  (platform `~/wt/task-104`) adds it to `docs/decisions/` exactly as proposed, the Amended-by lines in 0001/0050, the index; design doc questions marked answered.
+  Booked for Ludwig: the five ADR lines that still give the roguelike a platform role (0051:16, 0113:14, 0097, 0098:15, 0115:44).
+- **104 written** (`50c536a`): `docs/decisions/0123-reference-mod-chosen-by-task-file.md` (Accepted 2026-11-03; amendment text byte-identical to the proposal), one
+  Amended-by header line each in 0001 and 0050 (manager checked), README index line, INDEX.json regenerated; manager re-ran `tools/adr/build_index.py --check`:
+  "CHECK OK". Merge waits for every platform `*-verify.sh` on 104's head (cross-script rule; 010a and 080 read docs/decisions) — after the registry 039a sweep.
+- **Ludwig (verbatim):** "ADR-0123 har fortfarande inte synkat med vault" — it is not merged (the vault projects main). Fast path: the two platform verify scripts that
+  read docs/decisions (010a, 080) run on 104's head: both exit 0. PR #100 opened; its CI "check" **fails: `test_real_corpus_has_119_adrs_and_is_clean` (123 != 119)** —
+  **pre-existing:** platform main's "ADR index" workflow has failed on every run since 2026-09-02 (it pins 119 ADRs; ADR-0120 broke it; the path filter hid it). Not
+  merged past a red check. **Task 105** (qa-engineer): the real-corpus tests derive their counts from the files; then 104 merges and the vault syncs.
+- Also seen: the registry 039a sweep on main (started ~07:43Z) has been ~9 h inside its child `089a1-verify.sh` — likely 089a1's quiet-wait counts its parent 039a
+  (the 039b-class deadlock). To investigate after 104.
+- **Manager error 2 (same class): the whole 039a on registry main deadlocked in `089a1-verify.sh`** — its quiet filter excludes only its own name, so it counts its
+  parent 039a (6 h wait, then again in its nested run); 089a2 has the same filter. Both were merged after the last whole 039a sweep, so never exercised as 039a
+  children. Stopped (TaskStop, own job). **Task 106** (registry): transitive ancestor exclusion in both (089e shape), red-first, then the whole 039a on the branch.
+  Rule reinforced: a change to any closed script is not "verified" until a whole 039a (registry) / all-scripts loop (platform) has run on the merge result.
+- **105 merged** (platform #101; CI "check" pass — the ADR index workflow green for the first time since 2026-09-02). **104 merged** (platform #100 -> `a26b778`;
+  main merged in first; CI check pass ×2): **ADR-0123 accepted on main** (`docs/decisions/0123-reference-mod-chosen-by-task-file.md`), Amended-by lines in 0001/0050,
+  index; `refresh-main.sh`: written=9, id_conflicts=0 — ADR-0123 is now projected into the vault (answer to Ludwig's "har fortfarande inte synkat").
+- 106 running (registry: quiet-wait ancestor fix, then whole 039a).
+- **Ludwig, 2026-11-03 (verbatim):** "1. Please copy it for me. 2. Merge. 3. Amend them all". (1) The manager cannot: git-guard blocks every manager/agent command
+  that touches the vault; not worked around; Ludwig given the `! cp …` one-liner and offered a projection task for `docs/design/`. (2) PR #30 (008b-2) to be merged
+  after its unrun fixed-SHA round is verified (phase 2 after task 106 frees the machine), then one dry-run dispatch (the ★ A he chose). (3) **ADR-0124** (task 107):
+  amend 0051:16, 0113:14, 0097 (lines 1, 7), 0098:15, 0115:44 and 0001:19 the same way as 0123 (the reference mod, named by task file).
+- **107 merged** (platform #102; CI check pass): **ADR-0124 accepted** — the remaining roguelike platform-role lines (0001 design-kit line, 0051, 0097, 0098, 0113,
+  0115) name "the reference mod" per ADR-0123; one Amended-by header line each. Manager checks: readings vs approved meaning, index CHECK OK, header diff, 010a/080
+  verify and ADR tests green on the head. Vault refreshed (ADR-0124 projected).
+- **Ludwig ran the vault copy himself (2026-11-03, via `!`):** `cp ~/wom/docs/design/party-board-mod.md "$(cat ~/.config/wom/vault-path)/Party Board Mod - Design.md"`
+  -> completed with no output (success). For Ludwig item "design doc into the vault" done. (Static copy: later edits to the design doc do not reach the vault unless
+  copied again or the projection learns `docs/design/` — offered as a task, not started.)
+- **Ludwig (verbatim):** "Allt som skrivs till vault ska ju redan synas mellan alla enheter?" — yes (the vault syncs via Obsidian LiveSync per the projection
+  contract); the caveat was only that a manual copy does not follow later repo edits. Then **"Ja"** to automatic design-doc notes -> **task 108** (platform
+  `~/wt/task-108`, implementer, phase 1): the projection writes `docs/design/<stem>.md` as `<stem>.md` at the vault folder root (Ludwig's placement), mirroring 061.
+  Ludwig may delete his manual copy `Party Board Mod - Design.md` once the projected `party-board-mod.md` appears (the tool never deletes).
+- **106 merged** (registry #39 -> `0ac4d89`; `gate` pass): 089a1/089a2 quiet filters exclude self/descendants/ancestors (089e shape). The author's whole 039a on the
+  branch reported all 32 closed scripts green + 373 tests, but kept no output file; manager re-ran 106-verify and both `--own-only` (green) and **started the whole
+  039a on registry main `0ac4d89` itself, output kept in the job tmp dir** — the final proof of the 089 sweep. Task 108 (vault design notes) phase 1 done (`b0ec084`);
+  its phase 2 and 008b-2's phase 2 wait for this 039a.
+- **Final proof of the 089 sweep: whole standalone `039a-verify.sh` on registry main `0ac4d89` — exit 0, ALL CHECKS PASSED, 82 PASS, 0 FAIL** (manager's own run,
+  2026-11-03T23:29Z -> 2026-11-04T06:07Z; output kept at the path in `$CLAUDE_JOB_DIR/tmp/039afinal.dir`). Every closed registry script is green on main.
+  Next: 108 phase 2, then 008b-2 phase 2 -> merge #30 -> one dry-run dispatch.
+- **108 phase 2** green per author (108-verify + --mutate, 22 platform scripts after cleaning its clone). Manager fresh-clone re-run: 108-verify exit 0 **but 049-verify
+  exit 1 afterwards** (stray `tools/vault/tests/__pycache__`) — reproduces. Independent review (Opus) PWA: MED 2 explains it (108-verify runs python with `-I`, which
+  ignores PYTHONDONTWRITEBYTECODE, and no `-B`; 053/061 share the pattern), MED 1 `check` can go blind to a hand-written note; LOWs (case collisions, folder-name
+  stems ★ refuse, --note, check tests, contract wording). Not merged; fix round to the author. Booked: `-B` for 053/061-verify.
+- **108 merged** (platform #103 -> `f06a621`): manager re-run 108-verify then 049 in one fresh clone green (.pyc leak gone); review -> fix round -> delta PASS.
+  `refresh-main.sh` wrote `party-board-mod.md` and `party-board-mod-proposed-adr.md` at the vault folder root — design docs now follow the repo. Ludwig may delete
+  his manual copy `Party Board Mod - Design.md`. Booked: `-B` in 053/061-verify; Runbooks case-variant collisions. **Ludwig: "Ok, kör vidare"** -> 008b-2 phase 2.
+
+## SESSION STATUS — 2026-11-04 (session 14, handover)
+### Done in session 14 (2026-10-28 .. 2026-11-04), all merged
+- **Registry:** 008b-1 pipeline planner (#29); 101 re-pin 008b1-verify (#31); 089e (#32), 089b (#33, 039a/039b deadlock fix), 089d (#34), 089c (#35), 089a1 (#36),
+  089a2 (#38) — the whole closed-verify sweep (089); 103 restore 008a labels (#37); 106 quiet-wait ancestors (#39). **Proof: whole `039a-verify.sh` on registry main
+  `0ac4d89` exit 0, 82 PASS, 0 FAIL** (manager's own run, output kept).
+- **Platform:** 090, 096, 098 (party board mod design doc), 099, 100, 102 (re-pin 096-verify), 104 **ADR-0123** (party mod = reference mod; Q1 A, Q2 B, Q3 A, Q4 B,
+  Q5 A), 105 (ADR tests derive counts; ADR CI green again after being red since 2026-09-02), 107 **ADR-0124** (remaining roguelike platform-role lines), 108 (vault
+  projects `docs/design/*.md`; design docs now follow the repo into the vault), 109 (OPERATIONS gotchas). 097 wowdecomp survey (★ A watch only).
+- Ludwig's decisions recorded verbatim in this log: overnight ruling (expired), decision A "fixed SHAs only", ADR-0123 answers, "Amend them all", "Merge" (#30).
+### In progress (state on disk)
+- **008b-2 / registry PR #30** (`~/wt/registry-task-008b2`, branch head `410f51e` = main merged in): phase 2 running by its agent — `008b2-verify.sh`, `--mutate`, unit
+  suite, then the whole 039a on the merged head (started ~08:30Z 2026-11-04). Ludwig approved "Merge".
+### Next session starts here
+1. Read 008b-2's task log (`docs/tasks/008b2-pipeline-build-sign.md` on its branch). If green: manager fresh-clone re-run (008b2-verify default + --mutate; read the
+   039a output), merge #30 (registry `gate` must pass), then **one dry-run dispatch** of `pipeline.yml` (workflow_dispatch, `dry_run=true` with the
+   `dry_run_source_url`/`dry_run_commit`/`dry_run_id`/`dry_run_version` inputs pointing at a known commit; signs only with an ephemeral key) and record the run URL
+   for live criteria 7, 10, 11 in its log.
+2. Then the mission's remaining chain: **094** (ECMA patterns; re-check its delta), **008b-3a** (ownership carve-out), **008b-3b** (write-back job; removes the push
+   gate) — every closed-script change verified by a whole 039a on the merge result (OPERATIONS.md, task 109).
+3. Then the D4/§7 live walkthrough with `test:hello-world` (runbook `docs/runbooks/first-publish.md`), which needs Ludwig.
+4. Booked follow-ups (none blocking): `-B` in 053/061-verify; Runbooks case-variant collisions; 092 post-TIP take-ours warning comment; LOW findings of 089a1, 089a2,
+   089c, 089d, 089e, 090, 096 (in their task logs); 066 C3b full 062 output; 089 part F (008a section-2 greps); 065:73 / 075:44 is-ancestor HEAD; 008b-2
+   "verify before key write" and F6 per-leg environment approvals; old worktrees (`~/wom/.claude/worktrees/session-9-specs`, `session-10`, `~/wt/session-11c`,
+   `session-13`, `task-010a`, `task-023`, `task-058`; registry `task-039`, `task-065`, `task-084`) — check each before removing; pipeline App unused-key cleanup
+   after 008b-3b; minisign offline backup (Q-H) unconfirmed.
+### For Ludwig
+Nothing blocking. Optional: delete your manual vault copy `Party Board Mod - Design.md` (the projected `party-board-mod.md` replaces it).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, handover) i missionsloggen och fortsätt med 'Next session starts here'."
