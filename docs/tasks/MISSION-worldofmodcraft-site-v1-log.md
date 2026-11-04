@@ -3118,3 +3118,4 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 ### For Ludwig
 Nothing blocking. Optional: delete your manual vault copy `Party Board Mod - Design.md` (the projected `party-board-mod.md` replaces it).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+- **Ludwig, 2026-11-04 (verbatim):** "Behåll den här, kör klart 008b-2" — this session continues: finish 008b-2, merge #30, one dry run.
