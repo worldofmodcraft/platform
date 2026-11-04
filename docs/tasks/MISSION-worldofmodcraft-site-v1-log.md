@@ -3079,3 +3079,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   branch reported all 32 closed scripts green + 373 tests, but kept no output file; manager re-ran 106-verify and both `--own-only` (green) and **started the whole
   039a on registry main `0ac4d89` itself, output kept in the job tmp dir** — the final proof of the 089 sweep. Task 108 (vault design notes) phase 1 done (`b0ec084`);
   its phase 2 and 008b-2's phase 2 wait for this 039a.
+- **Final proof of the 089 sweep: whole standalone `039a-verify.sh` on registry main `0ac4d89` — exit 0, ALL CHECKS PASSED, 82 PASS, 0 FAIL** (manager's own run,
+  2026-11-03T23:29Z -> 2026-11-04T06:07Z; output kept at the path in `$CLAUDE_JOB_DIR/tmp/039afinal.dir`). Every closed registry script is green on main.
+  Next: 108 phase 2, then 008b-2 phase 2 -> merge #30 -> one dry-run dispatch.
