@@ -3086,3 +3086,6 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
   exit 1 afterwards** (stray `tools/vault/tests/__pycache__`) — reproduces. Independent review (Opus) PWA: MED 2 explains it (108-verify runs python with `-I`, which
   ignores PYTHONDONTWRITEBYTECODE, and no `-B`; 053/061 share the pattern), MED 1 `check` can go blind to a hand-written note; LOWs (case collisions, folder-name
   stems ★ refuse, --note, check tests, contract wording). Not merged; fix round to the author. Booked: `-B` for 053/061-verify.
+- **108 merged** (platform #103 -> `f06a621`): manager re-run 108-verify then 049 in one fresh clone green (.pyc leak gone); review -> fix round -> delta PASS.
+  `refresh-main.sh` wrote `party-board-mod.md` and `party-board-mod-proposed-adr.md` at the vault folder root — design docs now follow the repo. Ludwig may delete
+  his manual copy `Party Board Mod - Design.md`. Booked: `-B` in 053/061-verify; Runbooks case-variant collisions. **Ludwig: "Ok, kör vidare"** -> 008b-2 phase 2.
