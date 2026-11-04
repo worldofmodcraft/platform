@@ -3162,3 +3162,22 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
   - **Split 111 into 111a/b/c.** Options: A★ measure first with a new driver and no closed script changed, then specify de-duplication and path filters from data; B one task doing all three on assumptions. Reason: CLAUDE.md rule 7; a survey found no machine-readable file->script map and at least 13 scripts with nested calls, so the size of (b) and (c) is unknown until measured.
   - **Split 010b/010c.** Options: A★ ship the runbook now with Part 1 (M4) rehearsed and later steps marked, final rehearsal in 010c after 008b-3b; B wait for 008b-3b. Reason: B blocks M4 and the 008b-2 dry run on the whole remaining chain.
   - **Runbook identity:** Ludwig pushes with his stored `mbmludric` login via `gh auth switch`, and each such section ends by switching back to `womcraft`. Options: A★ as stated; B web upload only. Reason: tag and exact commit are needed, which the web upload does badly; the switch shows no token. Agents never run a switch.
+
+## SESSION STATUS — 2026-11-04 (session 15, HALTED on a MANAGER.md §8 absolute stop condition)
+### The stop
+**An agent modified state outside its worktree.** While rehearsing task 010b's Part 2, the doc-writer cloned `/home/ludwig/registry`, so the clone's `origin` was that checkout, and a push created local branch `add-test-hello-world` in it (19:19:23Z). It then tried `git branch -D` once; git-guard refused it (`2026-11-04T20:19:27+0100 branch-D block doc-writer`, `~/.config/wom/git-guard.log`); no retry in that log. The agent recorded the incident in its own task log and redid the rehearsal against a bare clone.
+### Audit (manager, read-only, no fix attempted)
+- `/home/ludwig/registry/.git/refs/heads/add-test-hello-world` = `428df02`, the same as its `main` and `origin/main`; its reflog has the one push entry. HEAD is still `main`. The ref adds no commit.
+- GitHub: `git ls-remote` of registry shows no such branch; `refs/heads/main` = `428df02` (expected). Platform `main` = `24d9141` (expected, #108). `mbmludric/wom-test-hello-world` answers 404: nothing created.
+- `~/.gitconfig` unchanged (mtime 2026-08-12). `~/wom` HEAD is `main`. No credential touched per the agent's log; **the agent's transcript was not audited**, and `git status` in `~/registry` could not be read (worktree isolation refuses `git -C` on shared checkouts, so I did not run it; the working tree there is unaudited).
+- Also seen in the guard log: `2026-11-04T20:22:06+0100 rm-rf block reviewer` (one refusal, 111a's reviewer; no retry logged, nothing removed).
+- **Spec defect, mine:** 010b's Forbidden list banned remotes and pushes, but its context told the agent to read registry files "through a fresh clone" without naming the source, and it did not forbid a rehearsal push to a clone whose origin is a shared checkout. Fix for future specs: clone from the GitHub URL or a bare copy.
+### State of the work (nothing merged since #108)
+- **010b:** stopped at its 50-turn cap (§8: budget stop). `~/wt/task-010b`, branch `task/010b-first-publish-runbook`, commit `fd4473d`, **not pushed as far as I checked: not on the list of registry refs because it is a platform branch; unverified**. Log edit and `docs/tasks/010b-verify.sh` are uncommitted. Verify run by the manager: **1 FAIL** ("not mode 100755 in git", because the script is uncommitted). No report delivered, no review. Its log claims "done"; treat that as unverified.
+- **111a:** fix round pushed, registry `task/111a-sweep-measure` head `ab2dc5a`. Author's fresh-clone verify and `--mutate` reported green; first review PASS-WITH-FINDINGS (findings 1-5 addressed by the fix round). **Not re-run by the manager, not re-reviewed, no PR.** The real measurement has not run.
+### For Ludwig
+**Q-S15: may the session resume?** Absolute stop conditions are not lifted by ADR-0125, so this is yours.
+- A★ Resume, treating it as contained: delete the stray ref with the non-forced `git branch -d` (it adds no commit), then finish 010b and 111a.
+- B Stay halted until a deeper audit (agent transcript and the `~/registry` working tree) is reported to you.
+### Next session starts here (after Ludwig's answer)
+1. Delete the stray branch. 2. 010b: commit the verify script and log, re-run, independent review, merge. 3. 111a: manager re-run, re-review, merge, then the real measurement on a quiet machine; spec 111b/111c from it. 4. Give Ludwig M4 from Part 1 of `first-publish.md`. 5. Dry run, 094, 008b-3a, 008b-3b. Booked: rehearsal rule for OPERATIONS.md (above).
