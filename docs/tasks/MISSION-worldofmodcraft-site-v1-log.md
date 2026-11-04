@@ -3155,3 +3155,10 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
 ### For Ludwig
 Nothing blocking right now. Coming: **M4** once task 010 is merged (the next session will give you exact click/commands).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, final) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## SESSION 15 — 2026-11-04 (running log)
+- **Plan:** 111a (measure), 010b (runbook, unblocks M4) in parallel; then the measurement, 111b/111c from its data; M4 with Ludwig; dry run; 094, 008b-3a, 008b-3b.
+- **★ decisions under ADR-0125 (logged the same day):**
+  - **Split 111 into 111a/b/c.** Options: A★ measure first with a new driver and no closed script changed, then specify de-duplication and path filters from data; B one task doing all three on assumptions. Reason: CLAUDE.md rule 7; a survey found no machine-readable file->script map and at least 13 scripts with nested calls, so the size of (b) and (c) is unknown until measured.
+  - **Split 010b/010c.** Options: A★ ship the runbook now with Part 1 (M4) rehearsed and later steps marked, final rehearsal in 010c after 008b-3b; B wait for 008b-3b. Reason: B blocks M4 and the 008b-2 dry run on the whole remaining chain.
+  - **Runbook identity:** Ludwig pushes with his stored `mbmludric` login via `gh auth switch`, and each such section ends by switching back to `womcraft`. Options: A★ as stated; B web upload only. Reason: tag and exact commit are needed, which the web upload does badly; the switch shows no token. Agents never run a switch.
