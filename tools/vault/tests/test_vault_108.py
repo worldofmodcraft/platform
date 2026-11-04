@@ -211,6 +211,140 @@ class TestAC7Vault(Base108):
         self.assertIn("added: Stray.md", out)
 
 
+class TestCaseAndFolders(Base108):
+    def test_case_variants_of_two_design_docs_are_an_error(self):
+        r = self.ds_repo(extra={"docs/design/Foo.md": "a\n", "docs/design/foo.md": "b\n"})
+        vault = self.mk("v-case")
+        rc, out, err, _ = self.write(r, vault=vault)
+        self.assertNotEqual(rc, 0)
+        self.assertIn("collides", err)
+        self.assertNotIn("Traceback", err)
+        self.assertEqual(os.listdir(vault), [])
+
+    def test_stem_equal_to_a_vault_folder_name_is_an_error(self):
+        for stem in ("ADR", "Runbooks", "Journal", "adr", "journal"):
+            with self.subTest(stem):
+                r = self.ds_repo(extra={"docs/design/%s.md" % stem: "x\n"})
+                vault = self.mk("v-folder-" + stem)
+                rc, out, err, _ = self.write(r, vault=vault)
+                self.assertNotEqual(rc, 0)
+                self.assertIn("folder", err)
+                self.assertNotIn("Traceback", err)
+                self.assertEqual(os.listdir(vault), [])
+
+
+class TestNoteFlag(Base108):
+    def test_note_selects_a_design_note(self):
+        r = self.ds_repo()
+        rc, out, err, _ = self.run_tool(["write", "--ref", "main", "--note", "Other.md"], cwd=r.path)
+        self.assertEqual(rc, 0, err)
+        self.assertEqual(set(self.files(self.vault)), {"Other.md"})
+
+    def test_note_naming_an_unplanned_root_note_is_still_refused(self):
+        r = self.ds_repo()
+        rc, out, err, _ = self.run_tool(["write", "--ref", "main", "--note", "Nope.md"], cwd=r.path)
+        self.assertNotEqual(rc, 0)
+        self.assertIn("not planned", err)
+        self.assertEqual(os.listdir(self.vault), [])
+
+
+class TestCheckNames(Base108):
+    """`check` must ignore exactly the names `write` would write, and never become blind to a hand-written note."""
+
+    def baseline(self, r, extra_args=(), cwd=None, env=None):
+        base = os.path.join(self.base, "baseline.json")
+        rc, out, err, _ = self.run_tool(["check", "--save-baseline", base] + list(extra_args), cwd=cwd or r.path,
+                                        extra_env=env)
+        return rc, err, (open(base).read() if os.path.exists(base) else "")
+
+    def test_hand_written_note_named_like_a_refused_design_doc_stays_visible(self):
+        for name in ("MINISIGN", "Status"):
+            with self.subTest(name):
+                r = self.ds_repo(extra={"docs/design/%s.md" % name: "x\n"})
+                vault = self.mk("v-hand-" + name)
+                self.vault = vault
+                open(os.path.join(vault, "%s.md" % name), "wb").write(b"hand\n")
+                rc, err, text = self.baseline(r)
+                self.assertEqual(rc, 0, err)
+                if name == "MINISIGN":
+                    self.assertIn("MINISIGN.md", text, "check went blind to a hand-written note")
+
+    def test_symlink_design_doc_is_not_a_planned_name_for_check(self):
+        r = self.ds_repo()
+        os.symlink("vault-design.md", os.path.join(r.path, "docs/design/link.md"))
+        t53.commit_at(r, "add symlink", "2026-11-03T11:00:00+00:00")
+        open(os.path.join(self.vault, "link.md"), "wb").write(b"hand\n")
+        rc, err, text = self.baseline(r)
+        self.assertEqual(rc, 0, err)
+        self.assertIn("link.md", text)
+
+    def test_ref_flag_takes_names_from_that_ref_not_from_main(self):
+        r = self.ds_repo()
+        r.git("checkout", "-q", "-b", "alt")
+        r.git("rm", "-q", "docs/design/Other.md", "docs/design/vault-design.md")
+        r.put("docs/design/Alt.md", "alt\n")
+        t53.commit_at(r, "alt design set", "2026-11-03T12:00:00+00:00")
+        r.git("checkout", "-q", "main")
+        for n in ("vault-design.md", "Other.md", "Alt.md"):
+            open(os.path.join(self.vault, n), "wb").write(b"---\ngenerated: true\n---\nx\n")
+        rc, err, text = self.baseline(r)
+        self.assertEqual((rc, "Alt.md" in text, "Other.md" in text), (0, True, False))
+        rc, err, text = self.baseline(r, ["--ref", "alt"])
+        self.assertEqual((rc, "Alt.md" in text, "Other.md" in text, "vault-design.md" in text), (0, False, True, True))
+
+    def test_repo_flag_works_from_another_directory(self):
+        r = self.ds_repo()
+        self.assertEqual(self.write(r)[0], 0)
+        elsewhere = self.mk("elsewhere")
+        rc, err, text = self.baseline(r, ["--repo", r.path], cwd=elsewhere)
+        self.assertEqual(rc, 0, err)
+        self.assertNotIn("vault-design", text)
+        self.assertNotIn("unknown", err)
+
+    def test_outside_a_repo_falls_back_with_a_note_and_reports_design_notes(self):
+        r = self.ds_repo()
+        self.assertEqual(self.write(r)[0], 0)
+        rc, err, text = self.baseline(r, cwd=self.mk("norepo"))
+        self.assertEqual(rc, 0, err)
+        self.assertIn("planned design notes unknown", err)
+        self.assertIn("vault-design.md", text)
+        self.assertNotIn("Traceback", err)
+
+    def test_unresolvable_ref_falls_back(self):
+        r = self.ds_repo()
+        self.assertEqual(self.write(r)[0], 0)
+        rc, err, text = self.baseline(r, ["--ref", "no-such-ref"])
+        self.assertEqual(rc, 0, err)
+        self.assertIn("planned design notes unknown", err)
+        self.assertIn("Other.md", text)
+
+    def test_missing_git_binary_is_a_note_not_a_traceback(self):
+        r = self.ds_repo()
+        self.assertEqual(self.write(r)[0], 0)
+        bindir = self.mk("pybin")
+        os.symlink(sys.executable, os.path.join(bindir, "python3"))
+        rc, err, text = self.baseline(r, env={"PATH": bindir})
+        self.assertEqual(rc, 0, err)
+        self.assertNotIn("Traceback", err)
+        self.assertIn("planned design notes unknown", err)
+
+    def test_non_utf8_design_path_is_a_named_error_for_write_and_a_note_for_check(self):
+        r = self.ds_repo()
+        bad = os.path.join(os.fsencode(r.path), b"docs/design/\xff.md")
+        open(bad, "wb").write(b"x\n")
+        t53.commit_at(r, "non-utf8 name", "2026-11-03T11:00:00+00:00")
+        vault = self.mk("v-utf8")
+        rc, out, err, _ = self.write(r, vault=vault)
+        self.assertNotEqual(rc, 0)
+        self.assertNotIn("Traceback", err)
+        self.assertIn("UTF-8", err)
+        self.assertEqual(os.listdir(vault), [])
+        rc, err, text = self.baseline(r)
+        self.assertEqual(rc, 0, err)
+        self.assertNotIn("Traceback", err)
+        self.assertIn("planned design notes unknown", err)
+
+
 class TestStatic108(unittest.TestCase):
     def test_no_secret_shaped_strings_in_108_tests(self):
         src = open(os.path.abspath(__file__), encoding="utf-8").read()

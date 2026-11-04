@@ -62,16 +62,23 @@ A ref with no `docs/runbooks/` writes no `Runbooks/` notes, creates no `Runbooks
 `Runbooks:` line. Non-`.md` files and subdirectories of `docs/runbooks/` are not runbooks. `check` ignores
 `Runbooks/<stem>.md` like the other planned names. Verified by `docs/tasks/061-verify.sh [--mutate]`.
 
-**Design docs (task 108).** Modelled exactly on Runbooks, but written at the vault folder root as `<stem>.md`. A design doc
-whose text starts with `---` (after an optional BOM) fails validation (nothing written); a doc that is not a regular file
-in git, has an unaccepted name or carries a forbidden hand-written note's name is an error; a stem that equals any other
-planned root note name (`Status`, `Tasks`, `Gotchas`, `Commands`, `Mission Log`, `Decisions`; compared NFC and
-case-insensitively) is an error naming the collision, nothing written; the secret scan covers the notes. A ref with no
-`docs/design/` writes no design notes. Non-`.md` files and subdirectories of `docs/design/` are not design docs. The
-tool never deletes: a design doc removed from the repo leaves its old note in the vault. Because the names are not a
-fixed pattern, `check` reads the planned design names from `--ref` (default `main`) of `--repo` (default `.`) and ignores
-those root files like the other planned names; if that ref cannot be resolved it prints a note on stderr and compares
-every root file. Verified by `docs/tasks/108-verify.sh [--mutate]`.
+**Design docs (task 108).** Modelled on Runbooks, but written at the vault folder root as `<stem>.md`. A design doc
+whose text starts with `---` (after an optional BOM) fails validation (nothing written). These are errors, each naming the
+doc, nothing written: a doc that is not a regular file in git (a symlink, say), a name outside the stem rule (so
+`Mission Log.md`, with its space, is rejected here), a forbidden hand-written note's name, a stem equal to a vault
+folder name the tool writes (`ADR`, `Tasks`, `Runbooks`, `Journal`), a stem equal to a planned root note name (`Status`,
+`Tasks`, `Gotchas`, `Commands`, `Decisions`; `Mission Log` is caught by the stem rule), two docs whose stems differ only in
+case, and a path that is not valid UTF-8. Comparisons are NFC and case-insensitive. The secret scan covers the notes. A
+ref with no `docs/design/` writes no design notes. Non-`.md` files and subdirectories of `docs/design/` are not design
+docs. `write --note <stem>.md` selects a design note like any other planned note. The tool never deletes: a design doc
+removed from the repo leaves its old note in the vault, and `check` then reports that file as `added:` (a harmless,
+safe-direction alarm).
+
+`check` learns the planned design names from `--ref` (default `main`) of `--repo` (default `.`) with exactly the rules
+`write` applies, minus the `---` body rule, so it never ignores a hand-written file that `write` would refuse to
+overwrite. If the ref cannot be used (not a repo, bad ref, no `git`, a refused or non-UTF-8 design doc) it prints a
+note on stderr and treats no root file as a design note, so design notes are then reported rather than hidden.
+Verified by `docs/tasks/108-verify.sh [--mutate]`.
 
 Headings inside code fences are not section boundaries. A missing source file, or a mission log with no
 `## SESSION` heading, is an error (nothing written), never an empty note.
@@ -147,7 +154,7 @@ python3 -I tools/vault/wom_vault.py write --ref HEAD      # inside a task/NNN-* 
 docs/tasks/051-verify.sh [--mutate]                       # self-test, temp dirs only
 docs/tasks/053-verify.sh [--mutate]                       # 053 additions, A1-A3; re-runs 051-verify.sh
 docs/tasks/061-verify.sh [--mutate]                       # runbook notes; re-runs 051, 053 and 052 verifiers
-docs/tasks/108-verify.sh [--mutate]                       # design-doc notes; re-runs 051, 053, 061 and 052 verifiers
+docs/tasks/108-verify.sh [--mutate]                       # design-doc notes; re-runs 051, 053, 061 and 052 verifiers (from a throw-away copy)
 ```
 Exit status 0 means success; 1 means a refusal (reason on stderr, nothing written); 2 is a usage error.
 

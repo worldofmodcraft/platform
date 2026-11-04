@@ -18,15 +18,32 @@ M = {
         ["TestAC2Names.test_ac2_unaccepted_name_is_an_error_not_a_silent_skip"]),
     "design-forbidden-name": (
         "if folded in FORBIDDEN_NAMES:", "if False:",
-        ["TestAC2Names.test_ac2_forbidden_hand_written_name_is_refused"]),
+        ["TestAC2Names.test_ac2_forbidden_hand_written_name_is_refused",
+         "TestCheckNames.test_hand_written_note_named_like_a_refused_design_doc_stays_visible"]),
     "design-non-regular": (
         "        if meta.split()[0] not in (\"100644\", \"100755\"):\n            raise WomError(\"design doc",
         "        if False:\n            raise WomError(\"design doc",
-        ["TestAC2Names.test_ac2_symlink_in_git_is_not_a_regular_file"]),
+        ["TestAC2Names.test_ac2_symlink_in_git_is_not_a_regular_file",
+         "TestCheckNames.test_symlink_design_doc_is_not_a_planned_name_for_check"]),
     "design-collision": (
         "if folded in taken:  # CHECK:design-collision", "if False:  # mutated",
         ["TestAC3Collision.test_ac3_stem_equal_to_a_planned_root_name_is_an_error",
          "TestAC3Collision.test_ac3_collision_names_the_planned_note"]),
+    "design-case-collision": (
+        "        taken[folded] = \"design doc %s\" % path  # CHECK:design-case-collision\n", "",
+        ["TestCaseAndFolders.test_case_variants_of_two_design_docs_are_an_error"]),
+    "design-folder-names": (
+        "if nfc(stem) in folders:", "if False:",
+        ["TestCaseAndFolders.test_stem_equal_to_a_vault_folder_name_is_an_error"]),
+    "note-flag": (
+        "DESIGN_NOTE_NAME_RE.match(rel) or TASK_NOTE_NAME_RE", "TASK_NOTE_NAME_RE",
+        ["TestNoteFlag.test_note_selects_a_design_note"]),
+    "check-fallback-scope": (
+        "except (WomError, OSError, ValueError) as exc:", "except WomError as exc:",
+        ["TestCheckNames.test_missing_git_binary_is_a_note_not_a_traceback"]),
+    "design-utf8": (
+        "    except UnicodeDecodeError:\n        raise WomError(\"a path under", "    except KeyError:\n        raise WomError(\"a path under",
+        ["TestCheckNames.test_non_utf8_design_path_is_a_named_error_for_write_and_a_note_for_check"]),
     "design-frontmatter": (
         "if body.lstrip(\"\\ufeff\").startswith(\"---\"):  # CHECK:design-frontmatter", "if False:  # mutated",
         ["TestAC4Frontmatter.test_ac4_design_doc_with_own_frontmatter_fails_and_writes_nothing"]),
