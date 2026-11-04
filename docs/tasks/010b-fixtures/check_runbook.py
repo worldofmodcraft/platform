@@ -4,6 +4,7 @@
     check_runbook.py shape    RUNBOOK
     check_runbook.py cred     RUNBOOK
     check_runbook.py switch   RUNBOOK
+    check_runbook.py stop     RUNBOOK
     check_runbook.py evidence RUNBOOK LOG
     check_runbook.py observed RUNBOOK FIXTURE_DIR
     check_runbook.py fill     RUNBOOK PLATFORM_ROOT
@@ -135,15 +136,52 @@ def check_switch(rb):
         fail("no 'gh auth status' check line found")
 
 
+STOP_RE = re.compile(r"\bstop\b|Ctrl\+C|[Tt]ell the manager|[Dd]o step")
+SWITCH_BACK = "gh auth switch --user womcraft"
+
+
+def check_stop(rb):
+    """Inside a switched section (from a switch to mbmludric to the switch back), every step has a stop line and
+    every line telling the reader to stop or to tell the manager also gives the exact switch-back command."""
+    state, region_steps = False, 0
+    for sid, lines in steps(read(rb)):
+        in_fence, prose, fenced_lines = False, [], []
+        for l in lines:
+            if l.startswith("```"):
+                in_fence = not in_fence
+            elif in_fence:
+                fenced_lines.append(l.strip())
+            else:
+                prose.append(l)
+        to_m = "gh auth switch --user mbmludric" in fenced_lines
+        to_w = SWITCH_BACK in fenced_lines
+        if state or to_m:
+            region_steps += 1
+            stops = [l for l in prose if STOP_RE.search(l)]
+            for l in stops:
+                if SWITCH_BACK not in l:
+                    fail(f"step {sid}: a stop line inside a switched section lacks `{SWITCH_BACK}`: {l.strip()[:80]}")
+            if not stops and not to_w:
+                fail(f"step {sid}: inside a switched section but no stop line gives the switch-back command")
+        if to_m:
+            state = True
+        if to_w:
+            state = False
+    if state:
+        fail("a section switched to mbmludric is never switched back")
+    if region_steps < 12:
+        fail(f"only {region_steps} steps found inside switched sections; the search is broken")
+
+
 def list_markers(log):
-    """per-step list from the 010b log: the block opened by a line containing 'UNVERIFIED-LIST 010b'."""
+    """per-step list from the 010b log: the block opened by the last line containing 'UNVERIFIED-LIST 010b'."""
     lines = read(log).split("\n")
     start = [i for i, l in enumerate(lines) if "UNVERIFIED-LIST 010b" in l]
-    if len(start) != 1:
-        fail(f"expected exactly one 'UNVERIFIED-LIST 010b' line in the log, found {len(start)}")
+    if not start:
+        fail("no 'UNVERIFIED-LIST 010b' line in the log")
         return None
-    items = []
-    for l in lines[start[0] + 1:]:
+    items = []  # the LAST list in the log is the current one (the log is append-only; a later list supersedes)
+    for l in lines[start[-1] + 1:]:
         m = re.match(r"^\s+- U\d+ step (\d+\.\d+)\s*$", l)
         if not m:
             break
@@ -184,7 +222,7 @@ def check_evidence(rb, log):
             fail(f"step {sid}: runbook has {marks.get(sid, 0)} marker(s), the log lists {listed.count(sid)}")
 
 
-OBSERVED = ["1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.13", "1.14", "1.15", "2.3", "2.4", "4.2", "5.1"]
+OBSERVED = ["1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.13", "1.14", "1.15", "2.3", "2.4", "4.3", "5.1"]
 
 
 def norm(line):
@@ -332,7 +370,7 @@ def main(argv):
         return 2
     cmd, args = argv[1], argv[2:]
     try:
-        table = {"shape": (check_shape, 1), "cred": (check_cred, 1), "switch": (check_switch, 1),
+        table = {"shape": (check_shape, 1), "cred": (check_cred, 1), "switch": (check_switch, 1), "stop": (check_stop, 1),
                  "evidence": (check_evidence, 2), "observed": (check_observed, 2), "fill": (check_fill, 2),
                  "m4": (check_m4, 2)}
         fn, n = table[cmd]

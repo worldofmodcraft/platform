@@ -21,17 +21,17 @@ Markers in *You should see*:
 - The word UNVERIFIED in square brackets, followed by "expected, not observed" — nobody has seen this yet. Treat it as a guess and tell the manager if the screen differs.
 - `[NOT REHEARSED]` — the step talks to GitHub itself and cannot be tried without really publishing, so it was not run.
 
-If a screen differs from "You should see", **stop and tell the manager what you see.** Do not improvise and do not retry
+If a screen differs from "You should see", **stop and tell the manager what you see.** (Inside a section that switched to `mbmludric`, first run `gh auth switch --user womcraft`; each such step says so.) Do not improvise and do not retry
 in a different way.
 
 **Rules for the whole runbook**
 
 1. You are never asked to copy, paste or type a password, token or key anywhere. If a command asks you for a password
-   or a token, press Ctrl+C and tell the manager.
+   or a token, press Ctrl+C and tell the manager (inside a switched section, run `gh auth switch --user womcraft` first).
 2. Use the **Ubuntu** (WSL) terminal, the same one the manager works in. Windows PowerShell is not used.
 3. Two GitHub accounts are stored on this computer: `womcraft` (the project's account, normally the active one) and
    `mbmludric` (yours). Every section that switches to `mbmludric` **ends with a step that switches back to `womcraft`.**
-   If anything goes wrong in the middle of such a section, do the switch-back step first and then tell the manager.
+   If anything goes wrong in the middle of such a section, run `gh auth switch --user womcraft` first and then tell the manager.
 4. This is the real registry. A published version is permanent (ADR-0041). Do not repeat a publish step to "try again".
 
 ---
@@ -278,6 +278,8 @@ gh auth status
 
 [UNVERIFIED — expected, not observed] The first `gh auth status` lists two accounts for github.com, `womcraft` and `mbmludric`, with `womcraft` marked active. After the switch, the second `gh auth status` lists the same two accounts with `mbmludric` marked active. The output shows account names only; no token is displayed and none is requested.
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** the next GitHub commands run as you, not as the project's account. Start of the part that **must** end with step 1.16.
 
 ### Step 1.12 — Create the empty public repository on GitHub
@@ -298,6 +300,8 @@ curl -s -o /dev/null -w "status=%{http_code}\n" https://api.github.com/repos/mbm
 ```
 status=200
 ```
+
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
 
 **This proves** the repository exists and is public (the `curl` call carries no login, so it can only see a public repository).
 
@@ -326,7 +330,7 @@ To file:///tmp/r010b-home-Q52ad5/remote/wom-test-hello-world.git
  * [new tag]         v1.0.0 -> v1.0.0
 ```
 
-If git asks for a username or a password, press Ctrl+C. Do not type anything. Do step 1.16, then tell the manager.
+If git asks for a username or a password, press Ctrl+C and do not type anything. Then run `gh auth switch --user womcraft`, then tell the manager.
 
 **This proves** the commit (as branch `main`) and the tag are on GitHub. Pushing uses the login that `gh` already holds for the active account, which is why step 1.11 came first.
 
@@ -348,6 +352,8 @@ f4fd0dd1010e148276668202cd0158016df83505	refs/heads/main
 f4fd0dd1010e148276668202cd0158016df83505	refs/tags/v1.0.0
 ```
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** GitHub's copy has your commit on `main` and under the tag `v1.0.0`, and that anybody can read it without logging in (this command sends no login).
 
 ### Step 1.15 — Print the commit hash for the manager
@@ -366,6 +372,8 @@ One line of exactly 40 characters (digits 0-9 and letters a-f), for example:
 f4fd0dd1010e148276668202cd0158016df83505
 ```
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** you have the value the registry entry in Part 2 needs. **Send that one line to the manager** with the words "M4 part 1 done". The hash is public information; it is not a secret.
 
 ### Step 1.16 — Switch back to the project account (always do this)
@@ -382,6 +390,8 @@ gh auth status
 **You should see**
 
 [UNVERIFIED — expected, not observed] `gh auth status` lists the same two accounts, with `womcraft` marked active again.
+
+If `womcraft` is not marked active, run `gh auth switch --user womcraft` once more; if it is still not active, tell the manager.
 
 **This proves** the machine is back in the state all project work expects (all project GitHub work runs as `womcraft`). End of Part 1.
 
@@ -408,6 +418,8 @@ gh auth status
 
 [UNVERIFIED — expected, not observed] `mbmludric` marked active in the list of accounts.
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** the fork and the pull request below are made by `mbmludric`. Start of the part that **must** end with step 2.5.
 
 ### Step 2.2 — Make your own copy (a fork) of the registry
@@ -424,6 +436,8 @@ gh repo fork worldofmodcraft/registry --clone
 **You should see**
 
 [UNVERIFIED — expected, not observed] Lines saying that the fork `mbmludric/registry` was created and cloned, and a new folder `~/wom-first-publish/registry`.
+
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
 
 **This proves** you have a copy of the registry you may push to. (Your account only has read access to the organisation's own repository, so this is the supported way, see `CONTRIBUTING.md` in the registry.)
 
@@ -461,6 +475,8 @@ filled mods/test.hello-world/entry.json
 
 The `From` and `* branch main -> FETCH_HEAD` lines of `git fetch` come before these, and they differ on GitHub. Your last hash must equal the hash from step 1.15.
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** the registry entry for `test:hello-world` version `1.0.0` now names your repository and your exact commit, with no placeholder left (the fill script checks that itself and refuses otherwise).
 
 ### Step 2.4 — Commit and push the branch to your fork
@@ -495,6 +511,8 @@ To /tmp/r010b-home-Q52ad5/remote/registry-fork.git
 branch 'add-test-hello-world' set up to track 'origin/add-test-hello-world'.
 ```
 
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
 **This proves** the pull request will contain exactly two new files, both under `mods/test.hello-world/`, and nothing else (the registry rejects a mix with other paths).
 
 ### Step 2.5 — Open the pull request, then switch back
@@ -513,6 +531,8 @@ gh auth status
 **You should see**
 
 [UNVERIFIED — expected, not observed] The address of the new pull request, of the form `https://github.com/worldofmodcraft/registry/pull/` followed by a number. Then `gh auth status` showing `womcraft` active.
+
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
 
 **This proves** the pull request is open and the machine is back on the project account. Send the pull request address to the manager.
 
@@ -613,7 +633,26 @@ Open `https://worldofmodcraft.com/mods/test/hello-world` in your browser.
 
 **This proves** the site renders the registry and the archive. Tell the manager which of these you can and cannot see.
 
-### Step 4.2 — Prepare the page change
+### Step 4.2 — Switch to your own GitHub account
+
+[NOT REHEARSED] Changing the account on this machine changes real login state. This is the start of a section that **must** end with step 4.4.
+
+**Do**
+
+```
+gh auth switch --user mbmludric
+gh auth status
+```
+
+**You should see**
+
+[UNVERIFIED — expected, not observed] `gh auth status` lists the two accounts with `mbmludric` marked active.
+
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
+
+**This proves** the page-change pull request below is made by `mbmludric`. The section ends with step 4.4, which switches back to `womcraft`.
+
+### Step 4.3 — Prepare the page change
 
 The change adds one sentence to the description and adds the spare screenshot, which was shipped inside the 1.0.0 archive for this purpose.
 
@@ -622,7 +661,6 @@ The change adds one sentence to the description and adds the spare screenshot, w
 **Do**
 
 ```
-gh auth switch --user mbmludric
 cd ~/wom-first-publish/registry
 git fetch https://github.com/worldofmodcraft/registry main
 git switch -c page-json-update FETCH_HEAD
@@ -642,7 +680,7 @@ git diff | grep "^[+-] "
 
 **You should see**
 
-After the switch, the `git diff --stat` shows one file and 3 insertions and 2 deletions, and the `git diff` filter shows one changed description line and one added screenshot line (rehearsal on disk):
+The `git diff --stat` shows one file and 3 insertions and 2 deletions, and the `git diff` filter shows one changed description line and one added screenshot line (rehearsal on disk):
 
 ```
  mods/test.hello-world/page.json | 5 +++--
@@ -654,9 +692,11 @@ After the switch, the `git diff --stat` shows one file and 3 insertions and 2 de
 +    "assets/screenshots/spare.png"
 ```
 
-**This proves** only `page.json` changed. A pull request that touches only `page.json` is allowed for the mod's owner and starts no build (`CONTRIBUTING.md`).
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
 
-### Step 4.3 — Commit, push, open the pull request, switch back
+**This proves** only `page.json` changed. A pull request that touches only `page.json` is allowed for the mod's owner and starts no build (`CONTRIBUTING.md`). For `test:hello-world` the registered owner is the organisation `worldofmodcraft`, not you; see the note under step 4.4.
+
+### Step 4.4 — Commit, push, open the pull request, switch back
 
 [NOT REHEARSED]
 
@@ -676,9 +716,11 @@ gh auth status
 
 [UNVERIFIED — expected, not observed] A pull request address, then `womcraft` marked active. In the browser, `gate` turns green, listing the change as page-only. Send the address to the manager, who merges it.
 
-**This proves** the page change travels through the same gate, and the machine is back on the project account.
+If what you see is different, **stop**: run `gh auth switch --user womcraft` first, then tell the manager what you see. Do not run any further step of this section.
 
-### Step 4.4 — See the changed page, with no new version
+**This proves** the page change travels through the same gate, and the machine is back on the project account. For `test:` the registered owner is the organisation `worldofmodcraft`; the gate lets you author the change because you are a member of that organisation (ADR-0119 section 3), not because you own the entry.
+
+### Step 4.5 — See the changed page, with no new version
 
 [NOT REHEARSED]
 
@@ -715,7 +757,7 @@ status=302 redirect=https://api.github.com/organizations/324218296/public_member
 
 (Observed 2026-11-04.)
 
-**This proves** how an anonymous caller sees the organisation's member list: `302` means "you are not allowed to see", not "not a member". The registry check therefore asks with the pull request author's own standing and treats "cannot tell" as a refusal (ADR-0119).
+**This proves** how an anonymous caller sees the organisation's member list: `302` means "you are not allowed to see", not "not a member". The registry check does not ask anonymously: its workflow (`.github/workflows/registry-ci.yml`, step "Ask the organisation whether the author is a member") asks `/orgs/ORG/members/LOGIN` with a token minted for a GitHub App that may read organisation members, and passes the HTTP status on to the gate. If no status comes back, the gate cannot decide and refuses (ADR-0119).
 
 ### Step 5.2 — Try a pull request the gate must refuse
 
