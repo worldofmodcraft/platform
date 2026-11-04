@@ -91,3 +91,4 @@ Creating any remote, pushing, tagging on a remote, opening a PR, publishing anyt
   - U17 step 4.4
   - U18 step 4.5
   - U19 step 5.2
+- 2026-11-04 doc-writer (010b, fix round result): PIN_FINAL is now `f78885565dfeb0e2d2a201762c7fcb68dc81ca25` (the content commit of this round; the commits after it touch only the verify script and this log). Fresh clone of `https://github.com/worldofmodcraft/platform`, branch `task/010b-first-publish-runbook` at `c921855`: `docs/tasks/010b-verify.sh` exit 0 ("010b-verify: ALL OK"); `docs/tasks/010b-verify.sh --mutate` exit 0 ("ALL OK (28 mutations, each red with a reason)"). [script] criteria 1-6; [human] none claimed.
