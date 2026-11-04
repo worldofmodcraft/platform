@@ -3130,3 +3130,8 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
   instead of asking"; (2) deletion of user data is kept as Ludwig's although not in his exception list — ★ the conservative option because it is irreversible and
   CLAUDE.md treats data as ask-first; Ludwig can lift it in one sentence. Cross-script check (every platform verify script on 110's head) running.
 - **110 merged** (platform #106; CI check pass): **ADR-0125 fast mode is in force** (until the phase-two mission is issued). Vault refreshed. Booked: re-run 102-verify on platform main once the machine is quiet.
+- **008b-2 merged** (registry #30 -> `428df02`; `gate` pass; Ludwig's "Merge"): manager fresh-clone re-run green (verify failed=0; --mutate 41 red); author's whole 039a
+  on the merged head 83 PASS / 0 FAIL. The merge started no pipeline run (push gate works; `gh run list --workflow pipeline.yml` empty). 102-verify re-run on
+  platform main: ALL CHECKS PASSED (the earlier red was only "machine not quiet").
+- **Dry run blocked on M4:** no public mod repository exists (`mbmludric/wom-test-hello-world` and `womcraft/...` both absent); M4 (Ludwig's `test:hello-world` repo)
+  waits for task 010 (first-publish runbook + staging tree; 010a's contents are on main). ★ (ADR-0125): next work = task 111 (test-run speed, option C) and task 010.
