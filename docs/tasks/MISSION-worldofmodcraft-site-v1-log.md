@@ -3119,3 +3119,9 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 Nothing blocking. Optional: delete your manual vault copy `Party Board Mod - Design.md` (the projected `party-board-mod.md` replaces it).
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, handover) i missionsloggen och fortsätt med 'Next session starts here'."
 - **Ludwig, 2026-11-04 (verbatim):** "Behåll den här, kör klart 008b-2" — this session continues: finish 008b-2, merge #30, one dry run.
+- **Ludwig, 2026-11-04 (verbatim):** "C, kör på det. Kan vi även uppdatera ADR så att du får mergea allt som blir grönt självt utan min input? Samt att utgångspunkten
+  är att du tar stjärna på alla förslag (men loggar allt i vault)? Vill snabba upp utvecklingsprocessen lite tills vi kommer till fas två och ska börja med server /
+  client". Exceptions (AskUserQuestion answer): **"Takedowns, Nycklar och hemligheter"** stay Ludwig's; everything else (merges of anything green, accepting new or
+  changed ADRs, mission scope) becomes a manager decision on ★, logged in this mission log (projected to the vault). Until phase two (server/client) starts.
+  -> **Task 110: ADR-0125** + time-bound notes in MANAGER.md / CLAUDE.md (retained text, as with the token-guard suspension). **Task 111** (test runs, option C:
+  measure, de-duplicate nested sweeps, then path-filtered pre-merge + nightly full sweep in CI per ADR-0099) after 008b-2.
