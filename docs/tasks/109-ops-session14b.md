@@ -10,3 +10,4 @@ Append one section to `docs/manager/OPERATIONS.md` with the lessons paid for aft
 ---
 # Task 109 log
 - 2026-11-04 manager (session 14): section written from the mission log entries of 2026-11-02..04 (tasks 089a1/a2/b/c/d/e, 101-108). Done.
+- 2026-11-04 manager: cross-script check on `119ae10`: the platform scripts that read OPERATIONS.md (049, 051, 052, 063, 072) all exit 0, 0 FAIL. Merged.
