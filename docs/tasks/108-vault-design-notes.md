@@ -1,6 +1,6 @@
 # Task 108: the vault projection also writes `docs/design/*.md` as notes at the vault folder root
 
-- **Mission:** SITE-V1 (operations tooling) — **Status:** review (phase 2 green 2026-11-04); was spec-approved 2026-11-03 (manager, session 14; Ludwig's request: design docs follow the repo automatically,
+- **Mission:** SITE-V1 (operations tooling) — **Status:** done (phase 2 green 2026-11-04); was spec-approved 2026-11-03 (manager, session 14; Ludwig's request: design docs follow the repo automatically,
   "Ja", 2026-11-03; placement at the folder root, not a subfolder: Ludwig 2026-10-28 "Nej, lägg designdokumentet under Project World of Modcraft i vaultet")
 - **Agent / model:** implementer — **Budget:** small
 - **Branch / worktree:** `task/108-vault-design-notes` / `~/wt/task-108` (platform)
@@ -51,3 +51,7 @@ paragraph) in the same branch.
   - Red-first for the new tests on the previous tool: 12 failing of 28 (the ref/repo/non-repo/unresolvable tests pass on it, being regression tests). Now 28 tests OK. 15 mutations (5 new + design-forbidden-name/non-regular now also kill the check tests), each killed.
   - Fresh clone at 16777e1, plain separate invocations, PYTHONDONTWRITEBYTECODE=1, `ps` before each: `108-verify.sh` exit 0 (28 tests, red-first on old tool 41 failing, hygiene ok); `108-verify.sh --mutate` exit 0 (86 mutants killed, no SURVIVED); `049-verify.sh` run AFTER them in the same clone exit 0. Then every `*-verify.sh` once, all exit 0 / 0 FAIL: 010a 048 049 051 052 053 056 058 059 061 063 068 072 076 078 079 080 085 090 096 102 108.
   - Open for the manager (review INFO 9): `party-board-mod.md` and `party-board-mod-proposed-adr.md` are on main; if Ludwig hand-placed a copy in the vault root, the first refresh refuses the whole run until it is moved. Ask him before merging; I did not look in the vault.
+- 2026-11-04 manager (session 14): manager fresh-clone re-run at `2905a94`: 108-verify ALL CHECKS PASSED, then 049-verify in the same clone exit 0 (0 FAIL) — the
+  .pyc leak the manager reproduced earlier is gone. Independent review PWA -> fix round -> delta review **PASS** (2 LOW, 2 INFO booked). Review INFO 9 resolved: Ludwig's
+  manual vault copy is named `Party Board Mod - Design.md`, not `party-board-mod*.md`, so the first refresh is not blocked. Booked: `-B` for 053/061-verify; Runbooks
+  case-variant collision gap. Status done; merged on the manager's authority (§7).
