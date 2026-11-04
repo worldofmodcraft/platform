@@ -3135,3 +3135,23 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
   platform main: ALL CHECKS PASSED (the earlier red was only "machine not quiet").
 - **Dry run blocked on M4:** no public mod repository exists (`mbmludric/wom-test-hello-world` and `womcraft/...` both absent); M4 (Ludwig's `test:hello-world` repo)
   waits for task 010 (first-publish runbook + staging tree; 010a's contents are on main). ★ (ADR-0125): next work = task 111 (test-run speed, option C) and task 010.
+
+## SESSION STATUS — 2026-11-04 (session 14, final) — supersedes the handover entry above; context 93 % (hard handover)
+### Since the handover entry
+- **ADR-0125 fast mode is in force** (platform #106): until the phase-two mission is issued, the manager merges green work and takes ★ on every question, logging each
+  decision here the same day. Ludwig keeps: takedowns, anything touching credentials/secrets/keys; manager ★ also kept user-data deletion as Ludwig's (logged).
+- **008b-2 merged** (registry #30 -> `428df02`): pipeline workflow (plan/build/sign/dry-run/summary) on main, push-gated; verification and reviews green.
+- Ludwig chose option **C** for the long test runs (task 111, not started).
+### Next session starts here
+1. **Task 111 (test-run speed, Ludwig's option C):** (a) measure — time every closed registry script inside one whole 039a and record the top costs; (b) de-duplicate:
+   each closed script runs exactly once per sweep (nested sweeps in 064/066/070 and the like stop re-running others when called from 039a, as 039b's `--no-closed`
+   does); (c) per ADR-0099: pre-merge runs only the scripts that read the changed files (a file->script map, generated, with a test) + a **nightly whole sweep in
+   GitHub Actions** (parallel jobs, stop-the-line on red). Update OPERATIONS.md's cross-script rule accordingly. Spec it first (task file), then dispatch.
+2. **Task 010 (D4 first-publish runbook + staging tree for `test:hello-world`; 010a contents are on main):** spec-approve it (★ under ADR-0125), dispatch, merge.
+   Then **For Ludwig: M4** (create the repo on `mbmludric` and push, per the runbook). Then the 008b-2 **dry-run dispatch** (live criteria 7, 10, 11) using that repo.
+3. Then **094**, **008b-3a**, **008b-3b** (removes the push gate), then the D4/§7 live walkthrough with Ludwig.
+4. Booked follow-ups: as in the handover entry above, plus: `-B` in 053/061-verify (108 review); the 008b-2 worktree is removed; registry worktrees `task-039`,
+   `task-065`, `task-084` and platform ones listed above are old — check each before removing.
+### For Ludwig
+Nothing blocking right now. Coming: **M4** once task 010 is merged (the next session will give you exact click/commands).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, final) i missionsloggen och fortsätt med 'Next session starts here'."
