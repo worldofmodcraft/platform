@@ -3089,3 +3089,32 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-10-2
 - **108 merged** (platform #103 -> `f06a621`): manager re-run 108-verify then 049 in one fresh clone green (.pyc leak gone); review -> fix round -> delta PASS.
   `refresh-main.sh` wrote `party-board-mod.md` and `party-board-mod-proposed-adr.md` at the vault folder root — design docs now follow the repo. Ludwig may delete
   his manual copy `Party Board Mod - Design.md`. Booked: `-B` in 053/061-verify; Runbooks case-variant collisions. **Ludwig: "Ok, kör vidare"** -> 008b-2 phase 2.
+
+## SESSION STATUS — 2026-11-04 (session 14, handover)
+### Done in session 14 (2026-10-28 .. 2026-11-04), all merged
+- **Registry:** 008b-1 pipeline planner (#29); 101 re-pin 008b1-verify (#31); 089e (#32), 089b (#33, 039a/039b deadlock fix), 089d (#34), 089c (#35), 089a1 (#36),
+  089a2 (#38) — the whole closed-verify sweep (089); 103 restore 008a labels (#37); 106 quiet-wait ancestors (#39). **Proof: whole `039a-verify.sh` on registry main
+  `0ac4d89` exit 0, 82 PASS, 0 FAIL** (manager's own run, output kept).
+- **Platform:** 090, 096, 098 (party board mod design doc), 099, 100, 102 (re-pin 096-verify), 104 **ADR-0123** (party mod = reference mod; Q1 A, Q2 B, Q3 A, Q4 B,
+  Q5 A), 105 (ADR tests derive counts; ADR CI green again after being red since 2026-09-02), 107 **ADR-0124** (remaining roguelike platform-role lines), 108 (vault
+  projects `docs/design/*.md`; design docs now follow the repo into the vault), 109 (OPERATIONS gotchas). 097 wowdecomp survey (★ A watch only).
+- Ludwig's decisions recorded verbatim in this log: overnight ruling (expired), decision A "fixed SHAs only", ADR-0123 answers, "Amend them all", "Merge" (#30).
+### In progress (state on disk)
+- **008b-2 / registry PR #30** (`~/wt/registry-task-008b2`, branch head `410f51e` = main merged in): phase 2 running by its agent — `008b2-verify.sh`, `--mutate`, unit
+  suite, then the whole 039a on the merged head (started ~08:30Z 2026-11-04). Ludwig approved "Merge".
+### Next session starts here
+1. Read 008b-2's task log (`docs/tasks/008b2-pipeline-build-sign.md` on its branch). If green: manager fresh-clone re-run (008b2-verify default + --mutate; read the
+   039a output), merge #30 (registry `gate` must pass), then **one dry-run dispatch** of `pipeline.yml` (workflow_dispatch, `dry_run=true` with the
+   `dry_run_source_url`/`dry_run_commit`/`dry_run_id`/`dry_run_version` inputs pointing at a known commit; signs only with an ephemeral key) and record the run URL
+   for live criteria 7, 10, 11 in its log.
+2. Then the mission's remaining chain: **094** (ECMA patterns; re-check its delta), **008b-3a** (ownership carve-out), **008b-3b** (write-back job; removes the push
+   gate) — every closed-script change verified by a whole 039a on the merge result (OPERATIONS.md, task 109).
+3. Then the D4/§7 live walkthrough with `test:hello-world` (runbook `docs/runbooks/first-publish.md`), which needs Ludwig.
+4. Booked follow-ups (none blocking): `-B` in 053/061-verify; Runbooks case-variant collisions; 092 post-TIP take-ours warning comment; LOW findings of 089a1, 089a2,
+   089c, 089d, 089e, 090, 096 (in their task logs); 066 C3b full 062 output; 089 part F (008a section-2 greps); 065:73 / 075:44 is-ancestor HEAD; 008b-2
+   "verify before key write" and F6 per-leg environment approvals; old worktrees (`~/wom/.claude/worktrees/session-9-specs`, `session-10`, `~/wt/session-11c`,
+   `session-13`, `task-010a`, `task-023`, `task-058`; registry `task-039`, `task-065`, `task-084`) — check each before removing; pipeline App unused-key cleanup
+   after 008b-3b; minisign offline backup (Q-H) unconfirmed.
+### For Ludwig
+Nothing blocking. Optional: delete your manual vault copy `Party Board Mod - Design.md` (the projected `party-board-mod.md` replaces it).
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-04 (session 14, handover) i missionsloggen och fortsätt med 'Next session starts here'."
