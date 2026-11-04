@@ -3129,3 +3129,4 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
   §8, §8b (additions only). **★ decisions under the new mode (logged):** (1) §8's two-stop-and-ask halt counts only events that remain Ludwig's — follows from "★
   instead of asking"; (2) deletion of user data is kept as Ludwig's although not in his exception list — ★ the conservative option because it is irreversible and
   CLAUDE.md treats data as ask-first; Ludwig can lift it in one sentence. Cross-script check (every platform verify script on 110's head) running.
+- **110 merged** (platform #106; CI check pass): **ADR-0125 fast mode is in force** (until the phase-two mission is issued). Vault refreshed. Booked: re-run 102-verify on platform main once the machine is quiet.
