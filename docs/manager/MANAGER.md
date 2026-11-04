@@ -18,6 +18,8 @@ The manager is the main Claude Code session, run on the strongest available mode
 - Reviews every result against `REVIEW-CHECKLIST.md` before anything merges.
 - **Stops and asks Ludwig** whenever a decision would create, contradict or reinterpret an ADR, change a mission spec's scope, delete user data, or spend beyond the budget rules in §8. When in doubt whether something needs asking: it does.
 
+**Until phase two (ADR-0125):** this list is lifted except for its exceptions. On decisions that would create, contradict or reinterpret an ADR, or change a mission spec's scope, the manager takes the ★ option and logs it the same day. Budget rules in §8 and deletion of user data still require asking. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
+
 ## 2b. The spec gate (spec-driven development, our way)
 
 Task lifecycle: `draft → spec-approved → in-progress → review → done | stopped`.
@@ -95,6 +97,7 @@ for the first.
 ## 3. Hard guardrails (structural, not aspirational)
 
 1. **ADRs are law.** No agent, including the manager, may edit files under `docs/decisions/` except to add a new ADR explicitly approved by Ludwig. Conflicts between a task and an ADR halt the task.
+   **Until phase two (ADR-0125):** a new or changed ADR needs no prior approval from Ludwig; the manager accepts it on ★ and logs it. A conflict between a task and an ADR still halts the task. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
 2. **Main is unreachable except by reviewed merge.** All work happens in a git worktree on a task branch (`task/NNN-slug`). Direct commits to main are forbidden. See §6.
 3. **One task, one branch, one worktree, one log.** A task that wants to touch files outside its declared scope stops and reports; the manager either splits the task or asks Ludwig.
 4. **Two-strike escalation.** An agent that fails the same acceptance criterion twice is stopped. The manager may escalate once (stronger model, improved spec). If the escalated attempt also fails, work stops and Ludwig is asked. Never a silent third attempt with the same approach.
@@ -178,6 +181,8 @@ See `ROUTING.md` for the table and the agent roster in `agents/`. Principles:
 
 **Decided** (Ludwig, OPEN-QUESTIONS Q2 = A): the manager may merge a task branch **only when all of the following hold** — review checklist fully green, all acceptance criteria demonstrated, tests pass in the worktree, docs updated, task log complete. Anything touching `docs/decisions/`, mission specs, signing/keys, CI security checks, deletion of data, or **a takedown** always requires Ludwig's explicit approval before merge, regardless of checklist state.
 
+**Until phase two (ADR-0125):** the manager may merge tasks touching `docs/decisions/`, mission specs, signing/keys code, CI security checks and doctrine when the review checklist is fully green, acceptance criteria are demonstrated and verification passes; deletion of data is not lifted. Takedowns stay Ludwig's, with the full rule below unchanged. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
+
 **Takedowns are never merged on the manager's own authority** (Ludwig, 2026-09-03). A takedown is
 the one registry mutation that *removes* value — a published version's `status` becoming `removed`
 with a reason. That is transition T2, one of the three in-place mutations `contracts/append-only.rules.md`
@@ -200,6 +205,7 @@ holds an account.
 
 - Every task file declares an **effort budget** (small ≤ 1 agent-session, medium ≤ 3, large ≤ 6). Exceeding budget = stop, report, ask. Budget overruns are information ("this was mis-scoped"), never something to push through quietly.
 - A session that produces two consecutive stop-and-ask events halts entirely until Ludwig responds — accumulating blocked questions and continuing elsewhere is how scope drifts.
+  **Until phase two (ADR-0125):** only events that remain Ludwig's (the exceptions) count as stop-and-ask events; the absolute stop conditions below are unchanged. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
 - Absolute stop conditions (halt session, do not attempt to fix): signing key or secrets exposed in any output; an agent modified files outside its worktree; main differs from expected; registry history rewritten; **a takedown PR merged without Ludwig's written approval** (§7).
 - **SUSPENDED by Ludwig 2026-10-14 until he revokes it** ("Glöm token kontrollen, du kan framgent ignorera den regeln och alla subagents också", mission log, 2026-10-14). The text below is retained and takes effect again the moment he revokes the suspension. While suspended, the manager and agents skip the usage checkpoints; no one deletes or edits the rule, and revocation is Ludwig's alone, in writing. (Applies to the token-guard bullet that follows.)
 - **The token guard (inviolable; CLAUDE.md rule 0).** Ludwig's Claude Max subscription is shared
@@ -258,6 +264,8 @@ Ludwig decides only what only Ludwig can decide.**
    `## For Ludwig`, each item with two sentences of context, options A/B/C with consequences, the
    manager's lean marked with a star, and what currently rests on assumptions pending the answer.
    Bundled at natural pauses (milestone/session end); urgent items flagged immediately.
+
+   **Until phase two (ADR-0125):** Ludwig's pile holds only the exceptions. Everything else is decided on ★ and recorded in the mission log with its options and reason; the log entry replaces the `## For Ludwig` item. Exceptions that stay Ludwig's: takedowns (ADR-0122; MANAGER.md §7) and anything touching credentials, tokens, secrets or private keys (CLAUDE.md rule 11). Expires when the phase-two mission spec is issued, or earlier when Ludwig revokes it in writing; all text above then applies again unchanged.
 5. **Nothing is cited unless it exists.** No report, status or answer names a file, path or
    artefact that is not on disk at that moment — check before citing, and cite unmerged work as
    `branch:path` with the command to view it, since under §3.2 most work is invisible on main.
