@@ -10,7 +10,7 @@ export PYTHONDONTWRITEBYTECODE=1 LC_ALL=C.UTF-8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$HERE" || exit 2
 PIN_BASE="24d91411571e240c72d2b543714df04e6a919508"   # platform origin/main at dispatch (PR #108 merge)
-PIN_FINAL="fd4473d02e1947b8fe4074cd80db983542edc512"                                 # the content commit: runbook, M4 text, checker, fixtures
+PIN_FINAL="f78885565dfeb0e2d2a201762c7fcb68dc81ca25"                                 # the content commit: runbook, M4 text, checker, fixtures
 RB=docs/runbooks/first-publish.md
 M4F=docs/runbooks/site-v1-manual-steps.md
 LOGF=docs/tasks/010b-first-publish-runbook.md
@@ -56,6 +56,7 @@ if [ "$MODE" = default ]; then
   chk cred "$FX/credential-positive-control.txt"; rc=$?
   if [ "$rc" = 1 ] && [ "$(grep -c '^FAIL' "$TMP/out")" -ge 2 ]; then ok "positive control: the fixture is caught ($(grep -c '^FAIL' "$TMP/out") hits)"; else bad "positive control not caught (exit $rc)"; fi
   chk switch "$TMP/rb.md"; verdict "every switch to mbmludric is followed by a switch back to womcraft" $?
+  chk stop "$TMP/rb.md"; verdict "inside a switched section every stop line gives the switch-back command" $?
   echo "== criterion 4: evidence rule"
   chk evidence "$TMP/rb.md" "$TMP/log.md"; verdict "UNVERIFIED markers equal the log list, step by step; gh steps are NOT REHEARSED; write-back steps name 008b-3b" $?
   chk observed "$TMP/rb.md" "$FX"; verdict "observed 'You should see' lines are found in the rehearsal transcripts" $?
@@ -90,7 +91,7 @@ mut() {
   if diff -rq "$TMP/rb.md" "$d/rb.md" >/dev/null && diff -rq "$TMP/m4.md" "$d/m4.md" >/dev/null && diff -q "$TMP/log.md" "$d/log.md" >/dev/null \
      && diff -rq "$FX" "$d/fx" >/dev/null && diff -rq tools "$d/plat/tools" >/dev/null; then bad "$name: the mutation changed nothing"; return; fi
   case $sub in
-    shape|cred|switch) python3 -I "$FX/check_runbook.py" "$sub" "$d/rb.md" >"$TMP/out" 2>&1; rc=$? ;;
+    shape|cred|switch|stop) python3 -I "$FX/check_runbook.py" "$sub" "$d/rb.md" >"$TMP/out" 2>&1; rc=$? ;;
     evidence)          python3 -I "$FX/check_runbook.py" evidence "$d/rb.md" "$d/log.md" >"$TMP/out" 2>&1; rc=$? ;;
     observed)          python3 -I "$FX/check_runbook.py" observed "$d/rb.md" "$d/fx" >"$TMP/out" 2>&1; rc=$? ;;
     fill)              python3 -I "$FX/check_runbook.py" fill "$d/rb.md" "$d/plat" >"$TMP/out" 2>&1; rc=$? ;;
@@ -115,6 +116,8 @@ echo " -- criterion 3"
 mut "3 'gh auth token' added"                 cred  "echo 'gh auth token' >> rb.md"
 mut "3 '--show-token' added to a status line" cred  "sed -i '0,/^gh auth status\$/s//gh auth status --show-token/' rb.md"
 mut "3 a switch back to womcraft deleted"     switch "sed -i '0,/^gh auth switch --user womcraft\$/{//d}' rb.md"
+mut "3 a stop line without the switch-back command" stop "sed -i '0,/^If what you see is different, \\*\\*stop\\*\\*: run .* first, then/s//If what you see is different, **stop**: then/' rb.md"
+mut "3 a switched step with no stop line"     stop "python3 -I -c \"t=open('rb.md').read(); i=t.index('If what you see is different'); j=t.index('\\n\\n',i); open('rb.md','w').write(t[:i]+t[j+2:])\""
 mut "3 a second switch to mbmludric without switching back" switch "sed -i '0,/^gh auth switch --user mbmludric\$/s//gh auth switch --user mbmludric\ngh auth switch --user mbmludric/' rb.md"
 echo " -- criterion 4"
 mut "4 one extra UNVERIFIED marker"           evidence "sed -i '0,/^(Observed 2026-11-04\\. /s//[UNVERIFIED — expected, not observed] (Observed 2026-11-04. /' rb.md"

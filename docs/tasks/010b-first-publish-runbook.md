@@ -68,3 +68,26 @@ Creating any remote, pushing, tagging on a remote, opening a PR, publishing anyt
   - U17 step 4.4
   - U18 step 5.2
 - 2026-11-04 doc-writer (010b, closing): content commit `fd4473d` is PIN_FINAL in `docs/tasks/010b-verify.sh`; the later commits touch only the verify script and this log (both in scope). Ludwig chose to resume after the incident above; the deletion of the stray local branch `add-test-hello-world` in `/home/ludwig/registry` is his decision, not mine, and I did not touch that checkout again. Results in a fresh clone of `https://github.com/worldofmodcraft/platform`, branch `task/010b-first-publish-runbook`: `docs/tasks/010b-verify.sh` exit 0 ("010b-verify: ALL OK"); `docs/tasks/010b-verify.sh --mutate` exit 0 ("ALL OK (26 mutations, each red with a reason)"). Other verify scripts that read the changed files, run in the worktree: 068, 085, 096, 102 exit 0. 090 exit 2 in the worktree ("working tree is dirty; run from a clean clone"); its re-run in the fresh clone exceeded two minutes and was stopped, so 090 is NOT demonstrated green: the manager should run it on the pushed branch. [script] results: criteria 1-6 as above; [human]: none claimed.
+- 2026-11-04 doc-writer (010b, fix round after review PASS-WITH-FINDINGS). **Corrections to the entries above (they stay as written):** (a) the Rehearsal paragraph says the steps were "run verbatim". That is wrong in detail. The transcripts show variants: step 1.3 was run with an extra `; ls -l ... | awk` listing that is not in the runbook; several runbook blocks were run as separate commands or combined with `&&`; step 4.2's heredoc was run as `<<"PY"` while the runbook says `<<'PY'`; the fill commands were run through `bash -c` with `HOME` redirected. "Observed" in this runbook therefore means "the same commands, or close variants, were run in the scratch area", not byte-identical replay. (b) The `observed` check of the verify script proves only that each such line appears in one of the transcript files after normalising hashes and the init path. It does not prove that the line was observed in the order or the context the runbook gives; the transcripts are the agent's own saved output. (c) The manager ran `090-verify.sh` on `034db5e`: exit 0, 86 ok, 0 FAIL (this closes the gap named in the closing entry).
+  **Findings fixed (review items):** 1. every step inside a section switched to `mbmludric` (1.11-1.16, 2.1-2.5, 4.2-4.4) now carries a stop line that names `gh auth switch --user womcraft` before "tell the manager"; the general rules and the "screen differs" line say the same. Steps outside a switched section (1.2, 1.10, 2.6 and others) are unchanged on purpose: the account is still `womcraft` there. Step 4.2 is now a separate switch step (switch, `gh auth status`, You should see, stop line, note that the section ends with step 4.4); the old 4.2 to 4.4 became 4.3 to 4.5. 2. step 5.1's "This proves" now describes the real mechanism: the registry workflow step "Ask the organisation whether the author is a member" asks `/orgs/ORG/members/LOGIN` with a GitHub App token and passes the HTTP status to the gate (read from a fresh GitHub clone of the registry, `registry-ci.yml`). 3. the "This proves" of 4.3/4.4 says that for `test:` the owner is the organisation and the author passes as an organisation member. 4. this entry. The reviewer also named lines 71 and 261 (steps 1.2 and 1.10); those steps run before the first switch, so they were left alone.
+  **Red then green (§2c rule 5):** the checker rule `stop` was added to `check_runbook.py` first and run on the unfixed runbook: exit 1 with ten lines, "FAIL step 1.11: inside a switched section but no stop line gives the switch-back command", the same for 1.12, 1.14, 1.15, 2.1, 2.2, 2.3, 2.4 and 4.2, and "FAIL step 1.13: a stop line inside a switched section lacks `gh auth switch --user womcraft`: If git asks for a username or a password, press Ctrl+C. ...". After the fix the same command exits 0. Two `--mutate` items were added (a stop line without the command; a switched step without a stop line). The checker now reads the LAST `UNVERIFIED-LIST 010b` in the log, because the log is append-only; the list below supersedes the earlier one. The observed-step list moved 4.2 to 4.3 with the renumbering.
+  UNVERIFIED-LIST 010b (supersedes the earlier list; 19 markers, runbook at the new PIN_FINAL):
+  - U1 step 1.11
+  - U2 step 1.12
+  - U3 step 1.13
+  - U4 step 1.14
+  - U5 step 1.16
+  - U6 step 2.1
+  - U7 step 2.2
+  - U8 step 2.4
+  - U9 step 2.5
+  - U10 step 2.6
+  - U11 step 2.7
+  - U12 step 3.1
+  - U13 step 3.2
+  - U14 step 3.3
+  - U15 step 4.1
+  - U16 step 4.2
+  - U17 step 4.4
+  - U18 step 4.5
+  - U19 step 5.2
