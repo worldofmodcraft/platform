@@ -1,6 +1,6 @@
 # Task 010b: first-publish runbook and the M4 text (split from task 010)
 
-- **Mission:** SITE-V1, deliverable **D4** (runbook half) — **Status:** spec-approved (manager, 2026-11-04, solo gate: documentation, no code, no security surface)
+- **Mission:** SITE-V1, deliverable **D4** (runbook half) — **Status:** done (merged, platform #109, 2026-11-05; spec-approved solo)
 - **Repo:** platform. **Agent / model:** doc-writer (model per frontmatter). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/010b-first-publish-runbook` / `~/wt/task-010b`, cut from platform `origin/main`
 - **Depends on:** 010a (merged; contents on main), 008b-2 (registry main `428df02`). 008b-3a/3b are not built; see criterion 4.

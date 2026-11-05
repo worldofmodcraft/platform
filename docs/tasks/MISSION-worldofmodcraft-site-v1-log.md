@@ -3195,3 +3195,26 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
 ### For Ludwig
 - **Q23, before phase two:** WoWee's licence versus AGPL. Options: A★ ask the copyright holders in writing and have a lawyer read the answer; B fork the last plain-MIT commit, without audio; C keep WoWee's terms and amend ADR-0049; D use benilla-wotlk. Nothing rests on an assumption yet: no fork exists.
 - M4 (Part 1 of `docs/runbooks/first-publish.md`), and deleting the stray branch: `git -C ~/registry branch -d add-test-hello-world`.
+- **2026-11-05, measurement (task 111a, `tools/dev/sweep.py` on registry `58c75c0`, a fresh clone with `npm ci` ajv):** complete, 34 measured, 0 unmeasured, `quiet_wait` true, 0 s waited; 039a skipped by design. Sum **26,195 s (7.3 h)**. Top: 065 11,563 s; 064 5,665 s; 070 2,944 s; 069 1,122 s; 089a1 948 s; 089b 785 s; 103 680 s; 066 628 s; 087 562 s; 067 321 s; 062 311 s. Nested starts 1,964 in total (032 359; 006 329; 057 312; 008a 289; 034 265). Read-only agents ran on the machine during it, so timings may be somewhat high. **One red, `089c`, explained:** AC0.4 needs `origin/main`, and my clone made with `--branch` had no local `main`; reproduced red through the driver, green after creating local `main`, also green standalone.
+- **111a merged** (registry #40 -> `ab5fcba`; `gate` pass). The sweep's head `58c75c0` had main `428df02` as its merge-base and main unchanged, so it was the merge result. Gap as logged: 039a's own non-sweep checks did not run. Three review rounds, all PASS-WITH-FINDINGS; manager's fresh-clone default and `--mutate` green.
+- **★ under ADR-0125, 111b design:** Options: A★ `--no-closed` on 064 and 065 only, 039b's proven pattern, about 7.3 h to 2.6 h by the measured sums; B also rework the fixtures in 070 and 069, a larger change to closed scripts for less gain, left for after a re-measure; C parallel CI only (111c), which leaves local gates at 7.3 h. Reason: the two loops are 65 % of the cost and are pure duplication inside a sweep.
+
+## SESSION STATUS — 2026-11-05 (session 15, handover) — context 38 %
+**Slip logged:** the manager read the context figure late and passed the 30 % soft limit (MANAGER.md §5) without noticing; 111b is therefore not dispatched from this session.
+### Done (all merged)
+- **Platform:** #108 specs; **010b** runbook and M4 text (#109, `8dfe9eb`); **112** Leyline analysis (#110, #111); **113** Rust client and usability survey, Q23 (#112). Vault refreshed after each. This status: session PR, merged with it.
+- **Registry:** **111a** `tools/dev/sweep.py` (#40, `ab5fcba`). First real measurement: 7.3 h, logged above.
+- **Decisions by Ludwig:** "A, kör på" (resume after the §8 stop). The stop itself and its audit are logged above.
+### In progress
+Nothing is running. **111b** (`docs/tasks/111b-sweep-dedup.md`) is spec-approved, not started.
+### Next session starts here
+1. **Dispatch 111b** (implementer; registry; `check-log-entry.sh count` first). Give the agent the measurement line from this log to append to `docs/tasks/111a-sweep-measure.md`. After review, the manager runs the real sweep on the merge result through a neutral script file (OPERATIONS.md, session 15), from a clone with a local `main`, and records the new time.
+2. **111c** (path-filtered pre-merge plus nightly parallel sweep, ADR-0099): specify from the new measurement; also the OPERATIONS cross-script rule.
+3. **094**, **008b-3a**, **008b-3b**, then **010c** (rehearse Parts 2-5, remove markers; `STOP_RE` loophole in `check_runbook.py`).
+4. When Ludwig reports M4's 40-hex commit: **dry-run dispatch** of `pipeline.yml` (live criteria 7, 10, 11), then the §7 walkthrough with him.
+5. **Booked:** 111a's minor findings (log above); worktrees `~/wt/task-010b`, `~/wt/registry-task-111a`, plus the older list in session 14's status, check each before removing; job tmp clones go with this job; reviewers cannot be blind while the task file carries its log (split it off in briefs); the earlier booked follow-ups from session 14's status still stand. **Proposals in `docs/design/rust-clients-usability-survey.md`, items 1-3 and 6, are cheap and not yet a task; offer them when phase-two specs are written.**
+### For Ludwig
+- **M4:** Part 1 of `docs/runbooks/first-publish.md`, steps 1.1-1.16; give the manager the 40-hex commit from step 1.15.
+- **Stray branch:** `git -C ~/registry branch -d add-test-hello-world`, not yet run when last checked.
+- **Q23, before phase two (not urgent):** WoWee licence versus ADR-0049; options in the survey note, ★ A.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-05 (session 15, handover) i missionsloggen och fortsätt med 'Next session starts here'."

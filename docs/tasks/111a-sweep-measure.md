@@ -1,6 +1,6 @@
 # Task 111a: a measuring sweep driver for the registry's closed verify scripts
 
-- **Mission:** SITE-V1 (process; Ludwig's option C for long test runs, 2026-11-04) — **Status:** spec-approved (manager, 2026-11-04, solo gate: a new read-only dev tool; no closed script, workflow or security surface changes)
+- **Mission:** SITE-V1 (process; Ludwig's option C for long test runs, 2026-11-04) — **Status:** done (merged, registry #40, 2026-11-05; the log is the copy in the registry branch; spec-approved solo)
 - **Repo:** registry. **Agent / model:** implementer (model per frontmatter). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/111a-sweep-measure` / `~/wt/registry-task-111a`, cut from registry `origin/main`
 - **Graph:** no node or edge; a developer tool that reads the repository only.
