@@ -170,11 +170,16 @@ the crown jewels regardless.
 ---
 
 ## ☐ M4 — The `test:hello-world` repository  — decided: Q2=A (`test` is a reserved namespace)
-**Status: not done.** `https://github.com/mbmludric/hello-world` returns 404 (checked 2026-10-15), and the staging
-files from task 010 are not in the repo yet. **Waiting on task 010.** Do not create the repo yet: task 010 will give
-you a tree to push and exact commands (`docs/runbooks/first-publish.md`).
+**Status: not done.** The repository to create is **`mbmludric/wom-test-hello-world`**, **public** (decided 2026-11-04, task 010b;
+the name `hello-world` is not used). Unauthenticated check, 2026-11-04: `https://api.github.com/repos/mbmludric/wom-test-hello-world`
+answers HTTP 404, so the name is free. (The old name `mbmludric/hello-world` also answered 404 on 2026-10-15 and is not used.)
+**Do it by following Part 1 of `docs/runbooks/first-publish.md`** (steps 1.1 to 1.16): it gives every command, what you should
+see and what it proves, including how to switch the `gh` account to `mbmludric` and back to `womcraft`. At the end you send the
+manager one line: the 40-character commit hash (step 1.15). Parts 2 to 5 of that runbook (registry pull request, pipeline, page
+change) come after M4 and are mostly marked as not yet observed.
 ADR-0119 reserves `mc` and `test` as organisation-owned namespaces, so `test:hello-world` is legal. The URL stays
-`worldofmodcraft.com/mods/test/hello-world`. The repo is created under your personal account `mbmludric`, **after M6**.
+`worldofmodcraft.com/mods/test/hello-world`. The repo is created under your personal account `mbmludric`, **after M6** (done).
+*M4 section last reviewed: 2026-11-04 (task 010b).*
 
 ---
 

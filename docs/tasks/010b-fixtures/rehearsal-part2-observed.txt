@@ -1,0 +1,52 @@
+
+$ cd ~/wom-first-publish/registry && git fetch https://github.com/worldofmodcraft/registry main && git switch -c add-test-hello-world FETCH_HEAD
+From file:///home/ludwig/registry
+ * branch            main       -> FETCH_HEAD
+Switched to a new branch 'add-test-hello-world'
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && mkdir -p mods/test.hello-world && git -C ~/wom archive origin/main docs/test-mod/registry-pr | tar -x -C mods/test.hello-world --strip-components=3 && ls mods/test.hello-world
+entry.json
+page.json
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && grep -n "commit\|source_url" mods/test.hello-world/entry.json
+11:      "commit": "0000000000000000000000000000000000000000",
+12:      "source_url": "https://github.com/OWNER-PLACEHOLDER/wom-test-hello-world",
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && python3 ~/wom-first-publish/fill_placeholders.py entry --account mbmludric --commit "$(git -C ~/wom-first-publish/wom-test-hello-world rev-parse HEAD)" --file mods/test.hello-world/entry.json
+filled mods/test.hello-world/entry.json
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && grep -n "commit\|source_url" mods/test.hello-world/entry.json; grep -rn "OWNER-PLACEHOLDER\|0000000000000000000000000000000000000000" mods/test.hello-world; echo "grep exit: $?"
+11:      "commit": "f4fd0dd1010e148276668202cd0158016df83505",
+12:      "source_url": "https://github.com/mbmludric/wom-test-hello-world",
+grep exit: 1
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && git config user.name "mbmludric" && git config user.email "37807560+mbmludric@users.noreply.github.com" && git add mods/test.hello-world && git status --short
+A  mods/test.hello-world/entry.json
+A  mods/test.hello-world/page.json
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && git commit -m "Add test:hello-world 1.0.0 (pipeline canary)"
+[add-test-hello-world c9d21d2] Add test:hello-world 1.0.0 (pipeline canary)
+ 2 files changed, 30 insertions(+)
+ create mode 100644 mods/test.hello-world/entry.json
+ create mode 100644 mods/test.hello-world/page.json
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && git push -u origin add-test-hello-world
+To /tmp/r010b-home-Q52ad5/remote/registry-fork.git
+   428df02..c9d21d2  add-test-hello-world -> add-test-hello-world
+branch 'add-test-hello-world' set up to track 'origin/add-test-hello-world'.
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && git log --oneline -2 && git show --stat --format= HEAD
+c9d21d2 Add test:hello-world 1.0.0 (pipeline canary)
+428df02 Merge pull request #30 from worldofmodcraft/task/008b2-pipeline-build-sign
+ mods/test.hello-world/entry.json | 16 ++++++++++++++++
+ mods/test.hello-world/page.json  | 14 ++++++++++++++
+ 2 files changed, 30 insertions(+)
+[exit 0]

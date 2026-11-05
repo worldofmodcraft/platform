@@ -1,0 +1,23 @@
+
+$ cd ~/wom-first-publish/registry && python3 -I - <<"PY"
+import json
+p = "mods/test.hello-world/page.json"
+d = json.load(open(p))
+d["description"] = d["description"] + " Updated to prove that a page change publishes without a new version."
+d["screenshots"].append("assets/screenshots/spare.png")
+with open(p, "w") as f:
+    json.dump(d, f, indent=2)
+    f.write("\n")
+PY
+git diff --stat; git diff | grep "^[+-] "
+ mods/test.hello-world/page.json | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+-  "description": "The permanent pipeline canary: a mod with no code whose only job is to prove that publishing works end to end, from a git tag to a signed archive and this page.",
++  "description": "The permanent pipeline canary: a mod with no code whose only job is to prove that publishing works end to end, from a git tag to a signed archive and this page. Updated to prove that a page change publishes without a new version.",
+-    "assets/screenshots/gallery.png"
++    "assets/screenshots/gallery.png",
++    "assets/screenshots/spare.png"
+[exit 0]
+
+$ cd ~/wom-first-publish/registry && git checkout -- . && git status --short
+[exit 0]

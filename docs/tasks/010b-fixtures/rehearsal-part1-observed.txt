@@ -1,0 +1,108 @@
+
+$ curl -s -o /dev/null -w "status=%{http_code}\n" https://api.github.com/repos/mbmludric/wom-test-hello-world
+status=404
+[exit 0]
+
+$ git -C ~/wom fetch origin
+[exit 0]
+
+$ mkdir ~/wom-first-publish
+[exit 0]
+
+$ mkdir ~/wom-first-publish/wom-test-hello-world
+[exit 0]
+
+$ git -C ~/wom show origin/main:tools/test-mod/fill_placeholders.py > ~/wom-first-publish/fill_placeholders.py; ls -l ~/wom-first-publish | sed 1d | awk "{print \$5, \$9}"
+4300 fill_placeholders.py
+40 wom-test-hello-world
+[exit 0]
+
+$ git -C ~/wom archive origin/main docs/test-mod/hello-world | tar -x -C ~/wom-first-publish/wom-test-hello-world --strip-components=3; cd ~/wom-first-publish/wom-test-hello-world && find . -type f | sort
+./LICENSE
+./README.md
+./assets/screenshots/gallery.png
+./assets/screenshots/spare.png
+./assets/screenshots/welcome.png
+./mod.lua
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && grep -rn OWNER-PLACEHOLDER .
+./mod.lua:9:  source = "https://github.com/OWNER-PLACEHOLDER/wom-test-hello-world",
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && python3 ~/wom-first-publish/fill_placeholders.py mod --account mbmludric
+filled mod.lua
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && grep -n "source =" mod.lua; grep -rn OWNER-PLACEHOLDER . ; echo "grep exit: $?"
+9:  source = "https://github.com/mbmludric/wom-test-hello-world",
+grep exit: 1
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git init -b main
+Initialized empty Git repository in /tmp/r010b-home-Q52ad5/wom-first-publish/wom-test-hello-world/.git/
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git config user.name "mbmludric" && git config user.email "37807560+mbmludric@users.noreply.github.com" && git config --local --get-regexp "^user"
+user.name mbmludric
+user.email 37807560+mbmludric@users.noreply.github.com
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git add -A && git status --short
+A  LICENSE
+A  README.md
+A  assets/screenshots/gallery.png
+A  assets/screenshots/spare.png
+A  assets/screenshots/welcome.png
+A  mod.lua
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git commit -m "test:hello-world 1.0.0 (World of Modcraft pipeline canary)"
+[main (root-commit) f4fd0dd] test:hello-world 1.0.0 (World of Modcraft pipeline canary)
+ 6 files changed, 83 insertions(+)
+ create mode 100644 LICENSE
+ create mode 100644 README.md
+ create mode 100644 assets/screenshots/gallery.png
+ create mode 100644 assets/screenshots/spare.png
+ create mode 100644 assets/screenshots/welcome.png
+ create mode 100644 mod.lua
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git log --oneline
+f4fd0dd test:hello-world 1.0.0 (World of Modcraft pipeline canary)
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git tag v1.0.0 && git show-ref --tags
+f4fd0dd1010e148276668202cd0158016df83505 refs/tags/v1.0.0
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git rev-parse HEAD && git rev-parse "v1.0.0^{commit}"
+f4fd0dd1010e148276668202cd0158016df83505
+f4fd0dd1010e148276668202cd0158016df83505
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git remote add origin https://github.com/mbmludric/wom-test-hello-world.git && git remote -v
+origin	file:///tmp/r010b-home-Q52ad5/remote/wom-test-hello-world.git (fetch)
+origin	file:///tmp/r010b-home-Q52ad5/remote/wom-test-hello-world.git (push)
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git push -u origin main
+To file:///tmp/r010b-home-Q52ad5/remote/wom-test-hello-world.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git push origin v1.0.0
+To file:///tmp/r010b-home-Q52ad5/remote/wom-test-hello-world.git
+ * [new tag]         v1.0.0 -> v1.0.0
+[exit 0]
+
+$ git ls-remote https://github.com/mbmludric/wom-test-hello-world.git
+f4fd0dd1010e148276668202cd0158016df83505	HEAD
+f4fd0dd1010e148276668202cd0158016df83505	refs/heads/main
+f4fd0dd1010e148276668202cd0158016df83505	refs/tags/v1.0.0
+[exit 0]
+
+$ cd ~/wom-first-publish/wom-test-hello-world && git status -sb
+## main...origin/main
+[exit 0]
