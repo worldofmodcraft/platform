@@ -480,3 +480,20 @@ machine, start an own background watch (wait until no `docs/tasks/*-verify.sh` r
 - A test that pins a corpus size (the ADR tests pinned 119) turns red the day the corpus grows and hides behind a path-filtered CI workflow: platform
   main's "ADR index" check was red from 2026-09-02 until task 105. Derive such counts from the files.
 - Design docs are projected into the vault root since task 108; a hand-placed file with a planned note's name blocks the whole refresh.
+
+## What session 15 paid for (2026-11-04/05)
+
+### A rehearsal never clones a shared checkout
+A runbook rehearsal cloned `~/registry`, so the clone's `origin` was that checkout and a push created a branch there, an absolute stop condition (MANAGER.md §8). Clone from the GitHub URL or a bare copy, and name the source in the spec. (Task 010b; mission log.)
+
+### Naming a verify script on a command line blocks the machine
+Quiet-waits match any process whose arguments contain `*-verify.sh`, unless it is an ancestor. `bash x-verify.sh | grep ...` makes a sibling shell with that text, and the script then waits for it, for hours. A `pgrep -f "x-verify.sh"` watcher matches its own command line and never ends; it deadlocked the machine until Ludwig killed it (agents and the manager are denied). Put the command in a small script file with a neutral name, and redirect output to a file. (Tasks 111a, 111b.)
+
+### `tools/dev/sweep.py` from a clone made with `--branch` gives a false red
+The inner clone gets `origin/main` only if the source clone has a local `main`; without it `089c-verify.sh` AC0.4 fails. Fetch and create local `main` first. (Task 111a's measurement; fixed by 111b.)
+
+### The measured cost of a whole sweep (2026-11-05, `58c75c0`)
+26,195 s (7.3 h): 065 = 3.2 h and 064 = 1.6 h, nearly all in their loops over other closed scripts; 070 = 0.8 h. Task 111b removes the loops inside a sweep. `tools/dev/sweep.py` is now the tool for this; 039a's own non-sweep checks are not in it.
+
+### Check an upstream's licence file, not its label
+ADR-0007 and ADR-0049 call WoWee MIT; its `LICENSE` has carried a no-commercial-games restriction since 2026-07-21 (open question Q23). GitHub's `license` field answered `NOASSERTION`, which was the hint. Before relying on a dependency's licence, read the file.
