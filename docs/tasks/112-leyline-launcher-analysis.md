@@ -1,6 +1,6 @@
 # Task 112: analyse Leyline as a possible starting point for the launcher
 
-- **Mission:** none (Ludwig's direct request, 2026-11-05; input to the later launcher work, ADR-0043) — **Status:** spec-approved (manager, 2026-11-05, solo gate: documentation only)
+- **Mission:** none (Ludwig's direct request, 2026-11-05; input to the later launcher work, ADR-0043) — **Status:** done (manager, 2026-11-05; spec-approved solo, documentation only)
 - **Agent / model:** surveyor for the reading; manager writes the note; reviewer fact-checks — **Budget:** small
 - **Branch:** `session/15` (documentation only, no code)
 
@@ -20,3 +20,4 @@ Running or building anything from the cloned repository (untrusted data; read on
 # Task 112 log
 - 2026-11-05 manager (session 15): spec written; read-only clone in the job tmp dir.
 - 2026-11-05 manager: surveyor read the launcher; manager spot-checked and wrote the note. Reviewer fact-check PASS-WITH-FINDINGS: four wrong claims (private upstream, Den Lite source private, no dependency resolution, README as a licence source), three imprecise (no CLI, where minisign runs, trust-model summary), and a missing case for forking. All corrected; the manager confirmed the workspace repository is public and has no detected licence (`gh api`), and measured the borrowable modules at 5,060 of 43,232 lines. The recommendation stands on ADR-0043's grounds. Not re-reviewed after the corrections: this is a non-binding note, and the corrections follow the reviewer's text.
+- 2026-11-05 manager: Ludwig asked for the torrent and relay discussion in the note ("Gör så!") and for the project's distinct purpose to be stated. Added three sections from ADR-0001, 0009, 0011, 0020, 0021, 0046 and Leyline's `mods/SPEC.md` and hosting docs. Relay code not read; said so in the note. This addition was not independently reviewed: a non-binding note.

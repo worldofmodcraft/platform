@@ -18,6 +18,20 @@
 | Thin shell over a CLI? | **No.** It is a large product; this is the main reason not to fork |
 | Same trust model for mods? | **No.** Weaker than ADR-0041: a hash per artefact, no signature |
 
+## Why World of Modcraft still has its own purpose
+
+Leyline and this project overlap at the launcher and hosting, not at the core. **Leyline delivers addons and scripts; World of Modcraft is a modding platform where mods build on each other** (ADR-0001: "Forge/Fabric for Minecraft", "Skyrim modding for WoW").
+
+| | World of Modcraft | Leyline (format 0.1, `mods/SPEC.md`) |
+|---|---|---|
+| What a mod is | Records, Lua and plugins, compiled by a kernel (ADR-0008) | A 3.3.5a addon and/or mod-ale Lua scripts |
+| Extending another mod | `kernel.wrap` with `extends` declared in the manifest, chained in load order and logged with attribution (ADR-0021) | No equivalent found in the format (not a full read of the realm code) |
+| Two mods changing one record | Merged per field; only a write to the same field conflicts, with a report (ADR-0009) | No record model in the format |
+| Load order and dependencies | Computed from `depends`, `extends` and `load_after`; install order means nothing (ADR-0011) | Flat prerequisites and conflict checks (`ui/market.js`) |
+| API | Three rings defined in one IDL (ADR-0020) | No kernel API; builds on addons and mod-ale |
+
+This is also why the two can coexist: what we would borrow from Leyline is packaging around the platform, and none of it touches the kernel.
+
 ## What it is
 
 Leyline is a mod launcher plus a peer-to-peer realm network: hosts run a realm on their own PC and reach players through a relay (`README.md`). The launcher is one part of the repository:
@@ -91,6 +105,23 @@ In the order I would look at them. Each is an idea first; copying code keeps the
 - **Not read in depth:** `hosting/` (relay and kit), `realm/`, `stream/`, the workspace repository, and whether the `terrain` crate is clean-room as it states.
 - **Not determined:** whether the updater and deep-link plugins work with the listed Tauri capabilities (`Cargo.toml` has no deep-link plugin dependency); whether any Windows build is code-signed.
 - **Snapshot:** everything is as of `747ecdd`, and the project changes daily. Re-read before relying on any detail.
+
+## Ideas raised by Ludwig (2026-11-05, not decided)
+
+### Torrent for mods
+- **Fits well:** ADR-0041 verifies hash and signature after download, so the source of the bytes does not matter; a tampered file is refused.
+- **Two rules:** the launcher fetches only what the registry names, by id and hash, with no field for pasting an arbitrary magnet link. Seeding is opt-in, because a seeder's IP address is visible to the swarm.
+- **Not urgent:** mods are small and GitHub Releases is enough for now (ADR-0103). Worth reconsidering if large asset mods or hosting limits appear; ADR-0077's disaster mirror is the related decision.
+- **Not for the game client:** Blizzard no longer sells 3.3.5a (ADR-0005), so such a feature points in practice at unauthorised copies. "It is up to the user" is a weak defence for a feature built for that purpose, and a takedown could hit the organisation and the registry that all mods come from. Legal counsel, not this note, would have to say more. Recommendation: leave it out; ADR-0005 stands.
+
+### Relay for hosting
+Described from Leyline's docs (`hosting/README.md`, `docs/leyline/network.md`, `be-a-node.md`); the code was not read.
+
+- **How it works:** the host's PC opens one outbound connection to the relay, with no open ports. A stock 3.3.5a client sets `realmlist` to the relay, which has a raw TCP port per realm. Players do not see the host's home address. The relay applies per-IP limits and checks invites before admitting anyone. Volunteers can run extra relay nodes.
+- **Why it matters:** it removes the largest step in playing with friends, and that is our audience (ADR-0002).
+- **Against ADR-0046:** today's answer is invite codes and Tailscale, with "no platform-operated relay (possible later without architectural change)". Tunnels are a generic interface there, so a relay can join without a rewrite.
+- **Costs of running one:** a running expense and operations, when the platform so far hosts nothing; responsibility for traffic passing through, including abuse; a single point of failure for whoever depends on it.
+- **Recommendation:** make the relay a program anyone can run on a small VPS, offered beside Tailscale. Players get the same simple flow, and the project need not operate a service from day one. A platform-run relay can remain a later choice. This belongs to the launcher and server phase; if adopted, it needs an ADR amending ADR-0046. Leyline's `hosting/` code (in the MIT repository) is the reading material.
 
 ## If you want to take this further
 
