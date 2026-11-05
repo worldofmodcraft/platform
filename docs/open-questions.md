@@ -26,6 +26,7 @@ Each entry: what, why deferred, what would trigger deciding it.
 | Q20 | **Winget distribution** of the launcher | Eases SmartScreen friction without a certificate | Around stable release (ADR-0094) |
 | Q21 | **Reference machine specs** — Ludwig to supply CPU/RAM/GPU/disk/OS + WSL-vs-native measurement mode | Awaiting specs | Fill docs/reference-machine.md when provided (ADR-0081) |
 | Q22 | **Console spectator view** — world map with player dots via overlay data in a console panel | Ring 3 seed, someone builds it | If/when a mod or the community wants it (ADR-0112) |
+| Q23 | **WoWee licence versus ADR-0007 and ADR-0049** — WoWee has been "MIT with an additional restriction" (no commercial games without written permission) since 2026-07-21, and its audio is all rights reserved; ADR-0049 plans the client fork as AGPL on the premise "WoWee is MIT". Options and reasoning: `docs/design/rust-clients-usability-survey.md` | Found by task 113 on 2026-11-05; no fork exists yet, and the site mission does not depend on it | **Before the phase-two mission is issued.** Ludwig decides; contact and legal review are his |
 
 ## Deferred to the roguelike design kit
 - Which of the 21 locked roguelike decisions change now that WoW-specific limits (DBC fields, client patches) are gone.
