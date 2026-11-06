@@ -493,7 +493,7 @@ Quiet-waits match any process whose arguments contain `*-verify.sh`, unless it i
 The inner clone gets `origin/main` only if the source clone has a local `main`; without it `089c-verify.sh` AC0.4 fails. Fetch and create local `main` first. (Task 111a's measurement; fixed by 111b.)
 
 ### The measured cost of a whole sweep (2026-11-05, `58c75c0`)
-26,195 s (7.3 h): 065 = 3.2 h and 064 = 1.6 h, nearly all in their loops over other closed scripts; 070 = 0.8 h. Task 111b removes the loops inside a sweep. `tools/dev/sweep.py` is now the tool for this; 039a's own non-sweep checks are not in it.
+26,195 s (7.3 h): 065 = 3.2 h and 064 = 1.6 h, nearly all in their loops over other closed scripts; 070 = 0.8 h. After task 111b (2026-11-06, `eaeeff1`): 10,230 s (2.84 h); the largest left are 070 (0.95 h), 069, 089a1 and 089b, whose nested runs are fixtures of their own checks. `tools/dev/sweep.py` is now the tool for this; 039a's own non-sweep checks are not in it.
 
 ### Check an upstream's licence file, not its label
 ADR-0007 and ADR-0049 call WoWee MIT; its `LICENSE` has carried a no-commercial-games restriction since 2026-07-21 (open question Q23). GitHub's `license` field answered `NOASSERTION`, which was the hint. Before relying on a dependency's licence, read the file.
