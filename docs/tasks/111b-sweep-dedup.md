@@ -38,3 +38,4 @@ Weakening any check that runs in standalone mode; removing a loop rather than gu
 ---
 # Task 111b log
 - 2026-11-05 manager (session 15): spec written from the measurement; gate passed solo.
+- 2026-11-06 manager: **scope extended (★ under ADR-0125).** `111a-verify.sh`'s own-change check reads `FINAL..HEAD`, which breaks Ludwig's decision A ("own-change checks read fixed SHAs only"; OPERATIONS.md) and reddens on any later commit. 111b found it. Options: A★ re-pin it inside 111b to `FINAL..TIP` with TIP = `58c75c0` (111a's merged head, `ab5fcba^2`), task 101's pattern, red-first shown on this branch; B a separate task, which costs a second multi-hour sweep. Added to the file scope: `docs/tasks/111a-verify.sh` (the own-change range only; its live guards stay on HEAD). Missed by three 111a review rounds and by the manager.
