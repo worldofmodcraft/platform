@@ -1,6 +1,6 @@
 # Task 111b: the whole sweep runs each closed script's nested sweep once, not again inside 064 and 065
 
-- **Mission:** SITE-V1 (process; Ludwig's option C) — **Status:** spec-approved (manager, 2026-11-05, solo gate: a skip flag with a proven pattern; the merge gate is a whole sweep)
+- **Mission:** SITE-V1 (process; Ludwig's option C) — **Status:** done (merged, registry #41 -> `235fea1`, 2026-11-06; the log is the copy in the registry branch)
 - **Repo:** registry. **Agent / model:** implementer (model per frontmatter). **Budget:** small (≤ 1 agent-session)
 - **Branch / worktree:** `task/111b-sweep-dedup` / `~/wt/registry-task-111b`, cut from registry `origin/main` (`ab5fcba`)
 - **Graph:** no node or edge. **Depends on:** 111a (merged). **Sequel:** 111c (path-filtered pre-merge plus nightly sweep, ADR-0099).
