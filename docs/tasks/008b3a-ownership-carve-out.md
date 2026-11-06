@@ -60,3 +60,4 @@ Carve-out + tests + fixtures + verify script + this file's log section current.
 ---
 # Task 008b-3a log  (append-only, updated continuously by the executing agent)
 - 2026-10-26 split from 008b-3 at the review of the 008b split (manager ★, session 12); nothing started.
+- 2026-11-06 manager (session 15): delta re-check against registry main `ab5fcba`: `tools/registry/ownership.py`, `contracts/ownership.md` and `tests/registry/test_ownership.py` last changed 2026-10-25 (task 075), before this spec was approved on 2026-10-26, so the spec stands. The "Needs Ludwig's approval: CI security check" line is lifted by ADR-0125 (merge of green CI security checks); the carve-out covers T1 and T3 only, so the takedown exception (ADR-0122, T2) is untouched and stays Ludwig's. Sequenced after 111b and 094 (one quiet-waiting agent at a time).
