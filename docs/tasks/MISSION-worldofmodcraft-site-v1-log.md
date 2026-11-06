@@ -3218,3 +3218,4 @@ Nothing is running. **111b** (`docs/tasks/111b-sweep-dedup.md`) is spec-approved
 - **Stray branch:** `git -C ~/registry branch -d add-test-hello-world`, not yet run when last checked.
 - **Q23, before phase two (not urgent):** WoWee licence versus ADR-0049; options in the survey note, ★ A.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-05 (session 15, handover) i missionsloggen och fortsätt med 'Next session starts here'."
+- **2026-11-06, Ludwig (verbatim):** "Klart, grenen är borttagen". The manager read `~/registry/.git/refs/heads/`: only `main` and `task/`; no packed ref. The stray branch from the 010b incident is gone; drop it from "For Ludwig". (His first try through `!` in the session failed, probably because of the session's worktree isolation; he ran it in his own terminal.)
