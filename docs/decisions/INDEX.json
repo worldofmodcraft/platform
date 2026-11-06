@@ -1,5 +1,5 @@
 {
-  "count": 125,
+  "count": 126,
   "adrs": [
     {
       "number": 1,
@@ -64,7 +64,8 @@
       ],
       "amends": [],
       "amended_by": [
-        120
+        120,
+        126
       ]
     },
     {
@@ -587,7 +588,9 @@
         38
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        126
+      ]
     },
     {
       "number": 37,
@@ -1287,7 +1290,9 @@
         79
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        126
+      ]
     },
     {
       "number": 79,
@@ -2137,6 +2142,34 @@
         122
       ],
       "amends": [],
+      "amended_by": []
+    },
+    {
+      "number": 126,
+      "filename": "0126-realm-and-character-stats-portal.md",
+      "title": "An opt-in realm and character stats portal at stats.worldofmodcraft.com (phase 3)",
+      "status": "Accepted (2026-11-06, decided by Ludwig)",
+      "date": "2026-11-06",
+      "area": "Site / Backend",
+      "touches": [
+        "site/stats-portal",
+        "backend/server-directory",
+        "privacy/telemetry",
+        "legal/assets"
+      ],
+      "related": [
+        2,
+        41,
+        60,
+        77,
+        107,
+        112
+      ],
+      "amends": [
+        4,
+        36,
+        78
+      ],
       "amended_by": []
     }
   ]
