@@ -4,6 +4,7 @@
 - **Date:** 2026-09-01
 - **Area:** Telemetry / Privacy
 - **Related:** ADR-0034, ADR-0037, ADR-0038
+- **Amended by:** ADR-0126 (the stats portal is a separate opt-in channel that sends character names and in-game data, never anything about the person)
 
 ## Decision
 - **One opt-in:** "Share diagnostics", with an explanatory text along the lines of: community-driven modding of WoW carries a real risk of crashes; this data helps the community fix problems for everyone. Off by default.
