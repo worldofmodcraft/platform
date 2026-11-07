@@ -3227,3 +3227,21 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
 - **★ under ADR-0125, order after 111b:** Options: A★ the pipeline chain first (094, 008b-3a, 008b-3b), 111c after; B 111c first. Reason: a gate now costs 2.8 h rather than 7.3 h, and the chain is the mission's critical path to the demo.
 - **2026-11-07, 094 merged** (registry #42 -> `e213cbc`; `gate` pass). Merge gate on `5c276f6` (merge-base = main `235fea1`, main unchanged): manager's fresh-clone 094 default and `--mutate` green; sweep split by a session restart: first run 16 scripts green (006..067) and stopped during 069, second run `--only` the 20 not reached, all green (6,888 s), so 36/36 on the same head. Four review rounds; the first sweep had caught a real defect (094's hygiene check blamed other scripts' `__pycache__` in a shared clone), fixed in `5c276f6`. Next: 008b-3a.
 - **2026-11-07, session restart:** the session was restarted by the harness; the background sweep stopped. Recovered from disk (§5.5).
+
+## SESSION STATUS — 2026-11-07 (session 15, final) — context 59 % (CLAUDE.md rule 10)
+### Done since the first handover (all merged)
+- **Registry:** 111b (#41, sweep 7.3 h -> 2.84 h); **094** (#42, pipeline pattern checks equal the gate's; 36/36 sweep).
+- **Platform:** ADR-0126 stats portal (#115, Ludwig's decisions); spec and log PRs #114, #116, #117. OPERATIONS.md "What session 15 paid for".
+### Parked
+- **008b-3a** (registry branch `task/008b3a-ownership-carve-out`, `487a4cb`, worktree `~/wt/registry-task-008b3a`): security review FAIL, F1 = the ownership contract has no pipeline carve-out (a spec defect). Details in its log.
+- **114** design mockups: Ludwig's "Nej, gör inga ändringar"; A/B/C unanswered. Its file `docs/tasks/114-site-design-mockups.md` is untracked in `~/wt/session-15` only.
+### Next session starts here
+1. **Task 118: `contracts/ownership.md` E16, the pipeline-identity carve-out for T1/T3** (registry). Read `contracts/ownership.md` (precedence must be declared at both ends, lines 41-70; R3, R7, R11), `append-only.rules.md` (fail-closed at :605; T1/T3), task 057's log (E16), the umbrella `008b-pipeline-workflow.md` (decisions), and 008b-3a's review findings. Security contract: **independent spec review before delegation.** 032-verify pins ownership.md: whole sweep gates the merge (through a neutral script file, from a clone with a local `main`).
+2. Then the **008b-3a fix round** against the merged contract (F2-F6 in its log), review, sweep, merge.
+3. Then **008b-3b** (wires `pipeline_identity = ("github", 342916936)`; M11 is done, so the reviewer's "not before M11" holds), **010c**, the 008b-2 dry run (needs M4), the §7 walkthrough.
+4. **111c** after the chain. Booked minor findings: 111a, 111b, 094 logs.
+### For Ludwig
+- **M4** (Part 1 of `docs/runbooks/first-publish.md`) and the 40-hex commit from step 1.15.
+- **Design:** A (no mockups now), B (mockups, nothing existing touched) or C (no changes at all this session)?
+- **Q23** before phase two (WoWee licence), ★ A.
+Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-07 (session 15, final) i missionsloggen och fortsätt med 'Next session starts here'."
