@@ -1,6 +1,6 @@
 # Task 094: pipeline modules match schema patterns with ECMA-262 semantics (reuse `ecma_pattern`)
 
-- **Mission:** SITE-V1 (D2 hardening) — **Status:** spec-approved 2026-10-28 (manager, after independent spec review PASS-WITH-AMENDMENTS, all 6 findings folded in)
+- **Mission:** SITE-V1 (D2 hardening) — **Status:** done (merged, registry #42 -> `e213cbc`, 2026-11-07; spec-approved 2026-10-28)
 - **Agent / model:** implementer (model per frontmatter) — **Budget:** small
 - **Branch / worktree:** `task/094-pipeline-ecma-patterns` / `~/wt/registry-task-094` — **registry** repo, from registry main `ab5fcba` (re-based 2026-11-06; see the log)
 - **Graph:** nodes N5 (build pipeline) and N3 (registry CI): code reuse of the E2/E8 pattern semantics inside the one registry repo; no new
