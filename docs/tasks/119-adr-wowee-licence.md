@@ -30,3 +30,13 @@ Changing the substance of any accepted ADR; contacting anyone; fetching WoWee's 
 ---
 # Task 119 log
 - 2026-11-26 manager (session 16): spec written from Ludwig's answer.
+- 2026-11-26 doc-writer: wrote `docs/decisions/0127-client-keeps-wowee-licence.md` from TEMPLATE.md (Accepted, 2026-11-26, Amends ADR-0049 and ADR-0007, one section each). Ludwig's answer quoted verbatim; WoWee wording quoted only from the survey and marked as read 2026-11-05; Ludwig's decision kept apart from the manager's ADR-0125 star parts, each with options and reasons.
+- Added one `- **Amended by:** ADR-0127 (...)` line to the header of ADR-0049 and of ADR-0007; nothing else in them changed (`git diff` shows +1 line each).
+- README category: listed under "Vision & governance" (after 0057), because the main effect is on the openness guarantee (ADR-0006: the no-closed-platform promise no longer covers the kernel), and it sits with the other licence/openness decisions there. "Architecture" (where 0007 is) was the alternative; ADR-0049 itself is under "Registry, site, launcher", which the task did not allow.
+- Survey note: last-reviewed stamp set to 2026-11-26 and one "Answered 2026-11-26" paragraph added under the licence options; nothing else changed. `docs/open-questions.md`: Q23 row prefixed "ANSWERED 2026-11-26 by ADR-0127"; nothing else changed.
+- Criterion 3 commands, run in the worktree root, real results: `python3 -I -B tools/adr/build_index.py --write` -> "Wrote .../INDEX.json (127 entries)", exit 0. `python3 -I -B tools/adr/build_index.py --check` -> "CHECK OK: INDEX.json matches the ADR files and both invariants hold.", exit 0 (Touches coverage 11/127 is informational, not fatal). `python3 -I -B -m unittest discover -s tests/adr -t .` -> exit 0 (Ran/OK line recorded in the report).
+- Note for the manager: the ADR's Touches line is new (legal/licensing, client/fork, kernel/licence, audio); INDEX.json now has 11 -> 12 tagged ADRs.
+
+## Questions
+- Non-blocking: ADR-0049's "Licensing explained" site page must be updated to the new licence split; this ADR says so but no task exists for it. Suggest the manager books one.
+- Non-blocking: ADR-0049 says unsafe-tier plugins include AGPL headers; with `libmodcraft` now MIT the header source for plugins may need a look. This ADR leaves it unchanged and says so; flagging for the manager.

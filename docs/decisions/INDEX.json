@@ -1,5 +1,5 @@
 {
-  "count": 126,
+  "count": 127,
   "adrs": [
     {
       "number": 1,
@@ -112,7 +112,9 @@
         49
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        127
+      ]
     },
     {
       "number": 8,
@@ -810,7 +812,9 @@
         40
       ],
       "amends": [],
-      "amended_by": []
+      "amended_by": [
+        127
+      ]
     },
     {
       "number": 50,
@@ -2169,6 +2173,32 @@
         4,
         36,
         78
+      ],
+      "amended_by": []
+    },
+    {
+      "number": 127,
+      "filename": "0127-client-keeps-wowee-licence.md",
+      "title": "The client fork keeps WoWee's licence terms; `libmodcraft` becomes MIT",
+      "status": "Accepted (2026-11-26; the client-licence choice decided by Ludwig, the parts it leaves open taken by the manager under ADR-0125)",
+      "date": "2026-11-26",
+      "area": "Legal",
+      "touches": [
+        "legal/licensing",
+        "client/fork",
+        "kernel/licence",
+        "audio"
+      ],
+      "related": [
+        6,
+        14,
+        40,
+        104,
+        125
+      ],
+      "amends": [
+        7,
+        49
       ],
       "amended_by": []
     }

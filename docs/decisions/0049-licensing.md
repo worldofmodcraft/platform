@@ -4,6 +4,7 @@
 - **Date:** 2026-09-01
 - **Area:** Legal
 - **Related:** ADR-0006, ADR-0007, ADR-0012, ADR-0040
+- **Amended by:** ADR-0127 (client fork keeps WoWee's licence terms; `libmodcraft` and our client-side code are MIT; upstream fixes under WoWee's terms)
 
 ## Decision
 - **AGPL-3.0:** server fork (mandatory, AzerothCore is AGPL), client fork (chosen — WoWee is MIT, we tighten it so no closed World of Modcraft can ever exist), `libmodcraft` on both sides, launcher, site generator, build pipeline, registry tooling.

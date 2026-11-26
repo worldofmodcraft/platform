@@ -1,7 +1,7 @@
 # Survey: Rust WoW clients, and what makes this kind of software easy to use
 
 - **Status:** Input for later client and launcher work. Nothing here is decided; nothing is adopted; no ADR is changed.
-- **Last reviewed:** 2026-11-05
+- **Last reviewed:** 2026-11-26
 - **Author:** manager and surveyor, task 113, for Ludwig
 - **Why:** Ludwig's goal, "så pass användarvänligt som möjligt".
 - **Method:** Code and docs read at the commits below. **Nothing was built or run**, so every player walkthrough here is from reading, not from trying. GitHub figures are from its API on 2026-11-05. Not legal advice.
@@ -52,6 +52,8 @@
 | D | Use benilla-wotlk as the client | MIT or Apache-2.0; in Rust; shows a browser path | Large redesign of ADR-0014's client side; see below |
 
 ★ A, because it costs one message and tells us whether the others are needed. B is the fallback if no answer comes.
+
+**Answered 2026-11-26:** Ludwig chose option C (Q23). Recorded in ADR-0127, which amends ADR-0049 and ADR-0007. The text above is the survey as written on 2026-11-05.
 
 ## Why Rust
 
