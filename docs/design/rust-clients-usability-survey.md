@@ -1,6 +1,6 @@
 # Survey: Rust WoW clients, and what makes this kind of software easy to use
 
-- **Status:** Input for later client and launcher work. Nothing here is decided; nothing is adopted; no ADR is changed.
+- **Status:** Input for later client and launcher work. Nothing here is decided; nothing is adopted. Update 2026-11-26: Q23 (WoWee's licence) was answered by ADR-0127, which amends ADR-0049 and ADR-0007.
 - **Last reviewed:** 2026-11-26
 - **Author:** manager and surveyor, task 113, for Ludwig
 - **Why:** Ludwig's goal, "så pass användarvänligt som möjligt".
