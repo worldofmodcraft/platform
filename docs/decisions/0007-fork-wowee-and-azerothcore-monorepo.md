@@ -4,6 +4,7 @@
 - **Date:** 2026-08-31
 - **Area:** Architecture
 - **Related:** ADR-0014, ADR-0027, ADR-0049
+- **Amended by:** ADR-0127 (WoWee is MIT with an additional restriction and reserved audio, not plain MIT; upstream fixes under WoWee's terms)
 
 ## Context
 The Blizzard 3.3.5a client is a closed binary. WoWee (github.com/Kelsidavis/WoWee) is an MIT-licensed native C++/Vulkan client supporting 1.12, 2.4.3 and 3.3.5a, tested against AzerothCore. A modding platform where "a mod can change everything" needs source access on both ends.

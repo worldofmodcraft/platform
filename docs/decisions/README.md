@@ -36,6 +36,7 @@ ADR silently — propose a superseding ADR instead.
 - [0006](0006-openness-and-handover.md) Openness is the defining trait; designed for handover
 - [0056](0056-english-throughout.md) English throughout
 - [0057](0057-warcraftxl-related-project.md) WarcraftXL: related project, different path
+- [0127](0127-client-keeps-wowee-licence.md) The client fork keeps WoWee's licence terms; `libmodcraft` becomes MIT
 
 ### Architecture
 - [0007](0007-fork-wowee-and-azerothcore-monorepo.md) Fork WoWee and AzerothCore; monorepo
