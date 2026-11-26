@@ -35,7 +35,7 @@ Changing the substance of any accepted ADR; contacting anyone; fetching WoWee's 
 - README category: listed under "Vision & governance" (after 0057), because the main effect is on the openness guarantee (ADR-0006: the no-closed-platform promise no longer covers the kernel), and it sits with the other licence/openness decisions there. "Architecture" (where 0007 is) was the alternative; ADR-0049 itself is under "Registry, site, launcher", which the task did not allow.
 - Survey note: last-reviewed stamp set to 2026-11-26 and one "Answered 2026-11-26" paragraph added under the licence options; nothing else changed. `docs/open-questions.md`: Q23 row prefixed "ANSWERED 2026-11-26 by ADR-0127"; nothing else changed.
 - Criterion 3 commands, run in the worktree root, real results: `python3 -I -B tools/adr/build_index.py --write` -> "Wrote .../INDEX.json (127 entries)", exit 0. `python3 -I -B tools/adr/build_index.py --check` -> "CHECK OK: INDEX.json matches the ADR files and both invariants hold.", exit 0 (Touches coverage 11/127 is informational, not fatal). `python3 -I -B -m unittest discover -s tests/adr -t .` -> exit 0 (Ran/OK line recorded in the report).
-- Note for the manager: the ADR's Touches line is new (legal/licensing, client/fork, kernel/licence, audio); INDEX.json now has 11 -> 12 tagged ADRs.
+- Note for the manager: the ADR's Touches line is new (legal/licensing, client/fork, kernel/licence, audio); the check run after adding it reports 11/127 ADRs with a Touches line, 0127 included. Unit tests: Ran 32, OK.
 
 ## Questions
 - Non-blocking: ADR-0049's "Licensing explained" site page must be updated to the new licence split; this ADR says so but no task exists for it. Suggest the manager books one.
