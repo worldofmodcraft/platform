@@ -3245,3 +3245,13 @@ Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-0
 - **Design:** A (no mockups now), B (mockups, nothing existing touched) or C (no changes at all this session)?
 - **Q23** before phase two (WoWee licence), ★ A.
 Kickoff line: "Kör din vanliga sessionsstart. Läs SESSION STATUS — 2026-11-07 (session 15, final) i missionsloggen och fortsätt med 'Next session starts here'."
+
+## Session 16 — 2026-11-26 (manager)
+- Session start: context 6 % (HUD cache). Read MANAGER.md, ADR index, session 15's final status. Worktree `~/wt/session-16`, branch `session/16` from main `6145113`.
+- **Ludwig, 2026-11-26 (verbatim):** "Går det att göra så att du bara kör på inatt, vill vakna upp till ett färdig projekt där vi kan börja bygga spelet". The manager answered that the chain can run all night under ADR-0125, but M4, Q23, the design choice and the phase-two spec are his, and the 2.8 h sweep per merge bounds how much merges tonight.
+- **Ludwig's answers, 2026-11-26 (verbatim):**
+  - Context threshold: "Kör på, undantaget gäller tills på lördag vid lunch. I övrigt samma svar som 1". Read as: MANAGER.md §5's planned-handover thresholds (30 % soft / 40 % hard) are waived for this session until **Saturday 2026-11-28 12:00**; "same as answer 1" = the option offered, so §5.5 (after an auto-compaction, trust disk, not memory) still applies. **Expires then; not a precedent.**
+  - M4: "Nej, i morgon". M4 stays with Ludwig; the dry run waits.
+  - **Q23: "C: Acceptera WoWees villkor"** — keep WoWee's licence terms (MIT with Additional Restriction) and amend ADR-0049. Becomes task 119 (new ADR amending ADR-0049, and ADR-0007 if it states the licence).
+  - **Task 114: "B: Gör mockups"** — private mockups, nothing existing touched. Answers the A/B/C left open on 2026-11-06.
+- Plan: (1) task 118 (ownership.md pipeline carve-out) spec, independent spec review, doc-writer, review, sweep, merge; (2) task 119 ADR for Q23 = C; (3) task 114 mockups by the manager while agents run; (4) 008b-3a fix round, 008b-3b, 010c, 111c in order.
