@@ -1,6 +1,6 @@
 # Task 118: `contracts/ownership.md` gains `R12`, the pipeline identity's carve-out for T1 and T3 (edge E16)
 
-- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`) — **Status:** spec-approved (manager, 2026-11-26, after independent spec review round 1 = FAIL and round 2 = PASS-WITH-FINDINGS; all findings folded in; security contract)
+- **Mission:** SITE-V1, deliverable **D2** (umbrella `docs/tasks/008b-pipeline-workflow.md`) — **Status:** done (merged with task 120 as registry PR #43 -> `3a0f823`, 2026-11-28; sweep 38/0 at `d06496a`)
 - **Repo:** registry. **Agent / model:** doc-writer (model per frontmatter). **Budget:** medium (≤ 3 agent-sessions)
 - **Branch / worktree:** `task/118-ownership-pipeline-carve-out` / `~/wt/registry-task-118`, cut from registry `origin/main` (`e213cbc`)
 - **Graph:** node N3, edge **E16** (author identity -> N3). **Blocks:** the 008b-3a fix round, then 008b-3b.

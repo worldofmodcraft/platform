@@ -1,6 +1,6 @@
 # Task 120: the ownership checker implements `R12` and `I9` (the pipeline write-back carve-out), re-cut from 008b-3a
 
-- **Mission:** SITE-V1, deliverable **D2** — **Status:** spec-approved (manager, 2026-11-26, after independent spec review round 1 = PASS-WITH-FINDINGS, all eight findings folded in; security: CI gate)
+- **Mission:** SITE-V1, deliverable **D2** — **Status:** done (merged with task 118 as registry PR #43 -> `3a0f823`, 2026-11-28; sweep 38/0 at `d06496a`)
 - **Repo:** registry. **Agent / model:** implementer (model per frontmatter). **Budget:** medium (≤ 3 agent-sessions)
 - **Branch / worktree:** `task/120-ownership-r12-checker` / `~/wt/registry-task-120`, cut from the **head of `task/118-ownership-pipeline-carve-out`** (the contract this implements), never from `task/008b3a-ownership-carve-out`.
 - **Graph:** N3, edge E16. **Supersedes:** the unmerged remainder of 008b-3a (its branch `487a4cb` stays as a reference and is never rewritten or merged). **Blocks:** 008b-3b.
